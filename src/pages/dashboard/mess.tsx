@@ -8,14 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const OPTIONS: MessType[] = [
-  "Veg-mens",
-  "Non-Veg-mens",
-  "Special-mens",
-  "Veg-womens",
-  "Non-Veg-womens",
-  "Special-womens",
-];
+import { MESS_OPTIONS } from "@/lib/constants";
 
 export default function MessPage() {
   const [messType, setMessType] = useState<MessType>("Veg-mens");
@@ -53,7 +46,7 @@ export default function MessPage() {
             <SelectValue placeholder="Select mess type" />
           </SelectTrigger>
           <SelectContent>
-            {OPTIONS.map((option) => (
+            {MESS_OPTIONS.map((option) => (
               <SelectItem key={option} value={option}>
                 {option}
               </SelectItem>

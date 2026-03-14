@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const BLOCKS: LaundryBlock[] = ["A", "B", "CB", "CG", "D1", "D2", "E"];
+import { LAUNDRY_BLOCKS } from "@/lib/constants";
 
 export default function LaundryPage() {
   const [block, setBlock] = useState<LaundryBlock>("A");
@@ -52,7 +52,7 @@ export default function LaundryPage() {
             <SelectValue placeholder="Select hostel block" />
           </SelectTrigger>
           <SelectContent>
-            {BLOCKS.map((b) => (
+            {LAUNDRY_BLOCKS.map((b) => (
               <SelectItem key={b} value={b}>
                 {b}
               </SelectItem>
