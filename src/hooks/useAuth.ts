@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from "react";
 import {
+  authClearSemester,
   authClearTokens,
   authGetState,
   authGetTokens,
@@ -9,32 +10,32 @@ import {
   authSetTokens,
   type AuthState,
   type AuthTokens,
-} from '@/lib/tauri-auth'
+} from "@/lib/tauri-auth";
 
 export type UseAuthReturn = {
   /** Current authentication state from the backend */
-  authState: AuthState | null
+  authState: AuthState | null;
   /** Whether an async auth operation is in progress */
-  loading: boolean
+  loading: boolean;
   /** Last error message, or null */
-  error: string | null
+  error: string | null;
   /** Whether tokens are currently stored */
-  hasTokens: boolean
+  hasTokens: boolean;
   /** Shorthand — true when authState.loggedIn is true */
-  isLoggedIn: boolean
+  isLoggedIn: boolean;
   /** Login with registration number and password */
-  login: (regNo: string, password: string) => Promise<void>
+  login: (regNo: string, password: string) => Promise<void>;
   /** Logout — clears ALL auth data (state + tokens + disk) */
-  logout: () => Promise<void>
+  logout: () => Promise<void>;
   /** Re-fetch auth state from the backend store */
-  refresh: () => Promise<void>
+  refresh: () => Promise<void>;
   /** Fetch current tokens from the backend */
-  fetchTokens: () => Promise<AuthTokens | null>
+  fetchTokens: () => Promise<AuthTokens | null>;
   /** Persist new tokens to the backend */
-  setTokens: (tokens: AuthTokens) => Promise<void>
+  setTokens: (tokens: AuthTokens) => Promise<void>;
   /** Delete stored tokens (but keep auth state) */
-  clearTokens: () => Promise<void>
-}
+  clearTokens: () => Promise<void>;
+};
 
 /**
  * Standalone hook for all auth operations.
@@ -43,125 +44,126 @@ export type UseAuthReturn = {
  * it talks directly to the Tauri backend via invoke.
  */
 export function useAuth(): UseAuthReturn {
-  const [authState, setAuthState] = useState<AuthState | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [hasTokens, setHasTokens] = useState(false)
+  const [authState, setAuthState] = useState<AuthState | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasTokens, setHasTokens] = useState(false);
 
-  const isLoggedIn = authState?.loggedIn ?? false
+  const isLoggedIn = authState?.loggedIn ?? false;
 
   // ---------- internal helpers ----------
 
   const handleError = useCallback((err: unknown): string => {
-    const msg = err instanceof Error ? err.message : String(err)
-    setError(msg)
-    return msg
-  }, [])
+    const msg = err instanceof Error ? err.message : String(err);
+    setError(msg);
+    return msg;
+  }, []);
 
   /** Probe the backend for token existence and update `hasTokens`. */
   const syncTokenStatus = useCallback(async () => {
     try {
-      const tokens = await authGetTokens()
-      setHasTokens(tokens !== null)
+      const tokens = await authGetTokens();
+      setHasTokens(tokens !== null);
     } catch {
-      setHasTokens(false)
+      setHasTokens(false);
     }
-  }, [])
+  }, []);
 
   // ---------- public API ----------
 
   const refresh = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const restored = await authRestoreSession()
+      const restored = await authRestoreSession();
       if (restored) {
-        setAuthState(restored)
+        setAuthState(restored);
       } else {
-        setAuthState(await authGetState())
+        setAuthState(await authGetState());
       }
-      await syncTokenStatus()
+      await syncTokenStatus();
     } catch (err) {
-      handleError(err)
-      setAuthState(null)
+      handleError(err);
+      setAuthState(null);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [handleError, syncTokenStatus])
+  }, [handleError, syncTokenStatus]);
 
   const login = useCallback(
     async (regNo: string, password: string) => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
-        const response = await authLogin(regNo, password)
-        setAuthState(response.state)
-        setHasTokens(true)
+        const response = await authLogin(regNo, password);
+        setAuthState(response.state);
+        setHasTokens(true);
       } catch (err) {
-        handleError(err)
-        throw err
+        handleError(err);
+        throw err;
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     },
     [handleError],
-  )
+  );
 
   const logout = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      await authLogout()
-      setAuthState(null)
-      setHasTokens(false)
+      await authLogout();
+      await authClearSemester();
+      setAuthState(null);
+      setHasTokens(false);
     } catch (err) {
-      handleError(err)
-      throw err
+      handleError(err);
+      throw err;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [handleError])
+  }, [handleError]);
 
   const fetchTokens = useCallback(async (): Promise<AuthTokens | null> => {
     try {
-      const tokens = await authGetTokens()
-      setHasTokens(tokens !== null)
-      return tokens
+      const tokens = await authGetTokens();
+      setHasTokens(tokens !== null);
+      return tokens;
     } catch (err) {
-      handleError(err)
-      return null
+      handleError(err);
+      return null;
     }
-  }, [handleError])
+  }, [handleError]);
 
   const setTokens = useCallback(
     async (tokens: AuthTokens) => {
       try {
-        await authSetTokens(tokens)
-        setHasTokens(true)
+        await authSetTokens(tokens);
+        setHasTokens(true);
       } catch (err) {
-        handleError(err)
-        throw err
+        handleError(err);
+        throw err;
       }
     },
     [handleError],
-  )
+  );
 
   const clearTokens = useCallback(async () => {
     try {
-      await authClearTokens()
-      setHasTokens(false)
+      await authClearTokens();
+      setHasTokens(false);
     } catch (err) {
-      handleError(err)
-      throw err
+      handleError(err);
+      throw err;
     }
-  }, [handleError])
+  }, [handleError]);
 
   // ---------- bootstrap ----------
 
   useEffect(() => {
-    void refresh()
+    void refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   return {
     authState,
@@ -175,5 +177,5 @@ export function useAuth(): UseAuthReturn {
     fetchTokens,
     setTokens,
     clearTokens,
-  }
+  };
 }

@@ -2,6 +2,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Semester {
+    pub id: String,
+    pub name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AuthState {
     pub user_id: String,
     pub logged_in: bool,
@@ -20,8 +27,12 @@ pub struct AuthTokens {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PersistedAuth {
+    #[serde(default)]
     pub state: Option<AuthState>,
+    #[serde(default)]
     pub tokens: Option<AuthTokens>,
+    #[serde(default)]
+    pub semester: Option<Semester>,
 }
 
 #[derive(Debug, Clone, Serialize)]

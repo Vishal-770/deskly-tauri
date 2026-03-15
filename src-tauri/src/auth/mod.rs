@@ -1,15 +1,12 @@
-mod captcha;
-pub mod commands;
-mod constants;
-mod http;
-mod parser;
-mod store;
+pub mod captcha;
+pub mod constants;
+pub mod helpers;
+pub mod http;
+pub mod parser;
+pub mod store;
 pub mod types;
+pub mod commands;
+pub mod keyring;
 
-// Re-export what lib.rs needs for setup
-pub use store::init_auth_store;
-
-// Re-export all Tauri commands — wildcard is required because the
-// #[tauri::command] macro generates hidden items (__cmd__*, __cmd_meta__*)
-// that `tauri::generate_handler!` expects at the same module path.
 pub use commands::*;
+pub use store::init_auth_store;

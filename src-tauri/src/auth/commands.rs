@@ -1,5 +1,8 @@
-use reqwest::header::{COOKIE, LOCATION};
+use chrono::Utc;
+use reqwest::header::{CONTENT_TYPE, COOKIE, LOCATION, REFERER};
 use tauri::{AppHandle, State};
+
+use crate::attendance::parser::extract_semesters_from_html;
 
 use super::captcha::{decode_data_url_bytes, solve_captcha_from_image_bytes};
 use super::constants::VTOP_BASE_URL;
@@ -11,24 +14,48 @@ use super::parser::{
     classify_login_error, extract_auth_tokens_from_dashboard, extract_captcha_src,
     extract_csrf_from_setup, is_recaptcha_page,
 };
+use super::keyring;
 use super::store::{load_from_disk, now_unix_ms, save_to_disk, AuthStore};
-use super::types::{AuthState, AuthTokens, LoginResponse};
+use super::types::{AuthState, AuthTokens, LoginResponse, Semester};
 
-#[tauri::command]
-pub async fn auth_login(
-    app: AppHandle,
-    store: State<'_, AuthStore>,
-    username: String,
-    password: String,
-) -> Result<LoginResponse, String> {
-    if username.trim().is_empty() {
-        return Err("username is required".to_string());
-    }
+async fn fetch_semesters(tokens: &AuthTokens) -> Result<Vec<Semester>, String> {
+    let client = build_http_client()?;
+    let response = client
+        .post(format!(
+            "{VTOP_BASE_URL}/vtop/academics/common/StudentTimeTableChn"
+        ))
+        .header(COOKIE, tokens.cookies.clone())
+        .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+        .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
+        .form(&[
+            ("verifyMenu", "true"),
+            ("authorizedID", tokens.authorized_id.as_str()),
+            ("_csrf", tokens.csrf.as_str()),
+            ("nocache", &Utc::now().timestamp_millis().to_string()),
+        ])
+        .send()
+        .await
+        .map_err(|e| format!("failed to fetch semester list: {e}"))?;
 
-    if password.trim().is_empty() {
-        return Err("password is required".to_string());
-    }
+    let html = response
+        .text()
+        .await
+        .map_err(|e| format!("failed to read semester list html: {e}"))?;
 
+    let semesters = extract_semesters_from_html(&html)?;
+    Ok(semesters
+        .into_iter()
+        .map(|semester| Semester {
+            id: semester.id,
+            name: semester.name,
+        })
+        .collect())
+}
+
+pub async fn internal_login(
+    username: &str,
+    password: &str,
+) -> Result<AuthTokens, String> {
     let client = build_http_client()?;
 
     // Mirror Deskly behavior: retry until VTOP serves DEFAULT image captcha (not reCAPTCHA).
@@ -226,25 +253,35 @@ pub async fn auth_login(
         if let Some(msg) = classify_login_error(&dashboard_html) {
             return Err(msg);
         }
-        let snippet = dashboard_html
-            .chars()
-            .take(280)
-            .collect::<String>()
-            .replace('\n', " ")
-            .replace('\r', " ");
-        return Err(format!(
-            "Login failed for an unknown reason (snippet: {:?})",
-            snippet
-        ));
+        return Err("Login failed: not authorized. Please check your credentials.".to_string());
     }
 
     let (new_csrf, authorized_id) = extract_auth_tokens_from_dashboard(&dashboard_html)?;
 
-    let tokens = AuthTokens {
+    Ok(AuthTokens {
         authorized_id,
         csrf: new_csrf,
         cookies: all_cookie_header,
-    };
+    })
+}
+
+#[tauri::command]
+pub async fn auth_login(
+    app: AppHandle,
+    store: State<'_, AuthStore>,
+    username: String,
+    password: String,
+) -> Result<LoginResponse, String> {
+    if username.trim().is_empty() {
+        return Err("username is required".to_string());
+    }
+
+    let tokens = internal_login(&username, &password).await?;
+
+    let selected_semester = fetch_semesters(&tokens)
+        .await
+        .ok()
+        .and_then(|semesters| semesters.first().cloned());
 
     let auth_state = AuthState {
         user_id: username.trim().to_string(),
@@ -259,7 +296,11 @@ pub async fn auth_login(
 
     guard.state = Some(auth_state.clone());
     guard.tokens = Some(tokens.clone());
+    guard.semester = selected_semester;
     save_to_disk(&app, &guard)?;
+
+    // Store password in keyring for auto-login
+    let _ = keyring::set_password(username.trim(), password.trim());
 
     Ok(LoginResponse {
         state: auth_state,
@@ -274,8 +315,13 @@ pub fn auth_logout(app: AppHandle, store: State<AuthStore>) -> Result<bool, Stri
         .lock()
         .map_err(|_| "failed to lock auth store".to_string())?;
 
+    if let Some(state) = &guard.state {
+        let _ = keyring::delete_password(&state.user_id);
+    }
+
     guard.state = None;
     guard.tokens = None;
+    guard.semester = None;
     save_to_disk(&app, &guard)?;
 
     Ok(true)
@@ -357,4 +403,103 @@ pub fn auth_clear_tokens(app: AppHandle, store: State<AuthStore>) -> Result<bool
     save_to_disk(&app, &guard)?;
 
     Ok(true)
+}
+
+#[tauri::command]
+pub fn auth_get_semester(store: State<AuthStore>) -> Result<Option<Semester>, String> {
+    let guard = store
+        .inner
+        .lock()
+        .map_err(|_| "failed to lock auth store".to_string())?;
+
+    Ok(guard.semester.clone())
+}
+
+#[tauri::command]
+pub fn auth_set_semester(
+    app: AppHandle,
+    store: State<AuthStore>,
+    semester: Semester,
+) -> Result<bool, String> {
+    if semester.id.trim().is_empty() {
+        return Err("semester id is required".to_string());
+    }
+
+    let mut guard = store
+        .inner
+        .lock()
+        .map_err(|_| "failed to lock auth store".to_string())?;
+
+    guard.semester = Some(semester);
+    save_to_disk(&app, &guard)?;
+
+    Ok(true)
+}
+
+#[tauri::command]
+pub fn auth_clear_semester(app: AppHandle, store: State<AuthStore>) -> Result<bool, String> {
+    let mut guard = store
+        .inner
+        .lock()
+        .map_err(|_| "failed to lock auth store".to_string())?;
+
+    guard.semester = None;
+    save_to_disk(&app, &guard)?;
+
+    Ok(true)
+}
+
+#[tauri::command]
+pub async fn auth_get_semesters(store: State<'_, AuthStore>) -> Result<Vec<Semester>, String> {
+    let tokens = {
+        let guard = store
+            .inner
+            .lock()
+            .map_err(|_| "failed to lock auth store".to_string())?;
+
+        guard
+            .tokens
+            .clone()
+            .ok_or_else(|| "No auth tokens found".to_string())?
+    };
+
+    fetch_semesters(&tokens).await
+}
+
+#[tauri::command]
+pub async fn auth_auto_relogin(
+    app: AppHandle,
+    store: State<'_, AuthStore>,
+) -> Result<AuthTokens, String> {
+    let (user_id, password) = {
+        let guard = store
+            .inner
+            .lock()
+            .map_err(|_| "failed to lock auth store".to_string())?;
+
+        let user_id = guard
+            .state
+            .as_ref()
+            .ok_or_else(|| "No active session found for auto-login".to_string())?
+            .user_id
+            .clone();
+
+        let password = keyring::get_password(&user_id)
+            .map_err(|e| format!("Failed to retrieve password for auto-login: {e}"))?;
+
+        (user_id, password)
+    };
+
+    let tokens = internal_login(&user_id, &password).await?;
+
+    let mut guard = store
+        .inner
+        .lock()
+        .map_err(|_| "failed to lock auth store".to_string())?;
+
+    guard.tokens = Some(tokens.clone());
+    guard.state.as_mut().map(|s| s.last_login = now_unix_ms());
+    save_to_disk(&app, &guard)?;
+
+    Ok(tokens)
 }
