@@ -1,8 +1,222 @@
+import { useEffect, useState } from "react";
+import { useSemester } from "@/hooks/useSemester";
+import { getMarks, type StudentMarkEntry } from "@/lib/features";
+import { BookOpen, User, Calendar, TrendingUp, Circle } from "lucide-react";
+import Loader from "@/components/Loader";
+import { ErrorDisplay } from "@/components/error-display";
+
 export default function MarksPage() {
+  const { currentSemester, loading: semesterLoading } = useSemester();
+
+  const [marksData, setMarksData] = useState<StudentMarkEntry[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [activeCourse, setActiveCourse] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMarks = async () => {
+      if (!currentSemester?.id) return;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await getMarks(currentSemester.id);
+        if (result.success && result.data) {
+          setMarksData(result.data);
+          setActiveCourse(result.data[0]?.courseCode ?? null);
+        } else {
+          setError(result.error || "Failed to fetch marks");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentSemester) void fetchMarks();
+  }, [currentSemester, semesterLoading]);
+
+  if (semesterLoading || loading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return (
+      <ErrorDisplay
+        title="Failed to load marks"
+        message={error}
+        onRetry={() => window.location.reload()}
+        retryLabel="Reload Page"
+      />
+    );
+  }
+
+  if (!marksData || marksData.length === 0) {
+    return (
+      <div className="h-[90vh] w-full flex items-center justify-center text-center">
+        <div>
+          <BookOpen className="w-10 h-10 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-muted-foreground">No marks data available</p>
+        </div>
+      </div>
+    );
+  }
+
+  const activeCourseData = marksData.find((c) => c.courseCode === activeCourse);
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">Marks</h1>
-      <p className="text-muted-foreground">Detailed assignment and exam marks.</p>
-    </div>
-  )
+    <main className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto px-8 py-16">
+        <div className="mb-12">
+          <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Academic Performance
+          </span>
+          <h1 className="text-4xl font-light mt-2 mb-1">Marks Overview</h1>
+          <p className="text-muted-foreground">
+            {currentSemester?.name} · {marksData.length} courses
+          </p>
+        </div>
+
+        <div className="mb-10">
+          <div className="flex flex-wrap gap-x-3 gap-y-4">
+            {marksData.map((course) => {
+              const isActive = activeCourse === course.courseCode;
+
+              return (
+                <button
+                  key={course.courseCode}
+                  onClick={() => setActiveCourse(course.courseCode)}
+                  className={`
+                    px-4 py-2 rounded-md text-sm font-mono whitespace-nowrap
+                    transition-all
+                    ${
+                      isActive
+                        ? "bg-secondary text-foreground shadow-sm"
+                        : "bg-secondary/40 text-muted-foreground hover:bg-secondary/70"
+                    }
+                  `}
+                >
+                  {course.courseCode}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {activeCourseData && (
+          <section>
+            <div className="flex items-start justify-between mb-8">
+              <div>
+                <h2 className="text-xl font-medium mb-1">
+                  {activeCourseData.courseTitle}
+                </h2>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="font-mono text-xs">
+                    {activeCourseData.courseCode}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" />
+                    {activeCourseData.faculty}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {activeCourseData.slot}
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="text-xs uppercase text-muted-foreground block mb-1">
+                  Total
+                </span>
+                <span className="text-2xl font-light">
+                  {activeCourseData.assessments
+                    .reduce((s, a) => s + a.weightageMark, 0)
+                    .toFixed(2)}
+                </span>
+                <span className="text-muted-foreground text-sm ml-1">
+                  /{" "}
+                  {activeCourseData.assessments.reduce(
+                    (s, a) => s + a.weightagePercent,
+                    0,
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {activeCourseData.assessments.length > 0 ? (
+              <div className="space-y-4 pl-4 border-l">
+                {activeCourseData.assessments.map((assessment, idx) => {
+                  const percentage =
+                    (assessment.scoredMark / assessment.maxMark) * 100;
+
+                  const color =
+                    percentage >= 80
+                      ? "bg-green-500"
+                      : percentage >= 60
+                        ? "bg-yellow-500"
+                        : "bg-red-500";
+
+                  return (
+                    <div key={idx} className="relative pl-6">
+                      <Circle
+                        className={`absolute -left-1.25 top-3 w-2 h-2 fill-current ${color}`}
+                      />
+
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-medium">{assessment.markTitle}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Weight: {assessment.weightagePercent}%
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="text-lg">
+                            {assessment.weightageMark.toFixed(1)}
+                            <span className="text-muted-foreground">
+                              {" "}
+                              / {assessment.weightagePercent}
+                            </span>
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {assessment.scoredMark} / {assessment.maxMark}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 h-1 bg-border rounded-full">
+                        <div
+                          className={`h-full rounded-full ${color}`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+
+                      {assessment.classAverage && (
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3" />
+                          Avg: {assessment.classAverage}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                No assessments recorded yet
+              </p>
+            )}
+          </section>
+        )}
+
+        <div className="mt-24 pt-8 border-t text-sm text-muted-foreground flex justify-between">
+          <span>Last updated: Today</span>
+          <span>{currentSemester?.name}</span>
+        </div>
+      </div>
+    </main>
+  );
 }
