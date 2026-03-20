@@ -15,6 +15,7 @@ import {
   Shirt,
   ChefHat,
   Receipt,
+  User,
 } from "lucide-react";
 import Fuse from "fuse.js";
 
@@ -112,8 +113,14 @@ const DashboardSidebar = () => {
         icon: <Settings className="w-5 h-5" />,
         description: "",
       },
+      {
+        label: "Profile",
+        href: "/dashboard/profile",
+        icon: <User className="w-5 h-5" />,
+        description: "",
+      },
     ],
-    []
+    [],
   );
 
   const results = useMemo(() => {
@@ -141,7 +148,7 @@ const DashboardSidebar = () => {
 
   return (
     <>
-      <div className="sticky top-0 w-16 h-full shrink-0 bg-card text-card-foreground py-4 border-r flex flex-col items-center z-40">
+      <div className="sticky top-0 w-16 h-full min-h-0 shrink-0 bg-card text-card-foreground py-4 border-r flex flex-col items-center z-40">
         {/* Search Button (Fixed) */}
         <div className="w-full flex justify-center mb-4 shrink-0">
           <button
@@ -153,7 +160,7 @@ const DashboardSidebar = () => {
         </div>
 
         {/* Nav Items (Scrollable) */}
-        <nav className="space-y-2 flex-1 flex flex-col items-center w-full overflow-y-auto no-scrollbar pb-4">
+        <nav className="space-y-2 flex-1 min-h-0 flex flex-col items-center w-full overflow-y-auto no-scrollbar pb-4">
           {navItems.map((item) => {
             const active =
               location.pathname === item.href ||
@@ -182,7 +189,7 @@ const DashboardSidebar = () => {
             className="fixed inset-0 bg-black/40"
             onClick={() => setSearchOpen(false)}
           />
-          <div className="relative z-50 w-[600px] bg-card p-4 rounded-lg shadow">
+          <div className="relative z-50 w-150 bg-card p-4 rounded-lg shadow">
             <input
               ref={inputRef}
               value={query}
