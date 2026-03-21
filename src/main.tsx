@@ -1,6 +1,7 @@
-
 import { createRoot } from 'react-dom/client'
-import App from './App'
+import { Routes } from '@generouted/react-router'
+import './App.css'
 
-createRoot(document.getElementById('root')!).render(<App />)
-
+createRoot(document.getElementById('root')!).render(
+  <Routes />
+)

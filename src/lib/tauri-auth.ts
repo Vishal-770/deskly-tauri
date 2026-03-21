@@ -12,8 +12,13 @@ export type AuthTokens = {
   cookies: string
 }
 
-export async function authLogin(username: string, password: string) {
-  return invoke<AuthState>('auth_login', { username, password })
+export type LoginResponse = {
+  state: AuthState
+  tokens: AuthTokens
+}
+
+export async function authLogin(regNo: string, password: string) {
+  return invoke<LoginResponse>('auth_login', { username: regNo, password })
 }
 
 export async function authLogout() {
@@ -39,4 +44,5 @@ export async function authGetTokens() {
 export async function authClearTokens() {
   return invoke<boolean>('auth_clear_tokens')
 }
+
 

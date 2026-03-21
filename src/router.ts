@@ -6,6 +6,18 @@ import { components, hooks, utils } from '@generouted/react-router/client'
 export type Path =
   | `/`
   | `/dashboard`
+  | `/dashboard/academic-calendar`
+  | `/dashboard/attendance`
+  | `/dashboard/contact`
+  | `/dashboard/courses`
+  | `/dashboard/curriculum`
+  | `/dashboard/grades`
+  | `/dashboard/laundry`
+  | `/dashboard/marks`
+  | `/dashboard/mess`
+  | `/dashboard/payment-receipts`
+  | `/dashboard/settings`
+  | `/dashboard/timetable`
 
 export type Params = {
   
