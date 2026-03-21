@@ -141,7 +141,7 @@ const DashboardSidebar = () => {
 
   return (
     <>
-      <div className="sticky top-0 w-16 h-screen shrink-0 bg-card text-card-foreground py-4 border-r flex flex-col items-center z-40">
+      <div className="sticky top-0 w-16 h-full shrink-0 bg-card text-card-foreground py-4 border-r flex flex-col items-center z-40">
         {/* Search Button (Fixed) */}
         <div className="w-full flex justify-center mb-4 shrink-0">
           <button

@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="h-screen w-full flex flex-col items-center justify-center bg-background text-foreground text-center p-6">
+        <div className="h-full w-full flex flex-col items-center justify-center bg-background text-foreground text-center p-6">
           <div className="bg-destructive/10 w-20 h-20 rounded-full flex items-center justify-center mb-6 border border-destructive/20 shadow-sm">
             <AlertOctagon className="w-10 h-10 text-destructive" />
           </div>

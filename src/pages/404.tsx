@@ -5,7 +5,7 @@ export default function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-background text-foreground text-center p-6">
+    <div className="h-full w-full flex flex-col items-center justify-center bg-background text-foreground text-center p-6">
       <div className="bg-muted w-20 h-20 rounded-full flex items-center justify-center mb-6 border border-border shadow-sm">
         <FileQuestion className="w-10 h-10 text-muted-foreground" />
       </div>
