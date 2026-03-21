@@ -1,33 +1,33 @@
-import { FormEvent, useEffect, useState } from 'react'
-import { useNavigate } from '@/router'
-import { useAuth } from '@/hooks/useAuth'
+import { FormEvent, useEffect, useState } from "react";
+import { useNavigate } from "@/router";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
-  const navigate = useNavigate()
-  const { authState, loading, error, login } = useAuth()
-  const [regNo, setRegNo] = useState('')
-  const [password, setPassword] = useState('')
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const navigate = useNavigate();
+  const { authState, loading, error, login } = useAuth();
+  const [regNo, setRegNo] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authState?.loggedIn) {
-      navigate('/dashboard')
+      navigate("/dashboard");
     }
-  }, [authState, navigate])
+  }, [authState, navigate]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setSubmitError(null)
+    event.preventDefault();
+    setSubmitError(null);
     try {
-      await login(regNo, password)
-      navigate('/dashboard')
+      await login(regNo, password);
+      navigate("/dashboard");
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : String(err))
+      setSubmitError(err instanceof Error ? err.message : String(err));
     }
-  }
+  };
 
   return (
-    <main className="min-h-full flex items-center justify-center bg-background text-foreground p-6">
+    <main className="h-full min-h-0 overflow-y-auto no-scrollbar flex items-center justify-center bg-background text-foreground p-6">
       <section className="w-full max-w-sm space-y-8 rounded-xl border border-border bg-card p-6 shadow-sm">
         <h1 className="text-2xl font-semibold mb-2">Deskly Login</h1>
         <p className="text-sm text-muted-foreground mb-6">
@@ -67,11 +67,10 @@ export default function Home() {
             disabled={loading}
             className="w-full rounded-md bg-primary text-primary-foreground py-2 font-medium disabled:opacity-70"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
-
       </section>
     </main>
-  )
+  );
 }

@@ -16,8 +16,10 @@ export type Path =
   | `/dashboard/marks`
   | `/dashboard/mess`
   | `/dashboard/payment-receipts`
+  | `/dashboard/profile`
   | `/dashboard/settings`
   | `/dashboard/timetable`
+  | `/no-internet`
 
 export type Params = {
   
