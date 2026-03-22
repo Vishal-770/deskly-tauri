@@ -111,6 +111,46 @@ Pushing this tag triggers [tauri-release.yml](.github/workflows/tauri-release.ym
 3. Generates latest.json using [generate-latest-json.mjs](scripts/generate-latest-json.mjs)
 4. Publishes release assets to GitHub Release for that tag
 
+## Release Checklist (Copy-Paste, v0.1.1)
+
+Use this block from repository root to release `v0.1.1`:
+
+```powershell
+# 0) Start clean
+git checkout main
+git pull origin main
+git status
+
+# 1) Update versions manually in these files to 0.1.1
+#    - package.json
+#    - src-tauri/Cargo.toml
+#    - src-tauri/tauri.conf.json
+
+# 2) Verify app still builds
+pnpm install
+pnpm build
+
+# 3) Commit version bump
+git add -A
+git commit -m "chore: release v0.1.1"
+git push origin main
+
+# 4) Create and push release tag (this triggers GitHub Actions release workflow)
+git tag v0.1.1
+git push origin v0.1.1
+
+# 5) Confirm workflow ran
+# GitHub -> Actions -> "Tauri Release"
+# Then verify release assets include installers, .sig files, and latest.json
+```
+
+Rollback tag if pushed by mistake:
+
+```powershell
+git tag -d v0.1.1
+git push origin :refs/tags/v0.1.1
+```
+
 ## Commands For Update Metadata Script
 
 The helper script can also be run manually:
