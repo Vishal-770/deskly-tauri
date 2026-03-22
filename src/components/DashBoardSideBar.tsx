@@ -18,6 +18,7 @@ import {
   User,
 } from "lucide-react";
 import Fuse from "fuse.js";
+import { motion, AnimatePresence } from "framer-motion";
 
 const DashboardSidebar = () => {
   const [searchOpen, setSearchOpen] = useState(false);
@@ -183,36 +184,46 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Search Overlay */}
-      {searchOpen && (
-        <div className="fixed inset-0 flex justify-center items-start pt-28 z-50">
-          <div
-            className="fixed inset-0 bg-black/40"
-            onClick={() => setSearchOpen(false)}
-          />
-          <div className="relative z-50 w-150 bg-card p-4 rounded-lg shadow">
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full p-2 outline-none"
-              placeholder="Search..."
+      <AnimatePresence>
+        {searchOpen && (
+          <div className="fixed inset-0 flex justify-center items-start pt-28 z-50">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+              onClick={() => setSearchOpen(false)}
             />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              className="relative z-[70] w-full max-w-lg mx-4 bg-card/90 backdrop-blur-2xl p-10 rounded-[3rem] border border-border shadow-2xl desktop-shadow"
+            >
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full p-2 outline-none bg-transparent"
+                placeholder="Search..."
+              />
 
-            <div className="mt-3 max-h-60 overflow-auto no-scrollbar">
-              {results?.map((r) => (
-                <button
-                  key={r.href}
-                  onClick={() => handleNavigate(r.href)}
-                  className="w-full text-left px-3 py-2 hover:bg-muted flex gap-2"
-                >
-                  {r.icon}
-                  {r.label}
-                </button>
-              ))}
-            </div>
+              <div className="mt-3 max-h-60 overflow-auto no-scrollbar">
+                {results?.map((r) => (
+                  <button
+                    key={r.href}
+                    onClick={() => handleNavigate(r.href)}
+                    className="w-full text-left px-3 py-2 hover:bg-muted flex gap-2 rounded-xl"
+                  >
+                    {r.icon}
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </>
   );
 };
