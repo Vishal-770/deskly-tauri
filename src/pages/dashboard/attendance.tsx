@@ -77,9 +77,9 @@ function CircularProgress({
 }) {
   const colors =
     percentage >= 75
-      ? { progress: "text-green-500", text: "text-foreground" }
+      ? { progress: "text-primary", text: "text-foreground" }
       : percentage >= 60
-        ? { progress: "text-yellow-500", text: "text-yellow-500" }
+        ? { progress: "text-foreground/60", text: "text-foreground/60" }
         : { progress: "text-destructive", text: "text-destructive" };
 
   const strokeWidth = 4;
@@ -97,7 +97,7 @@ function CircularProgress({
           stroke="currentColor"
           strokeWidth={strokeWidth}
           fill="none"
-          className="text-secondary"
+          className="text-muted/30"
         />
         <circle
           cx={size / 2}
@@ -135,14 +135,14 @@ function AttendanceRow({
   );
   
   const statusColor = record.attendancePercentage >= 75 
-    ? "text-green-500" 
+    ? "text-primary" 
     : record.attendancePercentage >= 60 
-      ? "text-yellow-500" 
+      ? "text-foreground/60" 
       : "text-destructive";
 
   return (
     <AccordionItem value={record.classId} className="border-b border-border/50 last:border-0">
-      <AccordionTrigger className="group hover:bg-muted/30 px-6 py-4 transition-all hover:no-underline">
+      <AccordionTrigger className="group hover:bg-accent/30 px-6 py-4 transition-all hover:no-underline">
         <div className="flex items-center gap-5 flex-1 text-left">
           <CircularProgress percentage={record.attendancePercentage} />
           <div className="flex-1 min-w-0">
@@ -181,13 +181,13 @@ function AttendanceRow({
         </div>
       </AccordionTrigger>
       
-      <AccordionContent className="bg-muted/20 px-6 py-4">
+      <AccordionContent className="bg-muted/10 px-6 py-4">
         {details ? (
           <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
             <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2">
               Attendance History
             </h4>
-            <div className="bg-background/50 rounded-xl border border-border/50 overflow-hidden">
+            <div className="bg-background/50 rounded-xl border border-border overflow-hidden">
               <div className="grid grid-cols-5 gap-2 p-3 text-[10px] font-bold text-muted-foreground uppercase border-b border-border/30">
                 <span className="pl-2">Date</span>
                 <span>Slot</span>
@@ -196,7 +196,7 @@ function AttendanceRow({
               </div>
               <div className="max-h-64 overflow-y-auto no-scrollbar">
                 {details.map((detail, idx) => (
-                  <div key={idx} className="grid grid-cols-5 gap-2 p-3 text-[11px] items-center hover:bg-muted/30 transition-colors border-b border-border/10 last:border-0">
+                  <div key={idx} className="grid grid-cols-5 gap-2 p-3 text-[11px] items-center hover:bg-accent/30 transition-colors border-b border-border/10 last:border-0">
                     <span className="font-medium">{detail.date}</span>
                     <span className="font-mono text-muted-foreground">{detail.slot}</span>
                     <span className="col-span-2 text-muted-foreground truncate">
@@ -204,9 +204,9 @@ function AttendanceRow({
                     </span>
                     <span className={cn(
                       "text-[10px] font-bold px-2 py-0.5 rounded-full justify-self-end mr-2",
-                      detail.status === "Present" ? "bg-green-500/10 text-green-500" :
+                      detail.status === "Present" ? "bg-primary/10 text-primary" :
                       detail.status === "Absent" ? "bg-destructive/10 text-destructive" :
-                      "bg-yellow-500/10 text-yellow-500"
+                      "bg-foreground/10 text-foreground/60"
                     )}>
                       {detail.status}
                     </span>
@@ -257,7 +257,7 @@ function StatsOverview({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-      <div className="bg-card p-6 rounded-2xl border border-border/50 shadow-sm flex items-center gap-5">
+      <div className="bg-card p-6 rounded-2xl border border-border shadow-sm flex items-center gap-5">
         <CircularProgress percentage={totals.percentage} size={64} />
         <div>
           <p className="text-2xl font-black text-foreground">{totals.percentage}%</p>
@@ -265,12 +265,12 @@ function StatsOverview({
         </div>
       </div>
       
-      <div className="bg-card p-6 rounded-2xl border border-border/50 shadow-sm">
+      <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
         <p className="text-2xl font-black text-foreground">{totals.attended}<span className="text-muted-foreground text-sm">/{totals.total}</span></p>
         <p className="text-[10px] text-muted-foreground uppercase font-bold">Total Classes</p>
       </div>
       
-      <div className="bg-card p-6 rounded-2xl border border-border/50 shadow-sm">
+      <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
         <p className="text-2xl font-black text-foreground">
           {totals.odHours}h {totals.odMinutes}m
         </p>
@@ -279,7 +279,7 @@ function StatsOverview({
 
       <div className={cn(
         "p-6 rounded-2xl border shadow-sm transition-colors",
-        totals.critical > 0 ? "bg-destructive/5 border-destructive/20" : "bg-card border-border/50"
+        totals.critical > 0 ? "bg-destructive/5 border-destructive/20" : "bg-card border-border"
       )}>
         <p className={cn("text-2xl font-black", totals.critical > 0 ? "text-destructive" : "text-foreground")}>
           {totals.critical}
