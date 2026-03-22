@@ -1,13 +1,14 @@
-use tauri::State;
-use chrono::Utc;
-use reqwest::header::{COOKIE, CONTENT_TYPE, REFERER};
+use super::formatter::generate_weekly_schedule;
+use super::parser::parse_timetable_courses;
+use super::types::{TimetableResponse, WeeklyScheduleResponse};
 use crate::auth::constants::VTOP_BASE_URL;
+use crate::auth::helpers::response_text_with_auth_retry;
+use crate::auth::helpers::{get_default_semester_id, selected_semester_id_from_store};
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
-use crate::auth::helpers::{get_default_semester_id, selected_semester_id_from_store};
-use super::types::{TimetableResponse, WeeklyScheduleResponse};
-use super::parser::parse_timetable_courses;
-use super::formatter::generate_weekly_schedule;
+use chrono::Utc;
+use reqwest::header::{CONTENT_TYPE, COOKIE, REFERER};
+use tauri::State;
 
 #[tauri::command]
 pub async fn timetable_get_courses(
@@ -40,10 +41,7 @@ pub async fn timetable_get_courses(
             .await
             .map_err(|e| format!("Failed to fetch timetable courses: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read timetable html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read timetable html").await
     })?;
 
     Ok(TimetableResponse {
@@ -82,10 +80,7 @@ pub async fn timetable_get_weekly(
             .await
             .map_err(|e| format!("Failed to fetch timetable: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read timetable html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read timetable html").await
     })?;
 
     let courses = parse_timetable_courses(&html)?;

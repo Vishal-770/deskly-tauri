@@ -1,5 +1,5 @@
-use scraper::{ElementRef, Html, Selector};
 use super::types::{AssessmentMark, StudentMarkEntry};
+use scraper::{ElementRef, Html, Selector};
 
 fn clean_text(raw: &str) -> String {
     raw.split_whitespace().collect::<Vec<_>>().join(" ")

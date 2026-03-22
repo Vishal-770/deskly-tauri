@@ -11,8 +11,7 @@ struct CaptchaModel {
 }
 
 static CAPTCHA_MODEL: Lazy<CaptchaModel> = Lazy::new(|| {
-    serde_json::from_str(include_str!("captcha_model.json"))
-        .expect("captcha model file is invalid")
+    serde_json::from_str(include_str!("captcha_model.json")).expect("captcha model file is invalid")
 });
 
 pub fn decode_data_url_bytes(data_url: &str) -> Result<Vec<u8>, String> {
@@ -26,7 +25,11 @@ pub fn decode_data_url_bytes(data_url: &str) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("failed to decode captcha data url: {e}"))
 }
 
-fn get_image_blocks(saturate: &[f32], width: usize, height: usize) -> Result<Vec<Vec<f32>>, String> {
+fn get_image_blocks(
+    saturate: &[f32],
+    width: usize,
+    height: usize,
+) -> Result<Vec<Vec<f32>>, String> {
     let expected = 200usize * 40usize;
     if width * height < expected {
         return Err(format!(
@@ -86,7 +89,11 @@ pub fn solve_captcha_from_image_bytes(bytes: &[u8]) -> Result<String, String> {
         let b = b as f32;
         let min = r.min(g.min(b));
         let max = r.max(g.max(b));
-        let value = if max == 0.0 { 0.0 } else { ((max - min) * 255.0 / max).round() };
+        let value = if max == 0.0 {
+            0.0
+        } else {
+            ((max - min) * 255.0 / max).round()
+        };
         saturate.push(value);
     }
 

@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { Calendar, Info } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "../../hooks/useAuth";
 import {
   getAcademicCalendarOptions,
   getAcademicCalendarView,
   type CalendarMonthOption,
   type MonthlySchedule,
   type CalendarDay,
-} from "@/lib/features";
-import Loader from "@/components/Loader";
-import { ErrorDisplay } from "@/components/error-display";
-import { cn } from "@/lib/utils";
-import { useSemester } from "@/hooks/useSemester";
+} from "../../lib/features";
+import Loader from "../../components/Loader";
+import { ErrorDisplay } from "../../components/error-display";
+import { cn } from "../../lib/utils";
+import { useSemester } from "../../hooks/useSemester";
 
 /* -------------------- Utility Functions -------------------- */
 
@@ -98,7 +98,6 @@ export default function AcademicCalendarPage() {
             "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
           ][currentDate.getMonth()];
           const currentYear = currentDate.getFullYear();
-          const currentMonthYear = `${currentMonthName} ${currentYear}`;
 
           // Try to match by label first since it's more human-readable
           const currentMonthItem = res.data.find(
@@ -248,7 +247,7 @@ export default function AcademicCalendarPage() {
                               {day.date}
                             </div>
                             <div className="space-y-1.5">
-                              {day.content.map((text: string, cIdx: number) => (
+                              {day?.content?.map((text: string, cIdx: number) => (
                                 <div
                                   key={cIdx}
                                   className="text-[10px] leading-tight p-1.5 rounded-lg bg-muted/40 text-muted-foreground border border-border/30 group-hover:border-primary/20 group-hover:bg-primary/5 transition-colors"

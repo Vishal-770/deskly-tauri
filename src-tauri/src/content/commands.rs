@@ -1,9 +1,10 @@
-use reqwest::header::{COOKIE, CONTENT_TYPE, REFERER};
-use tauri::State;
-use serde_json::Value;
 use chrono::Utc;
+use reqwest::header::{CONTENT_TYPE, COOKIE, REFERER};
+use serde_json::Value;
+use tauri::State;
 
 use crate::auth::constants::VTOP_BASE_URL;
+use crate::auth::helpers::response_text_with_auth_retry;
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
 
@@ -34,10 +35,7 @@ pub async fn get_content_page(
             .await
             .map_err(|e| format!("Failed to post to VTOP: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read response html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read response html").await
     })?;
 
     let parsed = extract_attendance_from_html(&html)?;
@@ -74,10 +72,7 @@ pub async fn get_cgpa_page(
             .await
             .map_err(|e| format!("Failed to post to VTOP: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read response html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read response html").await
     })?;
 
     // Handle JSON-wrapped HTML
