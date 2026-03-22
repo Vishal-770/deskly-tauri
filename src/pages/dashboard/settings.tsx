@@ -67,7 +67,14 @@ export default function SettingsPage() {
   const [appVersion, setAppVersion] = useState<string>("...");
   const [osLabel, setOsLabel] = useState<string>("Desktop");
   const [updateStatus, setUpdateStatus] = useState<
-    "idle" | "checking" | "available" | "downloading" | "downloaded" | "installing" | "not-available" | "error"
+    | "idle"
+    | "checking"
+    | "available"
+    | "downloading"
+    | "downloaded"
+    | "installing"
+    | "not-available"
+    | "error"
   >("idle");
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [updateInfo, setUpdateInfo] = useState<{
@@ -75,7 +82,9 @@ export default function SettingsPage() {
     notes?: string;
     date?: string;
   } | null>(null);
-  const [updateArtifact, setUpdateArtifact] = useState<TauriUpdate | null>(null);
+  const [updateArtifact, setUpdateArtifact] = useState<TauriUpdate | null>(
+    null,
+  );
   const [downloadedBytes, setDownloadedBytes] = useState(0);
   const [contentLength, setContentLength] = useState(0);
 
@@ -213,10 +222,14 @@ export default function SettingsPage() {
 
   const hasStorageError = Boolean(credentialStatus?.keyringError);
   const isPasswordStored = Boolean(credentialStatus?.hasPasswordStored);
-  const downloadProgress = contentLength > 0
-    ? Math.min(100, Math.round((downloadedBytes / contentLength) * 100))
-    : 0;
-  const isBusy = updateStatus === "checking" || updateStatus === "downloading" || updateStatus === "installing";
+  const downloadProgress =
+    contentLength > 0
+      ? Math.min(100, Math.round((downloadedBytes / contentLength) * 100))
+      : 0;
+  const isBusy =
+    updateStatus === "checking" ||
+    updateStatus === "downloading" ||
+    updateStatus === "installing";
 
   return (
     <div className="p-6 space-y-8 pb-20 animate-in fade-in duration-500">
@@ -373,14 +386,16 @@ export default function SettingsPage() {
                   <div>
                     <p className="text-sm font-semibold">App Updates</p>
                     <p className="text-xs text-muted-foreground">
-                      Check and install new releases without downloading manually.
+                      Check and install new releases without downloading
+                      manually.
                     </p>
                   </div>
                   <Badge variant="outline" className="text-[10px]">
                     {updateStatus === "idle" && "Idle"}
                     {updateStatus === "checking" && "Checking"}
                     {updateStatus === "available" && "Update Found"}
-                    {updateStatus === "downloading" && `Downloading ${downloadProgress}%`}
+                    {updateStatus === "downloading" &&
+                      `Downloading ${downloadProgress}%`}
                     {updateStatus === "downloaded" && "Ready to Install"}
                     {updateStatus === "installing" && "Installing"}
                     {updateStatus === "not-available" && "Up to Date"}
@@ -391,10 +406,19 @@ export default function SettingsPage() {
                 {updateInfo && (
                   <div className="text-xs text-muted-foreground space-y-1">
                     <p>
-                      Latest version: <span className="text-foreground font-medium">v{updateInfo.version}</span>
+                      Latest version:{" "}
+                      <span className="text-foreground font-medium">
+                        v{updateInfo.version}
+                      </span>
                     </p>
-                    {updateInfo.date && <p>Published: {new Date(updateInfo.date).toLocaleString()}</p>}
-                    {updateInfo.notes && <p className="line-clamp-3">Notes: {updateInfo.notes}</p>}
+                    {updateInfo.date && (
+                      <p>
+                        Published: {new Date(updateInfo.date).toLocaleString()}
+                      </p>
+                    )}
+                    {updateInfo.notes && (
+                      <p className="line-clamp-3">Notes: {updateInfo.notes}</p>
+                    )}
                   </div>
                 )}
 
@@ -409,7 +433,9 @@ export default function SettingsPage() {
                     onClick={() => void handleCheckForUpdates()}
                     disabled={isBusy}
                   >
-                    <RotateCcw className={`w-3.5 h-3.5 ${updateStatus === "checking" ? "animate-spin" : ""}`} />
+                    <RotateCcw
+                      className={`w-3.5 h-3.5 ${updateStatus === "checking" ? "animate-spin" : ""}`}
+                    />
                     Check for Updates
                   </Button>
 

@@ -43,13 +43,18 @@ if (!fs.existsSync(assetsDir)) {
 }
 
 if (!repository || !tag || !version) {
-  throw new Error("Missing required metadata. Provide --repository, --tag and --version.");
+  throw new Error(
+    "Missing required metadata. Provide --repository, --tag and --version.",
+  );
 }
 
 const allFiles = getAllFiles(assetsDir);
 const basenames = allFiles.map((file) => path.basename(file));
 
-const windowsAsset = findFirstByRegex(basenames, /\.msi$/i) || findFirstByRegex(basenames, /setup\.exe$/i) || findFirstByRegex(basenames, /\.exe$/i);
+const windowsAsset =
+  findFirstByRegex(basenames, /\.msi$/i) ||
+  findFirstByRegex(basenames, /setup\.exe$/i) ||
+  findFirstByRegex(basenames, /\.exe$/i);
 const linuxAsset = findFirstByRegex(basenames, /\.AppImage$/i);
 const macAsset = findFirstByRegex(basenames, /\.app\.tar\.gz$/i);
 
@@ -62,7 +67,9 @@ function addPlatform(key, assetName) {
   const sigName = `${assetName}.sig`;
   const sigPath = allFiles.find((file) => path.basename(file) === sigName);
   if (!sigPath) {
-    throw new Error(`Missing signature file for ${assetName}. Expected ${sigName}.`);
+    throw new Error(
+      `Missing signature file for ${assetName}. Expected ${sigName}.`,
+    );
   }
 
   platforms[key] = {
@@ -76,7 +83,9 @@ addPlatform("linux-x86_64", linuxAsset);
 addPlatform("darwin-x86_64", macAsset);
 
 if (Object.keys(platforms).length === 0) {
-  throw new Error("No updater assets found. Ensure .msi/.exe/.AppImage/.app.tar.gz files are present.");
+  throw new Error(
+    "No updater assets found. Ensure .msi/.exe/.AppImage/.app.tar.gz files are present.",
+  );
 }
 
 const latestJson = {
@@ -87,5 +96,9 @@ const latestJson = {
 };
 
 const outputPath = path.join(assetsDir, "latest.json");
-fs.writeFileSync(outputPath, `${JSON.stringify(latestJson, null, 2)}\n`, "utf-8");
+fs.writeFileSync(
+  outputPath,
+  `${JSON.stringify(latestJson, null, 2)}\n`,
+  "utf-8",
+);
 console.log(`Generated ${outputPath}`);

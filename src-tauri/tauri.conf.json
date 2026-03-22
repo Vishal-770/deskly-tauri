@@ -36,9 +36,10 @@
       "icons/icon.ico"
     ]
   },
+
   "plugins": {
     "updater": {
-      "pubkey": "REPLACE_WITH_TAURI_PUBLIC_KEY",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI1RjA5QkU1MjJBQTlFRUUKUldUdW5xb2k1WnZ3SldBdm9JNEdmZUk0bkRlZkhZKy9wNHA4WHVYZ082cFoydXBobnJsc3c2MHEK",
       "endpoints": [
         "https://github.com/Vishal-770/deskly-tauri/releases/latest/download/latest.json"
       ],
