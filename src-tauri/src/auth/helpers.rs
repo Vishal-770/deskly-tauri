@@ -71,6 +71,35 @@ pub fn is_session_expired(html: &str) -> bool {
     || (lowered.contains("vtop login") && !lowered.contains("authorizedid"))
 }
 
+#[macro_export]
+macro_rules! with_auto_relogin {
+    ($app:expr, $store:expr, $tokens:ident, $block:block) => {{
+        let mut retry_count = 0;
+        loop {
+            let result = {
+                let $tokens = match $crate::auth::helpers::auth_tokens_from_store(&$store) {
+                    Ok(t) => t,
+                    Err(err) => return Err(err),
+                };
+                $block
+            };
+
+            match result {
+                Ok(html) if $crate::auth::helpers::is_session_expired(&html) && retry_count < 1 => {
+                    match $crate::auth::helpers::perform_auto_relogin(&$app, &$store).await {
+                        Ok(_) => {
+                            retry_count += 1;
+                            continue;
+                        }
+                        Err(e) => return Err(format!("Auto-relogin failed: {}", e)),
+                    }
+                }
+                res => break res,
+            }
+        }
+    }};
+}
+
 pub async fn perform_auto_relogin(
     app: &tauri::AppHandle,
     store: &State<'_, AuthStore>,

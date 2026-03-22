@@ -152,6 +152,14 @@
     scrollbar-width: none;  /* Firefox */
   }
 
+  .no-scrollbar-x::-webkit-scrollbar:horizontal {
+    display: none;
+  }
+  .no-scrollbar-x {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   /* Custom visible scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
@@ -169,5 +177,22 @@
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--muted-foreground);
+  }
+
+  /* Glassmorphism & Desktop App Feel */
+  .glass-card {
+    @apply bg-card/40 backdrop-blur-xl border border-white/10 dark:border-white/5 shadow-xl transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply bg-card/50 border-white/20 dark:border-white/10;
+  }
+
+  .desktop-shadow {
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 4px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .active-indicator {
+    @apply absolute left-0 w-1 h-6 bg-primary rounded-r-full;
   }
 }

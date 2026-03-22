@@ -11,46 +11,34 @@ use super::parser::{extract_attendance_from_html, extract_cgpa_from_html};
 use super::types::{CGPAResponse, ContentResponse};
 
 #[tauri::command]
-pub async fn get_content_page(store: State<'_, AuthStore>) -> Result<ContentResponse, String> {
-    let tokens = {
-        let guard = store.inner.lock().map_err(|_| "Failed to lock auth store".to_string())?;
-        guard.tokens.clone()
-    };
+pub async fn get_content_page(
+    app: tauri::AppHandle,
+    store: State<'_, AuthStore>,
+) -> Result<ContentResponse, String> {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
+        let client = build_http_client()?;
+        let url = format!("{VTOP_BASE_URL}/vtop/get/dashboard/current/semester/course/details");
+        let x_param = Utc::now().to_rfc2822();
 
-    let tokens = match tokens {
-        Some(t) => t,
-        None => return Ok(ContentResponse {
-            success: false,
-            courses: None,
-            semester: None,
-            error: Some("No auth tokens found".to_string()),
-        }),
-    };
+        let response = client
+            .post(&url)
+            .header(COOKIE, tokens.cookies.clone())
+            .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
+            .form(&[
+                ("authorizedID", tokens.authorized_id.as_str()),
+                ("_csrf", tokens.csrf.as_str()),
+                ("x", &x_param),
+            ])
+            .send()
+            .await
+            .map_err(|e| format!("Failed to post to VTOP: {e}"))?;
 
-    let client = build_http_client()?;
-    let url = format!("{VTOP_BASE_URL}/vtop/get/dashboard/current/semester/course/details");
-
-    // Rust chrono `.to_rfc2822()` matches JS `toUTCString()` closely enough for this request format.
-    let x_param = Utc::now().to_rfc2822();
-
-    let response = client
-        .post(&url)
-        .header(COOKIE, tokens.cookies.clone())
-        .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
-        .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
-        .form(&[
-            ("authorizedID", tokens.authorized_id.as_str()),
-            ("_csrf", tokens.csrf.as_str()),
-            ("x", &x_param),
-        ])
-        .send()
-        .await
-        .map_err(|e| format!("Failed to post to VTOP: {e}"))?;
-
-    let html = response
-        .text()
-        .await
-        .map_err(|e| format!("Failed to read response html: {e}"))?;
+        response
+            .text()
+            .await
+            .map_err(|e| format!("Failed to read response html: {e}"))
+    })?;
 
     let parsed = extract_attendance_from_html(&html)?;
 
@@ -63,44 +51,34 @@ pub async fn get_content_page(store: State<'_, AuthStore>) -> Result<ContentResp
 }
 
 #[tauri::command]
-pub async fn get_cgpa_page(store: State<'_, AuthStore>) -> Result<CGPAResponse, String> {
-    let tokens = {
-        let guard = store.inner.lock().map_err(|_| "Failed to lock auth store".to_string())?;
-        guard.tokens.clone()
-    };
+pub async fn get_cgpa_page(
+    app: tauri::AppHandle,
+    store: State<'_, AuthStore>,
+) -> Result<CGPAResponse, String> {
+    let mut html = crate::with_auto_relogin!(app, store, tokens, {
+        let client = build_http_client()?;
+        let url = format!("{VTOP_BASE_URL}/vtop/get/dashboard/current/cgpa/credits");
+        let x_param = Utc::now().to_rfc2822();
 
-    let tokens = match tokens {
-        Some(t) => t,
-        None => return Ok(CGPAResponse {
-            success: false,
-            cgpa_data: None,
-            error: Some("No auth tokens found".to_string()),
-        }),
-    };
+        let response = client
+            .post(&url)
+            .header(COOKIE, tokens.cookies.clone())
+            .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
+            .form(&[
+                ("authorizedID", tokens.authorized_id.as_str()),
+                ("_csrf", tokens.csrf.as_str()),
+                ("x", &x_param),
+            ])
+            .send()
+            .await
+            .map_err(|e| format!("Failed to post to VTOP: {e}"))?;
 
-    let client = build_http_client()?;
-    let url = format!("{VTOP_BASE_URL}/vtop/get/dashboard/current/cgpa/credits");
-
-    let x_param = Utc::now().to_rfc2822();
-
-    let response = client
-        .post(&url)
-        .header(COOKIE, tokens.cookies.clone())
-        .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
-        .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
-        .form(&[
-            ("authorizedID", tokens.authorized_id.as_str()),
-            ("_csrf", tokens.csrf.as_str()),
-            ("x", &x_param),
-        ])
-        .send()
-        .await
-        .map_err(|e| format!("Failed to post to VTOP: {e}"))?;
-
-    let mut html = response
-        .text()
-        .await
-        .map_err(|e| format!("Failed to read response html: {e}"))?;
+        response
+            .text()
+            .await
+            .map_err(|e| format!("Failed to read response html: {e}"))
+    })?;
 
     // Handle JSON-wrapped HTML
     if let Ok(json) = serde_json::from_str::<Value>(&html) {

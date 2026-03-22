@@ -5,30 +5,20 @@ use tauri::State;
 use crate::auth::constants::VTOP_BASE_URL;
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
-use crate::auth::helpers::{auth_tokens_from_store, selected_semester_id_from_store, get_default_semester_id};
+use crate::auth::helpers::{
+    selected_semester_id_from_store, get_default_semester_id
+};
 
 use super::parser::parse_marks;
 use super::types::MarksResponse;
 
 #[tauri::command]
 pub async fn marks_get_student_mark_view(
-    app: tauri::AppHandle, // Added app handle for auto-relogin
+    app: tauri::AppHandle,
     semester_sub_id: Option<String>,
     store: State<'_, AuthStore>,
 ) -> Result<MarksResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(MarksResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let selected_semester_id = selected_semester_id_from_store(&store)?;
         let semester_id = if let Some(id) = semester_sub_id.as_ref().filter(|id| !id.trim().is_empty()) {
             id.clone()
@@ -56,23 +46,15 @@ pub async fn marks_get_student_mark_view(
             .await
             .map_err(|e| format!("Failed to fetch marks data: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read marks html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_marks(&html)?;
-    };
+            .map_err(|e| format!("Failed to read marks html: {e}"))
+    })?;
 
     Ok(MarksResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_marks(&html)?),
         error: None,
     })
 }

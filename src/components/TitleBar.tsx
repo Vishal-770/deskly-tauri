@@ -2,6 +2,8 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Minus, Square, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import appLogo from "@/assets/app-logo.png";
+
 // Tauri v2 API for the current window
 const appWindow = getCurrentWindow();
 
@@ -30,7 +32,8 @@ export function TitleBar() {
       className="h-8 bg-background flex justify-between items-center select-none z-50 fixed top-0 left-0 right-0 w-full text-foreground border-b border-border shadow-sm"
     >
       {/* Title */}
-      <div className="flex items-center pl-4 gap-2 pointer-events-none" data-tauri-drag-region>
+      <div className="flex items-center pl-3 gap-2 pointer-events-none" data-tauri-drag-region>
+         <img src={appLogo} alt="Logo" className="w-4 h-4 object-contain" />
          <span className="text-xs font-semibold text-muted-foreground tracking-wider">Deskly</span>
       </div>
 

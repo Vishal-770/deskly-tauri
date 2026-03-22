@@ -26,19 +26,7 @@ pub async fn academic_calendar_get(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<CalendarOptionsResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(CalendarOptionsResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let sem_id = match selected_semester_id_from_store(&store)? {
             Some(id) => id,
             None => get_default_semester_id(&tokens).await?,
@@ -61,23 +49,15 @@ pub async fn academic_calendar_get(
             .await
             .map_err(|e| format!("Failed to fetch academic calendar options: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read academic calendar options html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_calendar_options(&html)?;
-    };
+            .map_err(|e| format!("Failed to read academic calendar options html: {e}"))
+    })?;
 
     Ok(CalendarOptionsResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_calendar_options(&html)?),
         error: None,
     })
 }
@@ -88,19 +68,7 @@ pub async fn academic_calendar_get_view(
     cal_date: String,
     store: State<'_, AuthStore>,
 ) -> Result<CalendarViewResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(CalendarViewResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let sem_id = match selected_semester_id_from_store(&store)? {
             Some(id) => id,
             None => get_default_semester_id(&tokens).await?,
@@ -124,23 +92,15 @@ pub async fn academic_calendar_get_view(
             .await
             .map_err(|e| format!("Failed to fetch academic calendar month view: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read academic calendar view html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_calendar_view(&html)?;
-    };
+            .map_err(|e| format!("Failed to read academic calendar view html: {e}"))
+    })?;
 
     Ok(CalendarViewResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_calendar_view(&html)?),
         error: None,
     })
 }
@@ -294,19 +254,7 @@ pub async fn contact_info_get(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<ContactResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(ContactResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
         let response = client
             .post(format!("{VTOP_BASE_URL}/vtop/hrms/contactDetails"))
@@ -322,23 +270,15 @@ pub async fn contact_info_get(
             .await
             .map_err(|e| format!("Failed to fetch contact details: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read contact details html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_contact_details(&html)?;
-    };
+            .map_err(|e| format!("Failed to read contact details html: {e}"))
+    })?;
 
     Ok(ContactResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_contact_details(&html)?),
         error: None,
     })
 }
@@ -348,19 +288,7 @@ pub async fn payment_receipts_get(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<ReceiptResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(ReceiptResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
         let response = client
             .post(format!("{VTOP_BASE_URL}/vtop/p2p/getReceiptsApplno"))
@@ -378,23 +306,15 @@ pub async fn payment_receipts_get(
             .await
             .map_err(|e| format!("Failed to fetch receipts: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read receipts html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_receipts(&html)?;
-    };
+            .map_err(|e| format!("Failed to read receipts html: {e}"))
+    })?;
 
     Ok(ReceiptResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_receipts(&html)?),
         error: None,
     })
 }
@@ -404,19 +324,7 @@ pub async fn curriculum_get(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<CurriculumCategoriesResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(CurriculumCategoriesResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
         let response = client
             .post(format!("{VTOP_BASE_URL}/vtop/academics/common/Curriculum"))
@@ -433,23 +341,15 @@ pub async fn curriculum_get(
             .await
             .map_err(|e| format!("Failed to fetch curriculum: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read curriculum html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_curriculum_categories(&html)?;
-    };
+            .map_err(|e| format!("Failed to read curriculum html: {e}"))
+    })?;
 
     Ok(CurriculumCategoriesResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_curriculum_categories(&html)?),
         error: None,
     })
 }
@@ -460,19 +360,7 @@ pub async fn curriculum_get_category_view(
     category_id: String,
     store: State<'_, AuthStore>,
 ) -> Result<CurriculumCoursesResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(CurriculumCoursesResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
         let response = client
             .post(format!(
@@ -491,23 +379,15 @@ pub async fn curriculum_get_category_view(
             .await
             .map_err(|e| format!("Failed to fetch curriculum category view: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read curriculum category view html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_curriculum_courses(&html)?;
-    };
+            .map_err(|e| format!("Failed to read curriculum category view html: {e}"))
+    })?;
 
     Ok(CurriculumCoursesResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_curriculum_courses(&html)?),
         error: None,
     })
 }

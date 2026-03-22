@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ModeToggle } from "@/components/theme-toggle";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -107,10 +108,22 @@ export default function SettingsPage() {
 
       <Divider />
 
-      <section className="space-y-4">
+      <section className="space-y-4 text-foreground">
         <h2 className="text-2xl font-semibold">Preferences</h2>
 
-        <div className="rounded-2xl border border-border bg-card/30 p-6 space-y-4">
+        <div className="rounded-2xl border border-border bg-card/30 p-6 space-y-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-medium text-foreground">Interface Theme</p>
+              <p className="text-sm text-muted-foreground">
+                Switch between light and dark mode.
+              </p>
+            </div>
+            <ModeToggle />
+          </div>
+
+          <Divider />
+
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-medium">Selected Semester</p>

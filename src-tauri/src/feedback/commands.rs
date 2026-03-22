@@ -4,7 +4,7 @@ use reqwest::header::{COOKIE, CONTENT_TYPE, REFERER};
 use crate::auth::constants::VTOP_BASE_URL;
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
-use crate::auth::helpers::{auth_tokens_from_store, selected_semester_id_from_store, get_default_semester_id};
+use crate::auth::helpers::{selected_semester_id_from_store, get_default_semester_id};
 use super::types::FeedbackResponse;
 use super::parser::parse_feedback_status;
 
@@ -13,19 +13,7 @@ pub async fn feedback_get_status(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<FeedbackResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(FeedbackResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let semester_id = match selected_semester_id_from_store(&store)? {
             Some(id) => id,
             None => get_default_semester_id(&tokens).await?,
@@ -47,23 +35,15 @@ pub async fn feedback_get_status(
             .await
             .map_err(|e| format!("Failed to fetch feedback status: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read feedback status response html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_feedback_status(&html)?;
-    };
+            .map_err(|e| format!("Failed to read feedback status response html: {e}"))
+    })?;
 
     Ok(FeedbackResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_feedback_status(&html)?),
         error: None,
     })
 }

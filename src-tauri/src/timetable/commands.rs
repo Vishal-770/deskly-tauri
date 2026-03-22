@@ -4,7 +4,7 @@ use reqwest::header::{COOKIE, CONTENT_TYPE, REFERER};
 use crate::auth::constants::VTOP_BASE_URL;
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
-use crate::auth::helpers::{auth_tokens_from_store, get_default_semester_id, selected_semester_id_from_store};
+use crate::auth::helpers::{get_default_semester_id, selected_semester_id_from_store};
 use super::types::{TimetableResponse, WeeklyScheduleResponse};
 use super::parser::parse_timetable_courses;
 use super::formatter::generate_weekly_schedule;
@@ -15,19 +15,7 @@ pub async fn timetable_get_courses(
     semester_sub_id: Option<String>,
     store: State<'_, AuthStore>,
 ) -> Result<TimetableResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(TimetableResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let semester_id = if let Some(id) = semester_sub_id.as_ref() {
             id.clone()
         } else if let Some(id) = selected_semester_id_from_store(&store)? {
@@ -52,23 +40,15 @@ pub async fn timetable_get_courses(
             .await
             .map_err(|e| format!("Failed to fetch timetable courses: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read timetable html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_timetable_courses(&html)?;
-    };
+            .map_err(|e| format!("Failed to read timetable html: {e}"))
+    })?;
 
     Ok(TimetableResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_timetable_courses(&html)?),
         error: None,
     })
 }
@@ -79,19 +59,7 @@ pub async fn timetable_get_weekly(
     semester_sub_id: Option<String>,
     store: State<'_, AuthStore>,
 ) -> Result<WeeklyScheduleResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(WeeklyScheduleResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let semester_id = if let Some(id) = semester_sub_id.as_ref() {
             id.clone()
         } else {
@@ -114,24 +82,16 @@ pub async fn timetable_get_weekly(
             .await
             .map_err(|e| format!("Failed to fetch timetable: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read timetable html: {e}"))?;
+            .map_err(|e| format!("Failed to read timetable html: {e}"))
+    })?;
 
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        let courses = parse_timetable_courses(&html)?;
-        break generate_weekly_schedule(&courses);
-    };
-
+    let courses = parse_timetable_courses(&html)?;
     Ok(WeeklyScheduleResponse {
         success: true,
-        data: Some(data),
+        data: Some(generate_weekly_schedule(&courses)),
         error: None,
     })
 }

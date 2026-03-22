@@ -4,7 +4,7 @@ use reqwest::header::{COOKIE, CONTENT_TYPE, REFERER};
 use crate::auth::constants::VTOP_BASE_URL;
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
-use crate::auth::helpers::auth_tokens_from_store;
+// Removed unused import
 use super::types::GradesResponse;
 use super::parser::parse_student_history;
 
@@ -13,19 +13,7 @@ pub async fn grades_get_history(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<GradesResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(GradesResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
         let response = client
             .post(format!("{VTOP_BASE_URL}/vtop/examinations/examGradeView/StudentGradeHistory"))
@@ -42,23 +30,15 @@ pub async fn grades_get_history(
             .await
             .map_err(|e| format!("Failed to fetch grade history: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read grade history html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_student_history(&html)?;
-    };
+            .map_err(|e| format!("Failed to read grade history html: {e}"))
+    })?;
 
     Ok(GradesResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_student_history(&html)?),
         error: None,
     })
 }

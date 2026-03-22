@@ -338,19 +338,30 @@ pub fn auth_get_state(store: State<AuthStore>) -> Result<Option<AuthState>, Stri
 }
 
 #[tauri::command]
-pub fn auth_restore_session(
+pub async fn auth_restore_session(
     app: AppHandle,
-    store: State<AuthStore>,
+    store: State<'_, AuthStore>,
 ) -> Result<Option<AuthState>, String> {
     let persisted = load_from_disk(&app);
 
-    let mut guard = store
-        .inner
-        .lock()
-        .map_err(|_| "failed to lock auth store".to_string())?;
+    let (state, tokens_missing) = {
+        let mut guard = store
+            .inner
+            .lock()
+            .map_err(|_| "failed to lock auth store".to_string())?;
 
-    *guard = persisted;
-    Ok(guard.state.clone())
+        *guard = persisted;
+        (guard.state.clone(), guard.tokens.is_none())
+    };
+
+    if let Some(s) = state.as_ref() {
+        if s.logged_in && tokens_missing {
+            // Proactively try to re-login if we have a state but no tokens
+            let _ = auth_auto_relogin(app, store).await;
+        }
+    }
+
+    Ok(state)
 }
 
 #[tauri::command]

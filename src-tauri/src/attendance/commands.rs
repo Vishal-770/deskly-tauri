@@ -2,7 +2,9 @@ use chrono::Utc;
 use reqwest::header::{CONTENT_TYPE, COOKIE, REFERER};
 use tauri::State;
 
-use crate::auth::helpers::{auth_tokens_from_store, selected_semester_id_from_store};
+use crate::auth::helpers::{
+    selected_semester_id_from_store
+};
 use crate::auth::constants::VTOP_BASE_URL;
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
@@ -37,20 +39,13 @@ async fn fetch_semesters_html(tokens: &crate::auth::types::AuthTokens) -> Result
 
 #[tauri::command]
 pub async fn attendance_get_semesters(
+    app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<SemestersResponse, String> {
-    let tokens = match auth_tokens_from_store(&store) {
-        Ok(tokens) => tokens,
-        Err(err) => {
-            return Ok(SemestersResponse {
-                success: false,
-                semesters: None,
-                error: Some(err),
-            })
-        }
-    };
+    let html = crate::with_auto_relogin!(app, store, tokens, {
+        fetch_semesters_html(&tokens).await
+    })?;
 
-    let html = fetch_semesters_html(&tokens).await?;
     let semesters = extract_semesters_from_html(&html)?;
 
     Ok(SemestersResponse {
@@ -65,20 +60,8 @@ pub async fn attendance_get_current(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<AttendanceResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(AttendanceResponse {
-                success: false,
-                data: None,
-                semester_id: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let (data, semester_id) = loop {
+    let mut semester_id_final;
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let selected_semester_id = selected_semester_id_from_store(&store)?;
         let semester_id = if let Some(id) = selected_semester_id.filter(|id| !id.trim().is_empty()) {
             id
@@ -87,16 +70,10 @@ pub async fn attendance_get_current(
             let semesters = extract_semesters_from_html(&semesters_html)?;
             match semesters.first() {
                 Some(s) => s.id.clone(),
-                None => {
-                    return Ok(AttendanceResponse {
-                        success: false,
-                        data: None,
-                        semester_id: None,
-                        error: Some("No semester info found".to_string()),
-                    })
-                }
+                None => return Err("No semester info found".to_string()),
             }
         };
+        semester_id_final = Some(semester_id.clone());
 
         let client = build_http_client()?;
         let url = format!("{VTOP_BASE_URL}/vtop/processViewStudentAttendance");
@@ -117,24 +94,16 @@ pub async fn attendance_get_current(
             .await
             .map_err(|e| format!("Failed to fetch attendance: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read attendance response html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break (parse_attendance(&html)?, semester_id);
-    };
+            .map_err(|e| format!("Failed to read attendance response html: {e}"))
+    })?;
 
     Ok(AttendanceResponse {
         success: true,
-        data: Some(data),
-        semester_id: Some(semester_id),
+        data: Some(parse_attendance(&html)?),
+        semester_id: semester_id_final,
         error: None,
     })
 }
@@ -146,19 +115,7 @@ pub async fn attendance_get_detail(
     slot_name: String,
     store: State<'_, AuthStore>,
 ) -> Result<AttendanceDetailResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(AttendanceDetailResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
         let url = format!("{VTOP_BASE_URL}/vtop/processViewAttendanceDetail");
         let x_param = Utc::now().to_rfc2822();
@@ -179,23 +136,15 @@ pub async fn attendance_get_detail(
             .await
             .map_err(|e| format!("Failed to fetch attendance details: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read attendance detail response html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_attendance_details(&html)?;
-    };
+            .map_err(|e| format!("Failed to read attendance detail response html: {e}"))
+    })?;
 
     Ok(AttendanceDetailResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_attendance_details(&html)?),
         error: None,
     })
 }

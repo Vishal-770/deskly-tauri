@@ -4,7 +4,7 @@ use chrono::Utc;
 
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
-use crate::auth::helpers::{auth_tokens_from_store};
+// Removed unused import
 use crate::auth::constants::VTOP_BASE_URL;
 use super::types::ProfileResponse;
 use super::parser::parse_student_profile;
@@ -14,19 +14,7 @@ pub async fn profile_get_student_profile(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<ProfileResponse, String> {
-    let mut tokens = match auth_tokens_from_store(&store) {
-        Ok(t) => t,
-        Err(err) => {
-            return Ok(ProfileResponse {
-                success: false,
-                data: None,
-                error: Some(err),
-            })
-        }
-    };
-    let mut retry_count = 0;
-
-    let data = loop {
+    let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
         let response = client
             .post(format!("{VTOP_BASE_URL}/vtop/studentsRecord/StudentProfileAllView"))
@@ -43,23 +31,15 @@ pub async fn profile_get_student_profile(
             .await
             .map_err(|e| format!("Failed to fetch profile: {e}"))?;
 
-        let html = response
+        response
             .text()
             .await
-            .map_err(|e| format!("Failed to read profile html: {e}"))?;
-
-        if crate::auth::helpers::is_session_expired(&html) && retry_count < 1 {
-            tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
-            retry_count += 1;
-            continue;
-        }
-
-        break parse_student_profile(&html).map_err(|e| format!("Failed to parse student profile: {e}"))?;
-    };
+            .map_err(|e| format!("Failed to read profile html: {e}"))
+    })?;
 
     Ok(ProfileResponse {
         success: true,
-        data: Some(data),
+        data: Some(parse_student_profile(&html).map_err(|e| format!("Failed to parse student profile: {e}"))?),
         error: None,
     })
 }
