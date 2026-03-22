@@ -6,17 +6,18 @@ use crate::attendance::parser::extract_semesters_from_html;
 
 use super::captcha::{decode_data_url_bytes, solve_captcha_from_image_bytes};
 use super::constants::VTOP_BASE_URL;
+use super::crypto;
 use super::http::{
     build_http_client, collect_set_cookies, get_with_redirect_follow, merge_cookies,
     split_cookie_header,
 };
+use super::keyring;
 use super::parser::{
     classify_login_error, extract_auth_tokens_from_dashboard, extract_captcha_src,
     extract_csrf_from_setup, is_recaptcha_page,
 };
-use super::keyring;
 use super::store::{load_from_disk, now_unix_ms, save_to_disk, AuthStore};
-use super::types::{AuthState, AuthTokens, LoginResponse, Semester};
+use super::types::{AuthState, AuthTokens, CredentialStatus, LoginResponse, Semester};
 
 async fn fetch_semesters(tokens: &AuthTokens) -> Result<Vec<Semester>, String> {
     let client = build_http_client()?;
@@ -52,10 +53,7 @@ async fn fetch_semesters(tokens: &AuthTokens) -> Result<Vec<Semester>, String> {
         .collect())
 }
 
-pub async fn internal_login(
-    username: &str,
-    password: &str,
-) -> Result<AuthTokens, String> {
+pub async fn internal_login(username: &str, password: &str) -> Result<AuthTokens, String> {
     let client = build_http_client()?;
 
     // Mirror Deskly behavior: retry until VTOP serves DEFAULT image captcha (not reCAPTCHA).
@@ -214,14 +212,9 @@ pub async fn internal_login(
             .join(location)
             .map_err(|e| format!("invalid redirect url: {e}"))?;
 
-        get_with_redirect_follow(
-            &client,
-            url.as_ref(),
-            Some(&all_cookie_header),
-            5,
-        )
-        .await
-        .map_err(|e| format!("failed to load dashboard after login: {e}"))?
+        get_with_redirect_follow(&client, url.as_ref(), Some(&all_cookie_header), 5)
+            .await
+            .map_err(|e| format!("failed to load dashboard after login: {e}"))?
     } else {
         get_with_redirect_follow(
             &client,
@@ -294,13 +287,16 @@ pub async fn auth_login(
         .lock()
         .map_err(|_| "failed to lock auth store".to_string())?;
 
+    let encrypted_password = crypto::encrypt_password(&password)
+        .map_err(|e| format!("secure credential encryption failed: {e}"))?;
+
     guard.state = Some(auth_state.clone());
     guard.tokens = Some(tokens.clone());
     guard.semester = selected_semester;
+    guard.password_encrypted = Some(encrypted_password);
+    // Best-effort keyring write for compatibility; persistent auth password is authoritative.
+    let _ = keyring::set_password(username.trim(), &password);
     save_to_disk(&app, &guard)?;
-
-    // Store password in keyring for auto-login
-    let _ = keyring::set_password(username.trim(), password.trim());
 
     Ok(LoginResponse {
         state: auth_state,
@@ -322,6 +318,7 @@ pub fn auth_logout(app: AppHandle, store: State<AuthStore>) -> Result<bool, Stri
     guard.state = None;
     guard.tokens = None;
     guard.semester = None;
+    guard.password_encrypted = None;
     save_to_disk(&app, &guard)?;
 
     Ok(true)
@@ -335,6 +332,27 @@ pub fn auth_get_state(store: State<AuthStore>) -> Result<Option<AuthState>, Stri
         .map_err(|_| "failed to lock auth store".to_string())?;
 
     Ok(guard.state.clone())
+}
+
+#[tauri::command]
+pub fn auth_get_credential_status(store: State<AuthStore>) -> Result<CredentialStatus, String> {
+    let guard = store
+        .inner
+        .lock()
+        .map_err(|_| "failed to lock auth store".to_string())?;
+
+    let user_id = guard.state.as_ref().map(|s| s.user_id.clone());
+    let has_password_stored = guard
+        .password_encrypted
+        .as_ref()
+        .is_some_and(|password| !password.trim().is_empty());
+    let keyring_error = None;
+
+    Ok(CredentialStatus {
+        user_id,
+        has_password_stored,
+        keyring_error,
+    })
 }
 
 #[tauri::command]
@@ -354,14 +372,34 @@ pub async fn auth_restore_session(
         (guard.state.clone(), guard.tokens.is_none())
     };
 
-    if let Some(s) = state.as_ref() {
-        if s.logged_in && tokens_missing {
-            // Proactively try to re-login if we have a state but no tokens
-            let _ = auth_auto_relogin(app, store).await;
+    if state
+        .as_ref()
+        .is_some_and(|s| s.logged_in && tokens_missing)
+    {
+        // Proactively try to re-login if we have a state but no tokens.
+        // If relogin fails, clear stale persisted auth to avoid false logged-in UI state.
+        if crate::auth::helpers::perform_auto_relogin(&app, &store)
+            .await
+            .is_err()
+        {
+            let mut guard = store
+                .inner
+                .lock()
+                .map_err(|_| "failed to lock auth store".to_string())?;
+            guard.state = None;
+            guard.tokens = None;
+            guard.semester = None;
+            guard.password_encrypted = None;
+            save_to_disk(&app, &guard)?;
+            return Ok(None);
         }
     }
 
-    Ok(state)
+    let guard = store
+        .inner
+        .lock()
+        .map_err(|_| "failed to lock auth store".to_string())?;
+    Ok(guard.state.clone())
 }
 
 #[tauri::command]
@@ -482,35 +520,5 @@ pub async fn auth_auto_relogin(
     app: AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<AuthTokens, String> {
-    let (user_id, password) = {
-        let guard = store
-            .inner
-            .lock()
-            .map_err(|_| "failed to lock auth store".to_string())?;
-
-        let user_id = guard
-            .state
-            .as_ref()
-            .ok_or_else(|| "No active session found for auto-login".to_string())?
-            .user_id
-            .clone();
-
-        let password = keyring::get_password(&user_id)
-            .map_err(|e| format!("Failed to retrieve password for auto-login: {e}"))?;
-
-        (user_id, password)
-    };
-
-    let tokens = internal_login(&user_id, &password).await?;
-
-    let mut guard = store
-        .inner
-        .lock()
-        .map_err(|_| "failed to lock auth store".to_string())?;
-
-    guard.tokens = Some(tokens.clone());
-    guard.state.as_mut().map(|s| s.last_login = now_unix_ms());
-    save_to_disk(&app, &guard)?;
-
-    Ok(tokens)
+    crate::auth::helpers::perform_auto_relogin(&app, &store).await
 }

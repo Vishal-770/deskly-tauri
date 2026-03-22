@@ -1,8 +1,16 @@
+use super::types::{HostelDetails, ProctorDetails, ProfileData, StudentDetails};
 use scraper::{Html, Selector};
-use super::types::{ProfileData, StudentDetails, ProctorDetails, HostelDetails};
 
 fn text_of(el: &scraper::ElementRef) -> String {
-    el.text().collect::<Vec<_>>().join(" ").replace("\u{a0}", " ").replace("\n", " ").replace("\r", " ").replace("\t", " ").trim().to_string()
+    el.text()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .replace("\u{a0}", " ")
+        .replace("\n", " ")
+        .replace("\r", " ")
+        .replace("\t", " ")
+        .trim()
+        .to_string()
 }
 
 fn get_table_value(document: &Html, context_selector: &str, label: &str) -> String {
@@ -48,18 +56,39 @@ pub fn parse_student_profile(html: &str) -> Result<ProfileData, String> {
     let document = Html::parse_document(html);
 
     // --- 1. Student Details ---
-    let name_selector = Selector::parse(".card .col-4 p").map_err(|_| "Invalid name selector".to_string())?;
-    let img_selector = Selector::parse(".card .col-4 img").map_err(|_| "Invalid image selector".to_string())?;
-    let regno_selector = Selector::parse("#regno").map_err(|_| "Invalid regno selector".to_string())?;
-    let applno_selector = Selector::parse("#applno").map_err(|_| "Invalid applno selector".to_string())?;
+    let name_selector =
+        Selector::parse(".card .col-4 p").map_err(|_| "Invalid name selector".to_string())?;
+    let img_selector =
+        Selector::parse(".card .col-4 img").map_err(|_| "Invalid image selector".to_string())?;
+    let regno_selector =
+        Selector::parse("#regno").map_err(|_| "Invalid regno selector".to_string())?;
+    let applno_selector =
+        Selector::parse("#applno").map_err(|_| "Invalid applno selector".to_string())?;
 
-    let name = document.select(&name_selector).next().map(|el| text_of(&el)).unwrap_or_default();
-    let photo_url = document.select(&img_selector).next().and_then(|el| el.value().attr("src")).unwrap_or_default().to_string();
+    let name = document
+        .select(&name_selector)
+        .next()
+        .map(|el| text_of(&el))
+        .unwrap_or_default();
+    let photo_url = document
+        .select(&img_selector)
+        .next()
+        .and_then(|el| el.value().attr("src"))
+        .unwrap_or_default()
+        .to_string();
 
-    let register_number = document.select(&regno_selector).next().and_then(|el| el.value().attr("value")).map(|v| v.to_string())
+    let register_number = document
+        .select(&regno_selector)
+        .next()
+        .and_then(|el| el.value().attr("value"))
+        .map(|v| v.to_string())
         .unwrap_or_else(|| get_table_value(&document, "#collapseOne", "REGISTER NUMBER"));
-    
-    let application_number = document.select(&applno_selector).next().and_then(|el| el.value().attr("value")).map(|v| v.to_string())
+
+    let application_number = document
+        .select(&applno_selector)
+        .next()
+        .and_then(|el| el.value().attr("value"))
+        .map(|v| v.to_string())
         .unwrap_or_else(|| get_table_value(&document, "#collapseOne", "APPLICATION NUMBER"));
 
     let program = get_label_value(&document, "PROGRAM & BRANCH");
@@ -83,8 +112,14 @@ pub fn parse_student_profile(html: &str) -> Result<ProfileData, String> {
     };
 
     // --- 2. Proctor Details ---
-    let proctor_img_selector = Selector::parse("#collapseFour table img").map_err(|_| "Invalid proctor image selector".to_string())?;
-    let proctor_photo_url = document.select(&proctor_img_selector).next().and_then(|el| el.value().attr("src")).unwrap_or_default().to_string();
+    let proctor_img_selector = Selector::parse("#collapseFour table img")
+        .map_err(|_| "Invalid proctor image selector".to_string())?;
+    let proctor_photo_url = document
+        .select(&proctor_img_selector)
+        .next()
+        .and_then(|el| el.value().attr("src"))
+        .unwrap_or_default()
+        .to_string();
 
     let proctor = ProctorDetails {
         faculty_id: get_table_value(&document, "#collapseFour", "FACULTY ID"),
