@@ -11,6 +11,7 @@ import Loader from "@/components/Loader";
 import { ErrorDisplay } from "@/components/error-display";
 import { motion } from "framer-motion";
 
+
 /* -------------------- Components -------------------- */
 
 function StatItem({ label, value }: { label: string; value: string | number }) {
