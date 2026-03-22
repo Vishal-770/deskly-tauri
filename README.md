@@ -2,62 +2,142 @@
 
 Deskly desktop app built with Tauri + React + TypeScript.
 
-## Updater Setup
+## Quick Command Reference
 
-The app now uses the Tauri updater plugin with static metadata from GitHub Releases.
+Run from repository root:
 
-### 1. Generate signing keys (one-time)
+pnpm install
+pnpm dev
+pnpm build
+pnpm tauri dev
+pnpm tauri build
 
-Run this once on a secure machine and store the private key safely:
+## First-Time Updater Setup
 
-```bash
-pnpm tauri signer generate -w ~/.tauri/deskly.key
-```
+### 1. Generate signing keys (one time)
 
-This produces:
+Windows PowerShell:
 
-1. Private key file (`deskly.key`) used only in CI or local release builds.
-2. Public key content (`deskly.key.pub`) to copy into Tauri config.
+pnpm tauri signer generate -w "$HOME\\.tauri\\deskly.key"
 
-### 2. Configure updater public key
+This creates:
 
-Set the updater public key in [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json):
+1. Private key file at C:\Users\YOUR_USER\.tauri\deskly.key
+2. Public key file at C:\Users\YOUR_USER\.tauri\deskly.key.pub
 
-1. Replace `REPLACE_WITH_TAURI_PUBLIC_KEY` with the full public key string.
-2. Keep the endpoint pointing at GitHub latest metadata:
-	`https://github.com/Vishal-770/deskly-tauri/releases/latest/download/latest.json`
+### 2. Set updater public key in Tauri config
 
-### 3. Configure GitHub secrets
+Open [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json) and set:
 
-Add these repository secrets:
+1. plugins.updater.pubkey to the full content of your public key file
+2. plugins.updater.endpoints to the GitHub release latest.json URL
 
-1. `TAURI_SIGNING_PRIVATE_KEY`: contents of your private key (or secure path style if your runner supports it).
-2. `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`: private key password (can be empty if no password).
+Current endpoint used by this repo:
 
-## Release Workflow
+https://github.com/Vishal-770/deskly-tauri/releases/latest/download/latest.json
 
-Release automation is defined in [.github/workflows/tauri-release.yml](.github/workflows/tauri-release.yml).
+### 3. Add GitHub Actions secrets
 
-Trigger:
+GitHub repo -> Settings -> Secrets and variables -> Actions -> New repository secret
 
-1. Push a semantic version tag: `vX.Y.Z`
+Add:
 
-What it does:
+1. TAURI_SIGNING_PRIVATE_KEY = full content of deskly.key
+2. TAURI_SIGNING_PRIVATE_KEY_PASSWORD = key password (or empty if none)
 
-1. Builds signed installers for Windows, Linux, macOS.
-2. Uploads installer artifacts and `.sig` signature files.
-3. Generates `latest.json` using [scripts/generate-latest-json.mjs](scripts/generate-latest-json.mjs).
-4. Publishes everything to the GitHub Release for that tag.
+## Daily Development Commands
 
-## Settings Update Flow
+Install dependencies:
 
-The Settings page includes manual updater actions:
+pnpm install
 
-1. Check for updates.
-2. Download update with progress.
-3. Install update when download is complete.
+Run web app only:
 
-This lets users update in-app without manually re-downloading installers.
+pnpm dev
+
+Run Tauri desktop in dev mode:
+
+pnpm tauri dev
+
+Type check + production web build:
+
+pnpm build
+
+## Local Release Build Commands
+
+Build signed desktop installers locally (uses env vars):
+
+PowerShell:
+
+$env:TAURI_SIGNING_PRIVATE_KEY = Get-Content "$HOME\\.tauri\\deskly.key" -Raw
+$env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = "YOUR_PASSWORD"
+pnpm tauri build
+
+After build, updater files appear under src-tauri/target/release/bundle with installer files plus matching .sig files.
+
+## How To Publish An Update
+
+### 1. Ensure branch and commits are ready
+
+git checkout main
+git pull
+git status
+
+### 2. Bump version
+
+Update version consistently where required:
+
+1. [package.json](package.json)
+2. [src-tauri/Cargo.toml](src-tauri/Cargo.toml)
+3. [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json)
+
+Then commit:
+
+git add -A
+git commit -m "chore: release vX.Y.Z"
+git push origin main
+
+### 3. Create and push release tag
+
+git tag vX.Y.Z
+git push origin vX.Y.Z
+
+Pushing this tag triggers [tauri-release.yml](.github/workflows/tauri-release.yml).
+
+### 4. What CI does automatically
+
+1. Builds signed installers for Windows, Linux, and macOS
+2. Uploads installers and signature files
+3. Generates latest.json using [generate-latest-json.mjs](scripts/generate-latest-json.mjs)
+4. Publishes release assets to GitHub Release for that tag
+
+## Commands For Update Metadata Script
+
+The helper script can also be run manually:
+
+pnpm updater:latest-json -- --assetsDir release-assets --repository Vishal-770/deskly-tauri --tag vX.Y.Z --version X.Y.Z --notes "Release vX.Y.Z"
+
+## User Update Flow In App
+
+In Settings page users can:
+
+1. Check for updates
+2. Download update with progress
+3. Install update
+
+This lets users update without manually downloading new installers.
+
+## Troubleshooting
+
+If workflow fails with signing errors:
+
+1. Verify TAURI_SIGNING_PRIVATE_KEY exists and has full key content
+2. Verify TAURI_SIGNING_PRIVATE_KEY_PASSWORD is correct
+
+If app says signature mismatch:
+
+1. Confirm pubkey in [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json) matches the private key used in CI
+2. Confirm release assets include both installer and matching .sig files
 
 ## Recommended IDE Setup
 
