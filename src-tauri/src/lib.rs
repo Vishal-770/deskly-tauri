@@ -4,11 +4,11 @@ mod attendance;
 mod auth;
 mod content;
 mod features;
+mod feedback;
+mod grades;
 mod marks;
 mod profile;
 mod timetable;
-mod grades;
-mod feedback;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -19,6 +19,7 @@ fn greet(name: &str) -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let auth_store = auth::init_auth_store(&app.handle());
@@ -30,6 +31,7 @@ pub fn run() {
             auth::auth_login,
             auth::auth_logout,
             auth::auth_get_state,
+            auth::auth_get_credential_status,
             auth::auth_restore_session,
             auth::auth_set_tokens,
             auth::auth_get_tokens,

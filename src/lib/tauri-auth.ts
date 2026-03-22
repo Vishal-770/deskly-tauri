@@ -22,6 +22,12 @@ export type LoginResponse = {
   tokens: AuthTokens;
 };
 
+export type CredentialStatus = {
+  userId: string | null;
+  hasPasswordStored: boolean;
+  keyringError: string | null;
+};
+
 export async function authLogin(regNo: string, password: string) {
   return invoke<LoginResponse>("auth_login", { username: regNo, password });
 }
@@ -36,6 +42,10 @@ export async function authGetState() {
 
 export async function authRestoreSession() {
   return invoke<AuthState | null>("auth_restore_session");
+}
+
+export async function authGetCredentialStatus() {
+  return invoke<CredentialStatus>("auth_get_credential_status");
 }
 
 export async function authSetTokens(tokens: AuthTokens) {

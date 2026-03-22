@@ -24,8 +24,7 @@ pub fn auth_file_path(app: &AppHandle) -> Result<PathBuf, String> {
         .app_data_dir()
         .map_err(|e| format!("failed to resolve app data dir: {e}"))?;
 
-    fs::create_dir_all(&app_data_dir)
-        .map_err(|e| format!("failed to create app data dir: {e}"))?;
+    fs::create_dir_all(&app_data_dir).map_err(|e| format!("failed to create app data dir: {e}"))?;
 
     Ok(app_data_dir.join("auth_state.json"))
 }

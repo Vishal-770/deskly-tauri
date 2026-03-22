@@ -1,12 +1,11 @@
-use scraper::{Html, Selector};
 use crate::feedback::types::FeedbackStatus;
+use scraper::{Html, Selector};
 
 pub fn parse_feedback_status(html: &str) -> Result<Vec<FeedbackStatus>, String> {
     let document = Html::parse_document(html);
     let row_selector = Selector::parse("#loadMyFragment table tbody tr")
         .map_err(|_| "Failed to parse row selector")?;
-    let cell_selector = Selector::parse("td")
-        .map_err(|_| "Failed to parse cell selector")?;
+    let cell_selector = Selector::parse("td").map_err(|_| "Failed to parse cell selector")?;
 
     let mut feedback_data = Vec::new();
 

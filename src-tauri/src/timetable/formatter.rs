@@ -1,5 +1,5 @@
+use super::types::{ScheduleEntry, TimetableCourse, WeeklySchedule};
 use std::collections::HashMap;
-use super::types::{TimetableCourse, WeeklySchedule, ScheduleEntry};
 
 struct TimeRange {
     start: &'static str,
@@ -7,32 +7,101 @@ struct TimeRange {
 }
 
 const THEORY_TIMES: [TimeRange; 11] = [
-    TimeRange { start: "08:00 AM", end: "08:50 AM" }, // 0
-    TimeRange { start: "08:55 AM", end: "09:45 AM" }, // 1
-    TimeRange { start: "09:50 AM", end: "10:40 AM" }, // 2
-    TimeRange { start: "10:45 AM", end: "11:35 AM" }, // 3
-    TimeRange { start: "11:40 AM", end: "12:30 PM" }, // 4
-    TimeRange { start: "02:00 PM", end: "02:50 PM" }, // 5
-    TimeRange { start: "02:55 PM", end: "03:45 PM" }, // 6
-    TimeRange { start: "03:50 PM", end: "04:40 PM" }, // 7
-    TimeRange { start: "04:45 PM", end: "05:35 PM" }, // 8
-    TimeRange { start: "05:40 PM", end: "06:30 PM" }, // 9
-    TimeRange { start: "06:35 PM", end: "07:25 PM" }, // 10
+    TimeRange {
+        start: "08:00 AM",
+        end: "08:50 AM",
+    }, // 0
+    TimeRange {
+        start: "08:55 AM",
+        end: "09:45 AM",
+    }, // 1
+    TimeRange {
+        start: "09:50 AM",
+        end: "10:40 AM",
+    }, // 2
+    TimeRange {
+        start: "10:45 AM",
+        end: "11:35 AM",
+    }, // 3
+    TimeRange {
+        start: "11:40 AM",
+        end: "12:30 PM",
+    }, // 4
+    TimeRange {
+        start: "02:00 PM",
+        end: "02:50 PM",
+    }, // 5
+    TimeRange {
+        start: "02:55 PM",
+        end: "03:45 PM",
+    }, // 6
+    TimeRange {
+        start: "03:50 PM",
+        end: "04:40 PM",
+    }, // 7
+    TimeRange {
+        start: "04:45 PM",
+        end: "05:35 PM",
+    }, // 8
+    TimeRange {
+        start: "05:40 PM",
+        end: "06:30 PM",
+    }, // 9
+    TimeRange {
+        start: "06:35 PM",
+        end: "07:25 PM",
+    }, // 10
 ];
 
 const LAB_TIMES: [TimeRange; 12] = [
-    TimeRange { start: "08:00 AM", end: "08:50 AM" }, // 0
-    TimeRange { start: "08:50 AM", end: "09:40 AM" }, // 1
-    TimeRange { start: "09:45 AM", end: "10:35 AM" }, // 2
-    TimeRange { start: "11:00 AM", end: "11:50 AM" }, // 3
-    TimeRange { start: "11:50 AM", end: "12:40 PM" }, // 4
-    TimeRange { start: "12:40 PM", end: "01:30 PM" }, // 5
-    TimeRange { start: "02:00 PM", end: "02:50 PM" }, // 6
-    TimeRange { start: "02:50 PM", end: "03:40 PM" }, // 7
-    TimeRange { start: "03:50 PM", end: "04:40 PM" }, // 8
-    TimeRange { start: "04:40 PM", end: "05:30 PM" }, // 9
-    TimeRange { start: "05:40 PM", end: "06:30 PM" }, // 10
-    TimeRange { start: "06:30 PM", end: "07:20 PM" }, // 11
+    TimeRange {
+        start: "08:00 AM",
+        end: "08:50 AM",
+    }, // 0
+    TimeRange {
+        start: "08:50 AM",
+        end: "09:40 AM",
+    }, // 1
+    TimeRange {
+        start: "09:45 AM",
+        end: "10:35 AM",
+    }, // 2
+    TimeRange {
+        start: "11:00 AM",
+        end: "11:50 AM",
+    }, // 3
+    TimeRange {
+        start: "11:50 AM",
+        end: "12:40 PM",
+    }, // 4
+    TimeRange {
+        start: "12:40 PM",
+        end: "01:30 PM",
+    }, // 5
+    TimeRange {
+        start: "02:00 PM",
+        end: "02:50 PM",
+    }, // 6
+    TimeRange {
+        start: "02:50 PM",
+        end: "03:40 PM",
+    }, // 7
+    TimeRange {
+        start: "03:50 PM",
+        end: "04:40 PM",
+    }, // 8
+    TimeRange {
+        start: "04:40 PM",
+        end: "05:30 PM",
+    }, // 9
+    TimeRange {
+        start: "05:40 PM",
+        end: "06:30 PM",
+    }, // 10
+    TimeRange {
+        start: "06:30 PM",
+        end: "07:20 PM",
+    }, // 11
 ];
 
 fn get_theory_slot_map() -> HashMap<&'static str, Vec<(usize, usize)>> {
@@ -86,7 +155,15 @@ fn get_theory_slot_map() -> HashMap<&'static str, Vec<(usize, usize)>> {
     m
 }
 
-const DAYS: [&str; 7] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const DAYS: [&str; 7] = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+];
 
 pub fn generate_weekly_schedule(courses: &[TimetableCourse]) -> WeeklySchedule {
     let mut schedule = WeeklySchedule::default();
@@ -188,15 +265,23 @@ fn sort_schedule(schedule: &mut WeeklySchedule) {
 
 fn get_minutes(t: &str) -> i32 {
     let parts: Vec<&str> = t.split_whitespace().collect();
-    if parts.len() < 2 { return 0; }
+    if parts.len() < 2 {
+        return 0;
+    }
     let time_parts: Vec<&str> = parts[0].split(':').collect();
-    if time_parts.len() < 2 { return 0; }
-    
+    if time_parts.len() < 2 {
+        return 0;
+    }
+
     let mut h = time_parts[0].parse::<i32>().unwrap_or(0);
     let m = time_parts[1].parse::<i32>().unwrap_or(0);
     let period = parts[1];
 
-    if period == "PM" && h != 12 { h += 12; }
-    if period == "AM" && h == 12 { h = 0; }
+    if period == "PM" && h != 12 {
+        h += 12;
+    }
+    if period == "AM" && h == 12 {
+        h = 0;
+    }
     h * 60 + m
 }

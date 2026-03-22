@@ -4,6 +4,7 @@ use serde_json::Value;
 use tauri::State;
 
 use crate::auth::constants::VTOP_BASE_URL;
+use crate::auth::helpers::{is_auth_retryable_status, response_text_with_auth_retry};
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
 
@@ -12,8 +13,8 @@ use crate::auth::helpers::{
 };
 
 use super::parser::{
-    parse_calendar_options, parse_calendar_view, parse_contact_details, parse_curriculum_categories,
-    parse_curriculum_courses, parse_receipts,
+    parse_calendar_options, parse_calendar_view, parse_contact_details,
+    parse_curriculum_categories, parse_curriculum_courses, parse_receipts,
 };
 use super::types::{
     CalendarOptionsResponse, CalendarViewResponse, ContactResponse, CurriculumCategoriesResponse,
@@ -49,10 +50,8 @@ pub async fn academic_calendar_get(
             .await
             .map_err(|e| format!("Failed to fetch academic calendar options: {e}"))?;
 
-        response
-            .text()
+        response_text_with_auth_retry(response, "Failed to read academic calendar options html")
             .await
-            .map_err(|e| format!("Failed to read academic calendar options html: {e}"))
     })?;
 
     Ok(CalendarOptionsResponse {
@@ -92,10 +91,7 @@ pub async fn academic_calendar_get_view(
             .await
             .map_err(|e| format!("Failed to fetch academic calendar month view: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read academic calendar view html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read academic calendar view html").await
     })?;
 
     Ok(CalendarViewResponse {
@@ -248,7 +244,6 @@ pub async fn laundry_get_schedule(block: String) -> Result<LaundryResponse, Stri
     })
 }
 
-
 #[tauri::command]
 pub async fn contact_info_get(
     app: tauri::AppHandle,
@@ -259,7 +254,12 @@ pub async fn contact_info_get(
         let response = client
             .post(format!("{VTOP_BASE_URL}/vtop/hrms/contactDetails"))
             .header(COOKIE, tokens.cookies.clone())
-            .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .header(
+                CONTENT_TYPE,
+                "application/x-www-form-urlencoded; charset=UTF-8",
+            )
+            .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
+            .header("X-Requested-With", "XMLHttpRequest")
             .form(&[
                 ("verifyMenu", "true"),
                 ("authorizedID", tokens.authorized_id.as_str()),
@@ -270,10 +270,7 @@ pub async fn contact_info_get(
             .await
             .map_err(|e| format!("Failed to fetch contact details: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read contact details html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read contact details html").await
     })?;
 
     Ok(ContactResponse {
@@ -306,10 +303,7 @@ pub async fn payment_receipts_get(
             .await
             .map_err(|e| format!("Failed to fetch receipts: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read receipts html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read receipts html").await
     })?;
 
     Ok(ReceiptResponse {
@@ -341,10 +335,7 @@ pub async fn curriculum_get(
             .await
             .map_err(|e| format!("Failed to fetch curriculum: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read curriculum html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read curriculum html").await
     })?;
 
     Ok(CurriculumCategoriesResponse {
@@ -379,10 +370,8 @@ pub async fn curriculum_get_category_view(
             .await
             .map_err(|e| format!("Failed to fetch curriculum category view: {e}"))?;
 
-        response
-            .text()
+        response_text_with_auth_retry(response, "Failed to read curriculum category view html")
             .await
-            .map_err(|e| format!("Failed to read curriculum category view html: {e}"))
     })?;
 
     Ok(CurriculumCoursesResponse {
@@ -412,9 +401,7 @@ pub async fn curriculum_download_syllabus(
     let result = loop {
         let client = build_http_client()?;
         let response = client
-            .post(format!(
-                "{VTOP_BASE_URL}/vtop/courseSyllabusDownload1"
-            ))
+            .post(format!("{VTOP_BASE_URL}/vtop/courseSyllabusDownload1"))
             .header(COOKIE, tokens.cookies.clone())
             .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
             .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
@@ -427,8 +414,24 @@ pub async fn curriculum_download_syllabus(
             .await
             .map_err(|e| format!("Failed to fetch syllabus: {e}"))?;
 
+        if is_auth_retryable_status(response.status()) {
+            if retry_count < 1 {
+                tokens = crate::auth::helpers::perform_auto_relogin(&app, &store).await?;
+                retry_count += 1;
+                continue;
+            }
+
+            return Ok(SyllabusResponse {
+                success: false,
+                data: None,
+                error: Some("Authentication failed after auto-relogin retry".to_string()),
+            });
+        }
+
         // Check if it's an HTML response (session expired usually)
-        let content_type = response.headers().get(CONTENT_TYPE)
+        let content_type = response
+            .headers()
+            .get(CONTENT_TYPE)
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
             .to_string();
@@ -452,23 +455,27 @@ pub async fn curriculum_download_syllabus(
         }
 
         // It's binary data
-        let filename = response.headers().get("content-disposition")
+        let filename = response
+            .headers()
+            .get("content-disposition")
             .and_then(|v| v.to_str().ok())
             .and_then(|s| {
                 if let Some(pos) = s.find("filename=\"") {
                     let start = pos + 10;
                     if let Some(end) = s[start..].find('\"') {
-                        return Some(s[start..start+end].to_string());
+                        return Some(s[start..start + end].to_string());
                     }
                 }
                 None
             })
             .unwrap_or_else(|| format!("syllabus_{}.zip", course_code));
 
-        let bytes = response.bytes().await
+        let bytes = response
+            .bytes()
+            .await
             .map_err(|e| format!("Failed to read syllabus bytes: {e}"))?;
-        
-        use base64::{Engine as _, engine::general_purpose};
+
+        use base64::{engine::general_purpose, Engine as _};
         let b64 = general_purpose::STANDARD.encode(&bytes);
 
         break (filename, content_type.to_string(), b64);

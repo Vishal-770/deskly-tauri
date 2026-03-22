@@ -33,6 +33,8 @@ pub struct PersistedAuth {
     pub tokens: Option<AuthTokens>,
     #[serde(default)]
     pub semester: Option<Semester>,
+    #[serde(default, alias = "password")]
+    pub password_encrypted: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -40,4 +42,12 @@ pub struct PersistedAuth {
 pub struct LoginResponse {
     pub state: AuthState,
     pub tokens: AuthTokens,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CredentialStatus {
+    pub user_id: Option<String>,
+    pub has_password_stored: bool,
+    pub keyring_error: Option<String>,
 }

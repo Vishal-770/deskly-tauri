@@ -1,8 +1,8 @@
-use scraper::{Html, Selector};
 use super::types::{
     CGPADetails, CourseGrade, CurriculumCategory, CurriculumProgress, CurriculumSummary,
     GradeDistribution, StudentHistoryData, StudentProfile,
 };
+use scraper::{Html, Selector};
 
 fn clean_text(text: &str) -> String {
     text.replace(|c: char| c == '\n' || c == '\t', " ")
@@ -144,7 +144,14 @@ pub fn parse_student_history(html: &str) -> Result<StudentHistoryData, String> {
         credits_earned: 0.0,
         cgpa: 0.0,
         grade_distribution: GradeDistribution {
-            s: 0, a: 0, b: 0, c: 0, d: 0, e: 0, f: 0, n: 0,
+            s: 0,
+            a: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            f: 0,
+            n: 0,
         },
     };
 
