@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -10,36 +10,103 @@ import {
   Cell,
   ResponsiveContainer,
   Tooltip,
+  Legend,
 } from "recharts";
-import { Search } from "lucide-react";
+import { Search, Trophy, ScrollText, BarChart3, Info } from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { getGradesHistory, type StudentHistoryData } from "@/lib/features";
+} from "../../components/ui/select";
+import { getGradesHistory, type StudentHistoryData, type CourseGrade } from "../../lib/features";
+import { StatItem } from "../../components/stat-item";
+import { motion, AnimatePresence } from "framer-motion";
+import Loader from "../../components/Loader";
+import { ErrorDisplay } from "../../components/error-display";
 
 /* -------------------- Helper Components -------------------- */
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-card/90 backdrop-blur-md border border-border/50 p-4 rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200">
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1 leading-tight max-w-[200px]">
+          {label || payload[0].name}
+        </p>
+        <div className="flex items-baseline gap-2">
+          <p className="text-xl font-black tracking-tightest text-foreground">
+            {payload[0].value}
+          </p>
+          <p className="text-[10px] font-bold text-muted-foreground opacity-50 uppercase tracking-widest">
+            {payload[0].unit || "Credits"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+
 const GradeBadge = ({ grade }: { grade: string }) => {
   const colors: Record<string, string> = {
-    S: "text-[oklch(0.75_0.15_200)]",
-    A: "text-[oklch(0.8_0.15_145)]",
-    B: "text-[oklch(0.85_0.12_85)]",
-    C: "text-[oklch(0.8_0.15_60)]",
-    D: "text-[oklch(0.75_0.2_30)]",
-    F: "text-[oklch(0.65_0.2_25)]",
+    S: "text-primary",
+    A: "text-primary/100", 
+    B: "text-foreground/80",
+    C: "text-muted-foreground",
+    D: "text-muted-foreground/60",
+    F: "text-destructive",
   };
   return (
-    <span
-      className={`font-bold text-base ${colors[grade] || "text-muted-foreground"}`}
-    >
+    <span className={`text-xl font-black tracking-tighter ${colors[grade] || "text-muted-foreground"}`}>
       {grade}
     </span>
   );
 };
+
+function GradeItem({ grade, index }: { grade: CourseGrade; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.02 }}
+      className="group flex flex-col gap-4 py-6 border-b border-border/50 hover:bg-muted/5 transition-colors"
+    >
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3 mb-1">
+            <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+              {grade.courseCode}
+            </span>
+            <span className="text-[9px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+              {grade.courseType}
+            </span>
+          </div>
+          <h3 className="text-xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-tight">
+            {grade.courseTitle}
+          </h3>
+        </div>
+
+        <div className="flex items-center gap-12 shrink-0">
+          <div className="text-center">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Credits</p>
+            <p className="text-lg font-black tracking-tightest text-foreground font-mono">{grade.credits}</p>
+          </div>
+          <div className="text-center min-w-[40px]">
+             <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Grade</p>
+             <GradeBadge grade={grade.grade} />
+          </div>
+          <div className="text-right hidden sm:block w-32">
+            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Period</p>
+            <p className="text-[11px] font-bold text-muted-foreground/50 tracking-tighter uppercase whitespace-nowrap overflow-hidden text-ellipsis">{grade.examMonth}</p>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 /* -------------------- Page -------------------- */
 
@@ -53,6 +120,7 @@ export default function GradesPage() {
   useEffect(() => {
     const fetchGrades = async () => {
       try {
+        setLoading(true);
         const result = await getGradesHistory();
         if (result.success && result.data) {
           setGradeData(result.data);
@@ -68,382 +136,317 @@ export default function GradesPage() {
     fetchGrades();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-        <p className="text-muted-foreground animate-pulse">Fetching academic performance...</p>
-      </div>
+  const stats = useMemo(() => {
+    if (!gradeData) return null;
+    const completionPct = Math.round(
+      (gradeData.curriculum.summary.totalEarned /
+        gradeData.curriculum.summary.totalRequired) *
+        100,
     );
-  }
+    return { completionPct };
+  }, [gradeData]);
 
-  if (error || !gradeData) {
-    return (
-      <div className="p-10 flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
-        <div className="p-4 bg-destructive/10 rounded-full text-destructive mb-2">
-          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
-        <h2 className="text-xl font-semibold">Failed to Load Grades</h2>
-        <p className="text-muted-foreground max-w-md">{error || "No data available"}</p>
-        <button 
-          onClick={() => window.location.reload()}
-          className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  const filteredGrades = useMemo(() => {
+    if (!gradeData) return [];
+    return gradeData.grades.filter((g) => {
+      const matchSearch =
+        g.courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        g.courseTitle.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchFilter =
+        filterType === "all" ||
+        g.courseType.toLowerCase() === filterType.toLowerCase();
+      return matchSearch && matchFilter;
+    });
+  }, [gradeData, searchQuery, filterType]);
+
+  const courseTypes = useMemo(() => {
+    if (!gradeData) return ["all"];
+    return ["all", ...Array.from(new Set(gradeData.grades.map((g) => g.courseType)))];
+  }, [gradeData]);
+
+  if (loading && !gradeData) return <Loader />;
+  if (error || !gradeData) return <ErrorDisplay message={error || "No data available"} onRetry={() => window.location.reload()} />;
 
   /* Chart Data */
   const dist = gradeData.cgpa.gradeDistribution;
   const gradeDistributionData = [
-    { grade: "S", count: dist.s },
-    { grade: "A", count: dist.a },
-    { grade: "B", count: dist.b },
-    { grade: "C", count: dist.c },
-    { grade: "D", count: dist.d },
-    { grade: "E", count: dist.e },
-    { grade: "F", count: dist.f },
-  ].filter(d => d.count > 0);
+    { name: "S", value: dist.s },
+    { name: "A", value: dist.a },
+    { name: "B", value: dist.b },
+    { name: "C", value: dist.c },
+    { name: "D", value: dist.d },
+    { name: "E", value: dist.e },
+    { name: "F", value: dist.f },
+    { name: "N", value: dist.n },
+  ].filter(d => d.value > 0);
 
   const creditsBarData = gradeData.curriculum.details.map((d) => ({
-    category: d.category.replace(" Credits", ""),
+    name: d.category, // Use absolute full name
     earned: d.creditsEarned,
     required: d.creditsRequired,
   }));
 
-  const completionPct = Math.round(
-    (gradeData.curriculum.summary.totalEarned /
-      gradeData.curriculum.summary.totalRequired) *
-      100,
-  );
-
-  const filteredGrades = gradeData.grades.filter((g) => {
-    const matchSearch =
-      g.courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      g.courseTitle.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchFilter =
-      filterType === "all" ||
-      g.courseType.toLowerCase() === filterType.toLowerCase();
-    return matchSearch && matchFilter;
-  });
-
-  const courseTypes = [
-    "all",
-    ...Array.from(new Set(gradeData.grades.map((g) => g.courseType))),
-  ];
-
-  const CHART_COLORS = [
-    "oklch(0.7 0.15 200)",
-    "oklch(0.75 0.15 145)",
-    "oklch(0.8 0.12 85)",
-    "oklch(0.75 0.15 60)",
-    "oklch(0.7 0.2 30)",
+  const CHART_PALETTE = [
+    "var(--chart-1)",
+    "var(--chart-2)",
+    "var(--chart-3)",
+    "var(--chart-4)",
+    "var(--chart-5)",
+    "var(--primary)",
+    "var(--foreground)",
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10 max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="p-6 lg:p-10 space-y-20 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24 max-w-7xl mx-auto">
       {/* Header */}
-      <header className="space-y-1">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Academic Performance</h1>
-        <p className="text-muted-foreground">
-          Detailed grade & curriculum analysis for {gradeData.profile.regNo}
-        </p>
+      <header className="space-y-12">
+        <div className="space-y-4">
+           <div className="flex items-center gap-3">
+             <div className="w-1.5 h-10 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" />
+             <h1 className="text-4xl md:text-6xl font-black tracking-tightest text-foreground uppercase leading-none">
+               Grading & Curriculum
+             </h1>
+           </div>
+           <p className="text-sm text-muted-foreground font-bold opacity-30 tracking-widest pl-4 uppercase">
+             Comprehensive Analysis for {gradeData.profile.regNo} — {gradeData.profile.programme}
+           </p>
+        </div>
+
+        {/* Hero Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-12 gap-x-20">
+           <StatItem 
+             label="Current CGPA" 
+             value={gradeData.cgpa.cgpa.toFixed(2)} 
+             subValue="Over 10"
+             icon={Trophy}
+           />
+           <StatItem 
+             label="Credits Cleared" 
+             value={gradeData.curriculum.summary.totalEarned} 
+             subValue={`/ ${gradeData.curriculum.summary.totalRequired}`}
+             icon={ScrollText}
+           />
+           <StatItem 
+             label="Degree Completion" 
+             value={`${stats?.completionPct}%`} 
+             subValue="to Graduate"
+             icon={BarChart3}
+           />
+        </div>
       </header>
 
-      {/* Hero Stats */}
-      <section className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 sm:gap-8">
-        <div className="flex items-baseline gap-3">
-          <span className="text-6xl sm:text-7xl font-bold text-primary tracking-tighter">
-            {gradeData.cgpa.cgpa.toFixed(2)}
-          </span>
-          <span className="text-xl text-muted-foreground font-medium uppercase tracking-wider">
-            CGPA
-          </span>
-        </div>
-        <div className="grid grid-cols-2 sm:flex sm:flex-row gap-8 sm:gap-12 text-sm">
-          <div>
-            <p className="text-muted-foreground mb-1 uppercase text-xs font-semibold tracking-widest">Credits</p>
-            <span className="text-2xl font-bold text-foreground">
-              {gradeData.cgpa.creditsEarned}
-            </span>
-            <span className="text-muted-foreground ml-1.5 font-medium">
-              / {gradeData.cgpa.creditsRegistered}
-            </span>
-          </div>
-          <div>
-             <p className="text-muted-foreground mb-1 uppercase text-xs font-semibold tracking-widest">Progress</p>
-            <span className="text-2xl font-bold text-foreground">
-              {completionPct}%
-            </span>
-            <span className="text-muted-foreground ml-1.5 font-medium">complete</span>
-          </div>
-          <div className="hidden lg:block">
-             <p className="text-muted-foreground mb-1 uppercase text-xs font-semibold tracking-widest">Courses</p>
-            <span className="text-2xl font-bold text-foreground">
-              {gradeData.grades.length}
-            </span>
-            <span className="text-muted-foreground ml-1.5 font-medium">completed</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Divider */}
-      <div className="h-px bg-border/60" />
-
-      {/* Charts Row */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-        {/* Left Column: Charts */}
+      {/* Analytics Section */}
+      <section className="grid grid-cols-1 xl:grid-cols-2 gap-20">
+        {/* Left Column: Grade Distribution */}
         <div className="space-y-10">
-          {/* Grade Distribution */}
-          <div className="p-6 rounded-2xl bg-card border border-border/40 shadow-sm">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6">
-              Grade Distribution
+          <div className="flex items-center gap-3 mb-6">
+            <BarChart3 className="w-5 h-5 text-primary opacity-50" />
+            <h3 className="text-sm font-black text-foreground uppercase tracking-widest">
+              Performance Distribution
             </h3>
-            <div className="h-[200px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={gradeDistributionData}
-                    dataKey="count"
-                    nameKey="grade"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    strokeWidth={0}
-                    paddingAngle={4}
-                  >
-                    {gradeDistributionData.map((_, i) => (
-                      <Cell
-                        key={`cell-${i}`}
-                        fill={CHART_COLORS[i % CHART_COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--card)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 12,
-                      fontSize: 12,
-                      boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4">
-              {gradeDistributionData.map((d, i) => (
-                <div key={d.grade} className="flex items-center gap-2">
-                  <div
-                    className="w-2.5 h-2.5 rounded-full"
-                    style={{
-                      backgroundColor: CHART_COLORS[i % CHART_COLORS.length],
-                    }}
-                  />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {d.grade}: {d.count}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
-
-          {/* Credits by Category */}
-          <div className="p-6 rounded-2xl bg-card border border-border/40 shadow-sm">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-6">
-              Credits by Category
-            </h3>
-            <div className="h-[220px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={creditsBarData} barGap={4}>
-                  <CartesianGrid
-                    strokeDasharray="4 4"
-                    stroke="var(--border)"
-                    vertical={false}
-                    opacity={0.4}
-                  />
-                  <XAxis
-                    dataKey="category"
-                    tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-                    axisLine={false}
-                    tickLine={false}
-                    interval={0}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={30}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--card)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 12,
-                      fontSize: 12,
-                      boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                    }}
-                  />
-                  <Bar
-                    dataKey="earned"
-                    name="Earned"
-                    fill={CHART_COLORS[0]}
-                    radius={[4, 4, 0, 0]}
-                    barSize={24}
-                  />
-                  <Bar
-                    dataKey="required"
-                    name="Required"
-                    fill="var(--muted)"
-                    radius={[4, 4, 0, 0]}
-                    barSize={24}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          
+          <div className="h-[320px] w-full group">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={gradeDistributionData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={80}
+                  outerRadius={120}
+                  strokeWidth={0}
+                  paddingAngle={6}
+                  animationBegin={200}
+                  animationDuration={1500}
+                  isAnimationActive={true}
+                >
+                  {gradeDistributionData.map((_, i) => (
+                    <Cell
+                      key={`cell-${i}`}
+                      fill={CHART_PALETTE[i % CHART_PALETTE.length]}
+                      className="hover:opacity-80 transition-opacity cursor-pointer outline-none"
+                    />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "transparent" }} />
+                <Legend 
+                  verticalAlign="bottom" 
+                  align="center"
+                  iconType="circle"
+                  formatter={(value) => (
+                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 px-2 leading-none">
+                      {value}
+                    </span>
+                  )}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6">
+             {gradeDistributionData.map((d) => (
+               <div key={d.name} className="flex flex-col gap-1 border-l-2 border-border pl-4">
+                 <p className="text-[9px] font-black uppercase text-muted-foreground/40">{d.name} Grades</p>
+                 <p className="text-2xl font-black text-foreground">{d.value}</p>
+               </div>
+             ))}
           </div>
         </div>
 
-        {/* Right Column: Curriculum Progress */}
-        <div className="p-6 rounded-2xl bg-card border border-border/40 shadow-sm flex flex-col">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-8">
-            Curriculum Progress
-          </h3>
-          <div className="space-y-6 flex-1">
-            {gradeData.curriculum.details.map((d) => {
-              const pct = Math.round(
-                (d.creditsEarned / d.creditsRequired) * 100,
-              );
-              return (
-                <div key={d.category} className="space-y-2">
-                  <div className="flex justify-between text-xs items-center">
-                    <span className="text-muted-foreground font-medium">{d.category}</span>
-                    <span className="text-foreground font-bold">
-                      {d.creditsEarned} <span className="text-muted-foreground font-normal">/ {d.creditsRequired}</span>
-                    </span>
-                  </div>
-                  <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(var(--primary-rgb),0.3)]"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+        {/* Right Column: Credits by Category (Horizontal Layout) */}
+        <div className="space-y-10">
+          <div className="flex items-center gap-3 mb-6">
+            <ScrollText className="w-5 h-5 text-primary opacity-50" />
+            <h3 className="text-sm font-black text-foreground uppercase tracking-widest">
+              Full Curriculum Credits
+            </h3>
           </div>
-          <div className="mt-10 pt-6 border-t border-border/50 flex justify-between items-baseline">
-            <span className="text-sm font-bold text-muted-foreground uppercase tracking-tighter">Total Credits</span>
-            <div className="text-right">
-                <span className="text-3xl font-black text-foreground">
-                {gradeData.curriculum.summary.totalEarned}
-                </span>
-                <span className="text-muted-foreground ml-2 font-bold text-lg">
-                / {gradeData.curriculum.summary.totalRequired}
-                </span>
-            </div>
+          
+          <div className="h-full min-h-[500px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart 
+                data={creditsBarData} 
+                layout="vertical"
+                margin={{ left: 0, right: 30 }}
+                barGap={8}
+              >
+                <CartesianGrid
+                  strokeDasharray="12 12"
+                  stroke="var(--border)"
+                  horizontal={true}
+                  vertical={false}
+                  opacity={0.1}
+                />
+                <XAxis 
+                  type="number" 
+                  hide 
+                />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  tick={{ fontSize: 8, fill: "var(--muted-foreground)", fontWeight: "black", width: 220, textAnchor: 'start' }}
+                  width={230}
+                  axisLine={false}
+                  tickLine={false}
+                  interval={0}
+                  mirror={false}
+                />
+                <Tooltip 
+                   content={<CustomTooltip />}
+                   cursor={{ fill: "var(--primary)", opacity: 0.03 }}
+                />
+                <Bar
+                  dataKey="earned"
+                  name="Earned Credits"
+                  fill="var(--chart-1)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={12}
+                />
+                <Bar
+                  dataKey="required"
+                  name="Required Credits"
+                  fill="var(--muted-foreground)"
+                  radius={[0, 4, 4, 0]}
+                  barSize={12}
+                  opacity={0.1}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </section>
 
-      {/* Search & List Section */}
-      <section className="space-y-6 pt-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-          <h2 className="text-xl font-bold tracking-tight">Grade History</h2>
+      {/* Grade History Section */}
+      <section className="space-y-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-border/50 pb-8">
+           <div className="space-y-2">
+             <div className="flex items-center gap-3">
+               <div className="w-1.5 h-6 bg-primary/40 rounded-full" />
+               <h2 className="text-3xl font-black text-foreground tracking-tightest uppercase leading-none">Grade Archives</h2>
+             </div>
+             <p className="text-xs font-bold text-muted-foreground opacity-30 tracking-widest uppercase pl-4">Chronological session history</p>
+           </div>
           
-          <div className="flex items-center gap-3">
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="relative w-full sm:w-80 group">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/30 group-focus-within:text-primary transition-colors" />
               <input
                 type="text"
-                placeholder="Search course..."
+                placeholder="Course Code or Title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-64 h-10 pl-10 pr-4 text-sm bg-secondary/50 border border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all placeholder:text-muted-foreground/60"
+                className="h-12 w-full rounded-2xl border border-border/50 bg-muted/10 pl-12 pr-4 text-xs font-black placeholder:text-muted-foreground/20 focus:ring-0 focus:border-primary/50 outline-none transition-all uppercase tracking-widest"
               />
             </div>
-            <div className="relative">
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger className="h-10 w-[140px] rounded-xl border-none bg-secondary/50 focus:ring-2 focus:ring-primary/20">
-                  <SelectValue placeholder="All Types" />
-                </SelectTrigger>
-                <SelectContent>
-                  {courseTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type === "all" ? "All Types" : type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="h-12 w-[160px] rounded-2xl border border-border/50 bg-muted/10 text-[10px] font-black uppercase tracking-widest focus:ring-0 focus:border-primary/50 outline-none">
+                <SelectValue placeholder="All Domains" />
+              </SelectTrigger>
+              <SelectContent>
+                {courseTypes.map((type) => (
+                  <SelectItem key={type} value={type} className="text-[10px] font-black uppercase tracking-widest">
+                    {type === "all" ? "All Domains" : type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Grade List */}
-        <div className="grid grid-cols-1 gap-3">
-          {filteredGrades.map((g, idx) => (
-            <div
-              key={g.slNo}
-              className="flex flex-col sm:flex-row sm:items-center gap-4 py-4 px-5 rounded-2xl bg-card border border-border/40 hover:border-primary/30 hover:bg-secondary/20 transition-all group"
-            >
-              <div className="flex items-center gap-5 flex-1 min-w-0">
-                <span className="w-6 text-xs font-bold text-muted-foreground/40 tabular-nums">
-                  {(idx + 1).toString().padStart(2, '0')}
-                </span>
-                <div className="flex flex-col min-w-0">
-                    <span className="font-mono text-xs font-bold text-primary tracking-tight mb-0.5">
-                        {g.courseCode}
-                    </span>
-                    <span className="text-sm font-semibold text-foreground truncate">
-                        {g.courseTitle}
-                    </span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between sm:justify-end gap-6 sm:gap-10">
-                <div className="flex flex-col items-end sm:items-start sm:w-24">
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5 sm:hidden">Type</span>
-                   <span className="text-xs font-medium text-muted-foreground">
-                        {g.courseType}
-                    </span>
-                </div>
-                
-                <div className="flex flex-col items-center sm:w-16">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5 sm:hidden">Credits</span>
-                    <span className="text-xs font-bold text-foreground bg-secondary px-2.5 py-1 rounded-lg">
-                        {g.credits}
-                    </span>
-                </div>
-
-                <div className="flex flex-col items-center sm:w-12">
-                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5 sm:hidden">Grade</span>
-                   <GradeBadge grade={g.grade} />
-                </div>
-
-                <div className="flex flex-col items-end sm:w-32">
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5 sm:hidden">Period</span>
-                    <span className="text-xs font-medium text-muted-foreground text-right tabular-nums">
-                        {g.examMonth}
-                    </span>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="flex flex-col min-h-[400px]">
+          <AnimatePresence mode="popLayout">
+            {filteredGrades.map((g, index) => (
+              <GradeItem key={g.slNo} grade={g} index={index} />
+            ))}
+          </AnimatePresence>
 
           {filteredGrades.length === 0 && (
-            <div className="py-20 text-center flex flex-col items-center justify-center space-y-3 opacity-60">
-              <div className="p-4 bg-secondary rounded-full">
-                <Search className="w-8 h-8 text-muted-foreground" />
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="py-32 text-center"
+            >
+              <div className="w-20 h-20 bg-muted/30 rounded-3xl flex items-center justify-center mx-auto mb-8 border border-border/50">
+                <Search className="h-8 w-8 text-muted-foreground/10" />
               </div>
-              <p className="font-medium text-muted-foreground">No courses matching your filters</p>
-            </div>
+              <p className="text-2xl font-black text-foreground/40 tracking-tightest uppercase">No Archives Found</p>
+              <p className="text-xs text-muted-foreground/30 font-black uppercase tracking-widest mt-2">Try reflowing your search query</p>
+            </motion.div>
           )}
         </div>
+      </section>
+
+      {/* Curriculum Summary Bottom */}
+      <section className="pt-20">
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-20 p-12 bg-muted/20 border border-border/50 rounded-[40px] relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-10 opacity-[0.02] -rotate-12 translate-x-1/4 -translate-y-1/4 group-hover:rotate-0 transition-transform duration-1000">
+               <BarChart3 className="w-96 h-96" />
+            </div>
+            
+            <div className="space-y-6 relative z-10">
+               <h4 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-4">Curriculum Health</h4>
+               <p className="text-4xl font-black text-foreground tracking-tightest leading-[1.1]">
+                 You've cleared <span className="text-primary">{gradeData.curriculum.summary.totalEarned}</span> out of <span className="opacity-40">{gradeData.curriculum.summary.totalRequired}</span> required credits.
+               </p>
+               <div className="flex items-center gap-4 text-xs font-bold text-muted-foreground/60">
+                 <Info className="w-4 h-4" />
+                 <span>Verified data based on official university history</span>
+               </div>
+            </div>
+
+            <div className="flex items-end justify-center md:justify-end relative z-10">
+               <div className="text-right">
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 mb-2">Current Semester Success</p>
+                  <p className="text-8xl font-black tracking-tightest text-foreground leading-none">
+                     {Math.round((gradeData.cgpa.creditsEarned / gradeData.cgpa.creditsRegistered) * 100)}%
+                  </p>
+                  <p className="text-xs font-black uppercase tracking-widest text-primary mt-4">Passing Rate</p>
+               </div>
+            </div>
+         </div>
       </section>
     </div>
   );

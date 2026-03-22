@@ -23,15 +23,14 @@ fn parse_f64(value: &str) -> f64 {
 
 pub fn parse_calendar_options(html: &str) -> Result<Vec<CalendarMonthOption>, String> {
     let document = Html::parse_document(html);
-    let a_selector = Selector::parse("a")
-        .map_err(|_| "Invalid link selector".to_string())?;
+    let a_selector = Selector::parse("a").map_err(|_| "Invalid link selector".to_string())?;
 
     let mut options = Vec::new();
     for a in document.select(&a_selector) {
         let onclick = a.value().attr("onclick").unwrap_or("");
         if onclick.contains("processViewCalendar") {
             let label = text_of(&a);
-            
+
             // Extract '01-DEC-2025' from javascript:processViewCalendar('01-DEC-2025');
             let date_value = if let Some(start) = onclick.find('\'') {
                 let rest = &onclick[start + 1..];
@@ -45,10 +44,7 @@ pub fn parse_calendar_options(html: &str) -> Result<Vec<CalendarMonthOption>, St
             };
 
             if !label.is_empty() && !date_value.is_empty() {
-                options.push(CalendarMonthOption {
-                    label,
-                    date_value,
-                });
+                options.push(CalendarMonthOption { label, date_value });
             }
         }
     }

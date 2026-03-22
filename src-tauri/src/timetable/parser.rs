@@ -1,8 +1,13 @@
-use scraper::{Html, Selector};
 use super::types::{TimetableCourse, TimetableCourseCredits, TimetableFaculty};
+use scraper::{Html, Selector};
 
 fn text_of(el: &scraper::ElementRef) -> String {
-    el.text().collect::<Vec<_>>().join(" ").replace("\u{a0}", " ").trim().to_string()
+    el.text()
+        .collect::<Vec<_>>()
+        .join(" ")
+        .replace("\u{a0}", " ")
+        .trim()
+        .to_string()
 }
 
 fn parse_f64(s: &str) -> f64 {
@@ -17,7 +22,7 @@ pub fn parse_timetable_courses(html: &str) -> Result<Vec<TimetableCourse>, Strin
     let document = Html::parse_document(html);
     let table_selector = Selector::parse("#studentDetailsList table")
         .map_err(|_| "Invalid table selector".to_string())?;
-    
+
     // Use only the first table (the Course List), matching Electron's .first()
     let table = match document.select(&table_selector).next() {
         Some(t) => t,
@@ -70,7 +75,10 @@ pub fn parse_timetable_courses(html: &str) -> Result<Vec<TimetableCourse>, Strin
         // --- 3. Parse Slot and Venue ---
         let slot_venue_raw = text_of(&cols[7]);
         let slot_parts: Vec<&str> = slot_venue_raw.split('-').collect();
-        let slot = slot_parts.first().map(|s| s.trim().to_string()).unwrap_or_default();
+        let slot = slot_parts
+            .first()
+            .map(|s| s.trim().to_string())
+            .unwrap_or_default();
         let venue = if slot_parts.len() > 1 {
             slot_parts[1..].join("-").trim().to_string()
         } else {
@@ -80,7 +88,10 @@ pub fn parse_timetable_courses(html: &str) -> Result<Vec<TimetableCourse>, Strin
         // --- 4. Parse Faculty ---
         let faculty_raw = text_of(&cols[8]);
         let faculty_parts: Vec<&str> = faculty_raw.split('-').collect();
-        let faculty_name = faculty_parts.first().map(|s| s.trim().to_string()).unwrap_or_else(|| faculty_raw.clone());
+        let faculty_name = faculty_parts
+            .first()
+            .map(|s| s.trim().to_string())
+            .unwrap_or_else(|| faculty_raw.clone());
         let faculty_school = if faculty_parts.len() > 1 {
             faculty_parts[1..].join("-").trim().to_string()
         } else {
@@ -97,14 +108,21 @@ pub fn parse_timetable_courses(html: &str) -> Result<Vec<TimetableCourse>, Strin
             category: text_of(&cols[4]),
             registration_option: text_of(&cols[5]),
             class_id: text_of(&cols[6]),
-            slot: if slot.is_empty() { slot_venue_raw } else { slot },
+            slot: if slot.is_empty() {
+                slot_venue_raw
+            } else {
+                slot
+            },
             venue,
             faculty: TimetableFaculty {
                 name: faculty_name,
                 school: faculty_school,
             },
             registration_date: text_of(&cols[9]),
-            status: text_of(&cols[11]).replace("Registered and Approved", "").trim().to_string(),
+            status: text_of(&cols[11])
+                .replace("Registered and Approved", "")
+                .trim()
+                .to_string(),
         });
     }
 

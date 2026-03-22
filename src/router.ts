@@ -11,6 +11,7 @@ export type Path =
   | `/dashboard/contact`
   | `/dashboard/courses`
   | `/dashboard/curriculum`
+  | `/dashboard/faculty-info`
   | `/dashboard/grades`
   | `/dashboard/laundry`
   | `/dashboard/marks`

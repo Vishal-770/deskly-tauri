@@ -23,7 +23,7 @@ function SessionItem({ session, index }: { session: ScheduleEntry; index: number
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="group flex flex-col gap-4 py-8 border-b border-border hover:border-primary transition-colors"
+      className="group flex flex-col gap-4 py-8 border-b border-border/50 hover:bg-muted/5 transition-colors"
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex-1 min-w-0">

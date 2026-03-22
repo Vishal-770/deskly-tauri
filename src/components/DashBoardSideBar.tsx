@@ -16,6 +16,7 @@ import {
   ChefHat,
   Receipt,
   User,
+  Users,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -118,6 +119,12 @@ const DashboardSidebar = () => {
         label: "Profile",
         href: "/dashboard/profile",
         icon: <User className="w-5 h-5" />,
+        description: "",
+      },
+      {
+        label: "Faculty Info",
+        href: "/dashboard/faculty-info",
+        icon: <Users className="w-5 h-5" />,
         description: "",
       },
     ],

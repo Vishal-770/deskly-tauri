@@ -1,12 +1,13 @@
-use tauri::State;
-use chrono::Utc;
-use reqwest::header::{COOKIE, CONTENT_TYPE, REFERER};
+use super::parser::parse_feedback_status;
+use super::types::FeedbackResponse;
 use crate::auth::constants::VTOP_BASE_URL;
+use crate::auth::helpers::response_text_with_auth_retry;
+use crate::auth::helpers::{get_default_semester_id, selected_semester_id_from_store};
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
-use crate::auth::helpers::{selected_semester_id_from_store, get_default_semester_id};
-use super::types::FeedbackResponse;
-use super::parser::parse_feedback_status;
+use chrono::Utc;
+use reqwest::header::{CONTENT_TYPE, COOKIE, REFERER};
+use tauri::State;
 
 #[tauri::command]
 pub async fn feedback_get_status(
@@ -35,10 +36,8 @@ pub async fn feedback_get_status(
             .await
             .map_err(|e| format!("Failed to fetch feedback status: {e}"))?;
 
-        response
-            .text()
+        response_text_with_auth_retry(response, "Failed to read feedback status response html")
             .await
-            .map_err(|e| format!("Failed to read feedback status response html: {e}"))
     })?;
 
     Ok(FeedbackResponse {

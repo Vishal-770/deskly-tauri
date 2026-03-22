@@ -2,10 +2,8 @@ use chrono::Utc;
 use reqwest::header::{CONTENT_TYPE, COOKIE, REFERER};
 use tauri::State;
 
-use crate::auth::helpers::{
-    selected_semester_id_from_store
-};
 use crate::auth::constants::VTOP_BASE_URL;
+use crate::auth::helpers::{response_text_with_auth_retry, selected_semester_id_from_store};
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
 
@@ -31,10 +29,7 @@ async fn fetch_semesters_html(tokens: &crate::auth::types::AuthTokens) -> Result
         .await
         .map_err(|e| format!("Failed to fetch semesters: {e}"))?;
 
-    response
-        .text()
-        .await
-        .map_err(|e| format!("Failed to read semester response html: {e}"))
+    response_text_with_auth_retry(response, "Failed to read semester response html").await
 }
 
 #[tauri::command]
@@ -42,9 +37,8 @@ pub async fn attendance_get_semesters(
     app: tauri::AppHandle,
     store: State<'_, AuthStore>,
 ) -> Result<SemestersResponse, String> {
-    let html = crate::with_auto_relogin!(app, store, tokens, {
-        fetch_semesters_html(&tokens).await
-    })?;
+    let html =
+        crate::with_auto_relogin!(app, store, tokens, { fetch_semesters_html(&tokens).await })?;
 
     let semesters = extract_semesters_from_html(&html)?;
 
@@ -63,7 +57,8 @@ pub async fn attendance_get_current(
     let mut semester_id_final;
     let html = crate::with_auto_relogin!(app, store, tokens, {
         let selected_semester_id = selected_semester_id_from_store(&store)?;
-        let semester_id = if let Some(id) = selected_semester_id.filter(|id| !id.trim().is_empty()) {
+        let semester_id = if let Some(id) = selected_semester_id.filter(|id| !id.trim().is_empty())
+        {
             id
         } else {
             let semesters_html = fetch_semesters_html(&tokens).await?;
@@ -94,10 +89,7 @@ pub async fn attendance_get_current(
             .await
             .map_err(|e| format!("Failed to fetch attendance: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read attendance response html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read attendance response html").await
     })?;
 
     Ok(AttendanceResponse {
@@ -136,10 +128,8 @@ pub async fn attendance_get_detail(
             .await
             .map_err(|e| format!("Failed to fetch attendance details: {e}"))?;
 
-        response
-            .text()
+        response_text_with_auth_retry(response, "Failed to read attendance detail response html")
             .await
-            .map_err(|e| format!("Failed to read attendance detail response html: {e}"))
     })?;
 
     Ok(AttendanceDetailResponse {

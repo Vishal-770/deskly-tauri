@@ -80,7 +80,6 @@ pub struct LaundryResponse {
     pub error: Option<String>,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ContactDetail {
@@ -119,7 +118,6 @@ pub struct CurriculumCourse {
     pub course_type: String,
     pub credits: f64,
 }
-
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]

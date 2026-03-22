@@ -1,12 +1,13 @@
-use tauri::State;
-use chrono::Utc;
-use reqwest::header::{COOKIE, CONTENT_TYPE, REFERER};
 use crate::auth::constants::VTOP_BASE_URL;
+use crate::auth::helpers::response_text_with_auth_retry;
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
+use chrono::Utc;
+use reqwest::header::{CONTENT_TYPE, COOKIE, REFERER};
+use tauri::State;
 // Removed unused import
-use super::types::GradesResponse;
 use super::parser::parse_student_history;
+use super::types::GradesResponse;
 
 #[tauri::command]
 pub async fn grades_get_history(
@@ -16,7 +17,9 @@ pub async fn grades_get_history(
     let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
         let response = client
-            .post(format!("{VTOP_BASE_URL}/vtop/examinations/examGradeView/StudentGradeHistory"))
+            .post(format!(
+                "{VTOP_BASE_URL}/vtop/examinations/examGradeView/StudentGradeHistory"
+            ))
             .header(COOKIE, tokens.cookies.clone())
             .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
             .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
@@ -30,10 +33,7 @@ pub async fn grades_get_history(
             .await
             .map_err(|e| format!("Failed to fetch grade history: {e}"))?;
 
-        response
-            .text()
-            .await
-            .map_err(|e| format!("Failed to read grade history html: {e}"))
+        response_text_with_auth_retry(response, "Failed to read grade history html").await
     })?;
 
     Ok(GradesResponse {
