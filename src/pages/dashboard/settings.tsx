@@ -4,6 +4,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCredentialStatus } from "@/hooks/useCredentialStatus";
 import { useSemester } from "@/hooks/useSemester";
 import { type AuthTokens } from "@/lib/tauri-auth";
+import { getVersion } from "@tauri-apps/api/app";
+import {
+  check,
+  type DownloadEvent,
+  type Update as TauriUpdate,
+} from "@tauri-apps/plugin-updater";
 import {
   Select,
   SelectContent,
@@ -33,6 +39,9 @@ import {
   CircleAlert,
   Clock,
   Layers,
+  ArrowDownToLine,
+  RotateCcw,
+  Download,
 } from "lucide-react";
 import Loader from "@/components/Loader";
 
@@ -55,6 +64,29 @@ export default function SettingsPage() {
     refresh: refreshSemesters,
   } = useSemester();
   const [tokens, setTokenState] = useState<AuthTokens | null>(null);
+  const [appVersion, setAppVersion] = useState<string>("...");
+  const [osLabel, setOsLabel] = useState<string>("Desktop");
+  const [updateStatus, setUpdateStatus] = useState<
+    | "idle"
+    | "checking"
+    | "available"
+    | "downloading"
+    | "downloaded"
+    | "installing"
+    | "not-available"
+    | "error"
+  >("idle");
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [updateInfo, setUpdateInfo] = useState<{
+    version: string;
+    notes?: string;
+    date?: string;
+  } | null>(null);
+  const [updateArtifact, setUpdateArtifact] = useState<TauriUpdate | null>(
+    null,
+  );
+  const [downloadedBytes, setDownloadedBytes] = useState(0);
+  const [contentLength, setContentLength] = useState(0);
 
   useEffect(() => {
     const loadTokens = async () => {
@@ -65,9 +97,109 @@ export default function SettingsPage() {
     void loadTokens();
   }, [fetchTokens]);
 
+  useEffect(() => {
+    const loadAppInfo = async () => {
+      try {
+        const version = await getVersion();
+        setAppVersion(version);
+      } catch {
+        setAppVersion("unknown");
+      }
+
+      const platform = navigator.platform.toLowerCase();
+      if (platform.includes("win")) {
+        setOsLabel("Windows");
+      } else if (platform.includes("mac")) {
+        setOsLabel("macOS");
+      } else if (platform.includes("linux")) {
+        setOsLabel("Linux");
+      }
+    };
+
+    void loadAppInfo();
+  }, []);
+
   const handleLogout = async () => {
     await logout();
     navigate("/");
+  };
+
+  const handleCheckForUpdates = async () => {
+    setUpdateStatus("checking");
+    setUpdateError(null);
+    setDownloadedBytes(0);
+    setContentLength(0);
+
+    try {
+      const update = await check();
+      if (!update) {
+        setUpdateArtifact(null);
+        setUpdateInfo(null);
+        setUpdateStatus("not-available");
+        return;
+      }
+
+      setUpdateArtifact(update);
+      setUpdateInfo({
+        version: update.version,
+        notes: update.body,
+        date: update.date,
+      });
+      setUpdateStatus("available");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setUpdateError(message);
+      setUpdateStatus("error");
+    }
+  };
+
+  const handleDownloadUpdate = async () => {
+    if (!updateArtifact) {
+      return;
+    }
+
+    setUpdateStatus("downloading");
+    setUpdateError(null);
+    setDownloadedBytes(0);
+    setContentLength(0);
+
+    try {
+      await updateArtifact.download((event: DownloadEvent) => {
+        switch (event.event) {
+          case "Started":
+            setContentLength(event.data.contentLength ?? 0);
+            setDownloadedBytes(0);
+            break;
+          case "Progress":
+            setDownloadedBytes((prev) => prev + event.data.chunkLength);
+            break;
+          case "Finished":
+            break;
+        }
+      });
+      setUpdateStatus("downloaded");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setUpdateError(message);
+      setUpdateStatus("error");
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    if (!updateArtifact) {
+      return;
+    }
+
+    setUpdateStatus("installing");
+    setUpdateError(null);
+
+    try {
+      await updateArtifact.install();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setUpdateError(message);
+      setUpdateStatus("error");
+    }
   };
 
   const handleSemesterChange = async (semesterId: string) => {
@@ -90,6 +222,14 @@ export default function SettingsPage() {
 
   const hasStorageError = Boolean(credentialStatus?.keyringError);
   const isPasswordStored = Boolean(credentialStatus?.hasPasswordStored);
+  const downloadProgress =
+    contentLength > 0
+      ? Math.min(100, Math.round((downloadedBytes / contentLength) * 100))
+      : 0;
+  const isBusy =
+    updateStatus === "checking" ||
+    updateStatus === "downloading" ||
+    updateStatus === "installing";
 
   return (
     <div className="p-6 space-y-8 pb-20 animate-in fade-in duration-500">
@@ -223,14 +363,14 @@ export default function SettingsPage() {
                   <span className="text-muted-foreground uppercase tracking-tight">
                     Version
                   </span>
-                  <p className="font-semibold text-foreground">0.1.0-alpha</p>
+                  <p className="font-semibold text-foreground">v{appVersion}</p>
                 </div>
                 <div className="p-3 bg-background/20 rounded-xl border border-border/40 space-y-1">
                   <span className="text-muted-foreground uppercase tracking-tight">
                     OS
                   </span>
                   <p className="font-semibold text-foreground capitalize">
-                    Windows
+                    {osLabel}
                   </p>
                 </div>
                 <div className="p-3 bg-background/20 rounded-xl border border-border/40 space-y-1">
@@ -238,6 +378,92 @@ export default function SettingsPage() {
                     Platform
                   </span>
                   <p className="font-semibold text-foreground">Tauri / Vite</p>
+                </div>
+              </div>
+
+              <div className="mt-5 p-4 rounded-xl border border-border/50 bg-background/20 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold">App Updates</p>
+                    <p className="text-xs text-muted-foreground">
+                      Check and install new releases without downloading
+                      manually.
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="text-[10px]">
+                    {updateStatus === "idle" && "Idle"}
+                    {updateStatus === "checking" && "Checking"}
+                    {updateStatus === "available" && "Update Found"}
+                    {updateStatus === "downloading" &&
+                      `Downloading ${downloadProgress}%`}
+                    {updateStatus === "downloaded" && "Ready to Install"}
+                    {updateStatus === "installing" && "Installing"}
+                    {updateStatus === "not-available" && "Up to Date"}
+                    {updateStatus === "error" && "Error"}
+                  </Badge>
+                </div>
+
+                {updateInfo && (
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p>
+                      Latest version:{" "}
+                      <span className="text-foreground font-medium">
+                        v{updateInfo.version}
+                      </span>
+                    </p>
+                    {updateInfo.date && (
+                      <p>
+                        Published: {new Date(updateInfo.date).toLocaleString()}
+                      </p>
+                    )}
+                    {updateInfo.notes && (
+                      <p className="line-clamp-3">Notes: {updateInfo.notes}</p>
+                    )}
+                  </div>
+                )}
+
+                {updateError && (
+                  <p className="text-xs text-destructive">{updateError}</p>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    className="h-8"
+                    onClick={() => void handleCheckForUpdates()}
+                    disabled={isBusy}
+                  >
+                    <RotateCcw
+                      className={`w-3.5 h-3.5 ${updateStatus === "checking" ? "animate-spin" : ""}`}
+                    />
+                    Check for Updates
+                  </Button>
+
+                  {updateStatus === "available" && (
+                    <Button
+                      size="sm"
+                      className="h-8"
+                      variant="secondary"
+                      onClick={() => void handleDownloadUpdate()}
+                      disabled={isBusy}
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download
+                    </Button>
+                  )}
+
+                  {updateStatus === "downloaded" && (
+                    <Button
+                      size="sm"
+                      className="h-8"
+                      variant="default"
+                      onClick={() => void handleInstallUpdate()}
+                      disabled={isBusy}
+                    >
+                      <ArrowDownToLine className="w-3.5 h-3.5" />
+                      Install Update
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
