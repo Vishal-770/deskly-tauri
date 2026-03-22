@@ -112,10 +112,26 @@ jobs:
             --notes "Release ${GITHUB_REF_NAME}" \
             --pubDate "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
+      - name: List release assets
+        run: |
+          find release-assets -maxdepth 5 -type f | sort
+
       - name: Publish GitHub release assets
         uses: softprops/action-gh-release@v2
         with:
-          files: release-assets/**
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: |
+            release-assets/latest.json
+            release-assets/**/*.msi
+            release-assets/**/*.msi.sig
+            release-assets/**/*.exe
+            release-assets/**/*.exe.sig
+            release-assets/**/*.AppImage
+            release-assets/**/*.AppImage.sig
+            release-assets/**/*.app.tar.gz
+            release-assets/**/*.app.tar.gz.sig
+          fail_on_unmatched_files: true
           generate_release_notes: true
           draft: false
           prerelease: false
