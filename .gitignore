@@ -28,3 +28,7 @@ dist-ssr
 ~/.tauri/
 *.key
 *.key.pub
+*.private
+*.pub
+src-tauri/tauri.conf.json.enc
+src-tauri/tauri.conf.json.sig
