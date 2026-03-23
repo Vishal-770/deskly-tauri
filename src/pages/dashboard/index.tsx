@@ -10,6 +10,8 @@ import { CheckCircle2, AlertCircle, Smile, Frown } from 'lucide-react'
 export default function DashBoardPage() {
   const navigate = useNavigate()
   const { authState, loading } = useAuth()
+
+
   
   // CGPA State
   const [cgpaData, setCgpaData] = useState<CGPAData | null>(null)
@@ -37,6 +39,7 @@ export default function DashBoardPage() {
   useEffect(() => {
     const loadData = async () => {
       if (!authState?.loggedIn) return
+
       
       // Load CGPA
       setCgpaLoading(true)
@@ -75,6 +78,7 @@ export default function DashBoardPage() {
 
     loadData()
   }, [authState?.loggedIn])
+
 
 
   if (loading || !authState?.loggedIn) {

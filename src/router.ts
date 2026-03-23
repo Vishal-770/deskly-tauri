@@ -20,7 +20,6 @@ export type Path =
   | `/dashboard/profile`
   | `/dashboard/settings`
   | `/dashboard/timetable`
-  | `/no-internet`
 
 export type Params = {
   
