@@ -157,7 +157,7 @@ pub async fn perform_auto_relogin(
     use crate::auth::keyring;
     use crate::auth::store::{now_unix_ms, save_to_disk};
 
-    let (user_id, password) = {
+    let (user_id, password, should_repair_encrypted_password) = {
         let guard = store
             .inner
             .lock()
@@ -170,12 +170,38 @@ pub async fn perform_auto_relogin(
             .user_id
             .clone();
 
-        let password = if let Some(stored_password) = &guard.password_encrypted {
-            crypto::decrypt_password(stored_password)
-                .map_err(|e| format!("Failed to decrypt stored password for auto-login: {e}"))?
+        let (password, should_repair_encrypted_password) = if let Some(stored_password) =
+            &guard.password_encrypted
+        {
+            match crypto::decrypt_password(stored_password) {
+                Ok(password) => (password, false),
+                Err(decrypt_err) => {
+                    eprintln!(
+                        "[auth:auto-relogin] decrypt failed, attempting keyring fallback: {}",
+                        decrypt_err
+                    );
+
+                    match keyring::get_password_with_retry(&user_id) {
+                        Ok(password) => {
+                            eprintln!(
+                                "[auth:auto-relogin] keyring fallback succeeded after decrypt failure"
+                            );
+                            (password, true)
+                        }
+                        Err(keyring_err) if keyring::is_missing_entry_error(&keyring_err) => {
+                            return Err("Auto-login credentials are unavailable. Please log in again.".to_string())
+                        }
+                        Err(keyring_err) => {
+                            return Err(format!(
+                                "Auto-login credential recovery failed (decrypt + keyring): decrypt_error={decrypt_err}; keyring_error={keyring_err}"
+                            ))
+                        }
+                    }
+                }
+            }
         } else {
             match keyring::get_password_with_retry(&user_id) {
-                Ok(password) => password,
+                Ok(password) => (password, true),
                 Err(e) if keyring::is_missing_entry_error(&e) => {
                     return Err(
                         "No stored password found for auto-login. Please log in again.".to_string(),
@@ -189,7 +215,7 @@ pub async fn perform_auto_relogin(
             }
         };
 
-        (user_id, password)
+        (user_id, password, should_repair_encrypted_password)
     };
 
     // Mirror Electron behavior: retry once if login returns incomplete token set.
@@ -215,6 +241,22 @@ pub async fn perform_auto_relogin(
         .inner
         .lock()
         .map_err(|_| "failed to lock auth store".to_string())?;
+
+    if should_repair_encrypted_password {
+        match crypto::encrypt_password(&password) {
+            Ok(encrypted_password) => {
+                guard.password_encrypted = Some(encrypted_password);
+                eprintln!("[auth:auto-relogin] repaired encrypted password from fallback source");
+            }
+            Err(err) => {
+                // Do not fail auto-relogin if credential repair fails; tokens were already restored.
+                eprintln!(
+                    "[auth:auto-relogin] failed to repair encrypted password after successful relogin: {}",
+                    err
+                );
+            }
+        }
+    }
 
     guard.tokens = Some(tokens.clone());
     if let Some(state) = guard.state.as_mut() {
