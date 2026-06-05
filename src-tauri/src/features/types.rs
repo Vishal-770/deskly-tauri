@@ -162,8 +162,7 @@ pub struct CurriculumCoursesResponse {
 #[serde(rename_all = "camelCase")]
 pub struct SyllabusData {
     pub filename: String,
-    pub content_type: String,
-    pub data: String, // base64
+    pub save_path: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -172,6 +171,81 @@ pub struct SyllabusResponse {
     pub success: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<SyllabusData>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExamScheduleEntry {
+    pub exam_type: String,
+    pub serial_no: i32,
+    pub course_code: String,
+    pub course_title: String,
+    pub course_type: String,
+    pub class_id: String,
+    pub slot: String,
+    pub exam_date: String,
+    pub exam_session: String,
+    pub reporting_time: String,
+    pub exam_time: String,
+    pub venue: String,
+    pub seat_location: String,
+    pub seat_no: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExamScheduleGroup {
+    pub exam_type: String,
+    pub schedules: Vec<ExamScheduleEntry>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ExamScheduleResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<Vec<ExamScheduleGroup>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HodDeanDetail {
+    pub role: String,
+    pub name: String,
+    pub school: String,
+    pub cabin: String,
+    pub email: String,
+    pub intercom: String,
+    pub photo: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HodDeanResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<Vec<HodDeanDetail>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReceiptDownloadData {
+    pub filename: String,
+    pub save_path: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReceiptDownloadResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<ReceiptDownloadData>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
 }

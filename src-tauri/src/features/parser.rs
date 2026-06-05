@@ -2,7 +2,7 @@ use scraper::{ElementRef, Html, Selector};
 
 use super::types::{
     CalendarDay, CalendarMonthOption, ContactDetail, CurriculumCategory, CurriculumCourse,
-    MonthlySchedule, Receipt,
+    ExamScheduleEntry, HodDeanDetail, MonthlySchedule, Receipt,
 };
 
 fn clean_text(raw: &str) -> String {
@@ -298,4 +298,256 @@ pub fn parse_curriculum_courses(html: &str) -> Result<Vec<CurriculumCourse>, Str
     }
 
     Ok(rows)
+}
+
+pub fn parse_exam_schedule(html: &str) -> Result<Vec<ExamScheduleEntry>, String> {
+    let document = Html::parse_document(html);
+    let table_selector = Selector::parse("table.customTable").map_err(|_| "Invalid table selector".to_string())?;
+    let tr_selector = Selector::parse("tr").map_err(|_| "Invalid row selector".to_string())?;
+    let td_selector = Selector::parse("td").map_err(|_| "Invalid cell selector".to_string())?;
+
+    let table = document
+        .select(&table_selector)
+        .next()
+        .ok_or_else(|| "Could not find exam schedule table".to_string())?;
+
+    let mut entries = Vec::new();
+    let mut current_exam_type = "Unknown".to_string();
+
+    for row in table.select(&tr_selector) {
+        let cells: Vec<_> = row.select(&td_selector).collect();
+        if cells.is_empty() {
+            continue;
+        }
+
+        if cells.len() == 1 {
+            let class_attr = cells[0].value().attr("class").unwrap_or("");
+            if class_attr.contains("panelHead-secondary") {
+                current_exam_type = text_of(&cells[0]);
+                continue;
+            }
+        }
+
+        if cells.len() == 13 {
+            let serial_no = parse_i32(&text_of(&cells[0]));
+            let course_code = text_of(&cells[1]);
+            if serial_no == 0 && course_code.is_empty() {
+                continue;
+            }
+            if course_code.contains("Course Code") {
+                continue;
+            }
+
+            let course_title = text_of(&cells[2]);
+            let course_type = text_of(&cells[3]);
+            let class_id = text_of(&cells[4]);
+            let slot = text_of(&cells[5]);
+            let exam_date = text_of(&cells[6]);
+            let exam_session = text_of(&cells[7]);
+            let reporting_time = text_of(&cells[8]);
+            let exam_time = text_of(&cells[9]);
+            let venue = text_of(&cells[10]);
+            let seat_location = text_of(&cells[11]);
+            let seat_no = text_of(&cells[12]);
+
+            entries.push(ExamScheduleEntry {
+                exam_type: current_exam_type.clone(),
+                serial_no,
+                course_code,
+                course_title,
+                course_type,
+                class_id,
+                slot,
+                exam_date,
+                exam_session,
+                reporting_time,
+                exam_time,
+                venue,
+                seat_location,
+                seat_no,
+            });
+        }
+    }
+
+    Ok(entries)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_exam_schedule() {
+        let html = r#"
+            <table class="customTable">
+                <tr class="tableHeader">
+                    <td>S.No.</td><td>Course Code</td><td>Course Title</td><td>Course Type</td>
+                    <td>Class ID</td><td>Slot</td><td>Exam Date</td><td>Exam Session</td>
+                    <td>Reporting Time</td><td>Exam Time</td><td>Venue</td><td>Seat Location</td><td>Seat No.</td>
+                </tr>
+                <tr class="tableContent">
+                    <td class="panelHead-secondary" colspan="13" align="center">FAT</td>
+                </tr>
+                <tr class="tableContent">
+                    <td>1</td>
+                    <td>BCSE302L</td>
+                    <td>Database Systems</td>
+                    <td>TH</td>
+                    <td>CH2025260501233</td>
+                    <td>A1+TA1</td>
+                    <td>20-Apr-2026</td>
+                    <td>FN1</td>
+                    <td>09:45 AM</td>
+                    <td>10:00 AM - 01:00 PM</td>
+                    <td><span>AB3-607</span></td>
+                    <td><span><span>-</span></span></td>
+                    <td><span>27</span></td>
+                </tr>
+                <tr class="tableContent">
+                    <td class="panelHead-secondary" colspan="13" align="center">CAT2</td>
+                </tr>
+                <tr class="tableContent">
+                    <td>1</td>
+                    <td>BCSE302L</td>
+                    <td>Database Systems</td>
+                    <td>TH</td>
+                    <td>CH2025260501233</td>
+                    <td>A1+TA1</td>
+                    <td>14-Mar-2026</td>
+                    <td>FN2</td>
+                    <td>11:45 AM</td>
+                    <td>12:00 PM - 01:30 PM</td>
+                    <td><span>AB3-106</span></td>
+                    <td><span><span>R5C3</span></span></td>
+                    <td><span>27</span></td>
+                </tr>
+            </table>
+        "#;
+
+        let entries = parse_exam_schedule(html).unwrap();
+        assert_eq!(entries.len(), 2);
+        
+        assert_eq!(entries[0].exam_type, "FAT");
+        assert_eq!(entries[0].course_code, "BCSE302L");
+        assert_eq!(entries[0].course_title, "Database Systems");
+        assert_eq!(entries[0].venue, "AB3-607");
+        assert_eq!(entries[0].seat_location, "-");
+        assert_eq!(entries[0].seat_no, "27");
+
+        assert_eq!(entries[1].exam_type, "CAT2");
+        assert_eq!(entries[1].venue, "AB3-106");
+        assert_eq!(entries[1].seat_location, "R5C3");
+        assert_eq!(entries[1].seat_no, "27");
+    }
+
+    #[test]
+    fn test_parse_hod_dean_details() {
+        let html = r#"
+            <div class="box">
+                <div class="box-header with-border text-center">
+                    <h3 class="box-title"><b>DEAN</b></h3>
+                </div>
+                <table class="table">
+                    <tr>
+                        <td><b>Name of the Faculty </b></td>
+                        <td>Dr. VISWANATHAN V</td>
+                        <td rowspan="5"><img src="data:jpg;base64,12345" /></td>
+                    </tr>
+                    <tr>
+                        <td><b>School </b></td>
+                        <td>SCOPE</td>
+                    </tr>
+                    <tr>
+                        <td><b>Cabin No </b></td>
+                        <td>AB3-329</td>
+                    </tr>
+                    <tr>
+                        <td><b>Email ID </b></td>
+                        <td>dean.scope@vit.ac.in</td>
+                    </tr>
+                    <tr>
+                        <td><b>Intercom </b></td>
+                        <td>1234</td>
+                    </tr>
+                </table>
+            </div>
+        "#;
+
+        let details = parse_hod_dean_details(html).unwrap();
+        assert_eq!(details.len(), 1);
+        assert_eq!(details[0].role, "DEAN");
+        assert_eq!(details[0].name, "Dr. VISWANATHAN V");
+        assert_eq!(details[0].school, "SCOPE");
+        assert_eq!(details[0].cabin, "AB3-329");
+        assert_eq!(details[0].email, "dean.scope@vit.ac.in");
+        assert_eq!(details[0].intercom, "1234");
+        assert_eq!(details[0].photo, "data:jpg;base64,12345");
+    }
+}
+
+pub fn parse_hod_dean_details(html: &str) -> Result<Vec<HodDeanDetail>, String> {
+    let document = Html::parse_document(html);
+    let box_selector = Selector::parse(".box").map_err(|_| "Invalid box selector".to_string())?;
+    let title_selector = Selector::parse(".box-title, h3").map_err(|_| "Invalid title selector".to_string())?;
+    let table_selector = Selector::parse("table").map_err(|_| "Invalid table selector".to_string())?;
+    let tr_selector = Selector::parse("tr").map_err(|_| "Invalid row selector".to_string())?;
+    let td_selector = Selector::parse("td").map_err(|_| "Invalid cell selector".to_string())?;
+    let img_selector = Selector::parse("img").map_err(|_| "Invalid img selector".to_string())?;
+
+    let mut details = Vec::new();
+
+    for box_el in document.select(&box_selector) {
+        let role = box_el
+            .select(&title_selector)
+            .next()
+            .map(|el| text_of(&el))
+            .unwrap_or_else(|| "Unknown".to_string());
+
+        if let Some(table) = box_el.select(&table_selector).next() {
+            let mut name = String::new();
+            let mut school = String::new();
+            let mut cabin = String::new();
+            let mut email = String::new();
+            let mut intercom = String::new();
+            let mut photo = String::new();
+
+            for row in table.select(&tr_selector) {
+                if let Some(img) = row.select(&img_selector).next() {
+                    if let Some(src) = img.value().attr("src") {
+                        photo = src.to_string();
+                    }
+                }
+
+                let cells: Vec<_> = row.select(&td_selector).collect();
+                if cells.len() >= 2 {
+                    let key = text_of(&cells[0]).to_lowercase();
+                    let val = text_of(&cells[1]);
+
+                    if key.contains("name of the faculty") || key.contains("name of the dean") || key.contains("name of the hod") {
+                        name = val;
+                    } else if key.contains("school") || key.contains("department") {
+                        school = val;
+                    } else if key.contains("cabin") {
+                        cabin = val;
+                    } else if key.contains("email") {
+                        email = val;
+                    } else if key.contains("intercom") {
+                        intercom = val;
+                    }
+                }
+            }
+
+            details.push(HodDeanDetail {
+                role,
+                name,
+                school,
+                cabin,
+                email,
+                intercom,
+                photo,
+            });
+        }
+    }
+
+    Ok(details)
 }

@@ -1,20 +1,26 @@
-use reqwest::header::{COOKIE, LOCATION, SET_COOKIE};
+use reqwest::header::{ COOKIE, LOCATION, SET_COOKIE };
 use std::collections::HashMap;
+use std::time::Duration;
 
 use super::constants::VTOP_BASE_URL;
 
 pub fn build_http_client() -> Result<reqwest::Client, String> {
-    reqwest::Client::builder()
+    reqwest::Client
+        ::builder()
+        .connect_timeout(Duration::from_secs(10))
+        .timeout(Duration::from_secs(30))
         .danger_accept_invalid_certs(true)
         .redirect(reqwest::redirect::Policy::none())
-        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+        .user_agent(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+        )
         .default_headers({
             let mut headers = reqwest::header::HeaderMap::new();
             headers.insert(
                 reqwest::header::ACCEPT,
                 reqwest::header::HeaderValue::from_static(
-                    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                ),
+                    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+                )
             );
             headers
         })
@@ -26,9 +32,10 @@ pub async fn get_with_redirect_follow(
     client: &reqwest::Client,
     url: &str,
     cookie_header: Option<&str>,
-    max_hops: usize,
+    max_hops: usize
 ) -> Result<reqwest::Response, String> {
-    let mut current = reqwest::Url::parse(VTOP_BASE_URL)
+    let mut current = reqwest::Url
+        ::parse(VTOP_BASE_URL)
         .map_err(|e| format!("invalid base url: {e}"))?
         .join(url)
         .map_err(|e| format!("invalid start url '{url}': {e}"))?;
@@ -39,10 +46,7 @@ pub async fn get_with_redirect_follow(
             req = req.header(COOKIE, cookies);
         }
 
-        let response = req
-            .send()
-            .await
-            .map_err(|e| format!("request failed for {current}: {e}"))?;
+        let response = req.send().await.map_err(|e| format!("request failed for {current}: {e}"))?;
 
         if !response.status().is_redirection() {
             return Ok(response);
@@ -58,7 +62,8 @@ pub async fn get_with_redirect_follow(
             .and_then(|v| v.to_str().ok())
             .ok_or_else(|| format!("redirect location missing for {current}"))?;
 
-        current = reqwest::Url::parse(VTOP_BASE_URL)
+        current = reqwest::Url
+            ::parse(VTOP_BASE_URL)
             .map_err(|e| format!("invalid base url: {e}"))?
             .join(location)
             .map_err(|e| format!("invalid redirect url: {e}"))?;

@@ -1,216 +1,623 @@
-import { useEffect, useState, useMemo } from "react";
-import { Clock, User, Calendar } from "lucide-react";
-import { getTimetableWeekly, type WeeklySchedule, type ScheduleEntry } from "@/lib/features";
-import { cn } from "@/lib/utils";
-import Loader from "@/components/Loader";
+import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { invoke } from "@tauri-apps/api/core";
+import DashboardSidebar from "@/components/DashBoardSideBar";
 import { ErrorDisplay } from "@/components/error-display";
-import { useSemester } from "@/hooks/useSemester";
+import { ModeToggle } from "@/components/theme-toggle";
 import { motion } from "framer-motion";
+import {
+  Clock,
+  Calendar,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  BookOpen,
+  MapPin,
+  Monitor,
+} from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip as ReChartsTooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-const dayShortNames: Record<keyof WeeklySchedule, string> = {
-  monday: "Mon",
-  tuesday: "Tue",
-  wednesday: "Wed",
-  thursday: "Thu",
-  friday: "Fri",
-  saturday: "Sat",
-  sunday: "Sun",
-};
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface ScheduleEntry {
+  day: string;
+  startTime: string;
+  endTime: string;
+  courseCode: string;
+  courseTitle: string;
+  courseType: string;
+  slot: string;
+  venue: string;
+  faculty: string;
+}
+interface WeeklySchedule {
+  monday: ScheduleEntry[];
+  tuesday: ScheduleEntry[];
+  wednesday: ScheduleEntry[];
+  thursday: ScheduleEntry[];
+  friday: ScheduleEntry[];
+  saturday: ScheduleEntry[];
+  sunday: ScheduleEntry[];
+}
+interface ApiResult<T> { success: boolean; data?: T; error?: string; }
+interface AttendanceFaculty { id: string; name: string; school: string; }
+interface AttendanceRecord {
+  slNo: number; classId: string; courseCode: string; courseTitle: string;
+  courseType: string; slot: string; faculty: AttendanceFaculty;
+  attendanceType: string; registrationDate: string; attendanceDate: string;
+  attendedClasses: number; totalClasses: number; attendancePercentage: number; status: string;
+}
+interface AttendanceResponse { success: boolean; data?: AttendanceRecord[]; semesterId?: string; error?: string; }
 
-function SessionItem({ session, index }: { session: ScheduleEntry; index: number }) {
+const EMPTY: WeeklySchedule = { monday:[], tuesday:[], wednesday:[], thursday:[], friday:[], saturday:[], sunday:[] };
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function toMins(t: string): number {
+  const c = t.trim().toUpperCase().split(" ");
+  if (c.length < 2) return 0;
+  const [h, m] = c[0].split(":").map(Number);
+  let hr = h || 0;
+  if (c[1] === "PM" && hr !== 12) hr += 12;
+  if (c[1] === "AM" && hr === 12) hr = 0;
+  return hr * 60 + (m || 0);
+}
+function todayIdx(): number { const d = new Date().getDay(); return d === 0 ? 6 : d - 1; }
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+function Sk({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+}
+function CardSkeleton() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className="group flex flex-col gap-4 py-8 border-b border-border/50 hover:bg-muted/5 transition-colors"
-    >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
-              {session.courseCode}
-            </span>
-            <span className="text-[10px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-              {session.slot}
-            </span>
-          </div>
-          <h3 className="text-2xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-tight">
-            {session.courseTitle}
-          </h3>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-8 shrink-0">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Time</p>
-            <div className="flex items-center gap-2">
-               <Clock className="w-3 h-3 text-muted-foreground" />
-               <p className="text-lg font-black tracking-tightest text-foreground font-mono">
-                 {session.startTime} – {session.endTime}
-               </p>
-            </div>
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Venue</p>
-            <p className="text-lg font-black tracking-tightest text-foreground">{session.venue}</p>
-          </div>
-        </div>
+    <div className="flex items-center gap-4 md:gap-6 py-4 px-3 border border-transparent border-b border-border/20 last:border-b-0 animate-pulse">
+      <div className="w-[72px] shrink-0 flex flex-col items-end gap-1">
+        <Sk className="h-3.5 w-14" />
+        <Sk className="h-3 w-10" />
       </div>
-
-      <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-2">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-            <User className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-40">Faculty</p>
-            <p className="text-xs font-bold text-foreground">{session.faculty}</p>
-          </div>
-        </div>
+      <div className="relative hidden md:flex flex-col items-center justify-center self-stretch shrink-0 w-6">
+        <Sk className="h-3.5 w-3.5 rounded-full shrink-0" />
       </div>
-    </motion.div>
+      <div className="flex-1 flex items-start justify-between gap-4">
+        <div className="space-y-2 pt-0.5 flex-1">
+          <div className="flex gap-2">
+            <Sk className="h-3.5 w-16" />
+            <Sk className="h-3 w-12 rounded-full" />
+          </div>
+          <Sk className="h-4 w-48" />
+          <Sk className="h-3 w-36" />
+        </div>
+        <Sk className="h-9 w-14 shrink-0 rounded-xl" />
+      </div>
+    </div>
   );
 }
-
-function EmptyDay() {
+function SidebarSkeleton() {
   return (
-    <div className="py-24 text-center">
-      <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto mb-6">
-        <Calendar className="h-8 w-8 text-muted-foreground/30" />
+    <div className="space-y-8 animate-pulse">
+      {/* Current/Next skeleton */}
+      <div className="space-y-3">
+        <Sk className="h-3.5 w-16" />
+        <div className="border-l-2 border-primary/20 pl-4 py-1.5 space-y-3">
+          <Sk className="h-4 w-32" />
+          <Sk className="h-5 w-48" />
+          <div className="space-y-2 pt-1">
+            <Sk className="h-3 w-36" />
+            <Sk className="h-3 w-28" />
+          </div>
+        </div>
       </div>
-      <p className="text-xl font-black text-foreground tracking-tight">No classes scheduled</p>
-      <p className="text-sm text-muted-foreground font-medium opacity-50">Enjoy your free day!</p>
+      {/* Day summary skeleton */}
+      <div className="space-y-4">
+        <Sk className="h-3 w-24 border-b border-border/10 pb-2 w-full" />
+        <div className="grid grid-cols-2 gap-4">
+          {[...Array(4)].map((_,i) => (
+            <div key={i} className="space-y-1.5">
+              <Sk className="h-7 w-10" />
+              <Sk className="h-2.5 w-16" />
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Chart skeleton */}
+      <div className="space-y-3">
+        <Sk className="h-3 w-28 border-b border-border/10 pb-2 w-full" />
+        <Sk className="h-32 w-full" />
+      </div>
     </div>
   );
 }
 
-export default function TimetablePage() {
-  const [timetable, setTimetable] = useState<WeeklySchedule | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeDay, setActiveDay] = useState<keyof WeeklySchedule | null>(null);
-  const { currentSemester, loading: semesterLoading } = useSemester();
+// ─── Attendance bar pill ───────────────────────────────────────────────────────
+function attHint(attended: number, total: number) {
+  const need = Math.ceil(3 * total - 4 * attended);
+  const canSkip = Math.floor((4 * attended - 3 * total) / 3);
+  if (need > 0) return { type: "need" as const, count: need };
+  if (canSkip > 0) return { type: "skip" as const, count: canSkip };
+  return null;
+}
 
-  const currentDay = useMemo(() => {
-    const days: (keyof WeeklySchedule)[] = [
-      "sunday",
-      "monday",
-      "tuesday",
-      "wednesday",
-      "thursday",
-      "friday",
-      "saturday",
-    ];
-    return days[new Date().getDay()];
-  }, []);
-
-  const fetchTimetable = async () => {
-    if (!currentSemester) return;
-    
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getTimetableWeekly(currentSemester.id);
-      if (res.success && res.data) {
-        setTimetable(res.data);
-        if (!activeDay) {
-            setActiveDay(currentDay);
-        }
-      } else {
-        setError(res.error ?? "Failed to load timetable");
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTimetable();
-  }, [currentSemester]);
-
-  if (loading || semesterLoading) return <Loader />;
-  if (error) return <ErrorDisplay message={error} onRetry={fetchTimetable} />;
-  if (!timetable) return null;
-
-  const sortedDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as (keyof WeeklySchedule)[];
-
+function AttPill({ att }: { att: AttendanceRecord }) {
+  const p = att.attendancePercentage;
+  const textCls = p >= 75 ? "text-emerald-600 dark:text-emerald-400"
+                : p >= 60 ? "text-amber-600 dark:text-amber-400"
+                : "text-destructive";
+  const barCls  = p >= 75 ? "bg-emerald-500"
+                : p >= 60 ? "bg-amber-500"
+                : "bg-destructive";
   return (
-    <div className="p-6 lg:p-10 space-y-12 animate-in fade-in duration-500 pb-20 max-w-7xl mx-auto">
-      {/* Header */}
-      <header className="space-y-10">
-        <div className="space-y-4">
-           <div className="flex items-center gap-3">
-             <div className="w-1.5 h-8 bg-primary rounded-full" />
-             <h1 className="text-4xl md:text-5xl font-black tracking-tightest text-foreground uppercase">
-               Timetable
-             </h1>
-           </div>
-           <p className="text-sm text-muted-foreground font-medium opacity-50 tracking-wide pl-4">
-             {currentSemester?.name || "Semester Academic Overview"}
-           </p>
-        </div>
+    <div className="flex flex-col items-end gap-1 min-w-[64px]">
+      <span className={`text-lg font-black leading-none ${textCls}`}>{p}%</span>
+      <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${barCls}`} style={{ width: `${Math.min(p,100)}%` }} />
+      </div>
+      <span className="text-xs text-muted-foreground font-semibold">{att.attendedClasses}/{att.totalClasses}</span>
+    </div>
+  );
+}
 
-        {/* Day Tabs */}
-        <div className="flex flex-wrap gap-x-8 gap-y-4 border-b border-border pb-1">
-          {sortedDays.map((day) => {
-            const sessions = timetable[day] || [];
-            const isActive = activeDay === day;
+// ─── Page ─────────────────────────────────────────────────────────────────────
+export default function TimetablePage() {
+  const navigate = useNavigate();
+  const { isLoggedIn, loading: authLoading } = useAuth();
+
+  const [selectedDay, setSelectedDay]   = useState(() => todayIdx());
+  const [weekStart, setWeekStart]       = useState<Date>(() => {
+    const n = new Date(), d = n.getDay();
+    const mon = new Date(n.setDate(n.getDate() - d + (d === 0 ? -6 : 1)));
+    mon.setHours(0,0,0,0); return mon;
+  });
+  const [schedule, setSchedule]         = useState<WeeklySchedule>(EMPTY);
+  const [attendance, setAttendance]     = useState<AttendanceRecord[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState<string|null>(null);
+  const [now, setNow]                   = useState(() => new Date());
+
+  useEffect(() => { const t = setInterval(() => setNow(new Date()), 60_000); return () => clearInterval(t); }, []);
+  useEffect(() => { if (!authLoading && !isLoggedIn) navigate("/"); }, [isLoggedIn, authLoading]);
+
+  async function load() {
+    try {
+      setLoading(true); setError(null);
+      const [tt, att] = await Promise.all([
+        invoke<ApiResult<WeeklySchedule>>("timetable_get_weekly", { semesterSubId: null }),
+        invoke<AttendanceResponse>("attendance_get_current").catch(() => ({ success: false } as AttendanceResponse)),
+      ]);
+      if (tt.success && tt.data) setSchedule(tt.data);
+      else setError(tt.error ?? "Failed to load timetable.");
+      if (att.success && att.data) setAttendance(att.data);
+    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { if (isLoggedIn) load(); }, [isLoggedIn]);
+
+  const DAY_KEYS: (keyof WeeklySchedule)[] = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+  const DAY_SHORT = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  const DAY_FULL  = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+  const weekDays = useMemo(() => DAY_SHORT.map((name, i) => {
+    const d = new Date(weekStart); d.setDate(weekStart.getDate() + i);
+    return { name, full: DAY_FULL[i], num: d.getDate(), month: d.toLocaleString("default",{month:"short"}), date: d };
+  }), [weekStart]);
+
+  const weekLabel = useMemo(() => {
+    const s = weekDays[0], e = weekDays[6], sy = s.date.getFullYear(), ey = e.date.getFullYear();
+    return sy === ey ? `${s.month} ${s.num} – ${e.month} ${e.num}, ${sy}` : `${s.month} ${s.num}, ${sy} – ${e.month} ${e.num}, ${ey}`;
+  }, [weekDays]);
+
+  const daySchedule = useMemo(() => schedule[DAY_KEYS[selectedDay]] || [], [schedule, selectedDay]);
+  const todaySchedule = useMemo(() => schedule[DAY_KEYS[todayIdx()]] || [], [schedule]);
+
+  const classStatus = useMemo(() => {
+    const nm = now.getHours()*60 + now.getMinutes();
+    let cur: ScheduleEntry|null=null, nxt: ScheduleEntry|null=null;
+    for (const e of todaySchedule) {
+      const s=toMins(e.startTime), en=toMins(e.endTime);
+      if (nm>=s && nm<en) cur=e;
+      else if (nm<s && !nxt) nxt=e;
+    }
+    return { cur, nxt };
+  }, [todaySchedule, now]);
+
+  const stats = useMemo(() => {
+    let th=0, lab=0, mins=0;
+    daySchedule.forEach(it => {
+      const isLab = it.courseType?.toLowerCase().includes("lab") || it.slot?.startsWith("L");
+      if (isLab) lab++; else th++;
+      const s=toMins(it.startTime), e=toMins(it.endTime);
+      mins += e>s ? e-s : 50;
+    });
+    const h=Math.floor(mins/60), m=mins%60;
+    return { total:daySchedule.length, th, lab, dur: h>0 ? `${h}h${m>0?` ${m}m`:""}` : m>0 ? `${m}m` : "0m" };
+  }, [daySchedule]);
+
+  const chartData = useMemo(() => DAY_KEYS.map((k,i) => ({ name:DAY_SHORT[i], classes:schedule[k]?.length||0 })), [schedule]);
+
+  const weeklyStats = useMemo(() => {
+    let total = 0, th = 0, lab = 0, mins = 0;
+    for (const key of DAY_KEYS) {
+      for (const item of (schedule[key] || [])) {
+        total++;
+        const isLab = item.courseType?.toLowerCase().includes("lab") || item.slot?.startsWith("L");
+        if (isLab) lab++; else th++;
+        const s = toMins(item.startTime), e = toMins(item.endTime);
+        mins += e > s ? (e - s) : 50;
+      }
+    }
+    const h = Math.floor(mins / 60), m = mins % 60;
+    return { total, th, lab, dur: h > 0 ? `${h}h${m > 0 ? ` ${m}m` : ""}` : m > 0 ? `${m}m` : "0m" };
+  }, [schedule]);
+
+  const attMap = useMemo(() => {
+    const m = new Map<string, AttendanceRecord>();
+    for (const r of attendance) m.set(`${r.courseCode}::${r.courseType.toLowerCase().includes("lab")?"lab":"th"}`, r);
+    return m;
+  }, [attendance]);
+  const getAtt = (code: string, slot: string) => attMap.get(`${code}::${slot.toUpperCase().startsWith("L")?"lab":"th"}`);
+
+  // ── Skeleton pages ─────────────────────────────────────────────────────────
+  const shell = (children: React.ReactNode) => (
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground select-none">
+      <DashboardSidebar />
+      <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar pt-8 pb-16 px-6 md:px-10 bg-background">
+        {children}
+      </main>
+    </div>
+  );
+
+  if (authLoading) return shell(
+    <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
+      <div className="flex justify-between pb-6 border-b border-border/40 shrink-0">
+        <div className="space-y-2"><Sk className="h-7 w-36" /><Sk className="h-3 w-52" /></div>
+        <Sk className="h-8 w-44 rounded-lg" />
+      </div>
+      <div className="shrink-0">
+        <Sk className="h-14 w-full rounded-xl" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start min-h-0 flex-1 overflow-hidden">
+        <div className="lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-2">
+          {[...Array(5)].map((_,i) => <CardSkeleton key={i} />)}
+        </div>
+        <div className="space-y-8 lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2">
+          <SidebarSkeleton />
+        </div>
+      </div>
+    </div>
+  );
+
+  if (error) return shell(
+    <div className="flex h-full items-center justify-center">
+      <ErrorDisplay message={error} onRetry={load} />
+    </div>
+  );
+
+  const focused = classStatus.cur ?? classStatus.nxt;
+  const focusedLabel = classStatus.cur ? "In Progress" : classStatus.nxt ? "Up Next" : null;
+
+  return shell(
+    <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
+
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-6 border-b border-border/40 shrink-0">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">My Timetable</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Weekly schedule with attendance</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 border border-border/50 bg-muted/40 rounded-lg px-3.5 py-1.5 text-sm text-muted-foreground font-semibold">
+            <Calendar className="w-4 h-4 text-primary shrink-0" />
+            <span>{weekLabel}</span>
+            <div className="flex items-center gap-0.5 ml-1.5 pl-1.5 border-l border-border/50">
+              <button onClick={() => setWeekStart(p => { const d=new Date(p); d.setDate(p.getDate()-7); return d; })}
+                className="p-0.5 rounded hover:text-foreground cursor-pointer transition-colors"><ChevronLeft className="w-3.5 h-3.5" /></button>
+              <button onClick={() => setWeekStart(p => { const d=new Date(p); d.setDate(p.getDate()+7); return d; })}
+                className="p-0.5 rounded hover:text-foreground cursor-pointer transition-colors"><ChevronRight className="w-3.5 h-3.5" /></button>
+            </div>
+          </div>
+          <ModeToggle />
+        </div>
+      </header>
+
+      {/* ── Day tabs ───────────────────────────────────────────────────────── */}
+      <div className="border-b border-border/20 pb-3 shrink-0">
+        <div className="grid grid-cols-7 gap-2">
+          {weekDays.map((d, i) => {
+            const active = selectedDay === i;
+            const isToday = i === todayIdx();
+            const count = schedule[DAY_KEYS[i]]?.length || 0;
             return (
-              <button
-                key={day}
-                onClick={() => setActiveDay(day)}
-                className={cn(
-                  "group relative pb-4 transition-all",
-                  isActive ? "text-primary hover:text-primary" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                   <span className="text-sm font-black uppercase tracking-widest">
-                     <span className="hidden sm:inline">{day}</span>
-                     <span className="sm:hidden">{dayShortNames[day]}</span>
-                   </span>
-                   {sessions.length > 0 && (
-                     <span className={cn(
-                       "text-[10px] font-black px-1.5 py-0.5 rounded-full border transition-colors",
-                       isActive ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border opacity-50 group-hover:opacity-100"
-                     )}>
-                       {sessions.length}
-                     </span>
-                   )}
-                </div>
-                {isActive && (
+              <button key={d.full} onClick={() => setSelectedDay(i)}
+                className={`relative flex flex-col items-center gap-1.5 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                  active ? "text-primary font-bold animate-[pulse_0.15s_ease-out_1]" : "text-muted-foreground hover:text-foreground"
+                }`}>
+                <span className={`text-xs font-bold uppercase tracking-wider ${active ? "opacity-90" : "opacity-55"}`}>{d.name}</span>
+                <span className="text-xl font-black leading-none">{d.num}</span>
+                {/* today underline */}
+                {isToday && !active && <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-primary" />}
+                {/* classes dot */}
+                {count > 0 && <span className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${active ? "bg-primary" : "bg-emerald-500"}`} />}
+                
+                {/* Animated underline */}
+                {active && (
                   <motion.div
-                    layoutId="activeDay"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    layoutId="activeDayTab"
+                    className="absolute bottom-0 h-[2px] bg-primary rounded-full"
+                    style={{ left: "15%", right: "15%" }}
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
               </button>
             );
           })}
         </div>
-      </header>
+      </div>
 
-      {/* Day Content */}
-      <section>
-        {activeDay && (
-          <div key={activeDay} className="flex flex-col">
-            {timetable[activeDay] && timetable[activeDay].length > 0 ? (
-              timetable[activeDay].map((session: ScheduleEntry, index: number) => (
-                <SessionItem
-                  key={`${session.courseCode}-${index}`}
-                  session={session}
-                  index={index}
-                />
-              ))
+      {/* ── Main content ───────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start min-h-0 flex-1 overflow-hidden">
+
+        {/* Schedule list */}
+        <div className="lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-4">
+          {/* List header */}
+          <div className="flex items-center justify-between pb-3 border-b border-border/20">
+            <div>
+              <h2 className="text-lg font-extrabold text-foreground tracking-tight">{weekDays[selectedDay].full}</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">{weekDays[selectedDay].date.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</p>
+            </div>
+            {!loading && <span className="text-sm font-bold bg-muted text-muted-foreground px-3 py-1 rounded-full">{daySchedule.length} {daySchedule.length === 1 ? "class" : "classes"}</span>}
+          </div>
+
+          {/* Rows */}
+          <div className="relative">
+            {loading ? (
+              <div className="space-y-2 pt-2">
+                {[...Array(6)].map((_,i) => <CardSkeleton key={i} />)}
+              </div>
+            ) : daySchedule.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+                <Calendar className="w-8 h-8 text-muted-foreground/20" />
+                <div>
+                  <p className="text-sm font-bold text-foreground">No classes scheduled</p>
+                  <p className="text-xs text-muted-foreground mt-1">Enjoy your day off!</p>
+                </div>
+              </div>
             ) : (
-              <EmptyDay />
+              <div className="relative">
+                {/* Continuous timeline vertical line on desktop */}
+                <div className="absolute top-0 bottom-0 left-[92px] w-[2px] bg-border/15 hidden md:block" />
+
+                <div className="space-y-1 pt-2">
+                  {daySchedule.map((item, idx) => {
+                    const isLab = item.courseType?.toLowerCase().includes("lab") || item.slot?.startsWith("L");
+                    const isNow = classStatus.cur?.courseCode === item.courseCode && classStatus.cur?.slot === item.slot;
+                    const att = getAtt(item.courseCode, item.slot);
+
+                    return (
+                      <div key={`${item.courseCode}-${item.slot}-${idx}`}
+                        className={`relative flex flex-col md:flex-row md:items-center gap-4 md:gap-6 py-4 px-3 md:px-4 rounded-xl transition-all duration-200 border border-transparent ${
+                          isNow ? "bg-primary/[0.03] border-primary/15 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]" : "hover:bg-muted/20"
+                        }`}>
+
+                        {/* Time */}
+                        <div className="w-[80px] shrink-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1">
+                          <span className="text-sm font-extrabold text-foreground leading-none">{item.startTime}</span>
+                          <span className="text-xs text-muted-foreground font-semibold leading-none md:mt-1.5">{item.endTime}</span>
+                        </div>
+
+                        {/* Timeline dot */}
+                        <div className="relative hidden md:flex flex-col items-center justify-center self-stretch shrink-0 w-6">
+                          <div className={`w-3.5 h-3.5 rounded-full border-2 border-background z-10 transition-all duration-300 ${
+                            isNow ? "bg-primary ring-4 ring-primary/15 scale-110" : "bg-muted-foreground/35"
+                          }`} />
+                        </div>
+
+                        {/* Course info */}
+                        <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-extrabold tracking-wider text-primary uppercase">{item.courseCode}</span>
+                              <span className={`text-xs font-bold px-2 py-0.5 rounded-md leading-none ${
+                                isLab ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                     : "bg-primary/10 text-primary"
+                              }`}>{isLab ? "Lab" : "Theory"}</span>
+                              {isNow && (
+                                <span className="flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full leading-none">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />Live
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-base font-extrabold text-foreground leading-snug truncate">{item.courseTitle}</p>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground font-semibold flex-wrap">
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />{item.venue || "TBA"}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
+                                <span className="truncate max-w-[130px]" title={item.faculty}>{item.faculty || "TBA"}</span>
+                              </span>
+                              <span className="font-mono text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-semibold">{item.slot}</span>
+                              {att && (() => {
+                                const h = attHint(att.attendedClasses, att.totalClasses);
+                                if (!h) return null;
+                                return (
+                                  <span className={`text-xs font-extrabold px-2 py-0.5 rounded-md leading-none ${
+                                    h.type === "need"
+                                      ? "bg-destructive/10 text-destructive"
+                                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                  }`}>
+                                    {h.type === "need" ? `↑ ${h.count} to attend` : `↓ ${h.count} can skip`}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                          </div>
+
+                          {/* Attendance */}
+                          {att ? (
+                            <div className="shrink-0 flex items-center justify-end">
+                              <AttPill att={att} />
+                            </div>
+                          ) : (
+                            <div className="w-14 shrink-0" />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </div>
-        )}
-      </section>
+        </div>
+
+        {/* ── Sidebar ──────────────────────────────────────────────────────── */}
+        <div className="space-y-8 lg:h-full lg:overflow-y-auto no-scrollbar pb-6 lg:sticky lg:top-0 pr-2 shrink-0">
+          {loading ? <SidebarSkeleton /> : (
+            <>
+              {/* Current / Next class */}
+              {focusedLabel && focused ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-border/10 pb-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{focusedLabel}</p>
+                    {classStatus.cur && (
+                      <span className="flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />Live
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="border-l-2 border-primary pl-4 py-1.5 space-y-2.5">
+                    <div>
+                      <p className="text-xs font-extrabold text-primary tracking-wide uppercase">{focused.courseCode}</p>
+                      <p className="text-base font-extrabold text-foreground leading-snug">{focused.courseTitle}</p>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-muted-foreground pt-1">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 shrink-0 text-muted-foreground/60" />
+                        <span className="font-semibold text-foreground">{focused.startTime} – {focused.endTime}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 shrink-0 text-muted-foreground/60" />
+                        <span className="font-medium">{focused.venue || "TBA"}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 shrink-0 text-muted-foreground/60" />
+                        <span className="truncate font-medium">{focused.faculty || "TBA"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Attendance footer */}
+                  {(() => {
+                    const a = getAtt(focused.courseCode, focused.slot);
+                    if (!a) return null;
+                    const p = a.attendancePercentage;
+                    const barCls = p >= 75 ? "bg-emerald-500" : p >= 60 ? "bg-amber-500" : "bg-destructive";
+                    const txtCls = p >= 75 ? "text-emerald-600 dark:text-emerald-400" : p >= 60 ? "text-amber-600 dark:text-amber-400" : "text-destructive";
+                    const hint = attHint(a.attendedClasses, a.totalClasses);
+                    return (
+                      <div className="pl-4 pt-2 space-y-2.5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full ${barCls}`} style={{ width: `${Math.min(p,100)}%` }} />
+                          </div>
+                          <span className={`text-sm font-extrabold shrink-0 ${txtCls}`}>{p}% · {a.attendedClasses}/{a.totalClasses}</span>
+                        </div>
+                        {hint && (
+                          <p className={`text-xs font-bold ${
+                            hint.type === "need" ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
+                          }`}>
+                            {hint.type === "need"
+                              ? `↑ Attend ${hint.count} more class${hint.count > 1 ? "es" : ""} to reach 75%`
+                              : `↓ Can skip ${hint.count} class${hint.count > 1 ? "es" : ""} and stay above 75%`}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Today</p>
+                  <div className="flex items-center gap-3 py-1">
+                    <div className="p-2 rounded-lg bg-muted shrink-0"><Calendar className="w-4 h-4 text-muted-foreground/60" /></div>
+                    <div>
+                      <p className="text-base font-extrabold text-foreground">All done for today</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">No more classes scheduled.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Day stats */}
+              <div className="space-y-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">{DAY_FULL[selectedDay]}'s Summary</p>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-1">
+                  {([
+                    { label:"Classes",  val: stats.total,  Icon: Calendar  },
+                    { label:"Theory",   val: stats.th,     Icon: BookOpen  },
+                    { label:"Lab",      val: stats.lab,    Icon: Monitor   },
+                    { label:"Duration", val: stats.dur,    Icon: Clock     },
+                  ] as const).map(({ label, val, Icon }) => (
+                    <div key={label} className="space-y-1.5">
+                      <p className="text-3xl font-black text-foreground leading-none">{val}</p>
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Icon className="w-3.5 h-3.5 shrink-0 opacity-65" />
+                        <p className="text-xs font-bold uppercase tracking-wider">{label}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Weekly chart */}
+              <div className="space-y-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Weekly Overview</p>
+                <div className="h-36 pt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top:6, right:4, left:-28, bottom:0 }}>
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill:"var(--muted-foreground)", fontSize:12 }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill:"var(--muted-foreground)", fontSize:12 }} allowDecimals={false} />
+                      <ReChartsTooltip
+                        cursor={{ fill:"var(--accent)", opacity:0.12 }}
+                        contentStyle={{ backgroundColor:"var(--card)", borderColor:"var(--border)", borderRadius:"10px", fontSize:"12px", color:"var(--foreground)" }}
+                      />
+                      <Bar dataKey="classes" fill="var(--primary)" radius={[4,4,0,0]} maxBarSize={14} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Weekly totals */}
+              <div className="space-y-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Weekly Totals</p>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-1">
+                  {([
+                    { label: "Classes",  val: weeklyStats.total, Icon: Calendar  },
+                    { label: "Theory",   val: weeklyStats.th,    Icon: BookOpen  },
+                    { label: "Lab",      val: weeklyStats.lab,   Icon: Monitor   },
+                    { label: "Duration", val: weeklyStats.dur,   Icon: Clock     },
+                  ] as const).map(({ label, val, Icon }) => (
+                    <div key={label} className="space-y-1.5">
+                      <p className="text-3xl font-black text-foreground leading-none">{val}</p>
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Icon className="w-3.5 h-3.5 shrink-0 opacity-65" />
+                        <p className="text-xs font-bold uppercase tracking-wider">{label}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

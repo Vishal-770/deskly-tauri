@@ -122,13 +122,15 @@ fn get_theory_slot_map() -> HashMap<&'static str, Vec<(usize, usize)>> {
     m.insert("C1", vec![(2, 0), (4, 1)]);
     m.insert("V1", vec![(2, 3)]);
     m.insert("V2", vec![(2, 4)]);
+    m.insert("TBB1", vec![(2, 4)]);
 
     m.insert("TE1", vec![(3, 3)]);
     m.insert("TCC1", vec![(3, 4)]);
 
     m.insert("TA1", vec![(4, 2)]);
     m.insert("TF1", vec![(4, 3)]);
-    m.insert("TD1", vec![(4, 4)]);
+    m.insert("TD1", vec![(2, 3)]);
+    m.insert("TDD1", vec![(4, 4)]);
 
     m.insert("A2", vec![(0, 5), (2, 6)]);
     m.insert("F2", vec![(0, 6), (2, 7)]);

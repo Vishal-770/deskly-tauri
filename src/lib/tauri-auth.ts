@@ -75,3 +75,16 @@ export async function authClearSemester() {
 export async function authGetSemesters() {
   return invoke<Semester[]>("auth_get_semesters");
 }
+
+export async function authKeyringSet(username: string, password: string) {
+  return invoke<void>("auth_keyring_set", { username, password });
+}
+
+export async function authKeyringGet(username: string) {
+  return invoke<string>("auth_keyring_get", { username });
+}
+
+export async function authKeyringDelete(username: string) {
+  return invoke<void>("auth_keyring_delete", { username });
+}
+

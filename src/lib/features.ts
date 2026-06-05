@@ -449,8 +449,7 @@ export async function getGradesHistory(): Promise<ApiResult<StudentHistoryData>>
 
 export interface SyllabusData {
   filename: string;
-  contentType: string;
-  data: string; // base64
+  savePath: string;
 }
 
 export type SyllabusResponse = ApiResult<SyllabusData>;

@@ -124,4 +124,23 @@ mod tests {
             "NO MATCHING ENTRY FOUND IN SECURE STORAGE"
         ));
     }
+
+    #[test]
+    fn test_keyring_integration() {
+        let test_user = "test_user_deskly_123";
+        let test_pass = "super_secure_pass_456";
+
+        // Try setting password
+        let set_res = super::set_password(test_user, test_pass);
+        assert!(set_res.is_ok(), "set_password failed: {:?}", set_res);
+
+        // Try getting password
+        let get_res = super::get_password(test_user);
+        assert!(get_res.is_ok(), "get_password failed: {:?}", get_res);
+        assert_eq!(get_res.unwrap(), test_pass);
+
+        // Try deleting password
+        let del_res = super::delete_password(test_user);
+        assert!(del_res.is_ok(), "delete_password failed: {:?}", del_res);
+    }
 }
