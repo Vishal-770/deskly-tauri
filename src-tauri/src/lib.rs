@@ -1,4 +1,5 @@
 use tauri::Manager;
+use tauri_plugin_notification::NotificationExt;
 
 mod attendance;
 mod auth;
@@ -16,11 +17,35 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+#[tauri::command]
+fn test_backend(app: tauri::AppHandle) -> String {
+    // 1. Official Tauri cross-platform notification API (100% compatible with Windows, macOS, Linux, iOS, Android)
+    let _ = app.notification()
+        .builder()
+        .title("Deskly Test Notification")
+        .body("Backend connection active! Hello from the Tauri Rust backend.")
+        .show();
+
+    // 2. Linux development-time fallback (since Linux notification daemons block dev binaries lacking a registered .desktop launcher)
+    #[cfg(target_os = "linux")]
+    {
+        let _ = std::process::Command::new("notify-send")
+            .args([
+                "Deskly Test Notification",
+                "Backend connection active! Hello from the Tauri Rust backend."
+            ])
+            .spawn();
+    }
+
+    "Backend connection active! Native OS popup notification sent.".to_string()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let auth_store = auth::init_auth_store(&app.handle());
             app.manage(auth_store);
@@ -28,6 +53,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             greet,
+            test_backend,
             auth::auth_login,
             auth::auth_logout,
             auth::auth_get_state,

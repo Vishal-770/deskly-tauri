@@ -25,6 +25,15 @@ import {
   User
 } from "lucide-react";
 import Loader from "@/components/Loader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { isPermissionGranted, requestPermission } from "@tauri-apps/plugin-notification";
+
 
 // Interfaces
 interface CommandParam {
@@ -384,6 +393,12 @@ const COMMANDS: CommandMetadata[] = [
     params: [
       { name: "name", label: "Your Name", type: "text", placeholder: "e.g. John Doe" }
     ]
+  },
+  {
+    name: "test_backend",
+    displayName: "Test Notification Popup",
+    description: "Requests permission and displays a native OS system notification popup with a backend confirmation message.",
+    category: "Content & General"
   }
 ];
 
@@ -512,6 +527,12 @@ export default function DashboardPage() {
     }
 
     try {
+      if (selectedCommand.name === "test_backend") {
+        let permissionGranted = await isPermissionGranted();
+        if (!permissionGranted) {
+          await requestPermission();
+        }
+      }
       payload = await invoke(selectedCommand.name, args);
       status = "success";
     } catch (err: any) {
@@ -607,6 +628,37 @@ export default function DashboardPage() {
                   <span>View Timetable</span>
                 </button>
               )}
+
+              <button
+                onClick={async () => {
+                  try {
+                    let permissionGranted = await isPermissionGranted();
+                    if (!permissionGranted) {
+                      await requestPermission();
+                    }
+                    const res = await invoke<string>("test_backend");
+                    console.log("Backend response:", res);
+                    setLastResponse({
+                      command: "Test Backend Button",
+                      status: "success",
+                      duration: 0,
+                      payload: res
+                    });
+                  } catch (err) {
+                    console.error("Backend test failed:", err);
+                    setLastResponse({
+                      command: "Test Backend Button",
+                      status: "error",
+                      duration: 0,
+                      payload: err
+                    });
+                  }
+                }}
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
+              >
+                <Activity className="w-3.5 h-3.5 text-primary" />
+                <span>Test Backend</span>
+              </button>
 
               <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-accent/30 border border-border/50 text-muted-foreground w-fit">
                 <Activity className="w-3.5 h-3.5 text-primary animate-pulse" />
@@ -753,17 +805,21 @@ export default function DashboardPage() {
                         </label>
                         
                         {p.type === "select" ? (
-                          <select
-                            className="h-10 w-full rounded-xl border border-border/50 bg-accent/10 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200"
+                          <Select
                             value={paramValues[p.name] || ""}
-                            onChange={(e) => setParamValues({ ...paramValues, [p.name]: e.target.value })}
+                            onValueChange={(val) => setParamValues({ ...paramValues, [p.name]: val })}
                           >
-                            {p.options?.map((opt) => (
-                              <option key={opt} value={opt} className="bg-background text-foreground">
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
+                            <SelectTrigger className="h-10 w-full rounded-xl border border-border/50 bg-accent/10 px-3 text-sm focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200">
+                              <SelectValue placeholder={p.placeholder || "Select an option..."} />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border/50 bg-card">
+                              {p.options?.map((opt) => (
+                                <SelectItem key={opt} value={opt} className="rounded-lg">
+                                  {opt}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         ) : (
                           <input
                             type={p.type}
@@ -826,8 +882,8 @@ export default function DashboardPage() {
                       </span>
                       <span className={`text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full ${
                         lastResponse.status === "success"
-                          ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-500"
-                          : "bg-rose-500/10 border border-rose-500/30 text-rose-500"
+                          ? "bg-chart-2/10 border border-chart-2/30 text-chart-2"
+                          : "bg-destructive/10 border border-destructive/30 text-destructive"
                       }`}>
                         {lastResponse.status}
                       </span>
@@ -839,7 +895,7 @@ export default function DashboardPage() {
                       className="p-2 rounded-xl bg-accent/20 hover:bg-accent/40 border border-border/40 text-muted-foreground hover:text-foreground transition-all duration-150 cursor-pointer"
                       title="Copy response payload"
                     >
-                      {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                      {copied ? <Check className="w-4 h-4 text-chart-2" /> : <Copy className="w-4 h-4" />}
                     </button>
                   )}
                 </div>

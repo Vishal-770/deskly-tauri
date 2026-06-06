@@ -145,11 +145,11 @@ function attHint(attended: number, total: number) {
 
 function AttPill({ att }: { att: AttendanceRecord }) {
   const p = att.attendancePercentage;
-  const textCls = p >= 75 ? "text-emerald-600 dark:text-emerald-400"
-                : p >= 60 ? "text-amber-600 dark:text-amber-400"
+  const textCls = p >= 75 ? "text-chart-2"
+                : p >= 60 ? "text-chart-3"
                 : "text-destructive";
-  const barCls  = p >= 75 ? "bg-emerald-500"
-                : p >= 60 ? "bg-amber-500"
+  const barCls  = p >= 75 ? "bg-chart-2"
+                : p >= 60 ? "bg-chart-3"
                 : "bg-destructive";
   return (
     <div className="flex flex-col items-end gap-1 min-w-[64px]">
@@ -341,7 +341,7 @@ export default function TimetablePage() {
                 {/* today underline */}
                 {isToday && !active && <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-primary" />}
                 {/* classes dot */}
-                {count > 0 && <span className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${active ? "bg-primary" : "bg-emerald-500"}`} />}
+                {count > 0 && <span className={`absolute top-1 right-1 w-1.5 h-1.5 rounded-full ${active ? "bg-primary" : "bg-chart-2"}`} />}
                 
                 {/* Animated underline */}
                 {active && (
@@ -421,9 +421,8 @@ export default function TimetablePage() {
                           <div className="space-y-1.5 flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="text-sm font-extrabold tracking-wider text-primary uppercase">{item.courseCode}</span>
-                              <span className={`text-xs font-bold px-2 py-0.5 rounded-md leading-none ${
-                                isLab ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                     : "bg-primary/10 text-primary"
+                              <span className={`text-xs font-bold ${
+                                isLab ? "text-chart-2" : "text-primary"
                               }`}>{isLab ? "Lab" : "Theory"}</span>
                               {isNow && (
                                 <span className="flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full leading-none">
@@ -445,10 +444,10 @@ export default function TimetablePage() {
                                 const h = attHint(att.attendedClasses, att.totalClasses);
                                 if (!h) return null;
                                 return (
-                                  <span className={`text-xs font-extrabold px-2 py-0.5 rounded-md leading-none ${
+                                  <span className={`text-xs font-bold ${
                                     h.type === "need"
-                                      ? "bg-destructive/10 text-destructive"
-                                      : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                      ? "text-destructive"
+                                      : "text-chart-2"
                                   }`}>
                                     {h.type === "need" ? `↑ ${h.count} to attend` : `↓ ${h.count} can skip`}
                                   </span>
@@ -518,8 +517,8 @@ export default function TimetablePage() {
                     const a = getAtt(focused.courseCode, focused.slot);
                     if (!a) return null;
                     const p = a.attendancePercentage;
-                    const barCls = p >= 75 ? "bg-emerald-500" : p >= 60 ? "bg-amber-500" : "bg-destructive";
-                    const txtCls = p >= 75 ? "text-emerald-600 dark:text-emerald-400" : p >= 60 ? "text-amber-600 dark:text-amber-400" : "text-destructive";
+                    const barCls = p >= 75 ? "bg-chart-2" : p >= 60 ? "bg-chart-3" : "bg-destructive";
+                    const txtCls = p >= 75 ? "text-chart-2" : p >= 60 ? "text-chart-3" : "text-destructive";
                     const hint = attHint(a.attendedClasses, a.totalClasses);
                     return (
                       <div className="pl-4 pt-2 space-y-2.5">
@@ -531,7 +530,7 @@ export default function TimetablePage() {
                         </div>
                         {hint && (
                           <p className={`text-xs font-bold ${
-                            hint.type === "need" ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
+                            hint.type === "need" ? "text-destructive" : "text-chart-2"
                           }`}>
                             {hint.type === "need"
                               ? `↑ Attend ${hint.count} more class${hint.count > 1 ? "es" : ""} to reach 75%`

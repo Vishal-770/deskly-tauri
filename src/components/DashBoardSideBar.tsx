@@ -17,6 +17,8 @@ import {
   Receipt,
   User,
   Users,
+  FileText,
+  Award,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,6 +55,12 @@ const DashboardSidebar = () => {
         label: "Timetable",
         href: "/dashboard/timetable",
         icon: <Clock className="w-5 h-5" />,
+        description: "",
+      },
+      {
+        label: "Exams",
+        href: "/dashboard/exams",
+        icon: <FileText className="w-5 h-5" />,
         description: "",
       },
       {
@@ -125,6 +133,12 @@ const DashboardSidebar = () => {
         label: "Faculty Info",
         href: "/dashboard/faculty-info",
         icon: <Users className="w-5 h-5" />,
+        description: "",
+      },
+      {
+        label: "HOD & Dean",
+        href: "/dashboard/hod-dean",
+        icon: <Award className="w-5 h-5" />,
         description: "",
       },
     ],

@@ -468,3 +468,48 @@ export async function downloadCurriculumSyllabus(
     };
   }
 }
+
+export interface ReceiptDownloadData {
+  filename: string;
+  savePath: string;
+}
+
+export type ReceiptDownloadResponse = ApiResult<ReceiptDownloadData>;
+
+export async function downloadPaymentReceipt(
+  receitNo: string,
+  applno: string,
+): Promise<ReceiptDownloadResponse> {
+  try {
+    return await invoke<ReceiptDownloadResponse>("payment_receipt_download", {
+      receitNo,
+      applno,
+    });
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+export interface HodDeanDetail {
+  role: string;
+  name: string;
+  school: string;
+  cabin: string;
+  email: string;
+  intercom: string;
+  photo: string;
+}
+
+export async function getHodDeanDetails(): Promise<ApiResult<HodDeanDetail[]>> {
+  try {
+    return await invoke<ApiResult<HodDeanDetail[]>>("hod_dean_details_get");
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}

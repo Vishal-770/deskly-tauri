@@ -6,10 +6,18 @@ import { components, hooks, utils } from '@generouted/react-router/client'
 export type Path =
   | `/`
   | `/dashboard`
+  | `/dashboard/attendance`
+  | `/dashboard/attendance/:classId`
+  | `/dashboard/courses`
+  | `/dashboard/exams`
+  | `/dashboard/grades`
+  | `/dashboard/hod-dean`
+  | `/dashboard/payment-receipts`
+  | `/dashboard/profile`
   | `/dashboard/timetable`
 
 export type Params = {
-  
+  '/dashboard/attendance/:classId': { classId: string }
 }
 
 export type ModalPath = never
