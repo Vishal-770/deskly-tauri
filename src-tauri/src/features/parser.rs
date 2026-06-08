@@ -483,11 +483,150 @@ mod tests {
         assert_eq!(details[0].intercom, "1234");
         assert_eq!(details[0].photo, "data:jpg;base64,12345");
     }
+
+    #[test]
+    fn test_parse_hod_dean_details_multiple_in_single_box() {
+        let html = r#"
+            <div class="box">
+                <div class="table-responsive">
+                    <div class="box-header with-border text-center">
+                        <h3 class="box-title"><b>DEAN</b></h3>
+                    </div>
+                    <table class="table">
+                        <tr>
+                            <td><b>Name of the Faculty </b></td>
+                            <td>Dr. VISWANATHAN V</td>
+                            <td rowspan="5"><img src="data:jpg;base64,123" /></td>
+                        </tr>
+                        <tr>
+                            <td><b>School </b></td>
+                            <td>SCOPE</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="table-responsive">
+                    <div class="box-header with-border text-center">
+                        <h3 class="box-title"><b>HOD</b></h3>
+                    </div>
+                    <table class="table">
+                        <tr>
+                            <td><b>Name of the Faculty </b></td>
+                            <td>Dr. HOD NAME</td>
+                            <td rowspan="5"><img src="data:jpg;base64,456" /></td>
+                        </tr>
+                        <tr>
+                            <td><b>School </b></td>
+                            <td>SCOPE</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        "#;
+
+        let details = parse_hod_dean_details(html).unwrap();
+        assert_eq!(details.len(), 2);
+        assert_eq!(details[0].role, "DEAN");
+        assert_eq!(details[0].name, "Dr. VISWANATHAN V");
+        assert_eq!(details[0].photo, "data:jpg;base64,123");
+        assert_eq!(details[1].role, "HOD");
+        assert_eq!(details[1].name, "Dr. HOD NAME");
+        assert_eq!(details[1].photo, "data:jpg;base64,456");
+    }
+}
+
+fn parse_single_table(
+    table: &ElementRef<'_>,
+    role: String,
+    tr_selector: &Selector,
+    td_selector: &Selector,
+    img_selector: &Selector,
+) -> HodDeanDetail {
+    let mut name = String::new();
+    let mut school = String::new();
+    let mut cabin = String::new();
+    let mut email = String::new();
+    let mut intercom = String::new();
+    let mut photo = String::new();
+
+    for row in table.select(tr_selector) {
+        if let Some(img) = row.select(img_selector).next() {
+            if let Some(src) = img.value().attr("src") {
+                photo = src.to_string();
+            }
+        }
+
+        let cells: Vec<_> = row.select(td_selector).collect();
+        if cells.len() >= 2 {
+            let key = text_of(&cells[0]).to_lowercase();
+            let val = text_of(&cells[1]);
+
+            if key.contains("name") && (key.contains("faculty") || key.contains("dean") || key.contains("hod") || key.contains("h.o.d.") || key.contains("head")) {
+                name = val;
+            } else if key.contains("designation") || key.contains("school") || key.contains("department") || key.contains("center") {
+                school = val;
+            } else if key.contains("cabin") {
+                cabin = val;
+            } else if key.contains("email") {
+                email = val;
+            } else if key.contains("intercom") {
+                intercom = val;
+            }
+        }
+    }
+
+    HodDeanDetail {
+        role,
+        name,
+        school,
+        cabin,
+        email,
+        intercom,
+        photo,
+    }
+}
+
+fn find_role_for_table(table: &ElementRef<'_>, title_selector: &Selector) -> String {
+    // 1. Try finding it inside the table itself
+    if let Some(title_el) = table.select(title_selector).next() {
+        return text_of(&title_el);
+    }
+
+    // 2. Try sibling elements preceding the table (e.g. sibling box-header/h3)
+    let mut curr = table.prev_sibling();
+    while let Some(node) = curr {
+        if let Some(el) = ElementRef::wrap(node) {
+            if let Some(title_el) = el.select(title_selector).next() {
+                return text_of(&title_el);
+            }
+            let name = el.value().name();
+            let has_title_class = el.value().attr("class").map_or(false, |c| c.contains("box-title") || c.contains("box-header"));
+            if name == "h3" || has_title_class {
+                return text_of(&el);
+            }
+        }
+        curr = node.prev_sibling();
+    }
+
+    // 3. Try finding it inside the parent/grandparent
+    if let Some(parent_node) = table.parent() {
+        if let Some(parent_el) = ElementRef::wrap(parent_node) {
+            if let Some(title_el) = parent_el.select(title_selector).next() {
+                return text_of(&title_el);
+            }
+            if let Some(grandparent_node) = parent_el.parent() {
+                if let Some(grandparent_el) = ElementRef::wrap(grandparent_node) {
+                    if let Some(title_el) = grandparent_el.select(title_selector).next() {
+                        return text_of(&title_el);
+                    }
+                }
+            }
+        }
+    }
+    "Unknown".to_string()
 }
 
 pub fn parse_hod_dean_details(html: &str) -> Result<Vec<HodDeanDetail>, String> {
     let document = Html::parse_document(html);
-    let box_selector = Selector::parse(".box").map_err(|_| "Invalid box selector".to_string())?;
     let title_selector = Selector::parse(".box-title, h3").map_err(|_| "Invalid title selector".to_string())?;
     let table_selector = Selector::parse("table").map_err(|_| "Invalid table selector".to_string())?;
     let tr_selector = Selector::parse("tr").map_err(|_| "Invalid row selector".to_string())?;
@@ -496,57 +635,22 @@ pub fn parse_hod_dean_details(html: &str) -> Result<Vec<HodDeanDetail>, String> 
 
     let mut details = Vec::new();
 
-    for box_el in document.select(&box_selector) {
-        let role = box_el
-            .select(&title_selector)
-            .next()
-            .map(|el| text_of(&el))
-            .unwrap_or_else(|| "Unknown".to_string());
+    for table in document.select(&table_selector) {
+        let table_text = table.text().collect::<String>().to_lowercase();
+        let has_name = table_text.contains("name");
+        let has_role_keyword = table_text.contains("faculty")
+            || table_text.contains("dean")
+            || table_text.contains("hod")
+            || table_text.contains("h.o.d.")
+            || table_text.contains("head");
 
-        if let Some(table) = box_el.select(&table_selector).next() {
-            let mut name = String::new();
-            let mut school = String::new();
-            let mut cabin = String::new();
-            let mut email = String::new();
-            let mut intercom = String::new();
-            let mut photo = String::new();
-
-            for row in table.select(&tr_selector) {
-                if let Some(img) = row.select(&img_selector).next() {
-                    if let Some(src) = img.value().attr("src") {
-                        photo = src.to_string();
-                    }
-                }
-
-                let cells: Vec<_> = row.select(&td_selector).collect();
-                if cells.len() >= 2 {
-                    let key = text_of(&cells[0]).to_lowercase();
-                    let val = text_of(&cells[1]);
-
-                    if key.contains("name of the faculty") || key.contains("name of the dean") || key.contains("name of the hod") {
-                        name = val;
-                    } else if key.contains("school") || key.contains("department") {
-                        school = val;
-                    } else if key.contains("cabin") {
-                        cabin = val;
-                    } else if key.contains("email") {
-                        email = val;
-                    } else if key.contains("intercom") {
-                        intercom = val;
-                    }
-                }
-            }
-
-            details.push(HodDeanDetail {
-                role,
-                name,
-                school,
-                cabin,
-                email,
-                intercom,
-                photo,
-            });
+        if !(has_name && has_role_keyword) {
+            continue;
         }
+
+        let role = find_role_for_table(&table, &title_selector);
+        let parsed = parse_single_table(&table, role, &tr_selector, &td_selector, &img_selector);
+        details.push(parsed);
     }
 
     Ok(details)

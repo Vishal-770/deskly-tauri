@@ -8,10 +8,14 @@ export type Path =
   | `/dashboard`
   | `/dashboard/attendance`
   | `/dashboard/attendance/:classId`
+  | `/dashboard/contact`
   | `/dashboard/courses`
   | `/dashboard/exams`
+  | `/dashboard/faculty-info`
   | `/dashboard/grades`
   | `/dashboard/hod-dean`
+  | `/dashboard/laundry`
+  | `/dashboard/mess`
   | `/dashboard/payment-receipts`
   | `/dashboard/profile`
   | `/dashboard/timetable`

@@ -4,7 +4,6 @@ import { getHodDeanDetails, HodDeanDetail } from "@/lib/features";
 import DashboardSidebar from "@/components/DashBoardSideBar";
 import { ErrorDisplay } from "@/components/error-display";
 import {
-  ArrowLeft,
   Mail,
   MapPin,
   Phone,
@@ -16,7 +15,12 @@ import {
 function getSrcFromPhoto(photo: string): string {
   if (!photo) return "";
   const trimmed = photo.trim();
-  if (trimmed.startsWith("data:image")) return trimmed;
+  if (trimmed.startsWith("data:")) {
+    if (trimmed.startsWith("data:jpg;base64,")) {
+      return trimmed.replace("data:jpg;base64,", "data:image/jpeg;base64,");
+    }
+    return trimmed;
+  }
   // If it's a pure base64 string
   if (/^[A-Za-z0-9+/=]+$/.test(trimmed)) {
     return `data:image/jpeg;base64,${trimmed}`;
@@ -24,21 +28,20 @@ function getSrcFromPhoto(photo: string): string {
   return trimmed;
 }
 
-function renderPhoto(photoUrl: string, name: string, maxWClass = "max-w-[12rem]", maxHClass = "max-h-[16rem]") {
+function renderPhoto(photoUrl: string, name: string) {
   const src = photoUrl ? getSrcFromPhoto(photoUrl) : "";
   if (src) {
     return (
-      <div className={`relative ${maxWClass} shrink-0 overflow-hidden rounded-3xl border border-border/20 bg-muted/10 flex items-center justify-center p-1`}>
+      <div className="relative w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 shrink-0 overflow-hidden rounded-2xl border border-border/10 bg-muted/5 flex items-center justify-center p-0.5 shadow-sm">
         <img
           src={src}
           alt={name}
-          className={`w-full h-auto ${maxHClass} object-contain rounded-2xl`}
+          className="w-full h-full object-cover rounded-xl"
         />
       </div>
     );
   }
   
-  // Fallback if no photo is available:
   const initials = name
     ? name
         .split(" ")
@@ -49,22 +52,28 @@ function renderPhoto(photoUrl: string, name: string, maxWClass = "max-w-[12rem]"
     : "?";
 
   return (
-    <div className="w-40 h-48 rounded-3xl shrink-0 overflow-hidden bg-primary/10 flex items-center justify-center text-primary border border-border/20">
-      <span className="text-xl font-bold tracking-wider">{initials}</span>
+    <div className="relative w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 shrink-0 overflow-hidden rounded-2xl bg-primary/5 border border-border/10 flex items-center justify-center text-primary/80 shadow-sm">
+      <span className="text-lg sm:text-xl font-black tracking-wider">{initials}</span>
     </div>
   );
 }
 
+// ─── Details Grid Row Field (Vertical Label/Value Stack) ───────────────────────
+
 function renderDetailField(icon: React.ReactNode, label: string, value: string | null | undefined, className = "") {
   return (
-    <div className={`flex items-center justify-between gap-4 py-3.5 border-b border-border/10 group hover:border-primary/25 transition-colors min-w-0 ${className}`}>
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center text-muted-foreground/70 group-hover:bg-primary/10 group-hover:text-primary transition-all shrink-0">
-          {icon}
-        </div>
-        <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">{label}</span>
+    <div className={`flex items-start gap-3 py-2.5 border-b border-border/5 group min-w-0 ${className}`}>
+      <div className="w-6.5 h-6.5 rounded-full bg-primary/5 flex items-center justify-center text-primary/70 shrink-0 mt-0.5">
+        {icon}
       </div>
-      <span className="text-xs sm:text-sm font-extrabold text-foreground/90 break-words text-right pl-4">{value || "N/A"}</span>
+      <div className="flex-1 min-w-0 space-y-0.5">
+        <p className="text-[9px] sm:text-[10px] font-black text-muted-foreground/45 uppercase tracking-widest leading-none">
+          {label}
+        </p>
+        <p className="text-xs sm:text-sm font-semibold text-foreground/85 leading-normal break-words">
+          {value || "N/A"}
+        </p>
+      </div>
     </div>
   );
 }
@@ -77,48 +86,49 @@ function Sk({ className = "" }: { className?: string }) {
 
 function HodDeanSkeleton() {
   return (
-    <div className="w-full space-y-12 animate-pulse">
+    <div className="w-full space-y-10 animate-pulse">
       {/* Header skeleton */}
-      <div className="pb-4 border-b border-border/20 flex items-center gap-4">
-        <Sk className="w-8 h-8 rounded-full" />
+      <header className="pb-4 border-b border-border/20">
         <div className="space-y-2">
           <Sk className="h-6 w-36 rounded-full" />
           <Sk className="h-3 w-56 rounded-full" />
         </div>
-      </div>
+      </header>
 
       {/* Row items skeleton */}
-      {[...Array(2)].map((_, idx) => (
-        <div key={idx} className="space-y-6 pt-6 first:pt-0 border-t border-border/10 first:border-t-0">
-          <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start w-full">
-            <Sk className="w-44 h-60 rounded-3xl shrink-0" />
-            <div className="flex-1 w-full space-y-6">
-              <div className="border-b border-border/10 pb-4 flex gap-3 items-center">
-                <Sk className="h-5 w-16 rounded-full" />
-                <Sk className="h-8 w-64 rounded-full" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 w-full">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10">
-                    <div className="flex items-center gap-3">
-                      <Sk className="w-8 h-8 rounded-full shrink-0" />
-                      <Sk className="h-3 w-20 rounded-full" />
+      <div className="divide-y divide-border/10">
+        {[...Array(2)].map((_, idx) => (
+          <div key={idx} className="py-6 sm:py-8 w-full">
+            <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start w-full">
+              <Sk className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 rounded-2xl shrink-0" />
+              <div className="flex-1 w-full space-y-5">
+                <div className="border-b border-border/10 pb-4 flex flex-col sm:flex-row gap-3 items-center sm:items-baseline">
+                  <Sk className="h-4 w-16 rounded-full" />
+                  <Sk className="h-5 w-40 sm:w-56 rounded-full" />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-2.5 w-full">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-start gap-3 py-2.5 border-b border-border/10">
+                      <Sk className="w-6.5 h-6.5 rounded-full shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <Sk className="h-2 w-16 rounded-full" />
+                        <Sk className="h-3 w-32 rounded-full" />
+                      </div>
                     </div>
-                    <Sk className="h-4 w-32 rounded-full" />
+                  ))}
+                  <div className="flex items-start gap-3 py-2.5 border-b border-border/10 lg:col-span-2">
+                    <Sk className="w-6.5 h-6.5 rounded-full shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <Sk className="h-2 w-20 rounded-full" />
+                      <Sk className="h-3 w-48 rounded-full" />
+                    </div>
                   </div>
-                ))}
-                <div className="flex items-center justify-between py-3.5 border-b border-border/10 md:col-span-2">
-                  <div className="flex items-center gap-3">
-                    <Sk className="w-8 h-8 rounded-full shrink-0" />
-                    <Sk className="h-3 w-24 rounded-full" />
-                  </div>
-                  <Sk className="h-4 w-48 rounded-full" />
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -170,55 +180,65 @@ export default function HodDeanDetailsPage() {
     );
   }
 
-  return shell(
-    <div className="w-full space-y-12">
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="pb-4 border-b border-border/20 flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => window.history.back()}
-              className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
+  return (
+    shell(
+      <div className="w-full space-y-10">
+        {/* ── Header ─────────────────────────────────────────────────────────── */}
+        <header className="pb-4 border-b border-border/20 flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
+          <div className="space-y-1">
             <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/95 to-muted-foreground bg-clip-text text-transparent">
               HOD & Dean Details
             </h1>
+            <p className="text-xs text-muted-foreground">
+              View administrative contacts including Head of Departments and School Deans
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground pl-7">
-            View administrative contacts including Head of Departments and School Deans
-          </p>
-        </div>
-      </header>
+        </header>
 
-      {/* ── Details List ───────────────────────────────────────────────────── */}
-      <div className="space-y-12">
-        {details.map((item, idx) => (
-          <section key={idx} className="space-y-6 pt-6 first:pt-0 border-t border-border/10 first:border-t-0">
-            <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start w-full">
-              {/* Photo */}
-              {renderPhoto(item.photo, item.name, "w-44 max-w-full shrink-0", "max-h-[16rem]")}
-              
-              {/* Details block */}
-              <div className="flex-1 w-full space-y-6">
-                <div className="border-b border-border/10 pb-4 flex flex-col sm:flex-row sm:items-baseline gap-2">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-primary/10 w-fit">
-                    {item.role || "Faculty"}
-                  </span>
-                  <h2 className="text-xl font-black tracking-tight text-foreground">{item.name}</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 w-full">
-                  {renderDetailField(<Building className="w-4 h-4" />, "School", item.school)}
-                  {renderDetailField(<MapPin className="w-4 h-4" />, "Cabin Room", item.cabin)}
-                  {renderDetailField(<Phone className="w-4 h-4" />, "Intercom", item.intercom)}
-                  {renderDetailField(<Mail className="w-4 h-4" />, "Email Address", item.email, "md:col-span-2")}
-                </div>
+        {/* ── Details List ───────────────────────────────────────────────────── */}
+        <div className="divide-y divide-border/10">
+          {details.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+              <Building className="w-10 h-10 text-muted-foreground/20" />
+              <div>
+                <p className="text-sm font-bold text-foreground">No HOD or Dean details found</p>
+                <p className="text-xs text-muted-foreground mt-1">Ensure you are logged in or try reloading the page.</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/95 transition-all cursor-pointer"
+                >
+                  Reload Page
+                </button>
               </div>
             </div>
-          </section>
-        ))}
+          ) : (
+            details.map((item, idx) => (
+              <section key={idx} className="py-6 sm:py-8 w-full first:pt-0 last:pb-0">
+                <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start w-full">
+                  {/* Photo */}
+                  {renderPhoto(item.photo, item.name)}
+                  
+                  {/* Details block */}
+                  <div className="flex-1 w-full space-y-4 text-center sm:text-left min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 justify-center sm:justify-start">
+                      <span className="text-[9px] font-black text-primary uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/10 w-fit self-center sm:self-auto leading-none">
+                        {item.role || "Faculty"}
+                      </span>
+                      <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-black tracking-tight text-foreground truncate">{item.name}</h2>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-1 w-full">
+                      {renderDetailField(<Building className="w-3.5 h-3.5" />, "Designation", item.school)}
+                      {renderDetailField(<MapPin className="w-3.5 h-3.5" />, "Cabin Room", item.cabin)}
+                      {item.intercom && renderDetailField(<Phone className="w-3.5 h-3.5" />, "Intercom", item.intercom)}
+                      {renderDetailField(<Mail className="w-3.5 h-3.5" />, "Email Address", item.email, "lg:col-span-2")}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            ))
+          )}
+        </div>
       </div>
-    </div>
+    )
   );
 }

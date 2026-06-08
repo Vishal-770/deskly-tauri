@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "@/router";
+import { useNavigate, useMatch, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getCurrentAttendance, AttendanceRecord } from "@/lib/attendance";
 import DashboardSidebar from "@/components/DashBoardSideBar";
@@ -163,8 +163,7 @@ function AttendanceCard({ item, index }: { item: AttendanceRecord; index: number
   return (
     <div
       onClick={() => {
-        console.log("Navigating to attendance details for:", item.classId);
-        navigate("/dashboard/attendance/:classId", { params: { classId: item.classId }, state: { record: item } });
+        navigate(`/dashboard/attendance/${item.classId}`, { state: { record: item } });
       }}
       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-6 border-b border-border/10 hover:bg-muted/5 cursor-pointer transition-colors min-w-0 w-full"
     >
@@ -298,6 +297,9 @@ export default function AttendancePage() {
 
 
 
+  // Detect if we're on a child route (detail page) — if so, render only the Outlet
+  const isDetailRoute = useMatch("/dashboard/attendance/:classId");
+
   const shell = (children: React.ReactNode) => (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground select-none">
       <DashboardSidebar />
@@ -306,6 +308,11 @@ export default function AttendancePage() {
       </main>
     </div>
   );
+
+  // If we're on the detail child route, render the Outlet (detail page) inside the shell
+  if (isDetailRoute) {
+    return shell(<Outlet />);
+  }
 
   if (authLoading || (loading && attendance.length === 0)) {
     return shell(<AttendanceSkeleton />);

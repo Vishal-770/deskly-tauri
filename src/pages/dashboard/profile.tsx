@@ -20,7 +20,12 @@ import {
 function getSrcFromPhoto(photo: string): string {
   if (!photo) return "";
   const trimmed = photo.trim();
-  if (trimmed.startsWith("data:image")) return trimmed;
+  if (trimmed.startsWith("data:")) {
+    if (trimmed.startsWith("data:jpg;base64,")) {
+      return trimmed.replace("data:jpg;base64,", "data:image/jpeg;base64,");
+    }
+    return trimmed;
+  }
   // If it's a pure base64 string
   if (/^[A-Za-z0-9+/=]+$/.test(trimmed)) {
     return `data:image/jpeg;base64,${trimmed}`;
