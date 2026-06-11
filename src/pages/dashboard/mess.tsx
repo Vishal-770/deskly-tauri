@@ -152,12 +152,40 @@ export default function MessMenuPage() {
     setActiveDay(WEEKDAYS.includes(currentWeekday) ? currentWeekday : "Monday");
   }, [currentWeekday]);
 
+  // Load profile from Cache first
+  useEffect(() => {
+    const cachedProfile = localStorage.getItem("deskly::cache::mess_profile");
+    if (cachedProfile) {
+      try {
+        const parsed = JSON.parse(cachedProfile);
+        setProfile(parsed);
+        setSelectedMess(normalizeMessType(parsed.hostel?.messType));
+      } catch (e) {
+        console.error("Failed to parse cached mess profile", e);
+      }
+    }
+  }, []);
+
+  // Load menu from Cache first when selectedMess changes
+  useEffect(() => {
+    const cachedMenu = localStorage.getItem(`deskly::cache::mess_menu_${selectedMess}`);
+    if (cachedMenu) {
+      try {
+        setMenuData(JSON.parse(cachedMenu));
+        setLoading(false);
+      } catch (e) {
+        console.error("Failed to parse cached mess menu", e);
+      }
+    }
+  }, [selectedMess]);
+
   useEffect(() => {
     async function loadProfile() {
       try {
         const res = await getStudentProfile();
         if (res.success && res.data) {
           setProfile(res.data);
+          localStorage.setItem("deskly::cache::mess_profile", JSON.stringify(res.data));
           setSelectedMess(normalizeMessType(res.data.hostel?.messType));
         }
       } catch { /* silent */ }
@@ -167,12 +195,16 @@ export default function MessMenuPage() {
   }, []);
 
   const fetchMenu = async (messType: MessType) => {
-    setLoading(true);
+    setLoading(menuData ? false : true);
     setError(null);
     try {
       const res = await getMessMenu(messType);
-      if (res.success && res.data) setMenuData(res.data);
-      else setError(res.error ?? `Failed to fetch menu for ${formatMessTypeLabel(messType)}.`);
+      if (res.success && res.data) {
+        setMenuData(res.data);
+        localStorage.setItem(`deskly::cache::mess_menu_${messType}`, JSON.stringify(res.data));
+      } else {
+        setError(res.error ?? `Failed to fetch menu for ${formatMessTypeLabel(messType)}.`);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {

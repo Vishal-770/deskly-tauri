@@ -39,7 +39,7 @@
 
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI1RjA5QkU1MjJBQTlFRUUKUldUdW5xb2k1WnZ3SldBdm9JNEdmZUk0bkRlZkhZKy9wNHA4WHVYZ082cFoydXBobnJsc3c2MHEK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY1ODlCMjE1M0E1QTY4RkUKUldUK2FGbzZGYktKOVpjcDc0WHhXMENMS2srQ0YrdlJiZGF6ZjFaVHlnZWFWYW1rR0JEZ1Q4YVYK",
       "endpoints": [
         "https://github.com/Vishal-770/deskly-tauri/releases/latest/download/latest.json"
       ],

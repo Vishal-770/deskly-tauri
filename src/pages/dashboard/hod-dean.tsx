@@ -141,21 +141,36 @@ export default function HodDeanDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Load from cache first
   useEffect(() => {
-    async function fetchDetails() {
+    const cached = localStorage.getItem("deskly::cache::hod_dean");
+    if (cached) {
       try {
-        const res = await getHodDeanDetails();
-        if (res.success && res.data) {
-          setDetails(res.data);
-        } else {
-          setError(res.error ?? "Failed to fetch HOD and Dean details.");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
+        setDetails(JSON.parse(cached));
         setLoading(false);
+      } catch (e) {
+        console.error("Failed to parse cached HOD/Dean details", e);
       }
     }
+  }, []);
+
+  async function fetchDetails() {
+    try {
+      const res = await getHodDeanDetails();
+      if (res.success && res.data) {
+        setDetails(res.data);
+        localStorage.setItem("deskly::cache::hod_dean", JSON.stringify(res.data));
+      } else {
+        setError(res.error ?? "Failed to fetch HOD and Dean details.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     fetchDetails();
   }, []);
 
@@ -175,7 +190,7 @@ export default function HodDeanDetailsPage() {
   if (error || !details) {
     return shell(
       <div className="flex h-full items-center justify-center">
-        <ErrorDisplay message={error ?? "No HOD or Dean data loaded."} onRetry={() => window.location.reload()} />
+        <ErrorDisplay message={error ?? "No HOD or Dean data loaded."} onRetry={fetchDetails} />
       </div>
     );
   }

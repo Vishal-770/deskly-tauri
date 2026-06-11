@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
 import DashboardSidebar from "@/components/DashBoardSideBar";
 import { ErrorDisplay } from "@/components/error-display";
-import { ModeToggle } from "@/components/theme-toggle";
 import { motion } from "framer-motion";
 import {
   Clock,
@@ -182,18 +181,52 @@ export default function TimetablePage() {
   useEffect(() => { const t = setInterval(() => setNow(new Date()), 60_000); return () => clearInterval(t); }, []);
   useEffect(() => { if (!authLoading && !isLoggedIn) navigate("/"); }, [isLoggedIn, authLoading]);
 
+  // Load from Cache (SWR) first
+  useEffect(() => {
+    const cachedTt = localStorage.getItem("deskly::cache::timetable");
+    const cachedAtt = localStorage.getItem("deskly::cache::timetable_attendance");
+    if (cachedTt || cachedAtt) {
+      try {
+        if (cachedTt) setSchedule(JSON.parse(cachedTt));
+        if (cachedAtt) setAttendance(JSON.parse(cachedAtt));
+        setLoading(false);
+      } catch (e) {
+        console.error("Failed to parse cached timetable/attendance", e);
+      }
+    }
+  }, []);
+
   async function load() {
     try {
-      setLoading(true); setError(null);
+      setError(null);
       const [tt, att] = await Promise.all([
         invoke<ApiResult<WeeklySchedule>>("timetable_get_weekly", { semesterSubId: null }),
         invoke<AttendanceResponse>("attendance_get_current").catch(() => ({ success: false } as AttendanceResponse)),
       ]);
-      if (tt.success && tt.data) setSchedule(tt.data);
-      else setError(tt.error ?? "Failed to load timetable.");
-      if (att.success && att.data) setAttendance(att.data);
-    } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
-    finally { setLoading(false); }
+      
+      let updatedTt = schedule;
+      let updatedAtt = attendance;
+      
+      if (tt.success && tt.data) {
+        setSchedule(tt.data);
+        updatedTt = tt.data;
+      } else if (tt.error) {
+        setError(tt.error);
+      }
+      
+      if (att.success && att.data) {
+        setAttendance(att.data);
+        updatedAtt = att.data;
+      }
+      
+      // Save cache
+      localStorage.setItem("deskly::cache::timetable", JSON.stringify(updatedTt));
+      localStorage.setItem("deskly::cache::timetable_attendance", JSON.stringify(updatedAtt));
+    } catch (e) { 
+      setError(e instanceof Error ? e.message : String(e)); 
+    } finally { 
+      setLoading(false); 
+    }
   }
   useEffect(() => { if (isLoggedIn) load(); }, [isLoggedIn]);
 
@@ -320,7 +353,6 @@ export default function TimetablePage() {
                 className="p-0.5 rounded hover:text-foreground cursor-pointer transition-colors"><ChevronRight className="w-3.5 h-3.5" /></button>
             </div>
           </div>
-          <ModeToggle />
         </div>
       </header>
 

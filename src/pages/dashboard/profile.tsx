@@ -189,21 +189,36 @@ export default function StudentProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Load from cache first
   useEffect(() => {
-    async function fetchProfile() {
+    const cached = localStorage.getItem("deskly::cache::profile");
+    if (cached) {
       try {
-        const res = await getStudentProfile();
-        if (res.success && res.data) {
-          setProfile(res.data);
-        } else {
-          setError(res.error ?? "Failed to fetch student profile details.");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
+        setProfile(JSON.parse(cached));
         setLoading(false);
+      } catch (e) {
+        console.error("Failed to parse cached profile", e);
       }
     }
+  }, []);
+
+  async function fetchProfile() {
+    try {
+      const res = await getStudentProfile();
+      if (res.success && res.data) {
+        setProfile(res.data);
+        localStorage.setItem("deskly::cache::profile", JSON.stringify(res.data));
+      } else {
+        setError(res.error ?? "Failed to fetch student profile details.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     fetchProfile();
   }, []);
 
@@ -223,7 +238,7 @@ export default function StudentProfilePage() {
   if (error || !profile) {
     return shell(
       <div className="flex h-full items-center justify-center">
-        <ErrorDisplay message={error ?? "No profile data loaded."} onRetry={() => window.location.reload()} />
+        <ErrorDisplay message={error ?? "No profile data loaded."} onRetry={fetchProfile} />
       </div>
     );
   }

@@ -229,4 +229,9 @@
     -webkit-app-region: no-drag;
     app-region: no-drag;
   }
+
+  /* Override page container heights to fit perfectly in layout without scroll wiggle */
+  .app-content-wrapper > div.h-screen {
+    height: 100% !important;
+  }
 }

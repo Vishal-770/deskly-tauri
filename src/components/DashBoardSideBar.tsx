@@ -1,24 +1,24 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  BookOpen,
-  GraduationCap,
-  Settings,
   Calendar,
-  UserCheck,
-  Target,
-  ScrollText,
-  Phone,
-  Clock,
-  Search,
-  LayoutDashboard,
+  BookOpen,
   Shirt,
+  Users,
+  Settings,
+  LayoutDashboard,
+  CalendarClock,
+  ClipboardList,
+  GraduationCap,
+  UserCheck,
+  TrendingUp,
+  Phone,
   ChefHat,
   Receipt,
   User,
-  Users,
-  FileText,
-  Award,
+  Briefcase,
+  Terminal,
+  Search,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -54,13 +54,13 @@ const DashboardSidebar = () => {
       {
         label: "Timetable",
         href: "/dashboard/timetable",
-        icon: <Clock className="w-5 h-5" />,
+        icon: <CalendarClock className="w-5 h-5" />,
         description: "",
       },
       {
         label: "Exams",
         href: "/dashboard/exams",
-        icon: <FileText className="w-5 h-5" />,
+        icon: <ClipboardList className="w-5 h-5" />,
         description: "",
       },
       {
@@ -84,13 +84,7 @@ const DashboardSidebar = () => {
       {
         label: "Marks",
         href: "/dashboard/marks",
-        icon: <Target className="w-5 h-5" />,
-        description: "",
-      },
-      {
-        label: "Curriculum",
-        href: "/dashboard/curriculum",
-        icon: <ScrollText className="w-5 h-5" />,
+        icon: <TrendingUp className="w-5 h-5" />,
         description: "",
       },
       {
@@ -138,7 +132,13 @@ const DashboardSidebar = () => {
       {
         label: "HOD & Dean",
         href: "/dashboard/hod-dean",
-        icon: <Award className="w-5 h-5" />,
+        icon: <Briefcase className="w-5 h-5" />,
+        description: "",
+      },
+      {
+        label: "Debug",
+        href: "/debug",
+        icon: <Terminal className="w-5 h-5" />,
         description: "",
       },
     ],

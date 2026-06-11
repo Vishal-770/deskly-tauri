@@ -10,7 +10,6 @@ import {
 import { LAUNDRY_BLOCKS } from "@/lib/constants";
 import DashboardSidebar from "@/components/DashBoardSideBar";
 import { ErrorDisplay } from "@/components/error-display";
-import Loader from "@/components/Loader";
 import {
   Select,
   SelectContent,
@@ -70,6 +69,48 @@ function isRoomInLaundryRange(studentRoom: string | undefined, laundryRoomRange:
   return false;
 }
 
+function Sk({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
+}
+
+function LaundrySkeleton() {
+  return (
+    <div className="w-full space-y-6 flex flex-col flex-1">
+      {/* Header skeleton */}
+      <div className="pb-4 border-b border-border/10 space-y-2">
+        <Sk className="h-6 w-40" />
+        <Sk className="h-4 w-72" />
+      </div>
+      
+      {/* Options skeleton */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/10">
+        <Sk className="h-4 w-48" />
+        <Sk className="h-8 w-28 rounded-xl ml-auto sm:ml-0" />
+      </div>
+      
+      {/* Month title skeleton */}
+      <Sk className="h-6 w-36 animate-pulse" />
+      
+      {/* Calendar grid skeleton */}
+      <div className="grid grid-cols-7 border-t border-l border-border/10 rounded-2xl overflow-hidden bg-background">
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+          <div key={day} className="py-2 text-center border-b border-r border-border/10 bg-muted/5">
+            <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black tracking-widest text-muted-foreground/60 uppercase animate-pulse">
+              {day}
+            </span>
+          </div>
+        ))}
+        {[...Array(35)].map((_, i) => (
+          <div key={i} className="min-h-[48px] sm:min-h-[75px] md:min-h-[95px] p-2 border-b border-r border-border/10 flex flex-col justify-between">
+            <Sk className="h-4 w-5" />
+            <Sk className="h-3 w-12 mt-2" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function LaundryPage() {
   const { loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -90,15 +131,47 @@ export default function LaundryPage() {
     isCurrentMonth: boolean;
   } | null>(null);
 
+  // Load from cache first
+  useEffect(() => {
+    const cachedProfile = localStorage.getItem("deskly::cache::laundry_profile");
+    if (cachedProfile) {
+      try {
+        setProfile(JSON.parse(cachedProfile));
+      } catch (e) {
+        console.error("Failed to parse cached laundry profile", e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const cachedSchedule = localStorage.getItem(`deskly::cache::laundry_schedule_${selectedBlock}`);
+    if (cachedSchedule) {
+      try {
+        setLaundryData(JSON.parse(cachedSchedule));
+        setLoading(false);
+      } catch (e) {
+        console.error("Failed to parse cached laundry schedule", e);
+      }
+    }
+  }, [selectedBlock]);
+
   // 1. Initial Load: Fetch student profile to resolve their default block & room
   useEffect(() => {
     async function loadProfile() {
       try {
+        const savedBlock = localStorage.getItem("deskly::settings::hostelBlock");
+        if (savedBlock) {
+          setSelectedBlock(savedBlock as LaundryBlock);
+        }
+
         const profileRes = await getStudentProfile();
         if (profileRes.success && profileRes.data) {
           setProfile(profileRes.data);
-          const normBlock = normalizeBlockName(profileRes.data.hostel?.blockName);
-          setSelectedBlock(normBlock);
+          localStorage.setItem("deskly::cache::laundry_profile", JSON.stringify(profileRes.data));
+          if (!savedBlock) {
+            const normBlock = normalizeBlockName(profileRes.data.hostel?.blockName);
+            setSelectedBlock(normBlock);
+          }
         }
       } catch (err) {
         console.warn("Failed to load profile for laundry block defaults:", err);
@@ -111,12 +184,13 @@ export default function LaundryPage() {
 
   // 2. Schedule Fetch: Load laundry schedule whenever block changes
   const fetchSchedule = async (block: LaundryBlock) => {
-    setLoading(true);
+    setLoading(laundryData ? false : true);
     setError(null);
     try {
       const res = await getLaundrySchedule(block);
       if (res.success && res.data) {
         setLaundryData(res.data);
+        localStorage.setItem(`deskly::cache::laundry_schedule_${block}`, JSON.stringify(res.data));
       } else {
         setError(res.error ?? `Failed to fetch laundry schedule for Block ${block}.`);
       }
@@ -225,7 +299,7 @@ export default function LaundryPage() {
   );
 
   if (authLoading || (loading && !laundryData)) {
-    return renderShell(<Loader />);
+    return renderShell(<LaundrySkeleton />);
   }
 
   if (error && !laundryData) {

@@ -5,7 +5,10 @@ import { components, hooks, utils } from '@generouted/react-router/client'
 
 export type Path =
   | `/`
+  | `/academic-calendar`
+  | `/contact`
   | `/dashboard`
+  | `/dashboard/academic-calendar`
   | `/dashboard/attendance`
   | `/dashboard/attendance/:classId`
   | `/dashboard/contact`
@@ -15,10 +18,13 @@ export type Path =
   | `/dashboard/grades`
   | `/dashboard/hod-dean`
   | `/dashboard/laundry`
+  | `/dashboard/marks`
   | `/dashboard/mess`
   | `/dashboard/payment-receipts`
   | `/dashboard/profile`
+  | `/dashboard/settings`
   | `/dashboard/timetable`
+  | `/debug`
 
 export type Params = {
   '/dashboard/attendance/:classId': { classId: string }

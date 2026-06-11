@@ -12,38 +12,40 @@ pnpm build
 pnpm tauri dev
 pnpm tauri build
 
-## First-Time Updater Setup
+## First-Time Updater Setup & Pre-Generated Keys
 
-### 1. Generate signing keys (one time)
+> [!IMPORTANT]
+> **Updater signing keys have already been pre-generated for you!** 
+> The public key is already configured in [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json).
+> You only need to add the private key to your GitHub Repository Secrets to complete the setup.
 
-Windows PowerShell:
+### 1. Pre-Generated Keys (Copy-Paste)
 
-pnpm tauri signer generate -w "$HOME\\.tauri\\deskly.key"
+- **Public Key** (already set in `tauri.conf.json`):
+  ```text
+  dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY1ODlCMjE1M0E1QTY4RkUKUldUK2FGbzZGYktKOVpjcDc0WHhXMENMS2srQ0YrdlJiZGF6ZjFaVHlnZWFWYW1rR0JEZ1Q4YVYK
+  ```
+- **Private Key** (add to GitHub Secrets as `TAURI_SIGNING_PRIVATE_KEY`):
+  ```text
+  <PASTE_TAURI_SIGNING_PRIVATE_KEY_FROM_CHAT_HERE>
+  ```
 
-This creates:
+### 2. GitHub Actions Secrets Configuration
 
-1. Private key file at C:\Users\YOUR_USER\.tauri\deskly.key
-2. Public key file at C:\Users\YOUR_USER\.tauri\deskly.key.pub
+1. Go to your GitHub repository: **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**.
+2. Create the following secret:
+   - **Name**: `TAURI_SIGNING_PRIVATE_KEY`
+   - **Value**: (Copy and paste the private key from your chat history)
+3. Do **NOT** set `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` (or leave it empty/delete it if it exists) because this key was generated without a password.
 
-### 2. Set updater public key in Tauri config
+### 3. (Optional) Manual Signer Key Generation
 
-Open [src-tauri/tauri.conf.json](src-tauri/tauri.conf.json) and set:
+If you ever need to generate new keys in the future, run:
 
-1. plugins.updater.pubkey to the full content of your public key file
-2. plugins.updater.endpoints to the GitHub release latest.json URL
-
-Current endpoint used by this repo:
-
-https://github.com/Vishal-770/deskly-tauri/releases/latest/download/latest.json
-
-### 3. Add GitHub Actions secrets
-
-GitHub repo -> Settings -> Secrets and variables -> Actions -> New repository secret
-
-Add:
-
-1. TAURI_SIGNING_PRIVATE_KEY = full content of deskly.key
-2. TAURI_SIGNING_PRIVATE_KEY_PASSWORD = key password (or empty if none)
+```bash
+# Non-interactive CLI command (ideal for automated environments or quick setup)
+pnpm tauri signer generate --ci
+```
 
 ## Daily Development Commands
 

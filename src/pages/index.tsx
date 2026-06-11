@@ -137,12 +137,15 @@ export default function Home() {
           </form>
 
           <footer className="flex flex-col sm:flex-row justify-between items-center gap-8 pt-12 text-center sm:text-left">
-            <button
+            <a
+              href="https://github.com/Vishal-770/deskly-tauri/issues"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-[9px] text-muted-foreground/30 hover:text-primary transition-colors uppercase tracking-widest font-black flex items-center gap-2 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
             >
               <HelpCircle className="w-3 h-3" />
               Support Nexus
-            </button>
+            </a>
             <span className="text-[9px] text-muted-foreground/10 font-black uppercase tracking-[0.4em] pointer-events-none select-none">
               v2.0 // Ready
             </span>

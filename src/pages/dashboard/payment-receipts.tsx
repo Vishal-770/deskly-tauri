@@ -172,24 +172,38 @@ export default function PaymentReceiptsPage() {
 
   // Load receipts data
   useEffect(() => {
-    async function load() {
+    const cached = localStorage.getItem("deskly::cache::payment_receipts");
+    if (cached) {
       try {
-        const res = await getPaymentReceipts();
-        if (res.success && res.data) {
-          // Remove placeholder row or waste header row (e.g. where receiptNumber is "RECEIPT NUMBER")
-          const cleanList = res.data.filter(
-            (r) => r.receiptNumber.trim().toUpperCase() !== "RECEIPT NUMBER"
-          );
-          setReceipts(cleanList);
-        } else {
-          setError(res.error ?? "Failed to fetch payment receipts.");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
+        setReceipts(JSON.parse(cached));
         setLoading(false);
+      } catch (e) {
+        console.error("Failed to parse cached receipts", e);
       }
     }
+  }, []);
+
+  async function load() {
+    try {
+      const res = await getPaymentReceipts();
+      if (res.success && res.data) {
+        // Remove placeholder row or waste header row (e.g. where receiptNumber is "RECEIPT NUMBER")
+        const cleanList = res.data.filter(
+          (r) => r.receiptNumber.trim().toUpperCase() !== "RECEIPT NUMBER"
+        );
+        setReceipts(cleanList);
+        localStorage.setItem("deskly::cache::payment_receipts", JSON.stringify(cleanList));
+      } else {
+        setError(res.error ?? "Failed to fetch payment receipts.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     load();
   }, []);
 
@@ -253,7 +267,7 @@ export default function PaymentReceiptsPage() {
   if (error && receipts.length === 0) {
     return shell(
       <div className="flex h-full items-center justify-center">
-        <ErrorDisplay message={error} onRetry={() => window.location.reload()} />
+        <ErrorDisplay message={error} onRetry={load} />
       </div>
     );
   }

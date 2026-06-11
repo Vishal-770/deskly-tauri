@@ -45,18 +45,55 @@ interface ExamScheduleResponse {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function parseDateStr(str: string): Date {
-  const parts = str.split("-");
+  const cleanStr = str.trim();
+  const parts = cleanStr.split(/[-/]/);
   if (parts.length < 3) return new Date();
+  
   const day = parseInt(parts[0], 10);
-  const monthStr = parts[1].toLowerCase();
+  const monthPart = parts[1].trim();
   const year = parseInt(parts[2], 10);
   
   const months: Record<string, number> = {
     jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
     jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
   };
-  const month = months[monthStr.substring(0, 3)] ?? 0;
+  
+  let month = 0;
+  if (isNaN(Number(monthPart))) {
+    const monthStr = monthPart.toLowerCase();
+    month = months[monthStr.substring(0, 3)] ?? 0;
+  } else {
+    month = parseInt(monthPart, 10) - 1; // 1-indexed to 0-indexed
+  }
+  
   return new Date(year, month, day);
+}
+
+function getCalendarDayDifference(d1: Date, d2: Date): number {
+  const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+  const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+  return Math.round((utc2 - utc1) / (1000 * 60 * 60 * 24));
+}
+
+function parseExamTime(examDate: Date, examTimeStr: string): Date {
+  const d = new Date(examDate.getTime());
+  const timeParts = examTimeStr.split("-");
+  if (timeParts.length === 0) return d;
+  
+  const startPart = timeParts[0].trim();
+  const match = startPart.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (match) {
+    let hr = parseInt(match[1], 10);
+    const min = parseInt(match[2], 10);
+    const ampm = match[3]?.toUpperCase();
+    
+    if (ampm === "PM" && hr !== 12) hr += 12;
+    if (ampm === "AM" && hr === 12) hr = 0;
+    d.setHours(hr, min, 0, 0);
+  } else {
+    d.setHours(9, 0, 0, 0);
+  }
+  return d;
 }
 
 function formatExamTypeLabel(type: string): string {
@@ -233,18 +270,8 @@ export default function ExamSchedulePage() {
     const futureExams = allExams
       .map(s => {
         const d = parseDateStr(s.examDate);
-        const timeParts = s.examTime.split("-");
-        if (timeParts.length > 0) {
-          const c = timeParts[0].trim().toUpperCase().split(" ");
-          if (c.length >= 2) {
-            const [h, m] = c[0].split(":").map(Number);
-            let hr = h || 0;
-            if (c[1] === "PM" && hr !== 12) hr += 12;
-            if (c[1] === "AM" && hr === 12) hr = 0;
-            d.setHours(hr, m, 0, 0);
-          }
-        }
-        return { exam: s, targetDate: d };
+        const targetDate = parseExamTime(d, s.examTime);
+        return { exam: s, targetDate };
       })
       .filter(({ targetDate }) => targetDate.getTime() > currentTime.getTime())
       .sort((a, b) => a.targetDate.getTime() - b.targetDate.getTime());
@@ -252,16 +279,24 @@ export default function ExamSchedulePage() {
     if (futureExams.length === 0) return null;
 
     const { exam, targetDate } = futureExams[0];
-    const diffMs = targetDate.getTime() - currentTime.getTime();
+    const diffMs = Math.max(0, targetDate.getTime() - currentTime.getTime());
     
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
 
+    const formattedOptions: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    };
+    const dateFormatted = targetDate.toLocaleDateString("en-US", formattedOptions);
+
     return {
       exam,
-      dateFormatted: exam.examDate,
+      dateFormatted,
       countdown: { days, hours, minutes, seconds }
     };
   }, [groups, currentTime]);
@@ -540,9 +575,9 @@ export default function ExamSchedulePage() {
                     if (idx < activeSchedules.length - 1) {
                       const nextExam = activeSchedules[idx + 1];
                       const nextDate = parseDateStr(nextExam.examDate);
-                      const timeDiff = nextDate.getTime() - examDate.getTime();
-                      const dayDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                      const dayDiff = getCalendarDayDifference(examDate, nextDate);
                       if (dayDiff > 1) {
+                        const gapDays = dayDiff - 1;
                         gapElement = (
                           <div className="relative py-3 flex items-center justify-center">
                             {/* Line separator */}
@@ -550,7 +585,7 @@ export default function ExamSchedulePage() {
                             {/* Pill */}
                             <div className="relative z-10 bg-muted/65 text-muted-foreground text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                               <Info className="w-3.5 h-3.5 text-muted-foreground/75" />
-                              <span>{dayDiff - 1} {dayDiff - 1 === 1 ? "Day" : "Days"} Gap</span>
+                              <span>{gapDays} {gapDays === 1 ? "Day" : "Days"} Gap</span>
                             </div>
                           </div>
                         );
@@ -565,7 +600,10 @@ export default function ExamSchedulePage() {
                           <div className="w-[80px] shrink-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1.5">
                             <span className="text-3xl font-black text-foreground leading-none tracking-tighter">{dayNum}</span>
                             <span className="text-xs font-bold text-muted-foreground leading-none uppercase">{monthStr}</span>
-                            <span className="text-[10px] font-extrabold text-muted-foreground/70 leading-none uppercase">{weekDayStr}</span>
+                            <div className="flex items-center gap-1 md:flex-col md:items-end">
+                              <span className="text-[10px] font-extrabold text-muted-foreground/70 leading-none uppercase">{weekDayStr}</span>
+                              <span className="text-[9px] font-black text-muted-foreground/50 leading-none">{examDate.getFullYear()}</span>
+                            </div>
                           </div>
 
                           {/* Timeline dot node (Double Ring) */}

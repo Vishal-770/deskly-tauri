@@ -1,16 +1,30 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { getTimetableCourses, TimetableCourse } from "@/lib/features";
 import DashboardSidebar from "@/components/DashBoardSideBar";
-import { ErrorDisplay } from "@/components/error-display";
-import { Users, Search, X, BookOpen, MapPin, GraduationCap } from "lucide-react";
+import { Users, Search, X, MapPin, GraduationCap, Briefcase } from "lucide-react";
+import rawFacultyData from "@/data/faculty_info.json";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+interface FacultyJsonEntry {
+  emp_sno: string;
+  emp_name: string;
+  emp_id: string;
+  emp_designation: string;
+  emp_school_abbr: string;
+  emp_school: string;
+  emp_location_building: string;
+  emp_location_cabin: string;
+}
+
 type FacultyEntry = {
   name: string;
+  empId: string;
+  designation: string;
+  schoolAbbr: string;
   school: string;
-  courses: { code: string; title: string; slot: string; venue: string }[];
+  building: string;
+  cabin: string;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -25,120 +39,47 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-const PALETTE = [
-  "from-blue-500/10 to-blue-500/5 border-blue-500/20 text-blue-600 dark:text-blue-400",
-  "from-violet-500/10 to-violet-500/5 border-violet-500/20 text-violet-600 dark:text-violet-400",
-  "from-emerald-500/10 to-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400",
-  "from-amber-500/10 to-amber-500/5 border-amber-500/20 text-amber-600 dark:text-amber-400",
-  "from-rose-500/10 to-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-400",
-  "from-cyan-500/10 to-cyan-500/5 border-cyan-500/20 text-cyan-600 dark:text-cyan-400",
-  "from-indigo-500/10 to-indigo-500/5 border-indigo-500/20 text-indigo-600 dark:text-indigo-400",
-  "from-orange-500/10 to-orange-500/5 border-orange-500/20 text-orange-600 dark:text-orange-400",
-];
-
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/60 ${className}`} />;
+  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
 }
 
 function FacultySkeleton() {
   return (
-    <div className="w-full space-y-6">
-      <div className="pb-4 border-b border-border/20 space-y-2">
-        <Sk className="h-7 w-36" />
-        <Sk className="h-3 w-60" />
+    <div className="w-full space-y-8">
+      <div className="pb-6 border-b border-border/10 space-y-2">
+        <Sk className="h-7 w-40 animate-pulse" />
+        <Sk className="h-4 w-72 animate-pulse" />
       </div>
-      <div className="flex gap-2">
-        <Sk className="h-10 flex-1 rounded-xl" />
-      </div>
-      <div className="flex gap-2 flex-wrap">
-        {[...Array(4)].map((_, i) => <Sk key={i} className="h-7 w-24 rounded-full" />)}
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      
+      {/* Search Input Skeleton */}
+      <Sk className="h-10 w-full rounded-xl animate-pulse" />
+
+      {/* School Filter Chips Skeleton */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="rounded-2xl border border-border/10 p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <Sk className="w-12 h-12 rounded-2xl shrink-0" />
-              <div className="space-y-1.5 flex-1">
-                <Sk className="h-4 w-3/4" />
-                <Sk className="h-3 w-1/2" />
+          <Sk key={i} className="h-7 w-20 rounded-full shrink-0 animate-pulse" />
+        ))}
+      </div>
+
+      {/* Grid Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="space-y-4 pb-6 border-b border-border/10">
+            <div className="flex items-center gap-3.5">
+              <Sk className="w-11 h-11 rounded-xl shrink-0 animate-pulse" />
+              <div className="space-y-2 flex-1 min-w-0">
+                <Sk className="h-4.5 w-3/4 animate-pulse" />
+                <Sk className="h-3.5 w-1/2 animate-pulse" />
+                <Sk className="h-3 w-1/3 animate-pulse" />
               </div>
             </div>
-            <div className="h-px bg-border/10" />
-            <div className="space-y-2">
-              {[...Array(2)].map((_, j) => (
-                <div key={j} className="flex gap-2 items-start">
-                  <Sk className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" />
-                  <Sk className="h-3 flex-1" />
-                </div>
-              ))}
+            <div className="space-y-2.5 pt-2">
+              <Sk className="h-3.5 w-5/6 animate-pulse" />
             </div>
           </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-// ─── Faculty Card ─────────────────────────────────────────────────────────────
-
-function FacultyCard({ faculty, index }: { faculty: FacultyEntry; index: number }) {
-  const palette = PALETTE[index % PALETTE.length];
-  const initials = getInitials(faculty.name);
-
-  return (
-    <div className="group rounded-2xl border border-border/10 bg-card p-5 space-y-4 hover:border-border/30 transition-colors duration-200">
-      {/* Avatar + Name */}
-      <div className="flex items-start gap-3">
-        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${palette} border flex items-center justify-center shrink-0`}>
-          <span className="text-sm font-black">{initials}</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-extrabold text-foreground leading-snug">
-            {faculty.name}
-          </h3>
-          <div className="flex items-center gap-1 mt-0.5">
-            <GraduationCap className="w-3 h-3 text-muted-foreground/50 shrink-0" />
-            <p className="text-[10px] sm:text-xs text-muted-foreground/60 font-medium truncate">
-              {faculty.school}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div className="h-px bg-border/10" />
-
-      {/* Course list */}
-      <div className="space-y-2.5">
-        <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">
-          {faculty.courses.length} {faculty.courses.length === 1 ? "Course" : "Courses"}
-        </p>
-        <ul className="space-y-2">
-          {faculty.courses.map((course, i) => (
-            <li key={i} className="flex items-start gap-2.5">
-              <BookOpen className="w-3 h-3 text-muted-foreground/40 shrink-0 mt-0.5" />
-              <div className="min-w-0">
-                <p className="text-[10px] sm:text-xs font-extrabold text-foreground/85 leading-snug">
-                  {course.code}
-                  <span className="font-medium text-muted-foreground/60 ml-1">
-                    · Slot {course.slot}
-                  </span>
-                </p>
-                <p className="text-[10px] text-muted-foreground/55 leading-snug truncate">
-                  {course.title}
-                </p>
-                {course.venue && course.venue !== "NIL" && (
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-2.5 h-2.5 text-muted-foreground/30 shrink-0" />
-                    <span className="text-[9px] text-muted-foreground/40">{course.venue}</span>
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );
@@ -148,126 +89,119 @@ function FacultyCard({ faculty, index }: { faculty: FacultyEntry; index: number 
 
 export default function FacultyInfoPage() {
   const { loading: authLoading } = useAuth();
-  const [courses, setCourses] = useState<TimetableCourse[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [activeSchool, setActiveSchool] = useState<string>("All");
+  const [visibleCount, setVisibleCount] = useState(30);
 
-  const fetchCourses = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getTimetableCourses();
-      if (res.success && res.data) setCourses(res.data);
-      else setError(res.error ?? "Failed to load faculty information.");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Reset visibleCount on search/filter changes
+  useEffect(() => {
+    setVisibleCount(30);
+  }, [query, activeSchool]);
 
-  useEffect(() => { fetchCourses(); }, []);
+  // Aggregate all faculty entries from DB
+  const combinedFacultyList = useMemo<FacultyEntry[]>(() => {
+    const list: FacultyEntry[] = (rawFacultyData as FacultyJsonEntry[]).map((item) => {
+      return {
+        name: item.emp_name,
+        empId: item.emp_id,
+        designation: item.emp_designation,
+        schoolAbbr: item.emp_school_abbr,
+        school: item.emp_school,
+        building: item.emp_location_building,
+        cabin: item.emp_location_cabin,
+      };
+    });
 
-  // Aggregate faculty from courses — one entry per unique faculty name
-  const facultyList = useMemo<FacultyEntry[]>(() => {
-    if (!courses) return [];
-    const map = new Map<string, FacultyEntry>();
-    for (const course of courses) {
-      const key = course.faculty.name.trim();
-      if (!key || key === "NIL" || key === "-") continue;
-      if (!map.has(key)) {
-        map.set(key, {
-          name: key,
-          school: course.faculty.school || "VIT",
-          courses: [],
-        });
-      }
-      map.get(key)!.courses.push({
-        code: course.code,
-        title: course.title,
-        slot: course.slot,
-        venue: course.venue,
-      });
-    }
-    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [courses]);
+    // Sort: alphabetical by name
+    return list.sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
 
-  // Unique schools for filter chips
+  // Unique school abbreviations for filter chips
   const schools = useMemo(() => {
-    const set = new Set(facultyList.map((f) => f.school));
+    const set = new Set<string>();
+    (rawFacultyData as FacultyJsonEntry[]).forEach((item) => {
+      if (item.emp_school_abbr && item.emp_school_abbr !== "Not Available") {
+        set.add(item.emp_school_abbr.toUpperCase());
+      }
+    });
     return ["All", ...Array.from(set).sort()];
-  }, [facultyList]);
+  }, []);
 
-  // Filter by search query + school chip
-  const filtered = useMemo(() => {
-    let list = facultyList;
-    if (activeSchool !== "All") list = list.filter((f) => f.school === activeSchool);
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      list = list.filter(
-        (f) =>
-          f.name.toLowerCase().includes(q) ||
-          f.school.toLowerCase().includes(q) ||
-          f.courses.some(
-            (c) => c.code.toLowerCase().includes(q) || c.title.toLowerCase().includes(q)
-          )
+  // Filtered list based on query and school chip
+  const filteredList = useMemo(() => {
+    let result = combinedFacultyList;
+
+    if (activeSchool !== "All") {
+      result = result.filter(
+        (f) => f.schoolAbbr.toUpperCase() === activeSchool
       );
     }
-    return list;
-  }, [facultyList, activeSchool, query]);
+
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      result = result.filter(
+        (f) =>
+          f.name.toLowerCase().includes(q) ||
+          f.empId.toLowerCase().includes(q) ||
+          f.designation.toLowerCase().includes(q) ||
+          f.school.toLowerCase().includes(q) ||
+          f.schoolAbbr.toLowerCase().includes(q) ||
+          f.building.toLowerCase().includes(q) ||
+          f.cabin.toLowerCase().includes(q)
+      );
+    }
+
+    return result;
+  }, [combinedFacultyList, activeSchool, query]);
+
+  const visibleFaculty = useMemo(() => {
+    return filteredList.slice(0, visibleCount);
+  }, [filteredList, visibleCount]);
 
   const shell = (children: React.ReactNode) => (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground select-none">
       <DashboardSidebar />
-      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar pt-4 sm:pt-8 pb-16 px-4 sm:px-6 md:px-10 bg-background">
+      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar pt-6 pb-16 px-4 sm:px-6 md:px-10 bg-background">
         {children}
       </main>
     </div>
   );
 
-  if (error && !courses) {
-    return shell(
-      <div className="flex h-full items-center justify-center">
-        <ErrorDisplay title="Faculty Info Unavailable" message={error} onRetry={fetchCourses} />
-      </div>
-    );
-  }
-
-  const isLoading = authLoading || loading;
+  const isLoading = authLoading;
 
   return shell(
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-8">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="pb-4 border-b border-border/20 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+      <header className="pb-6 border-b border-border/10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-primary shrink-0" />
+          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Users className="w-5 h-5 text-primary shrink-0" />
             Faculty Info
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            Your registered course faculty for this semester
+          <p className="text-xs text-muted-foreground">
+            Search and view details of all VIT faculty members and cabins
           </p>
         </div>
-        {!isLoading && facultyList.length > 0 && (
-          <span className="text-xs text-muted-foreground/50 font-bold pb-0.5">
-            {filtered.length} of {facultyList.length} faculty
+        {!isLoading && filteredList.length > 0 && (
+          <span className="text-[10px] text-muted-foreground/60 font-black tracking-widest uppercase pb-0.5">
+            Showing {Math.min(visibleCount, filteredList.length)} of {filteredList.length} Faculty
           </span>
         )}
       </header>
 
-      {isLoading ? <FacultySkeleton /> : (
+      {isLoading ? (
+        <FacultySkeleton />
+      ) : (
         <>
-          {/* ── Search ──────────────────────────────────────────────────────── */}
+          {/* ── Search Bar ───────────────────────────────────────────────────── */}
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 pointer-events-none" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search faculty name, course code…"
-              className="w-full h-10 pl-10 pr-10 rounded-xl border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all"
+              placeholder="Search faculty by name, ID, cabin, building..."
+              className="w-full h-10 pl-9 pr-10 rounded-xl border border-border/15 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/20 transition-all duration-150"
             />
             {query && (
               <button
@@ -279,17 +213,18 @@ export default function FacultyInfoPage() {
             )}
           </div>
 
-          {/* ── School Filter Chips ──────────────────────────────────────────── */}
-          {schools.length > 2 && (
-            <div className="flex gap-2 flex-wrap">
+          {/* ── School Chips (Horizontal Scrollable) ───────────────────────── */}
+          {schools.length > 1 && (
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-1 pt-0 -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth">
               {schools.map((school) => (
                 <button
                   key={school}
                   onClick={() => setActiveSchool(school)}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer border
-                    ${activeSchool === school
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "border-border/20 text-muted-foreground hover:text-foreground hover:border-border/40 bg-muted/10"
+                  className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer border shrink-0
+                    ${
+                      activeSchool === school
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border/10 text-muted-foreground hover:text-foreground hover:border-border/20 bg-muted/10"
                     }
                   `}
                 >
@@ -299,26 +234,85 @@ export default function FacultyInfoPage() {
             </div>
           )}
 
-          {/* ── Grid ────────────────────────────────────────────────────────── */}
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
-              <Users className="w-10 h-10 text-muted-foreground/20" />
+          {/* ── Faculty Flat Listing Grid ──────────────────────────────────── */}
+          {filteredList.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+              <Users className="w-10 h-10 text-muted-foreground/15" />
               <p className="text-sm font-bold text-foreground">
-                {facultyList.length === 0
-                  ? "No faculty data available"
-                  : "No faculty match your search"}
+                No faculty members match your filters
               </p>
-              <p className="text-xs text-muted-foreground">
-                {facultyList.length === 0
-                  ? "Faculty info is derived from your timetable courses."
-                  : "Try adjusting your search or filter."}
+              <p className="text-xs text-muted-foreground/60">
+                Try typing a different name or choosing a different school filter.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filtered.map((faculty, i) => (
-                <FacultyCard key={faculty.name} faculty={faculty} index={i} />
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10 pt-2">
+              {visibleFaculty.map((faculty, i) => {
+                const initials = getInitials(faculty.name);
+                const hasLocation = 
+                  (faculty.building && faculty.building !== "Not Available") || 
+                  (faculty.cabin && faculty.cabin !== "Not Available");
+
+                return (
+                  <div 
+                    key={`${faculty.empId}-${i}`} 
+                    className="flex flex-col justify-between pb-6 border-b border-border/10 space-y-4"
+                  >
+                    <div className="space-y-3">
+                      {/* Avatar + Primary Info */}
+                      <div className="flex items-start gap-3.5">
+                        <div className="w-11 h-11 rounded-xl bg-muted/50 text-muted-foreground border border-border/10 flex items-center justify-center font-bold text-sm shrink-0">
+                          {initials}
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="text-sm font-bold text-foreground leading-snug truncate">
+                            {faculty.name}
+                          </h3>
+                          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground/60">
+                            <Briefcase className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate leading-none">
+                              {faculty.designation}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1 text-[10px] font-black uppercase tracking-wider text-primary">
+                            <GraduationCap className="w-3.5 h-3.5 shrink-0 text-primary/80" />
+                            <span className="truncate leading-none">
+                              {faculty.schoolAbbr} (ID: {faculty.empId})
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Location Cabin details */}
+                      {hasLocation && (
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          {faculty.cabin && faculty.cabin !== "Not Available" && (
+                            <div className="flex items-start gap-1.5">
+                              <MapPin className="w-3.5 h-3.5 mt-0.5 text-muted-foreground/50 shrink-0" />
+                              <span className="leading-snug">
+                                {faculty.cabin}
+                                {faculty.building && faculty.building !== "Not Available" && `, ${faculty.building}`}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Load More Button */}
+          {filteredList.length > visibleCount && (
+            <div className="flex justify-center pt-8">
+              <button
+                onClick={() => setVisibleCount((prev) => prev + 30)}
+                className="px-6 py-2.5 rounded-xl border border-border/10 bg-muted/5 text-xs font-extrabold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/10 hover:border-border/20 transition-all duration-150 cursor-pointer"
+              >
+                Load More Faculty
+              </button>
             </div>
           )}
         </>
