@@ -55,7 +55,9 @@ const windowsAsset =
   findFirstByRegex(basenames, /\.msi$/i) ||
   findFirstByRegex(basenames, /setup\.exe$/i) ||
   findFirstByRegex(basenames, /\.exe$/i);
-const linuxAsset = findFirstByRegex(basenames, /\.AppImage$/i);
+const linuxAsset =
+  findFirstByRegex(basenames, /\.AppImage\.tar\.gz$/i) ||
+  findFirstByRegex(basenames, /\.AppImage$/i);
 const macAsset = findFirstByRegex(basenames, /\.app\.tar\.gz$/i);
 
 const platforms = {};
@@ -81,6 +83,7 @@ function addPlatform(key, assetName) {
 addPlatform("windows-x86_64", windowsAsset);
 addPlatform("linux-x86_64", linuxAsset);
 addPlatform("darwin-x86_64", macAsset);
+addPlatform("darwin-aarch64", macAsset);
 
 if (Object.keys(platforms).length === 0) {
   throw new Error(
