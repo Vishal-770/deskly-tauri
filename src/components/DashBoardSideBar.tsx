@@ -17,7 +17,6 @@ import {
   Receipt,
   User,
   Briefcase,
-  Terminal,
   Search,
 } from "lucide-react";
 import Fuse from "fuse.js";
@@ -46,9 +45,9 @@ const DashboardSidebar = () => {
         description: "",
       },
       {
-        label: "Courses",
-        href: "/dashboard/courses",
-        icon: <BookOpen className="w-5 h-5" />,
+        label: "Profile",
+        href: "/dashboard/profile",
+        icon: <User className="w-5 h-5" />,
         description: "",
       },
       {
@@ -58,21 +57,9 @@ const DashboardSidebar = () => {
         description: "",
       },
       {
-        label: "Exams",
-        href: "/dashboard/exams",
-        icon: <ClipboardList className="w-5 h-5" />,
-        description: "",
-      },
-      {
-        label: "Academic Calendar",
-        href: "/dashboard/academic-calendar",
-        icon: <Calendar className="w-5 h-5" />,
-        description: "",
-      },
-      {
-        label: "Grades",
-        href: "/dashboard/grades",
-        icon: <GraduationCap className="w-5 h-5" />,
+        label: "Courses",
+        href: "/dashboard/courses",
+        icon: <BookOpen className="w-5 h-5" />,
         description: "",
       },
       {
@@ -88,15 +75,21 @@ const DashboardSidebar = () => {
         description: "",
       },
       {
-        label: "Contact",
-        href: "/dashboard/contact",
-        icon: <Phone className="w-5 h-5" />,
+        label: "Grades",
+        href: "/dashboard/grades",
+        icon: <GraduationCap className="w-5 h-5" />,
         description: "",
       },
       {
-        label: "Laundry",
-        href: "/dashboard/laundry",
-        icon: <Shirt className="w-5 h-5" />,
+        label: "Exams",
+        href: "/dashboard/exams",
+        icon: <ClipboardList className="w-5 h-5" />,
+        description: "",
+      },
+      {
+        label: "Academic Calendar",
+        href: "/dashboard/academic-calendar",
+        icon: <Calendar className="w-5 h-5" />,
         description: "",
       },
       {
@@ -106,21 +99,15 @@ const DashboardSidebar = () => {
         description: "",
       },
       {
+        label: "Laundry",
+        href: "/dashboard/laundry",
+        icon: <Shirt className="w-5 h-5" />,
+        description: "",
+      },
+      {
         label: "Payment Receipts",
         href: "/dashboard/payment-receipts",
         icon: <Receipt className="w-5 h-5" />,
-        description: "",
-      },
-      {
-        label: "Settings",
-        href: "/dashboard/settings",
-        icon: <Settings className="w-5 h-5" />,
-        description: "",
-      },
-      {
-        label: "Profile",
-        href: "/dashboard/profile",
-        icon: <User className="w-5 h-5" />,
         description: "",
       },
       {
@@ -136,9 +123,15 @@ const DashboardSidebar = () => {
         description: "",
       },
       {
-        label: "Debug",
-        href: "/debug",
-        icon: <Terminal className="w-5 h-5" />,
+        label: "Contact",
+        href: "/dashboard/contact",
+        icon: <Phone className="w-5 h-5" />,
+        description: "",
+      },
+      {
+        label: "Settings",
+        href: "/dashboard/settings",
+        icon: <Settings className="w-5 h-5" />,
         description: "",
       },
     ],

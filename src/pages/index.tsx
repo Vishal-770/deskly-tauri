@@ -70,7 +70,8 @@ export default function Home() {
                     id="reg-no"
                     value={regNo}
                     onChange={(e) => setRegNo(e.target.value)}
-                    className="block w-full h-12 pl-4 pr-12 bg-transparent border-b border-border/60 text-base font-normal text-foreground placeholder:text-foreground/20 focus:outline-none focus:border-primary transition-colors rounded-none placeholder:uppercase placeholder:tracking-[0.2em]"
+                    disabled={loading}
+                    className="block w-full h-12 pl-4 pr-12 bg-transparent border-b border-border/60 text-base font-normal text-foreground placeholder:text-foreground/20 focus:outline-none focus:border-primary transition-colors rounded-none placeholder:uppercase placeholder:tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="ID Number"
                     required
                   />
@@ -93,14 +94,16 @@ export default function Home() {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full h-12 pl-4 pr-12 bg-transparent border-b border-border/60 text-base font-normal text-foreground placeholder:text-foreground/20 focus:outline-none focus:border-primary transition-colors rounded-none placeholder:tracking-[0.3em]"
+                    disabled={loading}
+                    className="block w-full h-12 pl-4 pr-12 bg-transparent border-b border-border/60 text-base font-normal text-foreground placeholder:text-foreground/20 focus:outline-none focus:border-primary transition-colors rounded-none placeholder:tracking-[0.3em] disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="••••••••"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/20 transition-colors hover:text-foreground focus:outline-none"
+                    disabled={loading}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/20 transition-colors hover:text-foreground focus:outline-none disabled:opacity-50"
                   >
                     {showPassword ? (
                       <EyeOff className="w-3.5 h-3.5" />
