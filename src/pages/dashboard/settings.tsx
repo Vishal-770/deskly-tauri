@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
 import { check } from "@tauri-apps/plugin-updater";
+import { showNotification } from "@/lib/notifications";
 
 export default function SettingsPage() {
   const { isLoggedIn, loading: authLoading, logout } = useAuth();
@@ -102,7 +103,10 @@ export default function SettingsPage() {
         }
       });
       
-      alert("Update installed successfully. Please restart Deskly to apply changes.");
+      await showNotification(
+        "Update Installed",
+        "Update installed successfully. Please restart Deskly to apply changes."
+      );
     } catch (err) {
       console.error("Failed to download and install update:", err);
       setUpdateError(err instanceof Error ? err.message : String(err));

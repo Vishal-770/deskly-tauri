@@ -1,4 +1,5 @@
 import { check } from "@tauri-apps/plugin-updater";
+import { showNotification } from "./notifications";
 
 /**
  * Checks for software updates from GitHub Releases.
@@ -10,25 +11,32 @@ export async function checkForUpdates(silent = false): Promise<void> {
     const update = await check();
     if (!update) {
       if (!silent) {
-        alert("Your application is already up to date!");
+        await showNotification("Software Update", "Your application is already up to date!");
       }
       return;
     }
 
-    const confirmUpdate = silent
-      ? window.confirm(`A new update (v${update.version}) is available. Would you like to install it now?`)
-      : window.confirm(`A new version (v${update.version}) is available.\n\nRelease Date: ${update.date || "N/A"}\n\nWould you like to download and install this update?`);
-
-    if (confirmUpdate) {
-      if (!silent) {
-        alert("Downloading and installing update. Deskly will automatically restart once completed.");
-      }
-      await update.downloadAndInstall();
+    if (silent) {
+      // For background startup checks, notify natively without blocking the thread
+      await showNotification(
+        "Update Available",
+        `A new version (v${update.version}) is available. You can download and install it from Settings.`
+      );
+    } else {
+      // Fallback/Manual check via notifier (though settings UI has a dedicated checker)
+      await showNotification(
+        "Update Available",
+        `Deskly v${update.version} is available. Go to Settings to view changelog and install.`
+      );
     }
   } catch (err) {
     console.error("Failed to check for updates:", err);
     if (!silent) {
-      alert(`Failed to check for updates: ${err instanceof Error ? err.message : String(err)}`);
+      await showNotification(
+        "Software Update Error",
+        `Failed to check for updates: ${err instanceof Error ? err.message : String(err)}`
+      );
     }
   }
 }
+
