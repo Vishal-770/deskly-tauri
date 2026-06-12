@@ -17,8 +17,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings, Calendar, Building, LogOut, SunMoon, ArrowUpCircle, Scale } from "lucide-react";
-import { checkForUpdates } from "@/lib/updater";
+import { 
+  Settings, 
+  Calendar, 
+  Building, 
+  LogOut, 
+  SunMoon, 
+  ArrowUpCircle, 
+  Scale,
+  CheckCircle2,
+  AlertTriangle,
+  Loader2
+} from "lucide-react";
+import { getVersion } from "@tauri-apps/api/app";
+import { check } from "@tauri-apps/plugin-updater";
 
 export default function SettingsPage() {
   const { isLoggedIn, loading: authLoading, logout } = useAuth();
@@ -27,12 +39,81 @@ export default function SettingsPage() {
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null);
   const [hostelBlock, setHostelBlock] = useState<LaundryBlock>("A");
-  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  
+  // Software Update States
+  const [currentVersion, setCurrentVersion] = useState("1.0.6");
+  const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "upToDate" | "available" | "downloading" | "finished" | "error">("idle");
+  const [latestVersion, setLatestVersion] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState<{ downloaded: number; total?: number; percent?: number } | null>(null);
+  const [activeUpdate, setActiveUpdate] = useState<any>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
+  // Load version on mount
+  useEffect(() => {
+    async function loadVersion() {
+      try {
+        const ver = await getVersion();
+        setCurrentVersion(ver);
+      } catch (err) {
+        console.warn("Failed to get app version:", err);
+      }
+    }
+    loadVersion();
+  }, []);
 
   const handleUpdateCheck = async () => {
-    setCheckingUpdate(true);
-    await checkForUpdates(false);
-    setCheckingUpdate(false);
+    setUpdateStatus("checking");
+    setUpdateError(null);
+    try {
+      const update = await check();
+      if (!update) {
+        setUpdateStatus("upToDate");
+        return;
+      }
+      setLatestVersion(update.version);
+      setActiveUpdate(update);
+      setUpdateStatus("available");
+    } catch (err) {
+      console.error("Failed to check for updates:", err);
+      setUpdateError(err instanceof Error ? err.message : String(err));
+      setUpdateStatus("error");
+    }
+  };
+
+  const handleInstallUpdate = async () => {
+    if (!activeUpdate) return;
+    setUpdateStatus("downloading");
+    setDownloadProgress({ downloaded: 0 });
+    
+    let downloadedBytes = 0;
+    let totalBytes: number | undefined = undefined;
+
+    try {
+      await activeUpdate.downloadAndInstall((event: any) => {
+        if (event.event === "Started") {
+          totalBytes = event.data.contentLength;
+          setDownloadProgress({ downloaded: 0, total: totalBytes, percent: 0 });
+        } else if (event.event === "Progress") {
+          downloadedBytes += event.data.chunkLength;
+          const percent = totalBytes ? Math.round((downloadedBytes / totalBytes) * 100) : undefined;
+          setDownloadProgress({ downloaded: downloadedBytes, total: totalBytes, percent });
+        } else if (event.event === "Finished") {
+          setUpdateStatus("finished");
+        }
+      });
+      
+      try {
+        // @ts-ignore
+        const { relaunch } = await import("@tauri-apps/plugin-process");
+        await relaunch();
+      } catch {
+        alert("Update installed successfully. Please restart Deskly manually to apply changes.");
+      }
+    } catch (err) {
+      console.error("Failed to download and install update:", err);
+      setUpdateError(err instanceof Error ? err.message : String(err));
+      setUpdateStatus("error");
+    }
   };
 
   // Redirect to login if not logged in
@@ -128,23 +209,125 @@ export default function SettingsPage() {
         </div>
 
         {/* Software Update Card */}
-        <div className="bg-card/30 border border-border/25 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <ArrowUpCircle className="w-5 h-5 text-primary shrink-0" />
-            <div>
-              <h2 className="text-sm font-bold text-foreground">Software Update</h2>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                Check for new versions of Deskly and install updates
-              </p>
+        <div className="bg-card/30 border border-border/25 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <ArrowUpCircle className="w-5 h-5 text-primary shrink-0" />
+              <div>
+                <h2 className="text-sm font-bold text-foreground">Software Update</h2>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                  Current Version: v{currentVersion}
+                </p>
+              </div>
             </div>
+            {(updateStatus === "idle" || updateStatus === "upToDate" || updateStatus === "error") && (
+              <button
+                onClick={handleUpdateCheck}
+                className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-all text-xs font-bold rounded-xl cursor-pointer shadow-sm"
+              >
+                Check for Updates
+              </button>
+            )}
+            {updateStatus === "checking" && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span>Checking...</span>
+              </div>
+            )}
+            {updateStatus === "upToDate" && (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-chart-2 bg-chart-2/10 px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" />
+                  Latest
+                </span>
+              </div>
+            )}
+            {updateStatus === "error" && (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-destructive bg-destructive/10 px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Error
+                </span>
+              </div>
+            )}
           </div>
-          <button
-            onClick={handleUpdateCheck}
-            disabled={checkingUpdate}
-            className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-all text-xs font-bold rounded-xl cursor-pointer disabled:opacity-50 shadow-sm"
-          >
-            {checkingUpdate ? "Checking..." : "Check for Update"}
-          </button>
+
+          {/* New Update Available State */}
+          {updateStatus === "available" && activeUpdate && (
+            <div className="pt-2 border-t border-border/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-extrabold text-foreground">
+                    New Update Available: v{latestVersion}
+                  </h3>
+                  {activeUpdate.date && (
+                    <p className="text-[10px] text-muted-foreground/60 font-semibold mt-0.5">
+                      Released on {new Date(activeUpdate.date).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={handleInstallUpdate}
+                  className="px-4 py-2 bg-chart-2 text-white hover:bg-chart-2/90 transition-all text-xs font-bold rounded-xl cursor-pointer shadow-sm shadow-chart-2/10 animate-pulse"
+                >
+                  Install Update
+                </button>
+              </div>
+              {activeUpdate.body && (
+                <div className="p-3 bg-muted/20 border border-border/10 rounded-xl text-[11px] text-muted-foreground max-h-24 overflow-y-auto no-scrollbar font-medium">
+                  <p className="font-bold text-foreground/80 mb-1">Release Notes:</p>
+                  <p className="whitespace-pre-wrap">{activeUpdate.body}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Downloading State */}
+          {updateStatus === "downloading" && downloadProgress && (
+            <div className="pt-2 border-t border-border/10 space-y-2">
+              <div className="flex justify-between items-center text-xs font-semibold">
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                  Downloading update package...
+                </span>
+                <span className="text-foreground tabular-nums">
+                  {downloadProgress.percent !== undefined ? `${downloadProgress.percent}%` : ""}
+                </span>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary rounded-full transition-all duration-300"
+                  style={{ width: `${downloadProgress.percent ?? 0}%` }}
+                />
+              </div>
+              
+              <div className="flex justify-between items-center text-[10px] text-muted-foreground/60 font-semibold">
+                <span>
+                  {downloadProgress.total 
+                    ? `${(downloadProgress.downloaded / (1024 * 1024)).toFixed(2)} MB / ${(downloadProgress.total / (1024 * 1024)).toFixed(2)} MB`
+                    : `${(downloadProgress.downloaded / (1024 * 1024)).toFixed(2)} MB downloaded`
+                  }
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Finished State */}
+          {updateStatus === "finished" && (
+            <div className="pt-2 border-t border-border/10 flex items-center gap-3 text-xs font-bold text-chart-2">
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
+              <span>Update downloaded and installed successfully! Restarting application...</span>
+            </div>
+          )}
+
+          {/* Error Details */}
+          {updateStatus === "error" && updateError && (
+            <p className="text-[10px] text-destructive bg-destructive/5 border border-destructive/10 p-2.5 rounded-xl font-bold uppercase tracking-wider">
+              {updateError}
+            </p>
+          )}
         </div>
 
         {/* Academic Settings (Semester Selection) Card */}
