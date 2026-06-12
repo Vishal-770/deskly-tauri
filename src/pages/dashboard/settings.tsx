@@ -102,13 +102,7 @@ export default function SettingsPage() {
         }
       });
       
-      try {
-        // @ts-ignore
-        const { relaunch } = await import("@tauri-apps/plugin-process");
-        await relaunch();
-      } catch {
-        alert("Update installed successfully. Please restart Deskly manually to apply changes.");
-      }
+      alert("Update installed successfully. Please restart Deskly to apply changes.");
     } catch (err) {
       console.error("Failed to download and install update:", err);
       setUpdateError(err instanceof Error ? err.message : String(err));
