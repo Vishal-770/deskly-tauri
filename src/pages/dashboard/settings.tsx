@@ -41,7 +41,7 @@ export default function SettingsPage() {
   const [hostelBlock, setHostelBlock] = useState<LaundryBlock>("A");
   
   // Software Update States
-  const [currentVersion, setCurrentVersion] = useState("1.0.6");
+  const [currentVersion, setCurrentVersion] = useState("");
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "upToDate" | "available" | "downloading" | "finished" | "error">("idle");
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState<{ downloaded: number; total?: number; percent?: number } | null>(null);
