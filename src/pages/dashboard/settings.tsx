@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "@/router";
+import { useNavigate, Link } from "@/router";
 import DashboardSidebar from "@/components/DashBoardSideBar";
 import { ModeToggle } from "@/components/theme-toggle";
 import {
@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings, Calendar, Building, LogOut, SunMoon, ArrowUpCircle } from "lucide-react";
+import { Settings, Calendar, Building, LogOut, SunMoon, ArrowUpCircle, Scale } from "lucide-react";
 import { checkForUpdates } from "@/lib/updater";
 
 export default function SettingsPage() {
@@ -199,6 +199,25 @@ export default function SettingsPage() {
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        {/* Legal & Privacy Policy Card */}
+        <div className="bg-card/30 border border-border/25 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Scale className="w-5 h-5 text-primary shrink-0" />
+            <div>
+              <h2 className="text-sm font-bold text-foreground">Legal & Privacy Policy</h2>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                View unofficial app disclaimers, data source attribution, and privacy policies
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/legal"
+            className="px-4 py-2 bg-muted hover:bg-muted/80 text-foreground transition-all text-xs font-bold rounded-xl cursor-pointer shadow-sm flex items-center justify-center"
+          >
+            View Policy
+          </Link>
         </div>
 
         {/* Account Settings (Logout) Card */}

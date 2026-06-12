@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useNavigate } from "@/router";
+import { useNavigate, Link } from "@/router";
 import { useAuth } from "@/hooks/useAuth";
-import { User, LogIn, HelpCircle, Eye, EyeOff } from "lucide-react";
+import { User, LogIn, HelpCircle, Eye, EyeOff, Scale } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -140,15 +140,24 @@ export default function Home() {
           </form>
 
           <footer className="flex flex-col sm:flex-row justify-between items-center gap-8 pt-12 text-center sm:text-left">
-            <a
-              href="https://github.com/Vishal-770/deskly-tauri/issues"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[9px] text-muted-foreground/30 hover:text-primary transition-colors uppercase tracking-widest font-black flex items-center gap-2 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
-            >
-              <HelpCircle className="w-3 h-3" />
-              Support Nexus
-            </a>
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <a
+                href="https://github.com/Vishal-770/deskly-tauri/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[9px] text-muted-foreground/30 hover:text-primary transition-colors uppercase tracking-widest font-black flex items-center gap-2 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                Support Nexus
+              </a>
+              <Link
+                to="/legal"
+                className="text-[9px] text-muted-foreground/30 hover:text-primary transition-colors uppercase tracking-widest font-black flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+              >
+                <Scale className="w-3.5 h-3.5" />
+                Legal & Privacy
+              </Link>
+            </div>
             <span className="text-[9px] text-muted-foreground/10 font-black uppercase tracking-[0.4em] pointer-events-none select-none">
               v2.0 // Ready
             </span>

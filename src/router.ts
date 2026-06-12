@@ -25,6 +25,7 @@ export type Path =
   | `/dashboard/settings`
   | `/dashboard/timetable`
   | `/debug`
+  | `/legal`
 
 export type Params = {
   '/dashboard/attendance/:classId': { classId: string }
