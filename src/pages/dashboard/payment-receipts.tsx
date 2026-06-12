@@ -175,8 +175,11 @@ export default function PaymentReceiptsPage() {
     const cached = localStorage.getItem("deskly::cache::payment_receipts");
     if (cached) {
       try {
-        setReceipts(JSON.parse(cached));
-        setLoading(false);
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.length > 0) {
+          setReceipts(parsed);
+          setLoading(false);
+        }
       } catch (e) {
         console.error("Failed to parse cached receipts", e);
       }
@@ -185,6 +188,7 @@ export default function PaymentReceiptsPage() {
 
   async function load() {
     try {
+      setLoading(receipts && receipts.length > 0 ? false : true);
       const res = await getPaymentReceipts();
       if (res.success && res.data) {
         // Remove placeholder row or waste header row (e.g. where receiptNumber is "RECEIPT NUMBER")

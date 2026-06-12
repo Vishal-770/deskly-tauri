@@ -207,6 +207,8 @@ export default function ExamSchedulePage() {
       setError(null);
       if (authLoading) return;
 
+      setLoading(groups.length > 0 ? false : true);
+
       const res = await invoke<ExamScheduleResponse>("exam_schedule_get", { semesterSubId: null });
       if (res.success && res.data) {
         setGroups(res.data);

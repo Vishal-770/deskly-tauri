@@ -160,8 +160,10 @@ export default function GradesPage() {
     if (cached) {
       try {
         const parsed = JSON.parse(cached) as StudentHistoryData;
-        setData(parsed);
-        setLoading(false);
+        if (parsed && parsed.grades && parsed.grades.length > 0) {
+          setData(parsed);
+          setLoading(false);
+        }
       } catch (e) {
         console.error("Failed to parse cached grades", e);
       }
@@ -174,6 +176,8 @@ export default function GradesPage() {
       if (!isLoggedIn && !authLoading) return;
       setError(null);
       if (authLoading) return;
+
+      setLoading(data && data.grades && data.grades.length > 0 ? false : true);
 
       const res = await getGradesHistory();
       if (res.success && res.data) {

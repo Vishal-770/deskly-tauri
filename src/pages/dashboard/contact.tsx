@@ -137,8 +137,11 @@ export default function ContactPage() {
     const cached = localStorage.getItem("deskly::cache::contact");
     if (cached) {
       try {
-        setContacts(JSON.parse(cached));
-        setLoading(false);
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.length > 0) {
+          setContacts(parsed);
+          setLoading(false);
+        }
       } catch (e) {
         console.error("Failed to parse cached contacts", e);
       }
@@ -146,7 +149,7 @@ export default function ContactPage() {
   }, []);
 
   const fetchContacts = async () => {
-    setLoading(contacts ? false : true);
+    setLoading(contacts && contacts.length > 0 ? false : true);
     setError(null);
     try {
       const res = await getContactInfo();

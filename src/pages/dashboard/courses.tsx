@@ -216,6 +216,8 @@ export default function CoursesPage() {
       setError(null);
       if (authLoading) return;
 
+      setLoading(courses.length > 0 ? false : true);
+
       const res = await getTimetableCourses();
       if (res.success && res.data) {
         setCourses(res.data);

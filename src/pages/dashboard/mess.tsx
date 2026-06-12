@@ -171,12 +171,18 @@ export default function MessMenuPage() {
     const cachedMenu = localStorage.getItem(`deskly::cache::mess_menu_${selectedMess}`);
     if (cachedMenu) {
       try {
-        setMenuData(JSON.parse(cachedMenu));
-        setLoading(false);
+        const parsed = JSON.parse(cachedMenu);
+        if (parsed && parsed.length > 0) {
+          setMenuData(parsed);
+          setLoading(false);
+          return;
+        }
       } catch (e) {
         console.error("Failed to parse cached mess menu", e);
       }
     }
+    setMenuData(null);
+    setLoading(true);
   }, [selectedMess]);
 
   useEffect(() => {
@@ -195,7 +201,7 @@ export default function MessMenuPage() {
   }, []);
 
   const fetchMenu = async (messType: MessType) => {
-    setLoading(menuData ? false : true);
+    setLoading(menuData && menuData.length > 0 ? false : true);
     setError(null);
     try {
       const res = await getMessMenu(messType);

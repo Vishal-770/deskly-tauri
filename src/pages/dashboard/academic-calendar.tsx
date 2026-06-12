@@ -119,8 +119,8 @@ export default function AcademicCalendarPage() {
     if (cachedOptions) {
       try {
         const parsed = JSON.parse(cachedOptions);
-        setOptions(parsed);
-        if (parsed.length > 0) {
+        if (parsed && parsed.length > 0) {
+          setOptions(parsed);
           setSelectedOption(parsed[0]);
         }
       } catch (e) {
@@ -135,17 +135,23 @@ export default function AcademicCalendarPage() {
       const cachedView = localStorage.getItem(`deskly::cache::calendar_view_${selectedOption.dateValue}`);
       if (cachedView) {
         try {
-          setSchedule(JSON.parse(cachedView));
-          setLoading(false);
+          const parsed = JSON.parse(cachedView);
+          if (parsed && parsed.days && parsed.days.length > 0) {
+            setSchedule(parsed);
+            setLoading(false);
+            return;
+          }
         } catch (e) {
           console.error("Failed to parse cached calendar view", e);
         }
       }
+      setSchedule(null);
+      setLoading(true);
     }
   }, [selectedOption]);
 
   const fetchOptions = async () => {
-    setLoading(options ? false : true);
+    setLoading(options && options.length > 0 ? false : true);
     setError(null);
     try {
       const res = await getAcademicCalendarOptions();

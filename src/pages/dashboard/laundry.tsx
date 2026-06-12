@@ -147,12 +147,18 @@ export default function LaundryPage() {
     const cachedSchedule = localStorage.getItem(`deskly::cache::laundry_schedule_${selectedBlock}`);
     if (cachedSchedule) {
       try {
-        setLaundryData(JSON.parse(cachedSchedule));
-        setLoading(false);
+        const parsed = JSON.parse(cachedSchedule);
+        if (parsed && parsed.length > 0) {
+          setLaundryData(parsed);
+          setLoading(false);
+          return;
+        }
       } catch (e) {
         console.error("Failed to parse cached laundry schedule", e);
       }
     }
+    setLaundryData(null);
+    setLoading(true);
   }, [selectedBlock]);
 
   // 1. Initial Load: Fetch student profile to resolve their default block & room
@@ -184,7 +190,7 @@ export default function LaundryPage() {
 
   // 2. Schedule Fetch: Load laundry schedule whenever block changes
   const fetchSchedule = async (block: LaundryBlock) => {
-    setLoading(laundryData ? false : true);
+    setLoading(laundryData && laundryData.length > 0 ? false : true);
     setError(null);
     try {
       const res = await getLaundrySchedule(block);

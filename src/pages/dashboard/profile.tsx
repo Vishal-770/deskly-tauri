@@ -194,8 +194,11 @@ export default function StudentProfilePage() {
     const cached = localStorage.getItem("deskly::cache::profile");
     if (cached) {
       try {
-        setProfile(JSON.parse(cached));
-        setLoading(false);
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.student && parsed.student.name) {
+          setProfile(parsed);
+          setLoading(false);
+        }
       } catch (e) {
         console.error("Failed to parse cached profile", e);
       }
@@ -203,6 +206,7 @@ export default function StudentProfilePage() {
   }, []);
 
   async function fetchProfile() {
+    setLoading(profile ? false : true);
     try {
       const res = await getStudentProfile();
       if (res.success && res.data) {

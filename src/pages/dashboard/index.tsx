@@ -207,10 +207,12 @@ export default function DashboardHomePage() {
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        if (parsed.cgpaData) setCgpaData(parsed.cgpaData);
-        if (parsed.feedbackData) setFeedbackData(parsed.feedbackData);
-        if (parsed.profile) setProfile(parsed.profile);
-        setLoading(false);
+        if (parsed && (parsed.cgpaData || parsed.feedbackData || parsed.profile)) {
+          if (parsed.cgpaData) setCgpaData(parsed.cgpaData);
+          if (parsed.feedbackData) setFeedbackData(parsed.feedbackData);
+          if (parsed.profile) setProfile(parsed.profile);
+          setLoading(false);
+        }
       } catch (e) {
         console.error("Failed to parse cached dashboard data", e);
       }

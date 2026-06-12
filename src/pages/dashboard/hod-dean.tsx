@@ -146,8 +146,11 @@ export default function HodDeanDetailsPage() {
     const cached = localStorage.getItem("deskly::cache::hod_dean");
     if (cached) {
       try {
-        setDetails(JSON.parse(cached));
-        setLoading(false);
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.length > 0) {
+          setDetails(parsed);
+          setLoading(false);
+        }
       } catch (e) {
         console.error("Failed to parse cached HOD/Dean details", e);
       }
@@ -156,6 +159,7 @@ export default function HodDeanDetailsPage() {
 
   async function fetchDetails() {
     try {
+      setLoading(details && details.length > 0 ? false : true);
       const res = await getHodDeanDetails();
       if (res.success && res.data) {
         setDetails(res.data);

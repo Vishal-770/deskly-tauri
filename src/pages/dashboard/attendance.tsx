@@ -262,6 +262,8 @@ export default function AttendancePage() {
       setError(null);
       if (authLoading) return;
 
+      setLoading(attendance.length > 0 ? false : true);
+
       const res = await getCurrentAttendance();
       if (res.success && res.data) {
         setAttendance(res.data);

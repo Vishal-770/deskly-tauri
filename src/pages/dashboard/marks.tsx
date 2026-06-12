@@ -89,8 +89,8 @@ export default function MarksPage() {
     const cached = localStorage.getItem("deskly::cache::marks");
     if (cached) {
       try {
-        const parsed = JSON.parse(cached) as StudentMarkEntry[];
-        if (parsed.length > 0) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.length > 0) {
           setData(parsed);
           setLoading(false);
           setSelectedCourseCode(parsed[0].courseCode);
@@ -107,6 +107,8 @@ export default function MarksPage() {
       if (!isLoggedIn && !authLoading) return;
       setError(null);
       if (authLoading) return;
+
+      setLoading(data.length > 0 ? false : true);
 
       const res = await getMarks();
       if (res.success && res.data) {

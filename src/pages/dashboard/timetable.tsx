@@ -187,9 +187,24 @@ export default function TimetablePage() {
     const cachedAtt = localStorage.getItem("deskly::cache::timetable_attendance");
     if (cachedTt || cachedAtt) {
       try {
-        if (cachedTt) setSchedule(JSON.parse(cachedTt));
-        if (cachedAtt) setAttendance(JSON.parse(cachedAtt));
-        setLoading(false);
+        let hasData = false;
+        if (cachedTt) {
+          const parsedTt = JSON.parse(cachedTt);
+          if (parsedTt && Object.values(parsedTt).some((arr: any) => Array.isArray(arr) && arr.length > 0)) {
+            setSchedule(parsedTt);
+            hasData = true;
+          }
+        }
+        if (cachedAtt) {
+          const parsedAtt = JSON.parse(cachedAtt);
+          if (parsedAtt && parsedAtt.length > 0) {
+            setAttendance(parsedAtt);
+            hasData = true;
+          }
+        }
+        if (hasData) {
+          setLoading(false);
+        }
       } catch (e) {
         console.error("Failed to parse cached timetable/attendance", e);
       }
@@ -199,6 +214,9 @@ export default function TimetablePage() {
   async function load() {
     try {
       setError(null);
+      const isScheduleEmpty = Object.values(schedule).every(arr => arr.length === 0);
+      setLoading(isScheduleEmpty);
+
       const [tt, att] = await Promise.all([
         invoke<ApiResult<WeeklySchedule>>("timetable_get_weekly", { semesterSubId: null }),
         invoke<AttendanceResponse>("attendance_get_current").catch(() => ({ success: false } as AttendanceResponse)),
@@ -304,7 +322,8 @@ export default function TimetablePage() {
     </div>
   );
 
-  if (authLoading) return shell(
+  const isScheduleEmpty = Object.values(schedule).every(arr => arr.length === 0);
+  if (authLoading || (loading && isScheduleEmpty)) return shell(
     <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
       <div className="flex justify-between pb-6 border-b border-border/40 shrink-0">
         <div className="space-y-2"><Sk className="h-7 w-36" /><Sk className="h-3 w-52" /></div>
