@@ -3,6 +3,7 @@ import { useNavigate, Link } from "@/router";
 import { useAuth } from "@/hooks/useAuth";
 import { User, LogIn, HelpCircle, Eye, EyeOff, Scale } from "lucide-react";
 import { motion } from "framer-motion";
+import { getVersion } from "@tauri-apps/api/app";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -11,12 +12,25 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [version, setVersion] = useState("");
 
   useEffect(() => {
     if (authState?.loggedIn) {
       navigate("/dashboard");
     }
   }, [authState, navigate]);
+
+  useEffect(() => {
+    async function loadVersion() {
+      try {
+        const ver = await getVersion();
+        setVersion(ver);
+      } catch (err) {
+        console.warn("Failed to get app version:", err);
+      }
+    }
+    loadVersion();
+  }, []);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,40 +43,48 @@ export default function Home() {
     }
   };
 
-  const smoothTransition = { 
-    duration: 0.8, 
-    ease: [0.16, 1, 0.3, 1] as [number, number, number, number] 
+  const smoothTransition = {
+    duration: 0.8,
+    ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
   };
 
   return (
     <main className="h-full min-h-0 overflow-y-auto no-scrollbar relative bg-background text-foreground antialiased selection:bg-primary/20">
-      {/* Industrial Watermark - Hidden on small screens */}
-      <div className="hidden sm:block absolute top-20 right-20 text-[12rem] font-black text-foreground opacity-[0.015] pointer-events-none select-none leading-none tracking-tighter uppercase">
+      {/* Industrial Watermark - Subtle branding */}
+      <div className="hidden sm:block absolute top-24 right-24 text-[14rem] font-black text-foreground opacity-[0.015] pointer-events-none select-none leading-none tracking-tighter uppercase">
         DESKLY
       </div>
 
-      <div className="min-h-full w-full flex items-center justify-center p-6 sm:p-12">
-        <motion.section 
+      <div className="min-h-full w-full flex items-center justify-center p-6 sm:p-16">
+        <motion.section
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={smoothTransition}
-          className="w-full max-w-[360px] flex flex-col gap-12 sm:gap-16 py-8"
+          className="w-full max-w-[400px] flex flex-col gap-16 py-10"
         >
+          {/* Logo & Header */}
           <div className="space-y-8 flex flex-col items-center sm:items-start text-center sm:text-left">
-            <img src="/logo.png" className="w-10 h-10 sm:w-12 sm:h-12 object-contain" alt="Logo" />
-            <h1 className="text-4xl sm:text-5xl font-light tracking-tightest leading-none text-foreground">
-              Sign In
-            </h1>
+            <img src="/logo.png" className="w-12 h-12 sm:w-14 sm:h-14 object-contain" alt="Deskly Logo" />
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-foreground leading-none">
+                Sign In
+              </h1>
+              <p className="text-sm text-muted-foreground/60 leading-relaxed max-w-[320px]">
+                Sync your student dashboard with your official VTOP credentials.
+              </p>
+            </div>
           </div>
 
-          <form className="space-y-10" onSubmit={onSubmit}>
+          <form className="space-y-12" onSubmit={onSubmit}>
             <div className="space-y-8">
+              
+              {/* Registration Number Field */}
               <div className="group space-y-3">
                 <label
                   htmlFor="reg-no"
-                  className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-0.5"
+                  className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 ml-0.5"
                 >
-                  Reg No
+                  Registration Number
                 </label>
                 <div className="relative">
                   <input
@@ -71,20 +93,21 @@ export default function Home() {
                     value={regNo}
                     onChange={(e) => setRegNo(e.target.value)}
                     disabled={loading}
-                    className="block w-full h-12 pl-4 pr-12 bg-transparent border-b border-border/60 text-base font-normal text-foreground placeholder:text-foreground/20 focus:outline-none focus:border-primary transition-colors rounded-none placeholder:uppercase placeholder:tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
-                    placeholder="ID Number"
+                    className="block w-full h-12 pl-0 pr-12 bg-transparent border-b border-border/70 focus:border-primary focus:outline-none text-base font-normal text-foreground placeholder:text-muted-foreground/25 transition-colors rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    placeholder="Enter registration ID"
                     required
                   />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/20 transition-colors pointer-events-none group-focus-within:text-primary/40">
-                    <User className="w-3.5 h-3.5" />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/30 transition-colors pointer-events-none group-focus-within:text-primary/70">
+                    <User className="w-4.5 h-4.5" />
                   </div>
                 </div>
               </div>
 
+              {/* Password Field */}
               <div className="group space-y-3">
                 <label
                   htmlFor="password"
-                  className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 ml-0.5"
+                  className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 ml-0.5"
                 >
                   Password
                 </label>
@@ -95,7 +118,7 @@ export default function Home() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={loading}
-                    className="block w-full h-12 pl-4 pr-12 bg-transparent border-b border-border/60 text-base font-normal text-foreground placeholder:text-foreground/20 focus:outline-none focus:border-primary transition-colors rounded-none placeholder:tracking-[0.3em] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="block w-full h-12 pl-0 pr-12 bg-transparent border-b border-border/70 focus:border-primary focus:outline-none text-base font-normal text-foreground placeholder:text-muted-foreground/25 transition-colors rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="••••••••"
                     required
                   />
@@ -103,63 +126,62 @@ export default function Home() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={loading}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/20 transition-colors hover:text-foreground focus:outline-none disabled:opacity-50"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-foreground transition-colors focus:outline-none disabled:opacity-50"
                   >
                     {showPassword ? (
-                      <EyeOff className="w-3.5 h-3.5" />
+                      <EyeOff className="w-4.5 h-4.5" />
                     ) : (
-                      <Eye className="w-3.5 h-3.5" />
+                      <Eye className="w-4.5 h-4.5" />
                     )}
                   </button>
                 </div>
               </div>
             </div>
 
+            {/* Error Message */}
             {(submitError || error) && (
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-[9px] text-destructive font-black uppercase tracking-widest text-center"
-              >
+              <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-3 rounded-lg font-semibold leading-relaxed text-center">
                 {submitError ?? error}
-              </motion.p>
+              </p>
             )}
 
-            <div className="pt-4">
+            {/* Submit Button */}
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-14 flex justify-center items-center bg-primary hover:bg-primary/95 text-primary-foreground text-[11px] font-black uppercase tracking-[0.3em] transition-all rounded-none disabled:opacity-30 disabled:cursor-not-allowed group relative overflow-hidden"
+                className="w-full h-12 flex justify-center items-center bg-primary hover:bg-primary/95 text-primary-foreground text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
               >
-                <span className="relative z-10">{loading ? "Authenticating" : "Sign In"}</span>
+                <span>{loading ? "Authenticating..." : "Sign In"}</span>
                 {!loading && (
-                  <LogIn className="w-3 h-3 ml-3 relative z-10 opacity-60" />
+                  <LogIn className="w-4 h-4 ml-2.5 opacity-80" />
                 )}
               </button>
             </div>
           </form>
 
-          <footer className="flex flex-col sm:flex-row justify-between items-center gap-8 pt-12 text-center sm:text-left">
-            <div className="flex flex-col sm:flex-row gap-4 items-center">
+          {/* Footer links */}
+          <footer className="flex items-center justify-between pt-10 border-t border-border/10">
+            <div className="flex gap-5">
               <a
                 href="https://github.com/Vishal-770/deskly-tauri/issues"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[9px] text-muted-foreground/30 hover:text-primary transition-colors uppercase tracking-widest font-black flex items-center gap-2 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                className="text-xs text-muted-foreground/60 hover:text-primary transition-colors font-semibold flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
               >
-                <HelpCircle className="w-3.5 h-3.5" />
-                Support Nexus
+                <HelpCircle className="w-4 h-4" />
+                Support
               </a>
               <Link
                 to="/legal"
-                className="text-[9px] text-muted-foreground/30 hover:text-primary transition-colors uppercase tracking-widest font-black flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+                className="text-xs text-muted-foreground/60 hover:text-primary transition-colors font-semibold flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
               >
-                <Scale className="w-3.5 h-3.5" />
-                Legal & Privacy
+                <Scale className="w-4 h-4" />
+                Legal
               </Link>
             </div>
-            <span className="text-[9px] text-muted-foreground/10 font-black uppercase tracking-[0.4em] pointer-events-none select-none">
-              v2.0 // Ready
+            <span className="text-xs text-muted-foreground/35 font-bold select-none">
+              {version ? `v${version}` : "v1.0.7"}
             </span>
           </footer>
         </motion.section>
