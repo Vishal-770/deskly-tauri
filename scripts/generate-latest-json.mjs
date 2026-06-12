@@ -55,9 +55,7 @@ const windowsAsset =
   findFirstByRegex(basenames, /\.msi$/i) ||
   findFirstByRegex(basenames, /setup\.exe$/i) ||
   findFirstByRegex(basenames, /\.exe$/i);
-const linuxAsset =
-  findFirstByRegex(basenames, /\.AppImage\.tar\.gz$/i) ||
-  findFirstByRegex(basenames, /\.AppImage$/i);
+const linuxAsset = findFirstByRegex(basenames, /\.AppImage$/i);
 const macAsset = findFirstByRegex(basenames, /\.app\.tar\.gz$/i);
 
 const platforms = {};

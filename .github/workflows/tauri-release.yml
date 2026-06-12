@@ -25,8 +25,7 @@ jobs:
             artifact_name: linux
             bundle_glob: |
               src-tauri/target/release/bundle/appimage/*.AppImage
-              src-tauri/target/release/bundle/appimage/*.tar.gz
-              src-tauri/target/release/bundle/appimage/*.sig
+              src-tauri/target/release/bundle/appimage/*.AppImage.sig
               src-tauri/target/release/bundle/deb/*.deb
               src-tauri/target/release/bundle/rpm/*.rpm
           - os: macos-latest
@@ -136,8 +135,6 @@ jobs:
             release-assets/**/*.exe.sig
             release-assets/**/*.AppImage
             release-assets/**/*.AppImage.sig
-            release-assets/**/*.AppImage.tar.gz
-            release-assets/**/*.AppImage.tar.gz.sig
             release-assets/**/*.app.tar.gz
             release-assets/**/*.app.tar.gz.sig
             release-assets/**/*.dmg

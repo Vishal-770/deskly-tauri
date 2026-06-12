@@ -25,11 +25,13 @@ import {
   SunMoon, 
   ArrowUpCircle, 
   Scale,
-  Loader2
+  Loader2,
+  ExternalLink
 } from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
 import { check } from "@tauri-apps/plugin-updater";
 import { showNotification } from "@/lib/notifications";
+import { invoke } from "@tauri-apps/api/core";
 
 export default function SettingsPage() {
   const { isLoggedIn, loading: authLoading, logout } = useAuth();
@@ -46,8 +48,10 @@ export default function SettingsPage() {
   const [downloadProgress, setDownloadProgress] = useState<{ downloaded: number; total?: number; percent?: number } | null>(null);
   const [activeUpdate, setActiveUpdate] = useState<any>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  // null = unknown, true = AppImage, false = rpm/deb/other
+  const [isAppImage, setIsAppImage] = useState<boolean | null>(null);
 
-  // Load version on mount
+  // Load version and detect install format on mount
   useEffect(() => {
     async function loadVersion() {
       try {
@@ -57,7 +61,24 @@ export default function SettingsPage() {
         console.warn("Failed to get app version:", err);
       }
     }
+    async function detectInstallFormat() {
+      try {
+        // get_current_exe returns the path of the running binary
+        const exePath = await invoke<string>("plugin:os|exe").catch(() => null)
+          ?? await invoke<string>("get_exe_path").catch(() => null);
+        if (exePath) {
+          setIsAppImage(exePath.toLowerCase().endsWith(".appimage"));
+        } else {
+          // Fallback: check the env variable AppImage sets
+          setIsAppImage(!!(import.meta.env.APPIMAGE || ('APPIMAGE' in ((window as any).__TAURI_INTERNALS__ ?? {}))));
+        }
+      } catch {
+        // If detection fails, assume it could be AppImage (don't block)
+        setIsAppImage(null);
+      }
+    }
     loadVersion();
+    detectInstallFormat();
   }, []);
 
   const handleUpdateCheck = async () => {
@@ -303,50 +324,74 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="shrink-0">
-                    {(updateStatus === "idle" || updateStatus === "upToDate" || updateStatus === "error") && (
-                      <button
-                        onClick={handleUpdateCheck}
-                        className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-[11px] font-bold rounded-lg cursor-pointer transition-all"
+                    {/* Non-AppImage installs: show download link instead */}
+                    {isAppImage === false ? (
+                      <a
+                        href="https://github.com/Vishal-770/deskly-tauri/releases/latest"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-colors"
                       >
-                        Check
-                      </button>
-                    )}
-                    {updateStatus === "checking" && (
-                      <button
-                        disabled
-                        className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5"
-                      >
-                        <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
-                        Checking
-                      </button>
-                    )}
-                    {updateStatus === "available" && (
-                      <button
-                        onClick={handleInstallUpdate}
-                        className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-[11px] font-bold rounded-lg cursor-pointer transition-all animate-pulse"
-                      >
-                        Install
-                      </button>
-                    )}
-                    {updateStatus === "downloading" && (
-                      <button
-                        disabled
-                        className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5"
-                      >
-                        <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
-                        Downloading
-                      </button>
-                    )}
-                    {updateStatus === "finished" && (
-                      <button
-                        disabled
-                        className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg"
-                      >
-                        Restarting
-                      </button>
+                        <ExternalLink className="w-3 h-3" />
+                        Download
+                      </a>
+                    ) : (
+                      <>
+                        {(updateStatus === "idle" || updateStatus === "upToDate" || updateStatus === "error") && (
+                          <button
+                            onClick={handleUpdateCheck}
+                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-[11px] font-bold rounded-lg cursor-pointer transition-all"
+                          >
+                            Check
+                          </button>
+                        )}
+                        {updateStatus === "checking" && (
+                          <button
+                            disabled
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5"
+                          >
+                            <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                            Checking
+                          </button>
+                        )}
+                        {updateStatus === "available" && (
+                          <button
+                            onClick={handleInstallUpdate}
+                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-[11px] font-bold rounded-lg cursor-pointer transition-all animate-pulse"
+                          >
+                            Install
+                          </button>
+                        )}
+                        {updateStatus === "downloading" && (
+                          <button
+                            disabled
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5"
+                          >
+                            <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                            Downloading
+                          </button>
+                        )}
+                        {updateStatus === "finished" && (
+                          <button
+                            disabled
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg"
+                          >
+                            Restarting
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
+
+                {/* Non-AppImage notice */}
+                {isAppImage === false && (
+                  <div className="pl-7 pt-1">
+                    <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                      Auto-update is only supported for AppImage installs. RPM/DEB users should download the new package manually from GitHub releases.
+                    </p>
+                  </div>
+                )}
 
                 {/* Inline Details */}
                 {updateStatus === "available" && activeUpdate && activeUpdate.body && (
