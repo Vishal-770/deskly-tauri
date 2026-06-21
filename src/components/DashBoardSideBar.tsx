@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Calendar,
   BookOpen,
+  ScrollText,
   Shirt,
   Users,
   Settings,
@@ -60,6 +61,12 @@ const DashboardSidebar = () => {
         label: "Courses",
         href: "/dashboard/courses",
         icon: <BookOpen className="w-5 h-5" />,
+        description: "",
+      },
+      {
+        label: "Curriculum",
+        href: "/dashboard/curriculum",
+        icon: <ScrollText className="w-5 h-5" />,
         description: "",
       },
       {

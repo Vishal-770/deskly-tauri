@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
 import DashboardSidebar from "@/components/DashBoardSideBar";
 import { ErrorDisplay } from "@/components/error-display";
+import CalendarExportPopover from "@/components/calendar-export-popover";
+import SingleCourseExportModal from "@/components/single-course-export-modal";
 import { motion } from "framer-motion";
 import {
   Clock,
@@ -152,11 +154,11 @@ function AttPill({ att }: { att: AttendanceRecord }) {
                 : "bg-destructive";
   return (
     <div className="flex flex-col items-end gap-1 min-w-[64px]">
-      <span className={`text-lg font-black leading-none ${textCls}`}>{p}%</span>
+      <span className={`text-lg font-bold leading-none ${textCls}`}>{p}%</span>
       <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${barCls}`} style={{ width: `${Math.min(p,100)}%` }} />
       </div>
-      <span className="text-xs text-muted-foreground font-semibold">{att.attendedClasses}/{att.totalClasses}</span>
+      <span className="text-xs text-muted-foreground font-medium">{att.attendedClasses}/{att.totalClasses}</span>
     </div>
   );
 }
@@ -362,7 +364,8 @@ export default function TimetablePage() {
           <p className="text-xs text-muted-foreground mt-0.5">Weekly schedule with attendance</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 border border-border/50 bg-muted/40 rounded-lg px-3.5 py-1.5 text-sm text-muted-foreground font-semibold">
+          <CalendarExportPopover schedule={schedule} weekStartDate={weekStart} />
+          <div className="flex items-center gap-2 border border-border/50 bg-muted/40 rounded-lg px-3.5 py-1.5 text-sm text-muted-foreground font-medium">
             <Calendar className="w-4 h-4 text-primary shrink-0" />
             <span>{weekLabel}</span>
             <div className="flex items-center gap-0.5 ml-1.5 pl-1.5 border-l border-border/50">
@@ -385,10 +388,10 @@ export default function TimetablePage() {
             return (
               <button key={d.full} onClick={() => setSelectedDay(i)}
                 className={`relative flex flex-col items-center gap-1.5 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
-                  active ? "text-primary font-bold animate-[pulse_0.15s_ease-out_1]" : "text-muted-foreground hover:text-foreground"
+                  active ? "text-primary font-semibold animate-[pulse_0.15s_ease-out_1]" : "text-muted-foreground hover:text-foreground"
                 }`}>
-                <span className={`text-xs font-bold uppercase tracking-wider ${active ? "opacity-90" : "opacity-55"}`}>{d.name}</span>
-                <span className="text-xl font-black leading-none">{d.num}</span>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${active ? "opacity-90" : "opacity-55"}`}>{d.name}</span>
+                <span className="text-xl font-bold leading-none">{d.num}</span>
                 {/* today underline */}
                 {isToday && !active && <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-primary" />}
                 {/* classes dot */}
@@ -417,10 +420,10 @@ export default function TimetablePage() {
           {/* List header */}
           <div className="flex items-center justify-between pb-3 border-b border-border/20">
             <div>
-              <h2 className="text-lg font-extrabold text-foreground tracking-tight">{weekDays[selectedDay].full}</h2>
+              <h2 className="text-lg font-semibold text-foreground tracking-tight">{weekDays[selectedDay].full}</h2>
               <p className="text-sm text-muted-foreground mt-0.5">{weekDays[selectedDay].date.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</p>
             </div>
-            {!loading && <span className="text-sm font-bold bg-muted text-muted-foreground px-3 py-1 rounded-full">{daySchedule.length} {daySchedule.length === 1 ? "class" : "classes"}</span>}
+            {!loading && <span className="text-sm font-medium bg-muted text-muted-foreground px-3 py-1 rounded-full">{daySchedule.length} {daySchedule.length === 1 ? "class" : "classes"}</span>}
           </div>
 
           {/* Rows */}
@@ -456,8 +459,8 @@ export default function TimetablePage() {
 
                         {/* Time */}
                         <div className="w-[80px] shrink-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1">
-                          <span className="text-sm font-extrabold text-foreground leading-none">{item.startTime}</span>
-                          <span className="text-xs text-muted-foreground font-semibold leading-none md:mt-1.5">{item.endTime}</span>
+                          <span className="text-sm font-bold text-foreground leading-none">{item.startTime}</span>
+                          <span className="text-xs text-muted-foreground font-medium leading-none md:mt-1.5">{item.endTime}</span>
                         </div>
 
                         {/* Timeline dot */}
@@ -471,18 +474,18 @@ export default function TimetablePage() {
                         <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
                           <div className="space-y-1.5 flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-extrabold tracking-wider text-primary uppercase">{item.courseCode}</span>
-                              <span className={`text-xs font-bold ${
+                              <span className="text-sm font-semibold tracking-wider text-primary uppercase">{item.courseCode}</span>
+                              <span className={`text-xs font-medium ${
                                 isLab ? "text-chart-2" : "text-primary"
                               }`}>{isLab ? "Lab" : "Theory"}</span>
                               {isNow && (
-                                <span className="flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full leading-none">
+                                <span className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full leading-none">
                                   <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />Live
                                 </span>
                               )}
                             </div>
-                            <p className="text-base font-extrabold text-foreground leading-snug truncate">{item.courseTitle}</p>
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground font-semibold flex-wrap">
+                            <p className="text-base font-semibold text-foreground leading-snug truncate">{item.courseTitle}</p>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium flex-wrap">
                               <span className="flex items-center gap-1">
                                 <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />{item.venue || "TBA"}
                               </span>
@@ -490,12 +493,12 @@ export default function TimetablePage() {
                                 <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
                                 <span className="truncate max-w-[130px]" title={item.faculty}>{item.faculty || "TBA"}</span>
                               </span>
-                              <span className="font-mono text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-semibold">{item.slot}</span>
+                              <span className="font-mono text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-medium">{item.slot}</span>
                               {att && (() => {
                                 const h = attHint(att.attendedClasses, att.totalClasses);
                                 if (!h) return null;
                                 return (
-                                  <span className={`text-xs font-bold ${
+                                  <span className={`text-xs font-medium ${
                                     h.type === "need"
                                       ? "text-destructive"
                                       : "text-chart-2"
@@ -507,14 +510,15 @@ export default function TimetablePage() {
                             </div>
                           </div>
 
-                          {/* Attendance */}
-                          {att ? (
-                            <div className="shrink-0 flex items-center justify-end">
+                          {/* Attendance & Export */}
+                          <div className="shrink-0 flex items-center justify-end gap-3">
+                            <SingleCourseExportModal entry={item} dayDate={weekDays[selectedDay].date} />
+                            {att ? (
                               <AttPill att={att} />
-                            </div>
-                          ) : (
-                            <div className="w-14 shrink-0" />
-                          )}
+                            ) : (
+                              <div className="w-16 shrink-0" />
+                            )}
+                          </div>
                         </div>
                       </div>
                     );
@@ -533,9 +537,9 @@ export default function TimetablePage() {
               {focusedLabel && focused ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between border-b border-border/10 pb-2">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{focusedLabel}</p>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{focusedLabel}</p>
                     {classStatus.cur && (
-                      <span className="flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />Live
                       </span>
                     )}
@@ -543,14 +547,14 @@ export default function TimetablePage() {
 
                   <div className="border-l-2 border-primary pl-4 py-1.5 space-y-2.5">
                     <div>
-                      <p className="text-xs font-extrabold text-primary tracking-wide uppercase">{focused.courseCode}</p>
-                      <p className="text-base font-extrabold text-foreground leading-snug">{focused.courseTitle}</p>
+                      <p className="text-xs font-semibold text-primary tracking-wide uppercase">{focused.courseCode}</p>
+                      <p className="text-base font-semibold text-foreground leading-snug">{focused.courseTitle}</p>
                     </div>
 
                     <div className="space-y-2 text-sm text-muted-foreground pt-1">
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 shrink-0 text-muted-foreground/60" />
-                        <span className="font-semibold text-foreground">{focused.startTime} – {focused.endTime}</span>
+                        <span className="font-medium text-foreground">{focused.startTime} – {focused.endTime}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 shrink-0 text-muted-foreground/60" />
@@ -577,10 +581,10 @@ export default function TimetablePage() {
                           <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                             <div className={`h-full rounded-full ${barCls}`} style={{ width: `${Math.min(p,100)}%` }} />
                           </div>
-                          <span className={`text-sm font-extrabold shrink-0 ${txtCls}`}>{p}% · {a.attendedClasses}/{a.totalClasses}</span>
+                          <span className={`text-sm font-semibold shrink-0 ${txtCls}`}>{p}% · {a.attendedClasses}/{a.totalClasses}</span>
                         </div>
                         {hint && (
-                          <p className={`text-xs font-bold ${
+                          <p className={`text-xs font-medium ${
                             hint.type === "need" ? "text-destructive" : "text-chart-2"
                           }`}>
                             {hint.type === "need"
@@ -594,11 +598,11 @@ export default function TimetablePage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Today</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Today</p>
                   <div className="flex items-center gap-3 py-1">
                     <div className="p-2 rounded-lg bg-muted shrink-0"><Calendar className="w-4 h-4 text-muted-foreground/60" /></div>
                     <div>
-                      <p className="text-base font-extrabold text-foreground">All done for today</p>
+                      <p className="text-base font-semibold text-foreground">All done for today</p>
                       <p className="text-sm text-muted-foreground mt-0.5">No more classes scheduled.</p>
                     </div>
                   </div>
@@ -607,7 +611,7 @@ export default function TimetablePage() {
 
               {/* Day stats */}
               <div className="space-y-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">{DAY_FULL[selectedDay]}'s Summary</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">{DAY_FULL[selectedDay]}'s Summary</p>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-1">
                   {([
                     { label:"Classes",  val: stats.total,  Icon: Calendar  },
@@ -616,10 +620,10 @@ export default function TimetablePage() {
                     { label:"Duration", val: stats.dur,    Icon: Clock     },
                   ] as const).map(({ label, val, Icon }) => (
                     <div key={label} className="space-y-1.5">
-                      <p className="text-3xl font-black text-foreground leading-none">{val}</p>
+                      <p className="text-3xl font-bold text-foreground leading-none">{val}</p>
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Icon className="w-3.5 h-3.5 shrink-0 opacity-65" />
-                        <p className="text-xs font-bold uppercase tracking-wider">{label}</p>
+                        <p className="text-xs font-medium uppercase tracking-wider">{label}</p>
                       </div>
                     </div>
                   ))}
@@ -628,7 +632,7 @@ export default function TimetablePage() {
 
               {/* Weekly chart */}
               <div className="space-y-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Weekly Overview</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Weekly Overview</p>
                 <div className="h-36 pt-2">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top:6, right:4, left:-28, bottom:0 }}>
@@ -646,7 +650,7 @@ export default function TimetablePage() {
 
               {/* Weekly totals */}
               <div className="space-y-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Weekly Totals</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Weekly Totals</p>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4 pt-1">
                   {([
                     { label: "Classes",  val: weeklyStats.total, Icon: Calendar  },
@@ -655,10 +659,10 @@ export default function TimetablePage() {
                     { label: "Duration", val: weeklyStats.dur,   Icon: Clock     },
                   ] as const).map(({ label, val, Icon }) => (
                     <div key={label} className="space-y-1.5">
-                      <p className="text-3xl font-black text-foreground leading-none">{val}</p>
+                      <p className="text-3xl font-bold text-foreground leading-none">{val}</p>
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Icon className="w-3.5 h-3.5 shrink-0 opacity-65" />
-                        <p className="text-xs font-bold uppercase tracking-wider">{label}</p>
+                        <p className="text-xs font-medium uppercase tracking-wider">{label}</p>
                       </div>
                     </div>
                   ))}

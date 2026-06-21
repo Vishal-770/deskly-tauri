@@ -12,7 +12,13 @@ import {
   FileText,
   AlertCircle,
   Info,
+  CalendarRange,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import SingleExamExportModal from "@/components/single-exam-export-modal";
+import {
+  generateExamGroupIcs,
+} from "@/lib/calendar-export-utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ExamScheduleEntry {
@@ -174,6 +180,19 @@ export default function ExamSchedulePage() {
   const [groups, setGroups] = useState<ExamScheduleGroup[]>([]);
   const [selectedTab, setSelectedTab] = useState<string>("");
   const [loading, setLoading] = useState(true);
+
+  const handleDownloadGroupIcs = async () => {
+    try {
+      const icsContent = generateExamGroupIcs(activeSchedules);
+      const filename = `${formatExamTypeLabel(selectedTab).replace(/\s+/g, "_")}_Exam_Schedule.ics`;
+      await invoke("save_calendar_file", {
+        content: icsContent,
+        filename,
+      });
+    } catch (e) {
+      console.error("Failed to save calendar file", e);
+    }
+  };
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
@@ -375,6 +394,16 @@ export default function ExamSchedulePage() {
           <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">My Exams</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Your exam schedule at a glance</p>
         </div>
+        {activeSchedules.length > 0 && (
+          <Button
+            variant="outline"
+            onClick={handleDownloadGroupIcs}
+            className="rounded-xl h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20 shrink-0"
+          >
+            <CalendarRange className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span>Export {formatExamTypeLabel(selectedTab)} Schedule</span>
+          </Button>
+        )}
       </header>
 
       {/* ── Exam Tabs selector (Premium Horizontal Tab Bar) ───────────────── */}
@@ -645,14 +674,17 @@ export default function ExamSchedulePage() {
                               </div>
                             </div>
 
-                            {/* Seat details */}
-                            <div className="shrink-0 flex flex-col items-end md:items-end justify-center bg-muted/20 border border-border/10 rounded-xl px-4 py-2 min-w-[100px]">
-                              <span className="text-lg font-black text-foreground leading-none">Seat {item.seatNo}</span>
-                              {item.seatLocation !== "-" && (
-                                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1.5">
-                                  {item.seatLocation}
-                                </span>
-                              )}
+                            {/* Seat & Export details */}
+                            <div className="shrink-0 flex items-center gap-3">
+                              <SingleExamExportModal entry={item} />
+                              <div className="flex flex-col items-end md:items-end justify-center bg-muted/20 border border-border/10 rounded-xl px-4 py-2 min-w-[100px]">
+                                <span className="text-lg font-black text-foreground leading-none">Seat {item.seatNo}</span>
+                                {item.seatLocation !== "-" && (
+                                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1.5">
+                                    {item.seatLocation}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>

@@ -1,8 +1,18 @@
 import { useNavigate } from "@/router";
-import { ArrowLeft, Scale, ShieldAlert, Lock, Database, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  ArrowLeft,
+  Scale,
+  ShieldAlert,
+  Lock,
+  Database,
+  FileText,
+  Clock,
+} from "lucide-react";
 
 export default function LegalPage() {
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState("disclaimer");
 
   const SECTIONS = [
     { id: "disclaimer", label: "App Disclaimer", icon: ShieldAlert },
@@ -12,71 +22,112 @@ export default function LegalPage() {
     { id: "license", label: "MIT License", icon: FileText },
   ];
 
+  // Intersection Observer for scroll spy to make the TOC feel premium
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-20% 0px -60% 0px" }
+    );
+
+    SECTIONS.forEach((sec) => {
+      const el = document.getElementById(sec.id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
+      setActiveSection(id);
     }
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-background text-foreground overflow-y-auto no-scrollbar pt-8 pb-16 px-4 sm:px-6 md:px-10">
-      <div className="w-full space-y-8">
+    <div className="h-full w-full flex flex-col bg-background text-foreground overflow-y-auto no-scrollbar pt-6 sm:pt-8 pb-16 px-4 sm:px-6 md:px-10">
+      <div className="w-full max-w-6xl mx-auto space-y-10">
         
-        {/* Header */}
-        <header className="pb-6 border-b border-border/20 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        {/* ── Header Area ─────────────────────────────────────────────────── */}
+        <header className="pb-6 border-b border-border/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
             <button
               onClick={() => navigate(-1)}
-              className="p-2.5 rounded-2xl bg-muted/20 border border-border/10 hover:bg-muted text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+              className="p-3 rounded-2xl bg-muted/20 border border-border/15 hover:bg-muted text-muted-foreground hover:text-foreground hover:border-border/30 transition-all duration-150 cursor-pointer shrink-0"
               aria-label="Go Back"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2.5">
-                <Scale className="w-6 h-6 text-primary shrink-0" />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-black uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-lg">
+                  Legal Documents
+                </span>
+                <span className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground/60">
+                  <Clock className="w-3 h-3" />
+                  Last Updated: June 2026
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground mt-1.5 flex items-center gap-2">
+                <Scale className="w-7 h-7 text-primary shrink-0" />
                 Legal & Privacy Policy
               </h1>
-              <p className="text-xs text-muted-foreground mt-1">
-                Review Deskly's legal terms, VTOP disclaimers, local privacy policy, and open-source licenses
-              </p>
             </div>
           </div>
         </header>
 
-        {/* Mobile Navigation chips (Visible on mobile/tablet, hidden on desktop) */}
-        <div className="flex lg:hidden gap-2 overflow-x-auto no-scrollbar pb-2 pt-1 border-b border-border/10 -mx-4 px-4">
+        {/* ── Mobile Navigation Chips ─────────────────────────────────────── */}
+        <div className="flex lg:hidden gap-2 overflow-x-auto no-scrollbar pb-3 border-b border-border/10 -mx-4 px-4 scroll-smooth">
           {SECTIONS.map((sec) => {
+            const isActive = activeSection === sec.id;
             return (
               <button
                 key={sec.id}
                 onClick={() => scrollToSection(sec.id)}
-                className="px-3 py-1 bg-muted/30 border border-border/10 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all shrink-0 cursor-pointer rounded-lg"
+                className={`px-4 py-1.5 border text-xs font-semibold rounded-xl transition-all shrink-0 cursor-pointer ${
+                  isActive
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-muted/10 border-border/20 text-muted-foreground hover:bg-muted/20 hover:text-foreground"
+                }`}
               >
-                <span>{sec.label}</span>
+                {sec.label}
               </button>
             );
           })}
         </div>
 
-        {/* Layout Grid */}
+        {/* ── Main Layout Grid ────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           
-          {/* Desktop Table of Contents Sidebar (lg:col-span-3) */}
+          {/* Table of Contents Sidebar */}
           <aside className="hidden lg:block lg:col-span-3 sticky top-6 space-y-4">
-            <div className="space-y-3">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 px-3">
-                On This Page
+            <div className="p-5 bg-card/25 border border-border/15 rounded-3xl space-y-4">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 px-1">
+                Document Sections
               </p>
-              <nav className="flex flex-col gap-1">
+              <nav className="flex flex-col gap-1.5">
                 {SECTIONS.map((sec) => {
+                  const isActive = activeSection === sec.id;
+                  const Icon = sec.icon;
+
                   return (
                     <button
                       key={sec.id}
                       onClick={() => scrollToSection(sec.id)}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-accent/40 transition-all cursor-pointer"
+                      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-primary/10 text-primary border border-primary/20"
+                          : "text-muted-foreground border border-transparent hover:text-foreground hover:bg-accent/40"
+                      }`}
                     >
+                      <Icon className="w-4 h-4 shrink-0" />
                       <span>{sec.label}</span>
                     </button>
                   );
@@ -85,74 +136,133 @@ export default function LegalPage() {
             </div>
           </aside>
 
-          {/* Document Content (lg:col-span-9) */}
-          <div className="lg:col-span-9 divide-y divide-border/10 space-y-2">
+          {/* Legal Content */}
+          <div className="lg:col-span-9 space-y-6">
             
             {/* Section 1: Unofficial App Disclaimer */}
-            <section id="disclaimer" className="scroll-mt-6 space-y-3 pb-6">
-              <h2 className="text-sm font-bold text-foreground">Unofficial App Disclaimer</h2>
-              <div className="border-l-2 border-destructive bg-destructive/5 pl-4 py-2.5 text-xs text-foreground/90 leading-relaxed rounded-r-md">
-                <strong>Notice:</strong> This is an unofficial application and is not affiliated with, endorsed by, or maintained by Vellore Institute of Technology (VIT). Deskly operates as a completely unofficial, community-driven client interface and does not claim any official partner status or authorization from the college.
+            <section
+              id="disclaimer"
+              className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-destructive/10 text-destructive shrink-0">
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
+                <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
+                  Unofficial App Disclaimer
+                </h2>
               </div>
+              
+              <div className="border-l-4 border-destructive bg-destructive/5 pl-4 py-3 text-xs sm:text-sm text-foreground/90 leading-relaxed rounded-r-2xl">
+                <strong>Notice:</strong> This is an unofficial, community-driven application and is not affiliated with, endorsed by, or maintained by Vellore Institute of Technology (VIT). Deskly operates as a completely unofficial client interface and does not claim any official partner status or authorization from the college.
+              </div>
+              
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                All data shown in the application originates from the official college portal and may not always be accurate, complete, or up to date. Users should verify academic details (such as attendance, marks, grades, and exam schedules) through official college channels.
+                All data displayed in this application originates directly from the official college student portal (VTOP). It may not always reflect live modifications, system downtimes, or portal updates. Users must verify academic records (such as attendance metrics, marks, grades, and exam schedules) through official college channels.
               </p>
             </section>
 
             {/* Section 2: No Warranty Disclaimer */}
-            <section id="warranty" className="scroll-mt-6 space-y-3 py-6">
-              <h2 className="text-sm font-bold text-foreground">Terms of Use &amp; No Warranty</h2>
-              <div className="border-l-2 border-primary bg-primary/5 pl-4 py-2.5 text-xs text-muted-foreground leading-relaxed rounded-r-md">
+            <section
+              id="warranty"
+              className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+                  <Scale className="w-5 h-5" />
+                </div>
+                <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
+                  Terms of Use &amp; Warranty Limit
+                </h2>
+              </div>
+              
+              <div className="border-l-4 border-primary bg-primary/5 pl-4 py-3 text-xs sm:text-sm text-muted-foreground leading-relaxed rounded-r-2xl">
                 <strong>Disclaimer of Warranty:</strong> This software is provided &quot;as is&quot; without warranties of any kind, express or implied. Information displayed may be inaccurate, delayed, or unavailable due to network errors, server updates, or portal website structure changes.
               </div>
+              
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                In no event shall the developers of Deskly be held liable for any administrative issues, missed academic schedules, attendance calculation mismatches, or any other complications resulting from the use of this client application.
+                Under no circumstances shall the developers of Deskly be liable for administrative discrepancies, missed academic schedules, attendance calculation errors, or any other complications resulting from the use of this client application.
               </p>
             </section>
 
             {/* Section 3: Privacy Policy */}
-            <section id="privacy" className="scroll-mt-6 space-y-3 py-6">
-              <h2 className="text-sm font-bold text-foreground">Privacy Policy</h2>
+            <section
+              id="privacy"
+              className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-5 transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
+                  Privacy Policy
+                </h2>
+              </div>
+
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Deskly is designed with strict student privacy guidelines in mind:
               </p>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-1">
-                <div className="space-y-1">
-                  <h3 className="text-xs font-bold text-foreground">What Data is Stored?</h3>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-5 bg-muted/10 border border-border/10 rounded-2xl space-y-1.5">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-foreground">
+                    What Data is Stored?
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     Your VTOP credentials (registration number, password) and academic metrics (attendance, marks, grades, timetables, receipts) are stored on your local device.
                   </p>
                 </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-xs font-bold text-foreground">Where is it Stored?</h3>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed">
-                    Credentials are saved in secure OS-level keychain services (via the keyring API) and cached page data is held in browser local storage. No cloud servers are used.
+                <div className="p-5 bg-muted/10 border border-border/10 rounded-2xl space-y-1.5">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-foreground">
+                    Where is it Stored?
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Credentials are saved in secure OS-level keychain services (via the keyring API) and cached page data is held in local storage. No cloud servers are used.
                   </p>
                 </div>
               </div>
               
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed pt-1">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed pt-2">
                 <strong>Third-Party Sharing:</strong> No credentials, cookies, keys, session tokens, or student information are ever shared with, transmitted to, or stored on external servers or third-party analytical networks.
               </p>
             </section>
 
             {/* Section 4: Data Source Attribution */}
-            <section id="attribution" className="scroll-mt-6 space-y-3 py-6">
-              <h2 className="text-sm font-bold text-foreground">Data Source Attribution</h2>
+            <section
+              id="attribution"
+              className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+                  <Database className="w-5 h-5" />
+                </div>
+                <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
+                  Data Source Attribution
+                </h2>
+              </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 All academic information displayed within this client app is sourced from the official college student portal (VTOP) as fetched on behalf of the user using their local credentials. This application does not maintain an independent database of student records.
               </p>
             </section>
 
             {/* Section 5: Open Source License */}
-            <section id="license" className="scroll-mt-6 space-y-3 pt-6">
-              <h2 className="text-sm font-bold text-foreground">Open Source License</h2>
+            <section
+              id="license"
+              className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
+                  Open Source License
+                </h2>
+              </div>
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Deskly is released as open-source software under the terms of the MIT License:
               </p>
-              <pre className="font-mono text-[10px] bg-muted/20 border border-border/10 rounded-xl p-4 leading-normal whitespace-pre-wrap text-muted-foreground/80 overflow-x-auto">
+              <pre className="font-mono text-[10px] bg-muted/10 border border-border/10 rounded-2xl p-5 leading-normal whitespace-pre-wrap text-muted-foreground/85 overflow-x-auto">
 {`MIT License
 
 Copyright (c) 2026 Deskly Authors

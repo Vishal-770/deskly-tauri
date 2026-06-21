@@ -13,6 +13,8 @@ export type Path =
   | `/dashboard/attendance/:classId`
   | `/dashboard/contact`
   | `/dashboard/courses`
+  | `/dashboard/curriculum`
+  | `/dashboard/curriculum/:categoryId`
   | `/dashboard/exams`
   | `/dashboard/faculty-info`
   | `/dashboard/grades`
@@ -29,6 +31,7 @@ export type Path =
 
 export type Params = {
   '/dashboard/attendance/:classId': { classId: string }
+  '/dashboard/curriculum/:categoryId': { categoryId: string }
 }
 
 export type ModalPath = never
