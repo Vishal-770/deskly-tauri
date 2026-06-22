@@ -466,12 +466,12 @@ export default function DashboardHomePage() {
                           Mid Semester:
                         </span>
                         <span
-                          className={`inline-flex items-center gap-1 font-bold ${
+                          className={`inline-flex items-center gap-1.5 font-bold ${
                             mid.isGiven ? "text-emerald-500" : "text-destructive"
                           }`}
                           title={mid.rawText}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${mid.isGiven ? "bg-emerald-500" : "bg-destructive"}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${mid.isGiven ? "bg-emerald-500" : "bg-destructive"} relative -translate-y-[0.5px]`} />
                           {mid.statusText}
                         </span>
                       </div>
@@ -481,12 +481,12 @@ export default function DashboardHomePage() {
                           TEE Semester:
                         </span>
                         <span
-                          className={`inline-flex items-center gap-1 font-bold ${
+                          className={`inline-flex items-center gap-1.5 font-bold ${
                             tee.isGiven ? "text-emerald-500" : "text-destructive"
                           }`}
                           title={tee.rawText}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${tee.isGiven ? "bg-emerald-500" : "bg-destructive"}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${tee.isGiven ? "bg-emerald-500" : "bg-destructive"} relative -translate-y-[0.5px]`} />
                           {tee.statusText}
                         </span>
                       </div>

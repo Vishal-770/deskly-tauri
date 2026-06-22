@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Shirt, Calendar as CalendarIcon } from "lucide-react";
+import { Shirt, Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
 import { motion } from "framer-motion";
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -73,6 +73,30 @@ export default function LaundryPage() {
   
   // Current reference date (locked to active month)
   const currentDate = useMemo(() => new Date(), []);
+
+  const getLaundryGCalLink = (day: number, roomNumber: string) => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const eventDate = new Date(year, month, day);
+    
+    const startY = eventDate.getFullYear();
+    const startM = String(eventDate.getMonth() + 1).padStart(2, "0");
+    const startD = String(eventDate.getDate()).padStart(2, "0");
+
+    const nextDate = new Date(eventDate);
+    nextDate.setDate(eventDate.getDate() + 1);
+    const endY = nextDate.getFullYear();
+    const endM = String(nextDate.getMonth() + 1).padStart(2, "0");
+    const endD = String(nextDate.getDate()).padStart(2, "0");
+
+    const dates = `${startY}${startM}${startD}/${endY}${endM}${endD}`;
+    
+    const title = encodeURIComponent(`Laundry Schedule - Block ${selectedBlock}`);
+    const details = encodeURIComponent(`Room Range: ${roomNumber}\nAllocated wash day for your block/room.`);
+    const location = encodeURIComponent(`Laundry Room, Block ${selectedBlock}`);
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+  };
 
   // Load block settings from localStorage
   useEffect(() => {
@@ -289,6 +313,18 @@ export default function LaundryPage() {
               >
                 {isToday && (
                   <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary" />
+                )}
+                {laundryEntry?.roomNumber && (
+                  <a
+                    href={getLaundryGCalLink(cell.day, laundryEntry.roomNumber)}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute top-1 right-1 p-0.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer"
+                    title="Add to Google Calendar"
+                  >
+                    <CalendarPlus className="w-3.5 h-3.5" />
+                  </a>
                 )}
                 <div className="flex items-center justify-center w-full">
                   <span

@@ -1,23 +1,23 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  Calendar,
-  BookOpen,
-  ScrollText,
-  Shirt,
-  Users,
-  Settings,
   LayoutDashboard,
-  CalendarClock,
-  ClipboardList,
-  GraduationCap,
-  UserCheck,
-  TrendingUp,
-  Phone,
-  ChefHat,
-  Receipt,
   User,
+  CalendarClock,
+  UserCheck,
+  BookOpen,
+  Library,
+  ClipboardList,
+  TrendingUp,
+  GraduationCap,
+  Calendar,
+  Utensils,
+  WashingMachine,
+  Receipt,
+  BookUser,
   Briefcase,
+  Phone,
+  Settings,
   Search,
 } from "lucide-react";
 import Fuse from "fuse.js";
@@ -39,6 +39,7 @@ const DashboardSidebar = () => {
 
   const navItems = useMemo<NavItem[]>(
     () => [
+      // Group 1: Core Identity
       {
         label: "Dashboard",
         href: "/dashboard",
@@ -51,10 +52,17 @@ const DashboardSidebar = () => {
         icon: <User className="w-5 h-5" />,
         description: "",
       },
+      // Group 2: Academics
       {
         label: "Timetable",
         href: "/dashboard/timetable",
         icon: <CalendarClock className="w-5 h-5" />,
+        description: "",
+      },
+      {
+        label: "Attendance",
+        href: "/dashboard/attendance",
+        icon: <UserCheck className="w-5 h-5" />,
         description: "",
       },
       {
@@ -66,13 +74,13 @@ const DashboardSidebar = () => {
       {
         label: "Curriculum",
         href: "/dashboard/curriculum",
-        icon: <ScrollText className="w-5 h-5" />,
+        icon: <Library className="w-5 h-5" />,
         description: "",
       },
       {
-        label: "Attendance",
-        href: "/dashboard/attendance",
-        icon: <UserCheck className="w-5 h-5" />,
+        label: "Exams",
+        href: "/dashboard/exams",
+        icon: <ClipboardList className="w-5 h-5" />,
         description: "",
       },
       {
@@ -87,12 +95,7 @@ const DashboardSidebar = () => {
         icon: <GraduationCap className="w-5 h-5" />,
         description: "",
       },
-      {
-        label: "Exams",
-        href: "/dashboard/exams",
-        icon: <ClipboardList className="w-5 h-5" />,
-        description: "",
-      },
+      // Group 3: Campus Utilities & Finance
       {
         label: "Academic Calendar",
         href: "/dashboard/academic-calendar",
@@ -102,13 +105,13 @@ const DashboardSidebar = () => {
       {
         label: "Mess",
         href: "/dashboard/mess",
-        icon: <ChefHat className="w-5 h-5" />,
+        icon: <Utensils className="w-5 h-5" />,
         description: "",
       },
       {
         label: "Laundry",
         href: "/dashboard/laundry",
-        icon: <Shirt className="w-5 h-5" />,
+        icon: <WashingMachine className="w-5 h-5" />,
         description: "",
       },
       {
@@ -117,10 +120,11 @@ const DashboardSidebar = () => {
         icon: <Receipt className="w-5 h-5" />,
         description: "",
       },
+      // Group 4: Support & Administration
       {
         label: "Faculty Info",
         href: "/dashboard/faculty-info",
-        icon: <Users className="w-5 h-5" />,
+        icon: <BookUser className="w-5 h-5" />,
         description: "",
       },
       {
