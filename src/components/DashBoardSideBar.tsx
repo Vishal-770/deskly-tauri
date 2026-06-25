@@ -19,6 +19,8 @@ import {
   Phone,
   Settings,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Fuse from "fuse.js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -172,17 +174,25 @@ const DashboardSidebar = () => {
     navigate(href);
   };
 
-  const [isHovered, setIsHovered] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem("deskly::sidebar::collapsed") === "true";
+  });
+
+  const toggleSidebar = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("deskly::sidebar::collapsed", String(next));
+      return next;
+    });
+  };
 
   return (
     <>
       <div
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
         className={`h-full bg-card text-card-foreground py-4 border-r flex flex-col transition-all duration-300 ease-out z-40 select-none shrink-0 ${
-          isHovered
-            ? "w-60 items-start px-2"
-            : "w-16 items-center px-0"
+          isCollapsed
+            ? "w-16 items-center px-0"
+            : "w-60 items-start px-2"
         }`}
       >
         {/* Search Button */}
@@ -190,11 +200,11 @@ const DashboardSidebar = () => {
           <button
             onClick={() => setSearchOpen((s) => !s)}
             className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 ${
-              isHovered ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
+              !isCollapsed ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
             }`}
           >
             <Search className="w-5 h-5 shrink-0" />
-            {isHovered && (
+            {!isCollapsed && (
               <span className="text-xs font-bold tracking-tight text-muted-foreground/60 whitespace-nowrap">
                 Quick Search
               </span>
@@ -215,7 +225,7 @@ const DashboardSidebar = () => {
                 key={item.href}
                 to={item.href}
                 className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 shrink-0 ${
-                  isHovered ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
+                  !isCollapsed ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
                 } ${
                   active
                     ? "bg-primary/10 text-primary font-bold"
@@ -223,7 +233,7 @@ const DashboardSidebar = () => {
                 }`}
               >
                 <div className="shrink-0">{item.icon}</div>
-                {isHovered && (
+                {!isCollapsed && (
                   <span className="text-xs font-semibold tracking-tight whitespace-nowrap">
                     {item.label}
                   </span>
@@ -232,6 +242,28 @@ const DashboardSidebar = () => {
             );
           })}
         </nav>
+
+        {/* Collapse Toggle Button at the bottom */}
+        <div className="w-full flex justify-center mt-auto pt-4 border-t border-border/10 shrink-0 px-1">
+          <button
+            onClick={toggleSidebar}
+            className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 ${
+              !isCollapsed ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
+            }`}
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-5 h-5 shrink-0" />
+            ) : (
+              <ChevronLeft className="w-5 h-5 shrink-0" />
+            )}
+            {!isCollapsed && (
+              <span className="text-xs font-bold tracking-tight text-muted-foreground/60 whitespace-nowrap">
+                Collapse
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Search Overlay */}
