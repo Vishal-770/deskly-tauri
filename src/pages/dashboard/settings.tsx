@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "@/router";
-import DashboardSidebar from "@/components/DashBoardSideBar";
+
 import { ModeToggle } from "@/components/theme-toggle";
 import {
   Semester,
@@ -190,12 +190,7 @@ export default function SettingsPage() {
   };
 
   const shell = (children: React.ReactNode) => (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground select-none">
-      <DashboardSidebar />
-      <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar pt-8 pb-16 px-4 sm:px-6 md:px-10 bg-background">
-        {children}
-      </main>
-    </div>
+    <>{children}</>
   );
 
   return shell(

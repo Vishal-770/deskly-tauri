@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
-import DashboardSidebar from "@/components/DashBoardSideBar";
+
 import { ErrorDisplay } from "@/components/error-display";
 import CalendarExportPopover from "@/components/calendar-export-popover";
 import SingleCourseExportModal from "@/components/single-course-export-modal";
@@ -316,12 +316,7 @@ export default function TimetablePage() {
 
   // ── Skeleton pages ─────────────────────────────────────────────────────────
   const shell = (children: React.ReactNode) => (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground select-none">
-      <DashboardSidebar />
-      <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar pt-8 pb-16 px-6 md:px-10 bg-background">
-        {children}
-      </main>
-    </div>
+    <>{children}</>
   );
 
   const isScheduleEmpty = Object.values(schedule).every(arr => arr.length === 0);

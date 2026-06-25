@@ -25,7 +25,10 @@ import {
 import Fuse from "fuse.js";
 import { motion, AnimatePresence } from "framer-motion";
 
+let globalIsHovered = false;
+
 const DashboardSidebar = () => {
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const location = useLocation();
@@ -178,6 +181,27 @@ const DashboardSidebar = () => {
     return localStorage.getItem("deskly::sidebar::collapsed") === "true";
   });
 
+  const [isHovered, setIsHovered] = useState(globalIsHovered);
+
+  useEffect(() => {
+    if (sidebarRef.current) {
+      try {
+        const isActuallyHovered = sidebarRef.current.matches(":hover");
+        if (isActuallyHovered !== globalIsHovered) {
+          globalIsHovered = isActuallyHovered;
+          setIsHovered(isActuallyHovered);
+        }
+      } catch (err) {
+        console.error("Failed to check sidebar hover state on mount:", err);
+      }
+    }
+  }, []);
+
+  const setHovered = (val: boolean) => {
+    globalIsHovered = val;
+    setIsHovered(val);
+  };
+
   const toggleSidebar = () => {
     setIsCollapsed((prev) => {
       const next = !prev;
@@ -186,34 +210,39 @@ const DashboardSidebar = () => {
     });
   };
 
+  const showLabels = !isCollapsed || isHovered;
+
   return (
     <>
       <div
-        className={`h-full bg-card text-card-foreground py-4 border-r flex flex-col transition-all duration-300 ease-out z-40 select-none shrink-0 ${
-          isCollapsed
-            ? "w-16 items-center px-0"
-            : "w-60 items-start px-2"
+        ref={sidebarRef}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className={`h-full bg-background text-foreground py-4 border-r flex flex-col transition-[width] duration-300 ease-in-out z-40 select-none shrink-0 px-2 ${
+          showLabels ? "w-60" : "w-16"
         }`}
       >
         {/* Search Button */}
-        <div className="w-full flex justify-center mb-4 shrink-0 px-1">
+        <div className="w-full flex justify-center mb-4 shrink-0">
           <button
             onClick={() => setSearchOpen((s) => !s)}
-            className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 ${
-              !isCollapsed ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
-            }`}
+            className="w-full px-3.5 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200"
           >
             <Search className="w-5 h-5 shrink-0" />
-            {!isCollapsed && (
-              <span className="text-xs font-bold tracking-tight text-muted-foreground/60 whitespace-nowrap">
-                Quick Search
-              </span>
-            )}
+            <span
+              className={`text-xs font-bold tracking-tight text-muted-foreground/60 whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden ${
+                showLabels
+                  ? "max-w-40 opacity-100 translate-x-0 ml-3"
+                  : "max-w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+              }`}
+            >
+              Quick Search
+            </span>
           </button>
         </div>
 
         {/* Nav Items */}
-        <nav className="space-y-1.5 flex-1 min-h-0 flex flex-col w-full overflow-y-auto no-scrollbar pb-4 px-1">
+        <nav className="space-y-1.5 flex-1 min-h-0 flex flex-col w-full overflow-y-auto no-scrollbar pb-4">
           {navItems.map((item) => {
             const active =
               location.pathname === item.href ||
@@ -224,44 +253,50 @@ const DashboardSidebar = () => {
               <Link
                 key={item.href}
                 to={item.href}
-                className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 shrink-0 ${
-                  !isCollapsed ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
-                } ${
+                className={`w-full px-3.5 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200 shrink-0 ${
                   active
                     ? "bg-primary/10 text-primary font-bold"
                     : "text-muted-foreground/80 hover:text-foreground"
                 }`}
               >
                 <div className="shrink-0">{item.icon}</div>
-                {!isCollapsed && (
-                  <span className="text-xs font-semibold tracking-tight whitespace-nowrap">
-                    {item.label}
-                  </span>
-                )}
+                <span
+                  className={`text-xs font-semibold tracking-tight whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden ${
+                    showLabels
+                      ? "max-w-40 opacity-100 translate-x-0 ml-3"
+                      : "max-w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+                  }`}
+                >
+                  {item.label}
+                </span>
               </Link>
             );
           })}
         </nav>
 
         {/* Collapse Toggle Button at the bottom */}
-        <div className="w-full flex justify-center mt-auto pt-4 border-t border-border/10 shrink-0 px-1">
+        <div className="w-full flex justify-center mt-auto pt-4 border-t border-border/10 shrink-0">
           <button
             onClick={toggleSidebar}
-            className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 ${
-              !isCollapsed ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
-            }`}
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            className="w-full px-3.5 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200"
+            title={isCollapsed ? "Pin Sidebar (Always Expand)" : "Unpin Sidebar (Collapse)"}
           >
-            {isCollapsed ? (
-              <ChevronRight className="w-5 h-5 shrink-0" />
-            ) : (
-              <ChevronLeft className="w-5 h-5 shrink-0" />
-            )}
-            {!isCollapsed && (
-              <span className="text-xs font-bold tracking-tight text-muted-foreground/60 whitespace-nowrap">
-                Collapse
-              </span>
-            )}
+            <div className="shrink-0 w-5 h-5 flex items-center justify-center">
+              {showLabels ? (
+                <ChevronLeft className="w-5 h-5" />
+              ) : (
+                <ChevronRight className="w-5 h-5" />
+              )}
+            </div>
+            <span
+              className={`text-xs font-bold tracking-tight text-muted-foreground/60 whitespace-nowrap transition-all duration-300 ease-in-out overflow-hidden ${
+                showLabels
+                  ? "max-w-40 opacity-100 translate-x-0 ml-3"
+                  : "max-w-0 opacity-0 -translate-x-2 pointer-events-none ml-0"
+              }`}
+            >
+              {isCollapsed ? "Pin Sidebar" : "Collapse"}
+            </span>
           </button>
         </div>
       </div>

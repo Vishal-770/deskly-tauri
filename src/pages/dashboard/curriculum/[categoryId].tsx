@@ -6,7 +6,7 @@ import {
   downloadCurriculumSyllabus,
   CurriculumCourse,
 } from "@/lib/features";
-import DashboardSidebar from "@/components/DashBoardSideBar";
+
 import { ErrorDisplay } from "@/components/error-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -164,12 +164,7 @@ export default function CategoryCoursesPage() {
   }
 
   const shell = (children: React.ReactNode) => (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground select-none">
-      <DashboardSidebar />
-      <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar pt-8 pb-16 px-4 sm:px-6 md:px-10 bg-background">
-        {children}
-      </main>
-    </div>
+    <>{children}</>
   );
 
   const isLoading = authLoading || loading;
