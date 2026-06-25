@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getContactInfo, ContactDetail } from "@/lib/features";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { Copy, Check, Phone, Search, Building2, X } from "lucide-react";
@@ -108,15 +109,19 @@ function ContactRow({ contact }: { contact: ContactDetail }) {
           </button>
 
           {/* Browser Gmail compose link */}
-          <a
-            href={gmailUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={async () => {
+              try {
+                await openUrl(gmailUrl);
+              } catch (err) {
+                console.error("Failed to open Gmail link:", err);
+              }
+            }}
             title="Compose in browser Gmail"
-            className="p-2 rounded-lg border border-border/10 text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:border-border/30 transition-all duration-150 flex items-center justify-center"
+            className="p-2 rounded-lg border border-border/10 text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:border-border/30 transition-all duration-150 flex items-center justify-center cursor-pointer bg-transparent"
           >
             <GmailIcon className="w-4 h-4" />
-          </a>
+          </button>
         </div>
       </div>
     </div>

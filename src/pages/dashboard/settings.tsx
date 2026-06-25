@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, Link } from "@/router";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { ModeToggle } from "@/components/theme-toggle";
 import {
@@ -321,15 +322,19 @@ export default function SettingsPage() {
                   <div className="shrink-0">
                     {/* Non-AppImage installs: show download link instead */}
                     {isAppImage === false ? (
-                      <a
-                        href="https://github.com/Vishal-770/deskly-tauri/releases/latest"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-colors"
+                      <button
+                        onClick={async () => {
+                          try {
+                            await openUrl("https://github.com/Vishal-770/deskly-tauri/releases/latest");
+                          } catch (err) {
+                            console.error("Failed to open download link:", err);
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer border-0"
                       >
                         <ExternalLink className="w-3 h-3" />
                         Download
-                      </a>
+                      </button>
                     ) : (
                       <>
                         {(updateStatus === "idle" || updateStatus === "upToDate" || updateStatus === "error") && (

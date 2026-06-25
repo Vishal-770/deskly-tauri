@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { User, LogIn, HelpCircle, Eye, EyeOff, Scale } from "lucide-react";
 import { motion } from "framer-motion";
 import { getVersion } from "@tauri-apps/api/app";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -163,15 +164,19 @@ export default function Home() {
           {/* Footer links */}
           <footer className="flex items-center justify-between pt-10 border-t border-border/10">
             <div className="flex gap-5">
-              <a
-                href="https://github.com/Vishal-770/deskly-tauri/issues"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={async () => {
+                  try {
+                    await openUrl("https://github.com/Vishal-770/deskly-tauri/issues");
+                  } catch (err) {
+                    console.error("Failed to open support link:", err);
+                  }
+                }}
                 className="text-xs text-muted-foreground/60 hover:text-primary transition-colors font-semibold flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
               >
                 <HelpCircle className="w-4 h-4" />
                 Support
-              </a>
+              </button>
               <Link
                 to="/legal"
                 className="text-xs text-muted-foreground/60 hover:text-primary transition-colors font-semibold flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 focus:outline-none"

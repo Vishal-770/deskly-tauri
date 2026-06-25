@@ -354,7 +354,7 @@ export default function ExamSchedulePage() {
   );
 
   if (authLoading || (loading && groups.length === 0)) return shell(
-    <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
+    <div className="w-full xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       <div className="flex justify-between pb-6 border-b border-border/40 shrink-0">
         <div className="space-y-2"><Sk className="h-7 w-36" /><Sk className="h-3 w-52" /></div>
       </div>
@@ -363,11 +363,11 @@ export default function ExamSchedulePage() {
         <Sk className="h-10 w-24 rounded" />
         <Sk className="h-10 w-24 rounded" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start min-h-0 flex-1 overflow-hidden pt-4">
-        <div className="space-y-8 lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2">
+      <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden pt-4">
+        <div className="hidden xl:block xl:space-y-8 xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 xl:w-[280px]">
           <SidebarSkeleton />
         </div>
-        <div className="lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-3">
+        <div className="xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-3 w-full">
           {[...Array(4)].map((_, i) => <ExamCardSkeleton key={i} />)}
         </div>
       </div>
@@ -383,7 +383,7 @@ export default function ExamSchedulePage() {
   }
 
   return shell(
-    <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
+    <div className="w-full xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       {error && (
         <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
@@ -457,10 +457,10 @@ export default function ExamSchedulePage() {
       )}
 
       {/* ── Main Split View ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start min-h-0 flex-1 overflow-hidden pt-2">
+      <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden pt-2">
         
         {/* ── Left Sidebar (Sticky details) ────────────────────────────────── */}
-        <div className="space-y-6 lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2 shrink-0">
+        <div className="hidden xl:block xl:space-y-6 xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 shrink-0 xl:w-[280px]">
           {loading && activeSchedules.length === 0 ? (
             <SidebarSkeleton />
           ) : (
@@ -498,7 +498,7 @@ export default function ExamSchedulePage() {
                   {/* Countdown Digits */}
                   <div className="border border-border/20 rounded-xl p-4 space-y-2.5 text-center">
                     <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Starts in</span>
-                    <div className="grid grid-cols-4 gap-1 pt-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-1 pt-1">
                       {[
                         { label: "Days", val: nextExamInfo.countdown.days },
                         { label: "Hours", val: nextExamInfo.countdown.hours },
@@ -513,7 +513,7 @@ export default function ExamSchedulePage() {
                             {label}
                           </span>
                           {idx < 3 && (
-                            <div className="absolute right-0 top-1 bottom-4 w-px bg-border/20" />
+                            <div className="hidden sm:block absolute right-0 top-1 bottom-4 w-px bg-border/20" />
                           )}
                         </div>
                       ))}
@@ -539,7 +539,7 @@ export default function ExamSchedulePage() {
               <div className="space-y-4">
                 <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Quick Overview</p>
                 <div className="space-y-4 pt-1">
-                  <div className="flex flex-row gap-8">
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
                     {[
                       { label: "Total Exams", val: tabStats.totalExams },
                       { label: "Upcoming", val: tabStats.upcomingExams },
@@ -571,7 +571,7 @@ export default function ExamSchedulePage() {
         </div>
 
         {/* ── Right Content: Chronological Timeline ────────────────────────── */}
-        <div className="lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-4">
+        <div className="xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-4 w-full">
           <div className="flex items-center justify-between pb-3 border-b border-border/20 shrink-0">
             <div>
               <h2 className="text-base font-bold text-foreground tracking-tight">Exam Schedule ({formatExamTypeLabel(selectedTab)})</h2>

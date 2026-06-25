@@ -15,6 +15,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 interface CalendarExportPopoverProps {
   schedule: WeeklySchedule;
@@ -174,14 +175,18 @@ export default function CalendarExportPopover({
                   <ul className="list-disc pl-4 text-[10px] text-muted-foreground/80 space-y-1.5">
                     <li>
                       <span className="font-bold text-foreground/95">Google Calendar:</span> Go to{" "}
-                      <a
-                        href="https://calendar.google.com"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary hover:underline"
+                      <button
+                        onClick={async () => {
+                          try {
+                            await openUrl("https://calendar.google.com");
+                          } catch (err) {
+                            console.error("Failed to open calendar link:", err);
+                          }
+                        }}
+                        className="text-primary hover:underline cursor-pointer bg-transparent border-0 p-0 font-normal inline"
                       >
                         calendar.google.com
-                      </a>
+                      </button>
                       , open <span className="font-bold text-foreground/90">Settings</span> →{" "}
                       <span className="font-bold text-foreground/90">Import & Export</span>, and
                       upload the downloaded file.

@@ -16,6 +16,7 @@ import {
   Clock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 interface SingleCourseExportModalProps {
   entry: ScheduleEntry;
@@ -170,19 +171,19 @@ export default function SingleCourseExportModal({
 
               {/* Action Buttons */}
               <div className="mt-1">
-                <a
-                  href={gCalLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block w-full"
+                <Button
+                  onClick={async () => {
+                    try {
+                      await openUrl(gCalLink);
+                    } catch (err) {
+                      console.error("Failed to open calendar link:", err);
+                    }
+                  }}
+                  className="w-full rounded-xl h-9 text-xs font-semibold gap-1.5 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95"
                 >
-                  <Button
-                    className="w-full rounded-xl h-9 text-xs font-semibold gap-1.5 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Add to Google Calendar</span>
-                  </Button>
-                </a>
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Add to Google Calendar</span>
+                </Button>
               </div>
             </motion.div>
           </div>

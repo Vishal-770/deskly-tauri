@@ -321,7 +321,7 @@ export default function TimetablePage() {
 
   const isScheduleEmpty = Object.values(schedule).every(arr => arr.length === 0);
   if (authLoading || (loading && isScheduleEmpty)) return shell(
-    <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
+    <div className="w-full xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       <div className="flex justify-between pb-6 border-b border-border/40 shrink-0">
         <div className="space-y-2"><Sk className="h-7 w-36" /><Sk className="h-3 w-52" /></div>
         <Sk className="h-8 w-44 rounded-lg" />
@@ -329,11 +329,11 @@ export default function TimetablePage() {
       <div className="shrink-0">
         <Sk className="h-14 w-full rounded-xl" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start min-h-0 flex-1 overflow-hidden">
-        <div className="lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-2">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden">
+        <div className="xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-2 w-full">
           {[...Array(5)].map((_,i) => <CardSkeleton key={i} />)}
         </div>
-        <div className="space-y-8 lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2">
+        <div className="hidden xl:block xl:space-y-8 xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 xl:w-[320px]">
           <SidebarSkeleton />
         </div>
       </div>
@@ -354,7 +354,7 @@ export default function TimetablePage() {
   const focusedLabel = classStatus.cur ? "In Progress" : classStatus.nxt ? "Up Next" : null;
 
   return shell(
-    <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
+    <div className="w-full xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       {error && (
         <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
@@ -426,10 +426,10 @@ export default function TimetablePage() {
       </div>
 
       {/* ── Main content ───────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start min-h-0 flex-1 overflow-hidden">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden">
 
         {/* Schedule list */}
-        <div className="lg:h-full lg:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-4">
+        <div className="xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-4 w-full">
           {/* List header */}
           <div className="flex items-center justify-between pb-3 border-b border-border/20">
             <div>
@@ -543,7 +543,7 @@ export default function TimetablePage() {
         </div>
 
         {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-        <div className="space-y-8 lg:h-full lg:overflow-y-auto no-scrollbar pb-6 lg:sticky lg:top-0 pr-2 shrink-0">
+        <div className="hidden xl:block xl:space-y-8 xl:h-full xl:overflow-y-auto no-scrollbar pb-6 xl:sticky xl:top-0 pr-2 shrink-0 xl:w-[320px]">
           {loading ? <SidebarSkeleton /> : (
             <>
               {/* Current / Next class */}

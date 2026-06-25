@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Shirt, Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
 import { motion } from "framer-motion";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -310,16 +311,23 @@ export default function LaundryPage() {
                   <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary" />
                 )}
                 {laundryEntry?.roomNumber && (
-                  <a
-                    href={getLaundryGCalLink(cell.day, laundryEntry.roomNumber)}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const roomNumber = laundryEntry.roomNumber;
+                      if (!roomNumber) return;
+                      const url = getLaundryGCalLink(cell.day, roomNumber);
+                      try {
+                        await openUrl(url);
+                      } catch (err) {
+                        console.error("Failed to open calendar link:", err);
+                      }
+                    }}
                     className="absolute top-1 right-1 p-0.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer"
                     title="Add to Google Calendar"
                   >
                     <CalendarPlus className="w-3.5 h-3.5" />
-                  </a>
+                  </button>
                 )}
                 <div className="flex items-center justify-center w-full">
                   <span
