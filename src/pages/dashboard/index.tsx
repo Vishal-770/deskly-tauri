@@ -240,6 +240,7 @@ export default function DashboardHomePage() {
         updatedCgpa = cgpaRes.cgpaData;
       } else if (cgpaRes.error) {
         console.error("CGPA fetch error:", cgpaRes.error);
+        setError(cgpaRes.error);
       }
 
       if (feedbackRes.success && feedbackRes.data) {
@@ -247,6 +248,7 @@ export default function DashboardHomePage() {
         updatedFeedback = feedbackRes.data;
       } else if (feedbackRes.error) {
         console.error("Feedback fetch error:", feedbackRes.error);
+        setError(feedbackRes.error);
       }
 
       if (profileRes && profileRes.success && profileRes.data) {
@@ -313,6 +315,21 @@ export default function DashboardHomePage() {
 
   return shell(
     <div className="w-full space-y-10">
+      {error && (
+        <div className="flex items-center justify-between p-3.5 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
+            <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
+          </div>
+          <button 
+            onClick={loadData}
+            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="pb-6 border-b border-border/10 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div className="space-y-1">

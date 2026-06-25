@@ -345,17 +345,35 @@ export default function TimetablePage() {
     </div>
   );
 
-  if (error) return shell(
-    <div className="flex h-full items-center justify-center">
-      <ErrorDisplay message={error} onRetry={load} />
-    </div>
-  );
+  const hasSchedule = Object.values(schedule).some(arr => Array.isArray(arr) && arr.length > 0);
+
+  if (error && !hasSchedule) {
+    return shell(
+      <div className="flex h-full items-center justify-center">
+        <ErrorDisplay message={error} onRetry={load} />
+      </div>
+    );
+  }
 
   const focused = classStatus.cur ?? classStatus.nxt;
   const focusedLabel = classStatus.cur ? "In Progress" : classStatus.nxt ? "Up Next" : null;
 
   return shell(
     <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
+      {error && (
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
+            <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
+          </div>
+          <button 
+            onClick={load}
+            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-6 border-b border-border/40 shrink-0">

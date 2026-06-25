@@ -330,6 +330,20 @@ export default function AttendancePage() {
 
   return shell(
     <div className="w-full space-y-8">
+      {error && (
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
+            <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
+          </div>
+          <button 
+            onClick={load}
+            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="pb-4 border-b border-border/20">
