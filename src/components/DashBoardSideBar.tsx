@@ -176,64 +176,62 @@ const DashboardSidebar = () => {
 
   return (
     <>
-      <div className="relative h-full w-16 shrink-0 z-40 bg-background select-none">
-        <div
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          className={`absolute left-0 top-0 h-full bg-card text-card-foreground py-4 border-r flex flex-col transition-all duration-300 ease-out ${
-            isHovered
-              ? "w-60 items-start px-2 shadow-[8px_0_30px_-5px_rgba(0,0,0,0.3)]"
-              : "w-16 items-center px-0 shadow-none"
-          }`}
-        >
-          {/* Search Button */}
-          <div className="w-full flex justify-center mb-4 shrink-0 px-1">
-            <button
-              onClick={() => setSearchOpen((s) => !s)}
-              className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 ${
-                isHovered ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
-              }`}
-            >
-              <Search className="w-5 h-5 shrink-0" />
-              {isHovered && (
-                <span className="text-xs font-bold tracking-tight text-muted-foreground/60 whitespace-nowrap">
-                  Quick Search
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* Nav Items */}
-          <nav className="space-y-1.5 flex-1 min-h-0 flex flex-col w-full overflow-y-auto no-scrollbar pb-4 px-1">
-            {navItems.map((item) => {
-              const active =
-                location.pathname === item.href ||
-                (item.href !== "/dashboard" &&
-                  location.pathname.startsWith(item.href));
-
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 shrink-0 ${
-                    isHovered ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
-                  } ${
-                    active
-                      ? "bg-primary/10 text-primary font-bold"
-                      : "text-muted-foreground/80 hover:text-foreground"
-                  }`}
-                >
-                  <div className="shrink-0">{item.icon}</div>
-                  {isHovered && (
-                    <span className="text-xs font-semibold tracking-tight whitespace-nowrap">
-                      {item.label}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+      <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className={`h-full bg-card text-card-foreground py-4 border-r flex flex-col transition-all duration-300 ease-out z-40 select-none shrink-0 ${
+          isHovered
+            ? "w-60 items-start px-2"
+            : "w-16 items-center px-0"
+        }`}
+      >
+        {/* Search Button */}
+        <div className="w-full flex justify-center mb-4 shrink-0 px-1">
+          <button
+            onClick={() => setSearchOpen((s) => !s)}
+            className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 ${
+              isHovered ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
+            }`}
+          >
+            <Search className="w-5 h-5 shrink-0" />
+            {isHovered && (
+              <span className="text-xs font-bold tracking-tight text-muted-foreground/60 whitespace-nowrap">
+                Quick Search
+              </span>
+            )}
+          </button>
         </div>
+
+        {/* Nav Items */}
+        <nav className="space-y-1.5 flex-1 min-h-0 flex flex-col w-full overflow-y-auto no-scrollbar pb-4 px-1">
+          {navItems.map((item) => {
+            const active =
+              location.pathname === item.href ||
+              (item.href !== "/dashboard" &&
+                location.pathname.startsWith(item.href));
+
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`flex items-center gap-3 rounded-xl hover:bg-muted transition-all duration-200 shrink-0 ${
+                  isHovered ? "w-full px-3 py-3 justify-start" : "p-3 justify-center"
+                } ${
+                  active
+                    ? "bg-primary/10 text-primary font-bold"
+                    : "text-muted-foreground/80 hover:text-foreground"
+                }`}
+              >
+                <div className="shrink-0">{item.icon}</div>
+                {isHovered && (
+                  <span className="text-xs font-semibold tracking-tight whitespace-nowrap">
+                    {item.label}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Search Overlay */}
