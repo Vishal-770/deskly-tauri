@@ -323,7 +323,7 @@ export default function CategoryCoursesPage() {
                         onClick={() => handleDownloadSyllabus(course.code)}
                         className="w-full sm:w-auto rounded-lg text-xs"
                       >
-                        <Download className="w-3.5 h-3.5" />
+                        <Download className="size-3.5" />
                         {isDownloading ? "Downloading..." : "Syllabus"}
                       </Button>
                     </div>

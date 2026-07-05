@@ -237,12 +237,29 @@ export default function ExamSchedulePage() {
           if (!selectedTab || !tabNames.includes(selectedTab)) {
             setSelectedTab(res.data[0].examType);
           }
+        } else {
+          setGroups([]);
+          localStorage.removeItem("deskly::cache::exams");
         }
       } else {
-        setError(res.error ?? "Failed to fetch exam schedule.");
+        const errMsg = res.error ?? "Failed to fetch exam schedule.";
+        if (errMsg.includes("Could not find exam schedule table")) {
+          setGroups([]);
+          localStorage.removeItem("deskly::cache::exams");
+          setError("Could not find exam schedule table");
+        } else {
+          setError(errMsg);
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const errMsg = e instanceof Error ? e.message : String(e);
+      if (errMsg.includes("Could not find exam schedule table")) {
+        setGroups([]);
+        localStorage.removeItem("deskly::cache::exams");
+        setError("Could not find exam schedule table");
+      } else {
+        setError(errMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -354,7 +371,7 @@ export default function ExamSchedulePage() {
   );
 
   if (authLoading || (loading && groups.length === 0)) return shell(
-    <div className="w-full xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
+    <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       <div className="flex justify-between pb-6 border-b border-border/40 shrink-0">
         <div className="space-y-2"><Sk className="h-7 w-36" /><Sk className="h-3 w-52" /></div>
       </div>
@@ -374,7 +391,9 @@ export default function ExamSchedulePage() {
     </div>
   );
 
-  if (error && groups.length === 0) {
+  const isNotReleased = error?.includes("Could not find exam schedule table");
+
+  if (error && groups.length === 0 && !isNotReleased) {
     return shell(
       <div className="flex h-full items-center justify-center">
         <ErrorDisplay message={error} onRetry={load} />
@@ -383,8 +402,8 @@ export default function ExamSchedulePage() {
   }
 
   return shell(
-    <div className="w-full xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
-      {error && (
+    <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
+      {error && !isNotReleased && (
         <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
@@ -411,7 +430,7 @@ export default function ExamSchedulePage() {
             onClick={handleDownloadGroupIcs}
             className="rounded-xl h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20 shrink-0"
           >
-            <CalendarRange className="w-3.5 h-3.5 text-primary shrink-0" />
+            <CalendarRange className="size-3.5 text-primary shrink-0" />
             <span>Export {formatExamTypeLabel(selectedTab)} Schedule</span>
           </Button>
         )}
@@ -457,7 +476,20 @@ export default function ExamSchedulePage() {
       )}
 
       {/* ── Main Split View ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden pt-2">
+      {isNotReleased ? (
+        <div className="flex-1 flex flex-col items-center justify-center py-20 gap-3.5 text-center">
+          <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mx-auto mb-2 border border-border/10">
+            <CalendarRange className="w-6 h-6 text-primary/70" />
+          </div>
+          <div className="space-y-1.5">
+            <h2 className="text-base font-bold text-foreground">Exams Not Uploaded</h2>
+            <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+              The university has not released or uploaded the exam schedule for this semester on VTOP yet.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden pt-2">
         
         {/* ── Left Sidebar (Sticky details) ────────────────────────────────── */}
         <div className="hidden xl:block xl:space-y-6 xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 shrink-0 xl:w-[280px]">
@@ -601,7 +633,7 @@ export default function ExamSchedulePage() {
             ) : (
               <div className="relative">
                 {/* Continuous timeline vertical line on desktop */}
-                <div className="absolute top-0 bottom-0 left-[92px] w-[2px] bg-border/15 hidden md:block" />
+                <div className="absolute top-0 bottom-0 left-[131px] w-[2px] bg-border/15 hidden md:block" />
 
                 <div className="space-y-1 pt-2">
                   {activeSchedules.map((item, idx) => {
@@ -623,7 +655,7 @@ export default function ExamSchedulePage() {
                         gapElement = (
                           <div className="relative py-3 flex items-center justify-center">
                             {/* Line separator */}
-                            <div className="absolute left-[92px] right-0 border-t border-dashed border-border/20 hidden md:block" />
+                            <div className="absolute left-[131px] right-0 border-t border-dashed border-border/20 hidden md:block" />
                             {/* Pill */}
                             <div className="relative z-10 bg-muted/65 text-muted-foreground text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                               <Info className="w-3.5 h-3.5 text-muted-foreground/75" />
@@ -710,8 +742,8 @@ export default function ExamSchedulePage() {
             )}
           </div>
         </div>
-
       </div>
+      )}
     </div>
   );
 }

@@ -321,7 +321,7 @@ export default function TimetablePage() {
 
   const isScheduleEmpty = Object.values(schedule).every(arr => arr.length === 0);
   if (authLoading || (loading && isScheduleEmpty)) return shell(
-    <div className="w-full xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
+    <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       <div className="flex justify-between pb-6 border-b border-border/40 shrink-0">
         <div className="space-y-2"><Sk className="h-7 w-36" /><Sk className="h-3 w-52" /></div>
         <Sk className="h-8 w-44 rounded-lg" />
@@ -354,7 +354,7 @@ export default function TimetablePage() {
   const focusedLabel = classStatus.cur ? "In Progress" : classStatus.nxt ? "Up Next" : null;
 
   return shell(
-    <div className="w-full xl:h-[calc(100vh-5rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
+    <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       {error && (
         <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
@@ -456,7 +456,7 @@ export default function TimetablePage() {
             ) : (
               <div className="relative">
                 {/* Continuous timeline vertical line on desktop */}
-                <div className="absolute top-0 bottom-0 left-[92px] w-[2px] bg-border/15 hidden md:block" />
+                <div className="absolute top-0 bottom-0 left-[131px] w-[2px] bg-border/15 hidden md:block" />
 
                 <div className="space-y-1 pt-2">
                   {daySchedule.map((item, idx) => {

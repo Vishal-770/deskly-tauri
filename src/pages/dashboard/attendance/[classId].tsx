@@ -23,8 +23,7 @@ function BigCircularProgress({ percentage }: { percentage: number }) {
 
   let stroke = "text-destructive";
   if (percentage >= 75) stroke = "text-chart-2";
-  else if (percentage >= 60) stroke = "text-chart-3";
-  else if (percentage >= 40) stroke = "text-chart-4";
+  else if (percentage >= 50) stroke = "text-chart-3";
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
@@ -55,10 +54,11 @@ function StatusBadge({ status }: { status: string }) {
   const s = status.trim().toLowerCase();
   const isPresent = s === "present" || s === "p" || s === "1";
   const isAbsent = s === "absent" || s === "a" || s === "0";
+  const isOd = s.includes("od") || s.includes("duty") || s === "on duty";
 
   if (isPresent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-chart-2 bg-chart-2/10 px-2.5 py-1 rounded-full">
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-chart-2 bg-chart-2/10 px-2.5 py-1 rounded-full leading-none">
         <CheckCircle2 className="w-3 h-3" />
         Present
       </span>
@@ -66,14 +66,22 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isAbsent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-destructive bg-destructive/10 px-2.5 py-1 rounded-full">
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-destructive bg-destructive/10 px-2.5 py-1 rounded-full leading-none">
         <XCircle className="w-3 h-3" />
         Absent
       </span>
     );
   }
+  if (isOd) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full leading-none">
+        <span className="w-3.5 h-3.5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[7px] font-bold border border-primary/20 shrink-0">OD</span>
+        {status}
+      </span>
+    );
+  }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full">
+    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full leading-none">
       <Clock className="w-3 h-3" />
       {status}
     </span>
@@ -107,25 +115,36 @@ function DetailSkeleton() {
           <Sk className="h-3 w-64" />
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-card/40 border border-border/30 rounded-2xl p-4 min-h-[80px] space-y-3">
-            <div className="flex justify-between">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 py-6 border-y border-border/10">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className={`pl-2 space-y-2 ${
+              i === 0
+                ? ""
+                : i === 2 || i === 4
+                ? "border-none sm:border-l sm:border-border/10"
+                : "border-l border-border/10"
+            } ${
+              i === 4 ? "col-span-2 sm:col-span-1 border-t border-border/10 pt-4 sm:border-t-0 sm:pt-0" : ""
+            }`}
+          >
+            <div className="flex justify-between items-center">
               <Sk className="h-3 w-14" />
               <Sk className="h-4 w-4 rounded" />
             </div>
-            <Sk className="h-6 w-10" />
+            <Sk className="h-6 w-10 mt-1" />
           </div>
         ))}
       </div>
-      <div className="space-y-2">
+      <div className="space-y-1.5 pt-2">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-border/20">
-            <Sk className="h-4 w-6" />
-            <Sk className="h-4 w-24" />
-            <Sk className="h-4 w-16" />
-            <Sk className="h-4 flex-1" />
-            <Sk className="h-6 w-16 rounded-full" />
+          <div key={i} className="flex items-center gap-3 sm:gap-4 px-4 py-3 rounded-xl border border-transparent">
+            <Sk className="h-3 w-5" />
+            <Sk className="h-3.5 w-24" />
+            <Sk className="h-4 w-14 rounded-md" />
+            <Sk className="h-3 flex-1 hidden sm:block" />
+            <Sk className="h-5 w-16 rounded-full ml-auto" />
           </div>
         ))}
       </div>
@@ -185,14 +204,22 @@ export default function AttendanceDetailPage() {
     load();
   }, [classId, record]);
 
-  const presentCount = details.filter((d) => {
+  const isLab = record?.courseType.trim().toUpperCase().includes("LAB");
+  const multiplier = isLab ? 2 : 1;
+
+  const presentSlots = details.filter((d) => {
     const s = d.status.trim().toLowerCase();
     return s === "present" || s === "p" || s === "1";
   }).length;
 
-  const absentCount = details.filter((d) => {
+  const absentSlots = details.filter((d) => {
     const s = d.status.trim().toLowerCase();
     return s === "absent" || s === "a" || s === "0";
+  }).length;
+
+  const odSlots = details.filter((d) => {
+    const s = d.status.trim().toLowerCase();
+    return s.includes("od") || s.includes("duty") || s === "on duty";
   }).length;
 
   const shell = (children: React.ReactNode) => (
@@ -228,6 +255,14 @@ export default function AttendanceDetailPage() {
   const need = Math.ceil(3 * record.totalClasses - 4 * record.attendedClasses);
   const canSkip = Math.floor((4 * record.attendedClasses - 3 * record.totalClasses) / 3);
 
+  const totalSlots = details.length > 0 ? details.length : Math.ceil(record.totalClasses / multiplier);
+  const attendedSlots = details.length > 0 ? (presentSlots + odSlots) : Math.ceil(record.attendedClasses / multiplier);
+  const normalPresentSlots = details.length > 0 ? presentSlots : Math.max(0, attendedSlots - odSlots);
+  const calculatedAbsentSlots = details.length > 0 ? absentSlots : Math.max(0, totalSlots - attendedSlots);
+
+  const needSlots = need > 0 ? Math.ceil(need / multiplier) : 0;
+  const canSkipSlots = canSkip > 0 ? Math.floor(canSkip / multiplier) : 0;
+
   return shell(
     <div className="w-full space-y-5">
 
@@ -235,10 +270,10 @@ export default function AttendanceDetailPage() {
       <header className="pb-4 border-b border-border/20">
         <button
           onClick={() => navigate("/dashboard/attendance")}
-          className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors mb-3 group"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors mb-3 group cursor-pointer bg-transparent border-none p-0"
         >
-          <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5 duration-150" />
-          Back to Attendance
+          <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5 duration-150 relative -translate-y-[0.5px]" />
+          <span>Back to Attendance</span>
         </button>
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -279,65 +314,71 @@ export default function AttendanceDetailPage() {
       </header>
 
       {/* ── Summary Stats ────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-card/40 border border-border/30 rounded-2xl p-4 min-h-[80px] flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Classes</span>
-            <Calendar className="w-4 h-4 text-primary" />
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 py-6 border-y border-border/10">
+        
+        {/* Total Slots */}
+        <div className="flex flex-col gap-1.5 pl-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Total Slots</span>
           </div>
-          <div className="mt-3">
-            <span className="text-xl font-black text-foreground leading-none">{record.totalClasses}</span>
+          <span className="text-2xl font-bold text-foreground leading-none mt-1">{totalSlots}</span>
+        </div>
+
+        {/* Present */}
+        <div className="flex flex-col gap-1.5 pl-2 border-l border-border/10">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <CheckCircle2 className="w-3.5 h-3.5 text-chart-2 shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Present</span>
+          </div>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-bold text-foreground leading-none">{normalPresentSlots}</span>
           </div>
         </div>
 
-        <div className="bg-card/40 border border-border/30 rounded-2xl p-4 min-h-[80px] flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Present</span>
-            <CheckCircle2 className="w-4 h-4 text-chart-2" />
+        {/* OD Slots */}
+        <div className="flex flex-col gap-1.5 pl-2 border-none sm:border-l sm:border-border/10">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="w-3.5 h-3.5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[7px] font-bold shrink-0 border border-primary/20">OD</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">OD Slots</span>
           </div>
-          <div className="mt-3">
-            <span className="text-xl font-black text-foreground leading-none">{record.attendedClasses}</span>
-            {details.length > 0 && presentCount !== record.attendedClasses && (
-              <p className="text-[9px] text-muted-foreground/60 font-semibold mt-1">{presentCount} logged</p>
-            )}
+          <span className="text-2xl font-bold text-primary leading-none mt-1">{odSlots}</span>
+        </div>
+
+        {/* Absent */}
+        <div className="flex flex-col gap-1.5 pl-2 border-l border-border/10">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <XCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Absent</span>
+          </div>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-bold text-foreground leading-none">{calculatedAbsentSlots}</span>
           </div>
         </div>
 
-        <div className="bg-card/40 border border-border/30 rounded-2xl p-4 min-h-[80px] flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Absent</span>
-            <XCircle className="w-4 h-4 text-destructive" />
-          </div>
-          <div className="mt-3">
-            <span className="text-xl font-black text-foreground leading-none">{record.totalClasses - record.attendedClasses}</span>
-            {details.length > 0 && absentCount !== (record.totalClasses - record.attendedClasses) && (
-              <p className="text-[9px] text-muted-foreground/60 font-semibold mt-1">{absentCount} logged</p>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-card/40 border border-border/30 rounded-2xl p-4 min-h-[80px] flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              {need > 0 ? "Need to Attend" : "Can Miss"}
+        {/* Can Miss / Need */}
+        <div className="flex flex-col gap-1.5 pl-2 border-none sm:border-l sm:border-border/10 col-span-2 sm:col-span-1 border-t border-border/10 pt-4 sm:border-t-0 sm:pt-0">
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <BarChart3 className="w-3.5 h-3.5 text-primary shrink-0" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">
+              {needSlots > 0 ? "Need to Attend" : "Can Miss"}
             </span>
-            <BarChart3 className="w-4 h-4 text-primary" />
           </div>
-          <div className="mt-3">
-            {need > 0 ? (
+          <div className="flex items-baseline gap-1.5 mt-1 flex-wrap">
+            {needSlots > 0 ? (
               <>
-                <span className="text-xl font-black text-destructive leading-none">{need}</span>
-                <p className="text-[9px] text-muted-foreground/60 font-semibold mt-1">to reach 75%</p>
+                <span className="text-2xl font-bold text-destructive leading-none">{needSlots}</span>
+                <span className="text-[9px] text-muted-foreground/60 font-semibold">slots to reach 75%</span>
               </>
-            ) : canSkip > 0 ? (
+            ) : canSkipSlots > 0 ? (
               <>
-                <span className="text-xl font-black text-chart-2 leading-none">{canSkip}</span>
-                <p className="text-[9px] text-muted-foreground/60 font-semibold mt-1">classes safely</p>
+                <span className="text-2xl font-bold text-chart-2 leading-none">{canSkipSlots}</span>
+                <span className="text-[9px] text-muted-foreground/60 font-semibold">slots safely</span>
               </>
             ) : (
               <>
-                <span className="text-xl font-black text-foreground leading-none">0</span>
-                <p className="text-[9px] text-muted-foreground/60 font-semibold mt-1">On track at 75%</p>
+                <span className="text-2xl font-bold text-foreground leading-none">0</span>
+                <span className="text-[9px] text-muted-foreground/60 font-semibold">On track at 75%</span>
               </>
             )}
           </div>

@@ -62,7 +62,7 @@ export default function CalendarExportPopover({
         onClick={() => setIsOpen(true)}
         className="rounded-xl h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20"
       >
-        <CalendarRange className="w-3.5 h-3.5 text-primary shrink-0" />
+        <CalendarRange className="size-3.5 text-primary shrink-0" />
         <span>Export Schedule</span>
       </Button>
 

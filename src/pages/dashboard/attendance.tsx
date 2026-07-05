@@ -87,8 +87,7 @@ function CircularProgress({ percentage, size = 48 }: { percentage: number; size?
 
   let stroke = "text-destructive";
   if (percentage >= 75) stroke = "text-chart-2";
-  else if (percentage >= 60) stroke = "text-chart-3";
-  else if (percentage >= 40) stroke = "text-chart-4";
+  else if (percentage >= 50) stroke = "text-chart-3";
 
   return (
     <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
