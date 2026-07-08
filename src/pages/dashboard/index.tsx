@@ -342,7 +342,7 @@ export default function DashboardHomePage() {
         
         {/* Left Column: CGPA Callout & Academic Stats */}
         <div className="space-y-8">
-          {cgpaData && (
+          {cgpaData ? (
             <div className="space-y-6">
               <div className="space-y-1">
                 <p className="text-[10px] font-black tracking-widest text-muted-foreground/60 uppercase">
@@ -403,6 +403,26 @@ export default function DashboardHomePage() {
                 </div>
               </div>
             </div>
+          ) : (
+            /* Render Inline CGPA Skeleton */
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Sk className="h-3.5 w-48" />
+                <div className="flex items-baseline gap-2.5 mt-1">
+                  <Sk className="h-14 w-36" />
+                  <Sk className="h-4 w-12" />
+                </div>
+              </div>
+              <div className="pt-4 space-y-3 max-w-xl">
+                <div className="flex justify-between"><Sk className="h-3 w-36" /><Sk className="h-3 w-40" /></div>
+                <Sk className="h-1.5 w-full" />
+              </div>
+              <div className="grid grid-cols-3 gap-8 pt-8 max-w-xl">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="space-y-2"><Sk className="h-3 w-14" /><Sk className="h-7 w-12" /><Sk className="h-3 w-20" /></div>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* Quick Access Links */}
@@ -434,7 +454,7 @@ export default function DashboardHomePage() {
         </div>
 
         {/* Right Column: VTOP Feedback status checklist */}
-        {feedbackData && feedbackData.length > 0 && (
+        {feedbackData && feedbackData.length > 0 ? (
           <div className="space-y-6 lg:pl-8 lg:border-l lg:border-border/10">
             <div className="space-y-1">
               <h2 className="text-base font-bold text-foreground tracking-tight flex items-center gap-2">
@@ -454,7 +474,7 @@ export default function DashboardHomePage() {
                 
                 const mid = parseFeedbackText(item.midSemester);
                 const tee = parseFeedbackText(item.teeSemester);
-
+ 
                 return (
                   <div
                     key={idx}
@@ -487,7 +507,7 @@ export default function DashboardHomePage() {
                           {mid.statusText}
                         </span>
                       </div>
-
+ 
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground font-semibold">
                           TEE Semester:
@@ -506,6 +526,33 @@ export default function DashboardHomePage() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        ) : (
+          /* Render Inline Feedback Checklist Skeleton */
+          <div className="space-y-6 lg:pl-8 lg:border-l lg:border-border/10 w-full">
+            <div className="space-y-1">
+              <h2 className="text-base font-bold text-foreground tracking-tight flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-primary shrink-0" />
+                Feedback Checklist
+              </h2>
+              <p className="text-xs text-muted-foreground">VTOP feedback submission status</p>
+            </div>
+            
+            <div className="space-y-6 pt-2">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="space-y-3 pb-5 border-b border-border/10 last:border-b-0">
+                  <div className="space-y-1.5">
+                    <Sk className="h-3 w-20" />
+                    <Sk className="h-4 w-28" />
+                    <Sk className="h-3.5 w-44" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between"><Sk className="h-3.5 w-24" /><Sk className="h-3.5 w-16" /></div>
+                    <div className="flex justify-between"><Sk className="h-3.5 w-24" /><Sk className="h-3.5 w-16" /></div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
