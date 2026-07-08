@@ -49,8 +49,8 @@ export default function SettingsPage() {
   const [downloadProgress, setDownloadProgress] = useState<{ downloaded: number; total?: number; percent?: number } | null>(null);
   const [activeUpdate, setActiveUpdate] = useState<any>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
-  // null = unknown, true = AppImage, false = rpm/deb/other
-  const [isAppImage, setIsAppImage] = useState<boolean | null>(null);
+  // "windows", "macos", "appimage", "linux-manual", "unknown"
+  const [installFormat, setInstallFormat] = useState<string>("unknown");
 
   // Load version and detect install format on mount
   useEffect(() => {
@@ -64,18 +64,11 @@ export default function SettingsPage() {
     }
     async function detectInstallFormat() {
       try {
-        // get_current_exe returns the path of the running binary
-        const exePath = await invoke<string>("plugin:os|exe").catch(() => null)
-          ?? await invoke<string>("get_exe_path").catch(() => null);
-        if (exePath) {
-          setIsAppImage(exePath.toLowerCase().endsWith(".appimage"));
-        } else {
-          // Fallback: check the env variable AppImage sets
-          setIsAppImage(!!(import.meta.env.APPIMAGE || ('APPIMAGE' in ((window as any).__TAURI_INTERNALS__ ?? {}))));
-        }
-      } catch {
-        // If detection fails, assume it could be AppImage (don't block)
-        setIsAppImage(null);
+        const format = await invoke<string>("get_install_format");
+        setInstallFormat(format);
+      } catch (err) {
+        console.warn("Failed to detect install format:", err);
+        setInstallFormat("unknown");
       }
     }
     loadVersion();
@@ -320,8 +313,8 @@ export default function SettingsPage() {
                   </div>
                   
                   <div className="shrink-0">
-                    {/* Non-AppImage installs: show download link instead */}
-                    {isAppImage === false ? (
+                    {/* Non-AppImage Linux installs: show manual download link instead */}
+                    {installFormat === "linux-manual" ? (
                       <button
                         onClick={async () => {
                           try {
@@ -383,12 +376,12 @@ export default function SettingsPage() {
                     )}
                   </div>
                 </div>
-
+ 
                 {/* Non-AppImage notice */}
-                {isAppImage === false && (
+                {installFormat === "linux-manual" && (
                   <div className="pl-7 pt-1">
                     <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
-                      Auto-update is only supported for AppImage installs. RPM/DEB users should download the new package manually from GitHub releases.
+                      Auto-update is only supported for AppImage, Windows, and macOS installs. RPM/DEB users should download the new package manually from GitHub releases.
                     </p>
                   </div>
                 )}

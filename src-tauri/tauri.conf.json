@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Deskly",
-  "version": "2.0.6",
-  "identifier": "com.visha.deskly-tauri",
+  "version": "3.0.0",
+  "identifier": "com.deskly.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",

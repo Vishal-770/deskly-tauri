@@ -41,6 +41,27 @@ fn test_backend(app: tauri::AppHandle) -> String {
 }
 
 #[tauri::command]
+fn get_install_format() -> String {
+    #[cfg(target_os = "windows")]
+    return "windows".to_string();
+
+    #[cfg(target_os = "macos")]
+    return "macos".to_string();
+
+    #[cfg(target_os = "linux")]
+    {
+        if std::env::var("APPIMAGE").is_ok() {
+            "appimage".to_string()
+        } else {
+            "linux-manual".to_string()
+        }
+    }
+
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
+    return "unknown".to_string();
+}
+
+#[tauri::command]
 fn save_calendar_file(app: tauri::AppHandle, content: String, filename: String) -> Result<String, String> {
     use rfd::FileDialog;
 
@@ -102,6 +123,7 @@ pub fn run() {
             greet,
             test_backend,
             save_calendar_file,
+            get_install_format,
             auth::auth_login,
             auth::auth_logout,
             auth::auth_get_state,
