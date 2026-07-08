@@ -63,42 +63,67 @@ fn get_install_format() -> String {
 
 #[tauri::command]
 fn save_calendar_file(app: tauri::AppHandle, content: String, filename: String) -> Result<String, String> {
-    use rfd::FileDialog;
-
-    let path = FileDialog::new()
-        .set_file_name(&filename)
-        .add_filter("iCalendar", &["ics"])
-        .save_file();
-
-    if let Some(path) = path {
-        match std::fs::write(&path, &content) {
-            Ok(_) => {
-                let saved_path_str = path.to_string_lossy().to_string();
-                
-                // Try to trigger a native notification
-                let _ = app.notification()
-                    .builder()
-                    .title("Calendar Exported")
-                    .body(format!("Timetable successfully saved to: {}", path.file_name().unwrap_or_default().to_string_lossy()))
-                    .show();
-
-                // Linux development notification fallback
-                #[cfg(target_os = "linux")]
-                {
-                    let _ = std::process::Command::new("notify-send")
-                        .args([
-                            "Calendar Exported",
-                            &format!("Timetable successfully saved to: {}", path.file_name().unwrap_or_default().to_string_lossy())
-                        ])
-                        .spawn();
+    #[cfg(mobile)]
+    {
+        use tauri::Manager;
+        if let Ok(dir) = app.path().document_dir() {
+            let path = dir.join(&filename);
+            match std::fs::write(&path, &content) {
+                Ok(_) => {
+                    let path_str = path.to_string_lossy().to_string();
+                    let _ = app.notification()
+                        .builder()
+                        .title("Calendar Exported")
+                        .body(format!("Timetable successfully saved to: {}", filename))
+                        .show();
+                    Ok(path_str)
                 }
-
-                Ok(saved_path_str)
+                Err(e) => Err(format!("Failed to write file: {}", e)),
             }
-            Err(e) => Err(format!("Failed to write file: {}", e)),
+        } else {
+            Err("Document directory not found".to_string())
         }
-    } else {
-        Err("Save cancelled".to_string())
+    }
+
+    #[cfg(desktop)]
+    {
+        use rfd::FileDialog;
+
+        let path = FileDialog::new()
+            .set_file_name(&filename)
+            .add_filter("iCalendar", &["ics"])
+            .save_file();
+
+        if let Some(path) = path {
+            match std::fs::write(&path, &content) {
+                Ok(_) => {
+                    let saved_path_str = path.to_string_lossy().to_string();
+                    
+                    // Try to trigger a native notification
+                    let _ = app.notification()
+                        .builder()
+                        .title("Calendar Exported")
+                        .body(format!("Timetable successfully saved to: {}", path.file_name().unwrap_or_default().to_string_lossy()))
+                        .show();
+
+                    // Linux development notification fallback
+                    #[cfg(target_os = "linux")]
+                    {
+                        let _ = std::process::Command::new("notify-send")
+                            .args([
+                                "Calendar Exported",
+                                &format!("Timetable successfully saved to: {}", path.file_name().unwrap_or_default().to_string_lossy())
+                            ])
+                            .spawn();
+                    }
+
+                    Ok(saved_path_str)
+                }
+                Err(e) => Err(format!("Failed to write file: {}", e)),
+            }
+        } else {
+            Err("Save cancelled".to_string())
+        }
     }
 }
 
@@ -110,8 +135,12 @@ pub fn run() {
         std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
     }
 
-    tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
+    let builder = tauri::Builder::default();
+
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+
+    builder
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_notification::init())
         .setup(|app| {
