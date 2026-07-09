@@ -379,7 +379,7 @@ export default function ExamSchedulePage() {
         <Sk className="h-10 w-20 rounded-xl shrink-0" />
         <Sk className="h-10 w-20 rounded-xl shrink-0" />
       </div>
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="p-4 space-y-2">
             <div className="flex items-center gap-2">

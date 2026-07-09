@@ -1,7 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
-import { Users, Search, X, MapPin, GraduationCap, Briefcase } from "lucide-react";
+import {
+  Users,
+  Search,
+  X,
+  MapPin,
+  User,
+  Mail,
+  ChevronRight,
+
+} from "lucide-react";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import rawFacultyData from "@/data/faculty_info.json";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -39,45 +49,194 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
+function getFacultyEmail(name: string): string {
+  const clean = name.trim().toLowerCase().replace(/[^a-z\s]/g, "");
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "faculty@vit.ac.in";
+  if (parts.length === 1) return `${parts[0]}@vit.ac.in`;
+  
+  let longestIdx = 0;
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i].length > parts[longestIdx].length) {
+      longestIdx = i;
+    }
+  }
+  const mainName = parts[longestIdx];
+  const otherParts = parts.filter((_, idx) => idx !== longestIdx);
+  const initials = otherParts.map(p => p[0]).join("");
+  return initials ? `${mainName}.${initials}@vit.ac.in` : `${mainName}@vit.ac.in`;
+}
+
+// ─── Drawer Component ─────────────────────────────────────────────────────────
+
+function FacultyDetailDrawer({
+  faculty,
+  open,
+  onOpenChange
+}: {
+  faculty: FacultyEntry | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setCopied(false);
+    }
+  }, [open]);
+
+  if (!faculty) return null;
+
+  const initials = getInitials(faculty.name);
+  const email = getFacultyEmail(faculty.name);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const details = [
+    { icon: User,          label: "Employee ID",  value: faculty.empId, color: "text-sky-400" },
+    { icon: User,          label: "Designation",  value: faculty.designation, color: "text-emerald-400" },
+    { icon: Users,         label: "School / Dept", value: `${faculty.school} (${faculty.schoolAbbr})`, color: "text-amber-400" },
+    { icon: MapPin,        label: "Cabin / Room", value: faculty.cabin !== "Not Available" ? faculty.cabin : "TBA", color: "text-purple-400" },
+    { icon: MapPin,        label: "Building",     value: faculty.building !== "Not Available" ? faculty.building : "TBA", color: "text-sky-400" },
+  ];
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="pb-8 font-saira max-h-[92vh]">
+        <div className="overflow-y-auto no-scrollbar px-6 space-y-7 pt-5">
+          
+          {/* Header Row */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="w-[54px] h-[54px] rounded-full bg-sky-500/10 flex items-center justify-center text-sky-400 shrink-0 border border-sky-500/20">
+                <span className="text-base font-bold">{initials}</span>
+              </div>
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-center gap-2 leading-none">
+                  <span className="text-xs font-semibold text-sky-500 uppercase tracking-wide">
+                    Faculty Profile
+                  </span>
+                </div>
+                <h2 className="text-xl font-medium text-foreground leading-snug tracking-tight">
+                  {faculty.name}
+                </h2>
+              </div>
+            </div>
+            
+            {/* Close Button */}
+            <button
+              onClick={() => onOpenChange(false)}
+              className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0 font-sans"
+            >
+              <span className="text-lg leading-none">×</span>
+            </button>
+          </div>
+
+          {/* Email Card (with Copy button) */}
+          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 shrink-0">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Email Address</span>
+                <span className="text-sm font-semibold text-sky-400 truncate block mt-0.5">{email}</span>
+              </div>
+            </div>
+            <button
+              onClick={handleCopy}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 border cursor-pointer
+                ${copied
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                  : "bg-sky-500/15 border-sky-500/20 text-sky-400 hover:bg-sky-500/25"
+                }`}
+            >
+              {copied ? "Copied!" : "Copy Email"}
+            </button>
+          </div>
+
+          {/* Details list */}
+          <div className="space-y-4 pt-1">
+            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+              Additional Info
+            </p>
+
+            <div className="space-y-0">
+              {details.map(({ icon: Icon, label, value, color }, index) => (
+                <div key={label} className="flex gap-4 relative">
+                  
+                  {/* Left Column: Icon */}
+                  <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-[1px]">
+                    <Icon className={`w-5 h-5 ${color} shrink-0`} />
+                  </div>
+                  
+                  {/* Middle Column: Timeline node */}
+                  <div className="relative flex flex-col items-center shrink-0 w-3">
+                    {/* Line */}
+                    {index < details.length - 1 && (
+                      <div className="absolute top-[22px] bottom-0 w-px bg-border/20 left-1/2 -translate-x-1/2" />
+                    )}
+                    {/* Dot */}
+                    <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/45 mt-2.5 z-10" />
+                  </div>
+                  
+                  {/* Right Column: Text contents */}
+                  <div className="min-w-0 pb-5 pt-[3px] flex-1">
+                    <p className="text-xs text-muted-foreground leading-none mb-1">{label}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
+                  </div>
+                  
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function FacultySkeleton() {
   return (
-    <div className="w-full space-y-8">
-      <div className="pb-6 border-b border-border/10 space-y-2">
-        <Sk className="h-7 w-40 animate-pulse" />
-        <Sk className="h-4 w-72 animate-pulse" />
+    <div className="w-full space-y-6 px-2 py-4">
+      <div className="space-y-1">
+        <Sk className="h-7 w-40" />
+        <Sk className="h-3.5 w-72" />
+        <Sk className="h-3 w-36" />
       </div>
-      
-      {/* Search Input Skeleton */}
-      <Sk className="h-10 w-full rounded-xl animate-pulse" />
-
-      {/* School Filter Chips Skeleton */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
-        {[...Array(6)].map((_, i) => (
-          <Sk key={i} className="h-7 w-20 rounded-full shrink-0 animate-pulse" />
+      <div className="flex gap-2">
+        <Sk className="h-10 flex-1 rounded-xl" />
+        <Sk className="h-10 w-10 rounded-xl" />
+      </div>
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+        {[...Array(5)].map((_, i) => (
+          <Sk key={i} className="h-8 w-20 rounded-full shrink-0" />
         ))}
       </div>
-
-      {/* Grid Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="space-y-4 pb-6 border-b border-border/10">
-            <div className="flex items-center gap-3.5">
-              <Sk className="w-11 h-11 rounded-xl shrink-0 animate-pulse" />
-              <div className="space-y-2 flex-1 min-w-0">
-                <Sk className="h-4.5 w-3/4 animate-pulse" />
-                <Sk className="h-3.5 w-1/2 animate-pulse" />
-                <Sk className="h-3 w-1/3 animate-pulse" />
+      <div className="space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 flex-1">
+              <Sk className="w-11 h-11 rounded-full shrink-0" />
+              <div className="space-y-2 flex-1">
+                <Sk className="h-4 w-32" />
+                <Sk className="h-3 w-48" />
+                <Sk className="h-3 w-40" />
               </div>
             </div>
-            <div className="space-y-2.5 pt-2">
-              <Sk className="h-3.5 w-5/6 animate-pulse" />
-            </div>
+            <Sk className="w-4 h-4 rounded" />
           </div>
         ))}
       </div>
@@ -91,14 +250,15 @@ export default function FacultyInfoPage() {
   const { loading: authLoading } = useAuth();
   const [query, setQuery] = useState("");
   const [activeSchool, setActiveSchool] = useState<string>("All");
-  const [visibleCount, setVisibleCount] = useState(30);
+  const [visibleCount, setVisibleCount] = useState(20);
+  const [selectedFaculty, setSelectedFaculty] = useState<FacultyEntry | null>(null);
 
   // Reset visibleCount on search/filter changes
   useEffect(() => {
-    setVisibleCount(30);
+    setVisibleCount(20);
   }, [query, activeSchool]);
 
-  // Aggregate all faculty entries from DB
+  // Aggregate all faculty entries from JSON
   const combinedFacultyList = useMemo<FacultyEntry[]>(() => {
     const list: FacultyEntry[] = (rawFacultyData as FacultyJsonEntry[]).map((item) => {
       return {
@@ -158,160 +318,154 @@ export default function FacultyInfoPage() {
     return filteredList.slice(0, visibleCount);
   }, [filteredList, visibleCount]);
 
-  const shell = (children: React.ReactNode) => (
-    <>{children}</>
-  );
+  const shell = (children: React.ReactNode) => <>{children}</>;
 
   const isLoading = authLoading;
 
+  if (isLoading) return shell(<FacultySkeleton />);
+
   return shell(
-    <div className="w-full space-y-8">
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="pb-6 border-b border-border/10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Users className="w-5 h-5 text-primary shrink-0" />
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      <header className="flex items-start gap-2">
+        <Users className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
+        <div className="space-y-1 min-w-0">
+          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
             Faculty Info
           </h1>
-          <p className="text-xs text-muted-foreground">
-            Search and view details of all VIT faculty members and cabins
+          <p className="text-xs text-muted-foreground leading-none pt-0.5">
+            Search and view details of all VIT faculty members and explore.
           </p>
+          {!isLoading && filteredList.length > 0 && (
+            <p className="text-[10px] text-sky-400 font-extrabold uppercase tracking-wide pt-1 leading-none">
+              Showing {Math.min(visibleCount, filteredList.length)} of {filteredList.length} Faculty
+            </p>
+          )}
         </div>
-        {!isLoading && filteredList.length > 0 && (
-          <span className="text-[10px] text-muted-foreground/60 font-black tracking-widest uppercase pb-0.5">
-            Showing {Math.min(visibleCount, filteredList.length)} of {filteredList.length} Faculty
-          </span>
-        )}
       </header>
 
-      {isLoading ? (
-        <FacultySkeleton />
-      ) : (
-        <>
-          {/* ── Search Bar ───────────────────────────────────────────────────── */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 pointer-events-none" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search faculty by name, ID, cabin, building..."
-              className="w-full h-10 pl-9 pr-10 rounded-xl border border-border/15 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/20 transition-all duration-150"
-            />
-            {query && (
+      {/* ── Search Bar & Filter ───────────────────────────────────────────────── */}
+      <div className="relative w-full">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search faculty by name, ID, cabin, build"
+          className="w-full h-10 pl-9 pr-9 bg-muted/20 border border-border/10 rounded-xl text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
+        />
+        {query && (
+          <button
+            onClick={() => setQuery("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors cursor-pointer border-0 bg-transparent"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* ── School Chips (Horizontal Scrollable) ───────────────────────────────── */}
+      {schools.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
+          {schools.map((school) => {
+            const active = activeSchool === school;
+            return (
               <button
-                onClick={() => setQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors cursor-pointer"
+                key={school}
+                onClick={() => setActiveSchool(school)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer border shrink-0
+                  ${active
+                    ? "bg-sky-500 text-white border-sky-500"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/10"
+                  }`}
               >
-                <X className="w-4 h-4" />
+                {school === "All" ? "All Faculty" : school}
               </button>
-            )}
-          </div>
-
-          {/* ── School Chips (Horizontal Scrollable) ───────────────────────── */}
-          {schools.length > 1 && (
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-1 pt-0 -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth">
-              {schools.map((school) => (
-                <button
-                  key={school}
-                  onClick={() => setActiveSchool(school)}
-                  className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer border shrink-0
-                    ${
-                      activeSchool === school
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "border-border/10 text-muted-foreground hover:text-foreground hover:border-border/20 bg-muted/10"
-                    }
-                  `}
-                >
-                  {school === "All" ? "All Schools" : school}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* ── Faculty Flat Listing Grid ──────────────────────────────────── */}
-          {filteredList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-              <Users className="w-10 h-10 text-muted-foreground/15" />
-              <p className="text-sm font-bold text-foreground">
-                No faculty members match your filters
-              </p>
-              <p className="text-xs text-muted-foreground/60">
-                Try typing a different name or choosing a different school filter.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10 pt-2">
-              {visibleFaculty.map((faculty, i) => {
-                const initials = getInitials(faculty.name);
-                const hasLocation = 
-                  (faculty.building && faculty.building !== "Not Available") || 
-                  (faculty.cabin && faculty.cabin !== "Not Available");
-
-                return (
-                  <div 
-                    key={`${faculty.empId}-${i}`} 
-                    className="flex flex-col justify-between pb-6 border-b border-border/10 space-y-4"
-                  >
-                    <div className="space-y-3">
-                      {/* Avatar + Primary Info */}
-                      <div className="flex items-start gap-3.5">
-                        <div className="w-11 h-11 rounded-xl bg-muted/50 text-muted-foreground border border-border/10 flex items-center justify-center font-bold text-sm shrink-0">
-                          {initials}
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-bold text-foreground leading-snug truncate">
-                            {faculty.name}
-                          </h3>
-                          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground/60">
-                            <Briefcase className="w-3.5 h-3.5 shrink-0" />
-                            <span className="truncate leading-none">
-                              {faculty.designation}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-1 text-[10px] font-black uppercase tracking-wider text-primary">
-                            <GraduationCap className="w-3.5 h-3.5 shrink-0 text-primary/80" />
-                            <span className="truncate leading-none">
-                              {faculty.schoolAbbr} (ID: {faculty.empId})
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Location Cabin details */}
-                      {hasLocation && (
-                        <div className="space-y-1 text-xs text-muted-foreground">
-                          {faculty.cabin && faculty.cabin !== "Not Available" && (
-                            <div className="flex items-start gap-1.5">
-                              <MapPin className="w-3.5 h-3.5 mt-0.5 text-muted-foreground/50 shrink-0" />
-                              <span className="leading-snug">
-                                {faculty.cabin}
-                                {faculty.building && faculty.building !== "Not Available" && `, ${faculty.building}`}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Load More Button */}
-          {filteredList.length > visibleCount && (
-            <div className="flex justify-center pt-8">
-              <button
-                onClick={() => setVisibleCount((prev) => prev + 30)}
-                className="px-6 py-2.5 rounded-xl border border-border/10 bg-muted/5 text-xs font-extrabold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/10 hover:border-border/20 transition-all duration-150 cursor-pointer"
-              >
-                Load More Faculty
-              </button>
-            </div>
-          )}
-        </>
+            );
+          })}
+        </div>
       )}
+
+      {/* ── Faculty Listing ───────────────────────────────────────────────────── */}
+      {filteredList.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+          <Users className="w-8 h-8 text-muted-foreground/20" />
+          <p className="text-sm font-semibold text-foreground leading-none">No faculty members found</p>
+          <p className="text-xs text-muted-foreground">Try modifying your search or choosing a different school.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {visibleFaculty.map((faculty, i) => {
+            const initials = getInitials(faculty.name);
+            const hasLocation =
+              (faculty.building && faculty.building !== "Not Available") ||
+              (faculty.cabin && faculty.cabin !== "Not Available");
+
+            return (
+              <div
+                key={`${faculty.empId}-${i}`}
+                onClick={() => setSelectedFaculty(faculty)}
+                className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 hover:border-sky-500/20 active:opacity-75 transition-all duration-200 rounded-2xl p-4 flex items-center justify-between gap-4 cursor-pointer"
+              >
+                <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                  {/* Initials Avatar */}
+                  <div className="w-11 h-11 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center font-bold text-sm shrink-0">
+                    {initials}
+                  </div>
+
+                  <div className="min-w-0 space-y-1">
+                    <h3 className="text-sm font-bold text-foreground leading-none truncate">
+                      {faculty.name}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 leading-none">
+                      <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
+                      <span className="truncate">{faculty.designation}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-sky-400 leading-none">
+                      <Mail className="w-3.5 h-3.5 shrink-0 text-sky-500/80" />
+                      <span className="truncate">{getFacultyEmail(faculty.name)}</span>
+                    </div>
+                    {hasLocation && (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 leading-none">
+                        <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
+                        <span className="truncate">
+                          {faculty.cabin && faculty.cabin !== "Not Available" ? faculty.cabin : ""}
+                          {faculty.building && faculty.building !== "Not Available" ? `, ${faculty.building}` : ""}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Load More Button ─────────────────────────────────────────────────── */}
+      {filteredList.length > visibleCount && (
+        <div className="flex justify-center pt-4">
+          <button
+            onClick={() => setVisibleCount((prev) => prev + 20)}
+            className="px-6 py-2.5 rounded-xl border border-border/10 bg-muted/5 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors duration-150 cursor-pointer"
+          >
+            Load More Faculty
+          </button>
+        </div>
+      )}
+
+      {/* ── Faculty Details Drawer ───────────────────────────────────────────── */}
+      <FacultyDetailDrawer
+        faculty={selectedFaculty}
+        open={selectedFaculty !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedFaculty(null);
+        }}
+      />
     </div>
   );
 }

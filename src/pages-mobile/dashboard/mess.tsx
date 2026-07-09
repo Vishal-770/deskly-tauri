@@ -18,16 +18,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  ChefHat,
   Coffee,
   Utensils,
   Cookie,
   Soup,
-  Calendar,
-  LayoutGrid,
+  MapPin,
   Clock,
+  ChevronDown,
+  Home
 } from "lucide-react";
-
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -49,26 +48,30 @@ function formatMessTypeLabel(type: MessType): string {
   return map[type] ?? type;
 }
 
-const MEAL_META: Record<string, { timing: string; icon: (cls: string) => React.ReactNode; accent: string }> = {
+const MEAL_META: Record<string, { timing: string; icon: (cls: string) => React.ReactNode; accent: string; bgAccent: string }> = {
   Breakfast: {
-    timing: "07:00 AM – 09:00 AM",
+    timing: "07:30 AM – 09:30 AM",
     icon: (cls) => <Coffee className={`${cls} text-amber-500`} />,
-    accent: "from-amber-500/10 to-amber-500/5 border-amber-500/15",
+    accent: "bg-amber-500/10 border-amber-500/20",
+    bgAccent: "border-amber-500/10",
   },
   Lunch: {
-    timing: "12:00 PM – 02:00 PM",
+    timing: "12:30 PM – 02:30 PM",
     icon: (cls) => <Utensils className={`${cls} text-emerald-500`} />,
-    accent: "from-emerald-500/10 to-emerald-500/5 border-emerald-500/15",
+    accent: "bg-emerald-500/10 border-emerald-500/20",
+    bgAccent: "border-emerald-500/10",
   },
   Snacks: {
     timing: "05:00 PM – 06:30 PM",
     icon: (cls) => <Cookie className={`${cls} text-orange-500`} />,
-    accent: "from-orange-500/10 to-orange-500/5 border-orange-500/15",
+    accent: "bg-orange-500/10 border-orange-500/20",
+    bgAccent: "border-orange-500/10",
   },
   Dinner: {
-    timing: "07:00 PM – 09:00 PM",
+    timing: "07:30 PM – 09:30 PM",
     icon: (cls) => <Soup className={`${cls} text-indigo-500`} />,
-    accent: "from-indigo-500/10 to-indigo-500/5 border-indigo-500/15",
+    accent: "bg-indigo-500/10 border-indigo-500/20",
+    bgAccent: "border-indigo-500/10",
   },
 };
 
@@ -78,50 +81,40 @@ const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satur
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/60 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function MessSkeleton() {
   return (
-    <div className="w-full space-y-6 animate-pulse">
+    <div className="w-full space-y-6 px-2 py-4">
       {/* Header */}
-      <div className="pb-4 border-b border-border/20 space-y-2">
-        <Sk className="h-6 w-32" />
-        <Sk className="h-3 w-56" />
+      <div className="space-y-2">
+        <Sk className="h-7 w-32" />
+        <Sk className="h-3.5 w-56" />
+        <Sk className="h-3 w-40" />
       </div>
-
-      {/* Toolbar */}
-      <div className="flex justify-between items-center pb-4 border-b border-border/10">
-        <Sk className="h-4 w-40" />
-        <div className="flex gap-3">
-          <Sk className="h-8 w-24 rounded-xl" />
-          <Sk className="h-8 w-32 rounded-xl" />
-        </div>
+      {/* Weekday selector */}
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
+        {[...Array(7)].map((_, i) => (
+          <Sk key={i} className="h-10 w-12 rounded-xl shrink-0" />
+        ))}
       </div>
-
-      {/* Day tabs */}
-      <div className="flex gap-2 pb-3 border-b border-border/5">
-        {WEEKDAYS.map((d) => <Sk key={d} className="h-9 w-16 rounded-xl" />)}
-      </div>
-
-      {/* Meal grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Meal cards list */}
+      <div className="space-y-4">
         {MEALS.map((m) => (
-          <div key={m} className="space-y-4 py-4 border-b border-border/10">
-            <div className="flex items-center justify-between border-b border-border/5 pb-3">
-              <div className="flex items-center gap-2.5">
-                <Sk className="w-9 h-9 rounded-xl" />
-                <Sk className="h-5 w-24" />
+          <div key={m} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <Sk className="w-10 h-10 rounded-full shrink-0" />
+              <div className="space-y-2 flex-1">
+                <Sk className="h-4.5 w-24" />
+                <Sk className="h-3 w-36" />
               </div>
-              <Sk className="h-4 w-36" />
+              <Sk className="h-4 w-12 rounded ml-auto" />
             </div>
-            <div className="space-y-2.5 pl-1">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex items-start gap-2.5">
-                  <Sk className="w-2 h-2 rounded-full shrink-0 mt-1.5" />
-                  <Sk className={`h-4 ${i % 2 === 0 ? "w-40" : "w-56"}`} />
-                </div>
-              ))}
+            <div className="space-y-2 pt-2 border-t border-border/10">
+              <Sk className="h-4 w-3/4" />
+              <Sk className="h-4 w-2/3" />
+              <Sk className="h-4 w-5/6" />
             </div>
           </div>
         ))}
@@ -140,7 +133,6 @@ export default function MessMenuPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [viewMode, setViewMode] = useState<"day" | "week">("day");
   const [activeDay, setActiveDay] = useState<string>("");
 
   const currentWeekday = useMemo(() => {
@@ -228,9 +220,37 @@ export default function MessMenuPage() {
   const parseItems = (str: string) =>
     str.split(/[+,•]/).map((i) => i.replace(/\d+/g, "").trim()).filter(Boolean);
 
-  const shell = (children: React.ReactNode) => (
-    <>{children}</>
-  );
+  const weekDays = useMemo(() => {
+    const current = new Date();
+    const dayOfWeek = current.getDay();
+    const distance = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(current.setDate(current.getDate() + distance));
+    
+    const days = [];
+    const weekdaysAbbr = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(monday.getTime() + i * 24 * 60 * 60 * 1000);
+      days.push({
+        name: WEEKDAYS[i],
+        abbr: weekdaysAbbr[i],
+        dateNum: date.getDate(),
+        monthStr: monthNames[date.getMonth()],
+        displayLabel: `${date.getDate()} ${monthNames[date.getMonth()]}`
+      });
+    }
+    return days;
+  }, []);
+
+  const activeDayLabel = useMemo(() => {
+    const selected = weekDays.find(d => d.name === activeDay);
+    if (!selected) return "";
+    const isToday = activeDay.toLowerCase() === currentWeekday.toLowerCase();
+    return `${isToday ? "Today" : activeDay} (${selected.dateNum} ${selected.monthStr.toLowerCase()})`;
+  }, [activeDay, weekDays, currentWeekday]);
+
+  const shell = (children: React.ReactNode) => <>{children}</>;
 
   if (error && !menuData) {
     return shell(
@@ -242,228 +262,127 @@ export default function MessMenuPage() {
 
   const isLoading = authLoading || (loading && !menuData);
 
+  if (isLoading) return shell(<MessSkeleton />);
+
   return shell(
-    <div className="w-full space-y-6">
-      {/* ── Header ────────────────────────────────────────────────────────────── */}
-      <header className="pb-4 border-b border-border/20 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
-            <ChefHat className="w-6 h-6 text-primary shrink-0" />
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      <header className="flex items-start justify-between gap-4">
+        <div className="space-y-1 min-w-0">
+          <h1 className="text-[26px] font-medium tracking-tight text-foreground flex items-center gap-2 leading-none">
+            <Home className="w-6 h-6 text-sky-500 shrink-0" />
             Mess Menu
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground leading-none pt-0.5">
             Weekly meal schedule for student hostels
           </p>
+          {profile?.hostel?.blockName && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1 leading-none pt-1">
+              <MapPin className="w-3.5 h-3.5 text-sky-500" />
+              <span>Hostel: <span className="font-semibold text-foreground">{profile.hostel.blockName} – {profile.hostel.roomNumber}</span></span>
+            </p>
+          )}
         </div>
 
-        {profile?.hostel?.messType && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground/80 pb-0.5">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
-            Roster: <span className="font-extrabold text-foreground ml-1">{profile.hostel.messType}</span>
-          </div>
-        )}
-      </header>
-
-      {/* ── Toolbar ────────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border/10">
-        {/* Day / Week toggle */}
-        <div className="flex items-center rounded-xl bg-muted/20 border border-border/10 p-0.5 self-start">
-          {(["day", "week"] as const).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 focus:outline-none
-                ${viewMode === mode
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-                }
-              `}
-            >
-              {mode === "day" ? <Calendar className="w-3.5 h-3.5" /> : <LayoutGrid className="w-3.5 h-3.5" />}
-              {mode === "day" ? "Day view" : "Full week"}
-            </button>
-          ))}
-        </div>
-
-        {/* Mess type selector */}
+        {/* Mess selector */}
         <Select value={selectedMess} onValueChange={(val) => setSelectedMess(val as MessType)}>
-          <SelectTrigger className="w-full sm:w-[155px] h-9 rounded-xl bg-muted/20 hover:bg-muted/30 border-border/20 text-xs sm:text-sm focus:ring-1 focus:ring-primary/30">
+          <SelectTrigger className="w-[120px] h-9 rounded-xl bg-muted/20 border-border/10 text-xs shrink-0">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/20 bg-popover/95 backdrop-blur-md">
+          <SelectContent className="rounded-xl border-border/20 bg-card">
             {MESS_OPTIONS.map((m) => (
-              <SelectItem key={m} value={m} className="rounded-lg text-xs sm:text-sm">
+              <SelectItem key={m} value={m} className="text-xs">
                 {formatMessTypeLabel(m)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+      </header>
+
+      {/* ── Today / Day Selector Dropdown label ────────────────────────────────── */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5 text-foreground cursor-pointer">
+          <span className="text-sm font-semibold capitalize">{activeDayLabel}</span>
+          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+        </div>
       </div>
 
-      {isLoading ? <MessSkeleton /> : (
-        <>
-          {/* ── Day Tabs ────────────────────────────────────────────────────────── */}
-          {viewMode === "day" && (
-            <div className="w-full flex items-center gap-1 overflow-x-auto no-scrollbar border-b border-border/5 pb-2">
-              {WEEKDAYS.map((day) => {
-                const isToday = day.toLowerCase() === currentWeekday.toLowerCase();
-                const isSelected = day.toLowerCase() === activeDay.toLowerCase();
-                return (
-                  <button
-                    key={day}
-                    onClick={() => setActiveDay(day)}
-                    className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 border shrink-0 cursor-pointer focus:outline-none
-                      ${isSelected
-                        ? "bg-primary/10 text-primary border-primary/15"
-                        : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/10"
-                      }
-                    `}
-                  >
-                    <span className="hidden sm:inline">{day.substring(0, 3)}</span>
-                    <span className="sm:hidden">{day.substring(0, 2)}</span>
-                    {isToday && (
-                      <span className="text-[8px] font-black uppercase bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md leading-none">
-                        Today
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+      {/* ── Weekday Selector Horizontal Strip ──────────────────────────────────── */}
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
+        {weekDays.map((d) => {
+          const isSelected = d.name.toLowerCase() === activeDay.toLowerCase();
+          return (
+            <button
+              key={d.name}
+              onClick={() => setActiveDay(d.name)}
+              className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs cursor-pointer transition-colors duration-150 shrink-0 min-w-[52px]
+                ${isSelected
+                  ? "bg-sky-500/15 border-sky-500/30 text-sky-400 font-bold"
+                  : "bg-muted/10 border-border/10 text-muted-foreground hover:bg-muted/20"
+                }`}
+            >
+              {isSelected ? (
+                <div className="flex flex-col items-center">
+                  <span className="text-[10px] leading-none mb-1">{d.abbr}</span>
+                  <span className="text-xs font-semibold leading-none uppercase">{d.displayLabel}</span>
+                </div>
+              ) : (
+                <span className="text-xs font-semibold leading-none">{d.abbr}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-          {/* ── VIEW 1: Day Focus ──────────────────────────────────────────────── */}
-            {viewMode === "day" && activeDayMenu && (
-              <div
-                key={activeDay}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-px border border-border/10 rounded-2xl overflow-hidden bg-border/10"
-              >
-                {MEALS.map((meal) => {
-                  const meta = MEAL_META[meal];
-                  const items = parseItems(activeDayMenu[meal.toLowerCase() as keyof MessMenuItem] as string || "");
+      {/* ── Meal Cards List ───────────────────────────────────────────────────── */}
+      {activeDayMenu && (
+        <div className="space-y-4">
+          {MEALS.map((meal) => {
+            const meta = MEAL_META[meal];
+            const items = parseItems(activeDayMenu[meal.toLowerCase() as keyof MessMenuItem] as string || "");
 
-                  return (
-                    <div
-                      key={meal}
-                      className={`bg-background p-5 sm:p-6 space-y-4`}
-                    >
-                      {/* Meal Header */}
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${meta.accent} border flex items-center justify-center shrink-0`}>
-                            {meta.icon("w-4.5 h-4.5 sm:w-5 sm:h-5")}
-                          </div>
-                          <div>
-                            <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-foreground leading-none">{meal}</h3>
-                            <div className="flex items-center gap-1 mt-1">
-                              <Clock className="w-3 h-3 text-muted-foreground/60 shrink-0" />
-                              <span className="text-[10px] sm:text-xs text-muted-foreground/70 font-semibold tracking-tight">
-                                {meta.timing}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 pt-0.5">
-                          {items.length} items
-                        </span>
-                      </div>
-
-                      {/* Divider */}
-                      <div className="h-px bg-border/30" />
-
-                      {/* Items list */}
-                      <ul className="space-y-2.5">
-                        {items.length > 0 ? (
-                          items.map((item, i) => (
-                            <li
-                              key={i}
-                              className="text-xs sm:text-sm text-foreground/80 font-medium flex items-start gap-2.5 leading-relaxed"
-                            >
-                              <span className="w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0 mt-1.5" />
-                              {item}
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-xs sm:text-sm text-muted-foreground/40 italic">
-                            No items scheduled.
-                          </li>
-                        )}
-                      </ul>
+            return (
+              <div key={meal} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-4">
+                {/* Header of meal card */}
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full ${meta.accent} flex items-center justify-center shrink-0`}>
+                      {meta.icon("w-5 h-5")}
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                    <div>
+                      <h3 className="text-base font-bold text-foreground leading-none">{meal}</h3>
+                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground/60 leading-none">
+                        <Clock className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                        <span>{meta.timing}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold text-sky-500 uppercase leading-none">
+                    {items.length} ITEMS
+                  </span>
+                </div>
 
-            {/* ── VIEW 2: Full Week Table ────────────────────────────────────── */}
-            {viewMode === "week" && menuData && (
-              <div
-                className="w-full overflow-x-auto no-scrollbar rounded-2xl border border-border/10"
-              >
-                <table className="w-full text-left border-collapse min-w-[660px]">
-                  <thead>
-                    <tr className="border-b border-border/10 bg-muted/5">
-                      <th className="px-4 py-3.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest w-[90px]">
-                        Day
-                      </th>
-                      {MEALS.map((meal) => (
-                        <th key={meal} className="px-4 py-3.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">
-                          <div className="flex items-center gap-1.5">
-                            {MEAL_META[meal].icon("w-3.5 h-3.5")}
-                            {meal}
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/5">
-                    {menuData.map((row) => {
-                      const isToday = row.day.trim().toLowerCase() === currentWeekday.trim().toLowerCase();
-                      return (
-                        <tr
-                          key={row.id}
-                          className={`transition-colors ${isToday ? "bg-primary/5" : "hover:bg-muted/5"}`}
-                        >
-                          <td className="px-4 py-4 align-top">
-                            <div className="flex flex-col gap-1">
-                              <span className={`text-xs font-extrabold ${isToday ? "text-primary" : "text-foreground"}`}>
-                                {row.day.substring(0, 3)}
-                              </span>
-                              {isToday && (
-                                <span className="text-[8px] font-black uppercase bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md leading-none w-fit">
-                                  Today
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          {MEALS.map((meal) => {
-                            const raw = row[meal.toLowerCase() as keyof MessMenuItem] as string;
-                            const items = parseItems(raw || "");
-                            return (
-                              <td key={meal} className="px-4 py-4 align-top">
-                                {items.length > 0 ? (
-                                  <ul className="space-y-1">
-                                    {items.map((item, i) => (
-                                      <li key={i} className="text-[10px] sm:text-xs text-foreground/75 font-medium flex items-start gap-1.5">
-                                        <span className="w-1 h-1 rounded-full bg-muted-foreground/30 shrink-0 mt-1.5" />
-                                        {item}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                ) : (
-                                  <span className="text-[10px] text-muted-foreground/30 italic">—</span>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                {/* Items list inside card */}
+                {items.length > 0 ? (
+                  <ul className="space-y-2 pt-2 border-t border-border/10 pl-0.5">
+                    {items.map((item, i) => (
+                      <li key={i} className="text-xs font-semibold text-foreground/80 flex items-start gap-2.5 leading-relaxed">
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0 mt-1.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-xs text-muted-foreground/40 italic pt-2 border-t border-border/10">
+                    No items scheduled
+                  </div>
+                )}
               </div>
-            )}
-        </>
+            );
+          })}
+        </div>
       )}
     </div>
   );

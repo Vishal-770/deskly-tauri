@@ -55,8 +55,7 @@ export default function MobileDashboardLayout() {
     { label: "Contact", path: "/dashboard/contact", icon: Phone },
     { label: "Settings", path: "/dashboard/settings", icon: Settings },
   ] as const;
-
-  // Core dock navigation items (maximum 4 for spacing)
+  // Core dock navigation items (Home, Timetable + More)
   const coreNavItems: NavItem[] = [
     { label: "Home", path: "/dashboard", icon: Home },
     { label: "Timetable", path: "/dashboard/timetable", icon: Clock },
@@ -66,7 +65,6 @@ export default function MobileDashboardLayout() {
 
   // Grid items inside the "More" bottom sheet
   const moreGridItems: NavItem[] = allNavItems.filter((item) => !corePaths.has(item.path));
-
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-background text-foreground select-none relative">
       

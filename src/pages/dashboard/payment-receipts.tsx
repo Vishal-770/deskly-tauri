@@ -5,12 +5,12 @@ import { getPaymentReceipts, Receipt } from "@/lib/features";
 import { ErrorDisplay } from "@/components/error-display";
 import {
   ArrowLeft,
-  Search,
   Calendar,
   Receipt as ReceiptIcon,
   CreditCard,
   FileText,
-  User
+  User,
+  ChevronDown
 } from "lucide-react";
 
 // ─── Currency Formatter Helper ────────────────────────────────────────────────
@@ -50,110 +50,17 @@ function Sk({ className = "" }: { className?: string }) {
 
 function PaymentReceiptsSkeleton() {
   return (
-    <div className="w-full space-y-6">
-      {/* Header skeleton */}
-      <div className="pb-4 border-b border-border/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Sk className="w-8 h-8 rounded-full" />
-            <Sk className="h-6 w-36 rounded-full" />
-          </div>
-          <Sk className="h-3 w-56 rounded-full pl-10" />
-        </div>
+    <div className="w-full space-y-6 px-2 py-4">
+      <div className="space-y-1">
+        <Sk className="h-7 w-36" />
+        <Sk className="h-3 w-56 animate-pulse" />
       </div>
-
-      {/* Student Profile Details skeleton */}
-      <div className="w-full py-4 flex items-center justify-between gap-6">
-        <div className="flex items-center gap-4 w-full">
-          <Sk className="w-10 h-10 rounded-full shrink-0" />
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-2 w-full max-w-xl">
-            <div className="space-y-1">
-              <Sk className="h-2.5 w-12 rounded-full" />
-              <Sk className="h-4 w-24 rounded-full" />
-            </div>
-            <div className="space-y-1">
-              <Sk className="h-2.5 w-24 rounded-full" />
-              <Sk className="h-4 w-28 rounded-full" />
-            </div>
-            <div className="space-y-1 col-span-2 md:col-span-1">
-              <Sk className="h-2.5 w-16 rounded-full" />
-              <Sk className="h-4 w-16 rounded-full" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Top Stats Summary Grid skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="py-2 flex items-center gap-4">
-            <Sk className="w-10 h-10 rounded-full shrink-0" />
-            <div className="space-y-2 w-full">
-              <Sk className="h-2.5 w-20 rounded-full" />
-              <Sk className="h-5 w-24 rounded-full" />
-              <Sk className="h-2 w-16 rounded-full" />
-            </div>
-          </div>
+      <Sk className="h-24 w-full rounded-2xl" />
+      <Sk className="h-44 w-full rounded-2xl" />
+      <div className="space-y-3">
+        {[...Array(4)].map((_, i) => (
+          <Sk key={i} className="h-16 w-full rounded-2xl" />
         ))}
-      </div>
-
-      {/* Search Controls skeleton */}
-      <div className="w-full py-4">
-        <Sk className="h-10 w-full max-w-sm rounded-full" />
-      </div>
-
-      {/* Table skeleton (Desktop) / Cards (Mobile) */}
-      <div className="w-full">
-        <div className="hidden md:block">
-          <div className="bg-accent/15 border-b border-border/30 p-3 flex justify-between rounded-full">
-            <Sk className="h-3 w-10 rounded-full" />
-            <Sk className="h-3 w-28 rounded-full" />
-            <Sk className="h-3 w-20 rounded-full" />
-            <Sk className="h-3 w-16 rounded-full" />
-            <Sk className="h-3 w-16 rounded-full" />
-            <Sk className="h-3 w-24 rounded-full" />
-          </div>
-          <div className="divide-y divide-border/20 p-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="py-4 flex justify-between items-center">
-                <Sk className="h-8 w-8 rounded-full" />
-                <Sk className="h-4 w-24 rounded-full" />
-                <Sk className="h-4 w-16 rounded-full" />
-                <Sk className="h-4 w-20 rounded-full" />
-                <Sk className="h-4 w-10 rounded-full" />
-                <Sk className="h-4 w-28 rounded-full" />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Mobile View skeleton */}
-        <div className="md:hidden divide-y divide-border/20">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="py-4 space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="flex gap-3">
-                  <Sk className="w-8 h-8 rounded-full" />
-                  <div className="space-y-1">
-                    <Sk className="h-3.5 w-20 rounded-full" />
-                    <Sk className="h-2 w-12 rounded-full" />
-                  </div>
-                </div>
-                <Sk className="h-4 w-16 rounded-full" />
-              </div>
-              <div className="grid grid-cols-2 gap-2 pl-11">
-                <div className="space-y-1">
-                  <Sk className="h-2 w-10 rounded-full" />
-                  <Sk className="h-3 w-20 rounded-full" />
-                </div>
-                <div className="space-y-1">
-                  <Sk className="h-2 w-14 rounded-full" />
-                  <Sk className="h-3 w-12 rounded-full" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );
@@ -166,9 +73,7 @@ export default function PaymentReceiptsPage() {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Search State
-  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Load receipts data
   useEffect(() => {
@@ -191,7 +96,7 @@ export default function PaymentReceiptsPage() {
       setLoading(receipts && receipts.length > 0 ? false : true);
       const res = await getPaymentReceipts();
       if (res.success && res.data) {
-        // Remove placeholder row or waste header row (e.g. where receiptNumber is "RECEIPT NUMBER")
+        // Remove placeholder row or waste header row
         const cleanList = res.data.filter(
           (r) => r.receiptNumber.trim().toUpperCase() !== "RECEIPT NUMBER"
         );
@@ -211,20 +116,12 @@ export default function PaymentReceiptsPage() {
     load();
   }, []);
 
-  // Compute clean, filtered data
-  const filteredReceipts = useMemo(() => {
-    return receipts.filter((receipt) => {
-      return (
-        receipt.receiptNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        receipt.receiptId.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    });
-  }, [receipts, searchQuery]);
+  const filteredReceipts = useMemo(() => receipts, [receipts]);
 
-  // Compute Summary Statistics
+  // Compute Summary Statistics (Exactly 3 stats as requested)
   const stats = useMemo(() => {
     if (filteredReceipts.length === 0) {
-      return { totalPaid: 0, count: 0, latestDate: "N/A" };
+      return { totalPaid: 0, count: 0, latestDate: "N/A", latestAmount: 0 };
     }
 
     const count = filteredReceipts.length;
@@ -240,7 +137,8 @@ export default function PaymentReceiptsPage() {
     return {
       totalPaid,
       count,
-      latestDate: latestReceipt?.date || "N/A"
+      latestDate: latestReceipt?.date || "N/A",
+      latestAmount: latestReceipt?.amount || 0
     };
   }, [filteredReceipts]);
 
@@ -254,10 +152,7 @@ export default function PaymentReceiptsPage() {
     };
   }, [receipts]);
 
-
-  const shell = (children: React.ReactNode) => (
-    <>{children}</>
-  );
+  const shell = (children: React.ReactNode) => <>{children}</>;
 
   if (authLoading || loading) {
     return shell(<PaymentReceiptsSkeleton />);
@@ -272,203 +167,167 @@ export default function PaymentReceiptsPage() {
   }
 
   return shell(
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
       
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="pb-4 border-b border-border/20 flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => window.history.back()}
-              className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/95 to-muted-foreground bg-clip-text text-transparent">
-              Receipt History
-            </h1>
-          </div>
-          <p className="text-xs text-muted-foreground pl-7">
-            View all fee receipts and payment details
-          </p>
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      <header className="flex items-center gap-4">
+        <button
+          onClick={() => window.history.back()}
+          className="p-1 text-foreground shrink-0 border-0 bg-transparent cursor-pointer"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        <div className="space-y-0.5">
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Receipt History</h1>
+          <p className="text-xs text-muted-foreground">View all fee receipts and payment details</p>
         </div>
       </header>
 
-      {/* ── Student Profile Details ───────────────────────────────────────── */}
+      {/* ── Registration Details ────────────────────────────────────────────── */}
       {studentMeta && (
-        <div className="w-full py-4 flex items-center justify-between gap-6">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <User className="w-5 h-5 text-primary" />
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-1 h-4 bg-sky-500 rounded-full" />
+            <h2 className="text-sm font-semibold tracking-tight text-foreground">Registration Details</h2>
+          </div>
+          
+          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
+              <User className="w-6 h-6 text-sky-400" />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-1 sm:gap-y-0.5">
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Reg. No.</p>
-                <p className="text-sm font-black text-foreground truncate">{studentMeta.regNo}</p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 flex-1">
+              <div>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Reg. No.</span>
+                <span className="text-sm font-semibold text-foreground">{studentMeta.regNo}</span>
               </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Application No.</p>
-                <p className="text-sm font-bold text-foreground truncate">{studentMeta.applNo}</p>
+              <div>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Application No.</span>
+                <span className="text-sm font-semibold text-foreground">{studentMeta.applNo}</span>
               </div>
-              <div className="min-w-0 col-span-2 md:col-span-1">
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Campus Code</p>
-                <p className="text-sm font-bold text-foreground/80">{studentMeta.campusCode}</p>
+              <div className="col-span-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Campus Code</span>
+                <span className="text-sm font-semibold text-foreground">{studentMeta.campusCode}</span>
               </div>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
-      {/* ── Top Stats Summary Grid ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:grid-cols-3 py-2">
-        {/* Total Receipts */}
-        <div className="flex items-center gap-4 py-2">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <ReceiptIcon className="w-5 h-5 text-primary" />
-          </div>
-          <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Receipts</p>
-            <p className="text-lg font-black text-foreground leading-none">{stats.count}</p>
-            <p className="text-[9px] text-muted-foreground/60 font-semibold">Successfully Paid</p>
-          </div>
+      {/* ── Overview Stats (3 stats card) ─────────────────────────────────────── */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-4 bg-sky-500 rounded-full" />
+          <h2 className="text-sm font-semibold tracking-tight text-foreground">Overview</h2>
         </div>
 
-        {/* Total Amount Paid */}
-        <div className="flex items-center gap-4 py-2">
-          <div className="w-10 h-10 rounded-full bg-chart-2/10 flex items-center justify-center shrink-0">
-            <CreditCard className="w-5 h-5 text-chart-2" />
-          </div>
-          <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Amount Paid</p>
-            <p className="text-lg font-black text-chart-2 leading-none">{formatINR(stats.totalPaid)}</p>
-            <p className="text-[9px] text-muted-foreground/60 font-semibold">All Time</p>
-          </div>
-        </div>
-
-        {/* Latest Payment */}
-        <div className="flex items-center gap-4 py-2">
-          <div className="w-10 h-10 rounded-full bg-chart-4/10 flex items-center justify-center shrink-0">
-            <Calendar className="w-5 h-5 text-chart-4" />
-          </div>
-          <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Latest Payment</p>
-            <p className="text-lg font-black text-foreground leading-none truncate max-w-full">{stats.latestDate}</p>
-            <p className="text-[9px] text-muted-foreground/60 font-semibold">Most Recent</p>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Search Controls ──────────────────────────────────────── print:hidden */}
-      <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden py-4">
-        {/* Search */}
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-          <input
-            type="text"
-            placeholder="Search by receipt number..."
-            className="h-10 w-full rounded-full border border-border/50 bg-background pl-9 pr-3 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-muted-foreground/40 text-foreground"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* ── Table / Cards Container ───────────────────────────────────────── */}
-      <div className="w-full">
-        {filteredReceipts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center border border-dashed border-border/60 rounded-3xl bg-accent/5">
-            <ReceiptIcon className="w-10 h-10 text-muted-foreground/25" />
-            <p className="text-sm font-bold text-foreground">No receipts found</p>
-            <p className="text-xs text-muted-foreground">
-              Try adjusting your search criteria.
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-3xl">
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className="bg-accent/15 border-b border-border/30 text-[10px] font-black uppercase tracking-wider text-muted-foreground/80">
-                    <th className="py-3 px-4 w-12 text-center">Icon</th>
-                    <th className="py-3 px-4">Receipt Number</th>
-                    <th className="py-3 px-4">Date</th>
-                    <th className="py-3 px-4">Amount</th>
-                    <th className="py-3 px-4">Campus Code</th>
-                    <th className="py-3 px-4">Receipt ID</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/20 text-xs font-semibold text-foreground/90">
-                  {filteredReceipts.map((receipt) => {
-                    return (
-                      <tr
-                        key={receipt.receiptNumber}
-                        className="hover:bg-accent/5 transition-colors duration-150"
-                      >
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center mx-auto text-primary">
-                            <FileText className="w-4 h-4" />
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 font-bold text-foreground">{receipt.receiptNumber}</td>
-                        <td className="py-3.5 px-4 text-muted-foreground/80">{receipt.date}</td>
-                        <td className="py-3.5 px-4 font-extrabold text-chart-2">
-                          {formatINR(receipt.amount)}
-                        </td>
-                        <td className="py-3.5 px-4 text-muted-foreground/80">{receipt.campusCode}</td>
-                        <td className="py-3.5 px-4 font-mono text-[11px] text-muted-foreground/70 shrink-0">
-                          {receipt.receiptId || "-"}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+          <div className="grid grid-cols-2 divide-x divide-border/10">
+            {/* Cell 1: Total Receipts */}
+            <div className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center shrink-0 text-sky-400">
+                <ReceiptIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Total Receipts</span>
+                <span className="text-lg font-bold text-foreground block mt-1 leading-none">{stats.count}</span>
+                <span className="text-[9px] text-muted-foreground/60 block mt-1 leading-none">Successfully paid</span>
+              </div>
             </div>
+            {/* Cell 2: Total Amount Paid */}
+            <div className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-400">
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Total Amount Paid</span>
+                <span className="text-lg font-bold text-emerald-400 block mt-1 leading-none">{formatINR(stats.totalPaid)}</span>
+                <span className="text-[9px] text-muted-foreground/60 block mt-1 leading-none">All time</span>
+              </div>
+            </div>
+          </div>
+          {/* Cell 3: Latest Payment */}
+          <div className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0 text-purple-400">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Latest Payment</span>
+              <span className="text-lg font-bold text-foreground block mt-1 leading-none">{stats.latestDate}</span>
+              <span className="text-[9px] text-muted-foreground/60 block mt-1 leading-none">Fee: {formatINR(stats.latestAmount)}</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Mobile List View (Flat, divider-based item list with no offset card color) */}
-            <div className="divide-y divide-border/20 md:hidden">
-              {filteredReceipts.map((receipt) => {
-                return (
-                  <div
-                    key={receipt.receiptNumber}
-                    className="py-4 flex flex-col gap-3"
+      {/* ── Receipt Records Collapsible List ──────────────────────────────────── */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="w-1 h-4 bg-sky-500 rounded-full" />
+          <h2 className="text-sm font-semibold tracking-tight text-foreground">Receipt Records</h2>
+        </div>
+
+        <div className="space-y-3">
+          {filteredReceipts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+              <ReceiptIcon className="w-8 h-8 text-muted-foreground/20" />
+              <p className="text-sm font-semibold text-foreground leading-none">No receipts found</p>
+              <p className="text-xs text-muted-foreground">No payment records are available.</p>
+            </div>
+          ) : (
+            filteredReceipts.map((receipt) => {
+              const isExpanded = expandedId === receipt.receiptNumber;
+              return (
+                <div key={receipt.receiptNumber} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
+                  {/* Accordion Trigger */}
+                  <button
+                    onClick={() => setExpandedId(isExpanded ? null : receipt.receiptNumber)}
+                    className="w-full text-left p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors border-0 bg-transparent"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                          <FileText className="w-4 h-4" />
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 shrink-0">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-semibold text-foreground leading-none truncate">Receipt #{receipt.receiptNumber}</h3>
+                        <p className="text-[10px] text-muted-foreground mt-1.5 leading-none">{receipt.date}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm font-bold text-emerald-400">{formatINR(receipt.amount)}</span>
+                      <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                    </div>
+                  </button>
+
+                  {/* Accordion Content */}
+                  {isExpanded && (
+                    <div className="px-4 pb-4 pt-2 border-t border-border/10 bg-muted/[0.02]">
+                      <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-[10px] pt-2">
+                        <div>
+                          <span className="text-muted-foreground/60 font-semibold uppercase tracking-wider block">Receipt ID</span>
+                          <span className="font-mono text-foreground mt-0.5 block">{receipt.receiptId || "N/A"}</span>
                         </div>
                         <div>
-                          <p className="text-xs font-black text-foreground">
-                            Receipt #{receipt.receiptNumber}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">{receipt.date}</p>
+                          <span className="text-muted-foreground/60 font-semibold uppercase tracking-wider block">Campus Code</span>
+                          <span className="text-foreground mt-0.5 block">{receipt.campusCode}</span>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-muted-foreground/60 font-semibold uppercase tracking-wider block">Application No.</span>
+                          <span className="text-foreground mt-0.5 block">{receipt.applNo || "N/A"}</span>
+                        </div>
+                        <div className="col-span-2">
+                          <span className="text-muted-foreground/60 font-semibold uppercase tracking-wider block">Registration ID</span>
+                          <span className="text-foreground mt-0.5 block">{receipt.regNo || "N/A"}</span>
                         </div>
                       </div>
-                      <span className="text-sm font-extrabold text-chart-2">
-                        {formatINR(receipt.amount)}
-                      </span>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-[10px] pl-11">
-                      <div>
-                        <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Receipt ID</p>
-                        <p className="font-mono text-foreground mt-0.5 truncate">{receipt.receiptId || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Campus Code</p>
-                        <p className="font-semibold text-foreground mt-0.5">{receipt.campusCode}</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </div>
-
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
     </div>
   );
 }

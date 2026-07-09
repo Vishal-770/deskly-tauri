@@ -265,7 +265,7 @@ export default function AttendanceDetailPage() {
       </div>
 
       {/* ── 2x2 Grid Stats Card ───────────────────────────────────────────────── */}
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl grid grid-cols-2 overflow-hidden relative">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl grid grid-cols-2 overflow-hidden relative">
         {/* Inner vertical separator line */}
         <div className="absolute top-0 bottom-0 left-1/2 w-px bg-border/10 -translate-x-1/2" />
         {/* Inner horizontal separator line */}
@@ -326,13 +326,13 @@ export default function AttendanceDetailPage() {
             ))}
           </div>
         ) : details.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-[#0e0e0f]/20 border border-border/10 rounded-2xl">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
             <Calendar className="w-8 h-8 text-muted-foreground/20" />
             <p className="text-sm font-semibold text-foreground leading-none">No session logs available</p>
             <p className="text-xs text-muted-foreground">Detailed logs haven't been synchronized.</p>
           </div>
         ) : (
-          <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
             {details.map((row, i) => (
               <div
                 key={`${row.serialNo}-${i}`}

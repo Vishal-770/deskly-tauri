@@ -16,48 +16,38 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Shirt, Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
-import { motion } from "framer-motion";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function LaundrySkeleton() {
   return (
-    <div className="w-full space-y-6 flex flex-col flex-1">
-      {/* Header skeleton */}
-      <div className="pb-4 border-b border-border/10 space-y-2">
-        <Sk className="h-6 w-40" />
-        <Sk className="h-4 w-72" />
+    <div className="w-full space-y-6 px-2 py-4 animate-pulse font-saira">
+      <div className="space-y-1">
+        <Sk className="h-7 w-40" />
+        <Sk className="h-3.5 w-72" />
       </div>
-      
-      {/* Options skeleton */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/10">
-        <Sk className="h-4 w-48" />
-        <Sk className="h-8 w-28 rounded-xl ml-auto sm:ml-0" />
-      </div>
-      
-      {/* Month title skeleton */}
-      <Sk className="h-6 w-36 animate-pulse" />
-      
-      {/* Calendar grid skeleton */}
-      <div className="grid grid-cols-7 border-t border-l border-border/10 rounded-2xl overflow-hidden bg-background">
-        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-          <div key={day} className="py-2 text-center border-b border-r border-border/10 bg-muted/5">
-            <span className="text-[10px] font-semibold tracking-wider text-muted-foreground/60 uppercase animate-pulse">
-              {day}
-            </span>
-          </div>
-        ))}
-        {[...Array(35)].map((_, i) => (
-          <div key={i} className="min-h-[48px] sm:min-h-[75px] md:min-h-[95px] p-2 border-b border-r border-border/10 flex flex-col justify-between">
-            <Sk className="h-4 w-5" />
-            <Sk className="h-3 w-12 mt-2" />
-          </div>
-        ))}
+      <Sk className="h-16 w-full rounded-xl" />
+      <div className="space-y-3">
+        <Sk className="h-5 w-32" />
+        <div className="bg-muted/10 border border-border/10 rounded-2xl divide-y divide-border/10">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 flex-1">
+                <Sk className="w-10 h-10 rounded-xl shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <Sk className="h-4 w-28" />
+                  <Sk className="h-3 w-36" />
+                </div>
+              </div>
+              <Sk className="w-8 h-8 rounded-lg shrink-0" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -72,10 +62,11 @@ export default function LaundryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Current reference date (locked to active month)
   const currentDate = useMemo(() => new Date(), []);
 
-  const getLaundryGCalLink = (day: number, roomNumber: string) => {
+  const getLaundryGCalLink = (dayStr: string, roomNumber: string) => {
+    const day = parseInt(dayStr, 10);
+    if (isNaN(day)) return "";
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const eventDate = new Date(year, month, day);
@@ -99,7 +90,7 @@ export default function LaundryPage() {
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
   };
 
-  // Load block settings from localStorage
+  // Load saved block settings
   useEffect(() => {
     const savedBlock = localStorage.getItem("deskly::settings::hostelBlock");
     if (savedBlock) {
@@ -132,60 +123,37 @@ export default function LaundryPage() {
     }
   }, [selectedBlock, isLoggedIn]);
 
-  // Generate calendar grid cells (only for current month, with empty placeholders for padding to maintain weekday columns)
-  const calendarDays = useMemo(() => {
+  // Sort laundry list chronologically by date number
+  const sortedLaundryData = useMemo(() => {
+    if (!laundryData) return [];
+    return [...laundryData].sort((a, b) => {
+      return parseInt(a.date, 10) - parseInt(b.date, 10);
+    });
+  }, [laundryData]);
+
+  // Helper to dynamically calculate weekday details based on current year/month and date
+  const getDayDetails = useMemo(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
-    const firstDayOfWeek = new Date(year, month, 1).getDay();
-    const totalDays = new Date(year, month + 1, 0).getDate();
-    
-    const days = [];
-    
-    // Previous Month padding days (empty placeholders)
-    for (let i = 0; i < firstDayOfWeek; i++) {
-      days.push({
-        day: 0,
-        month: month === 0 ? 11 : month - 1,
-        year: month === 0 ? year - 1 : year,
-        isCurrentMonth: false,
-      });
-    }
-    
-    // Current Month days
-    for (let i = 1; i <= totalDays; i++) {
-      days.push({
-        day: i,
-        month: month,
-        year: year,
-        isCurrentMonth: true,
-      });
-    }
-    
-    // Next Month padding days to complete the final week row
-    const totalCells = days.length;
-    const totalCellsNeeded = Math.ceil(totalCells / 7) * 7;
-    const remainingCells = totalCellsNeeded - totalCells;
-    for (let i = 1; i <= remainingCells; i++) {
-      days.push({
-        day: 0,
-        month: month === 11 ? 0 : month + 1,
-        year: month === 11 ? year + 1 : year,
-        isCurrentMonth: false,
-      });
-    }
-    
-    return days;
+    return (dateStr: string) => {
+      const day = parseInt(dateStr, 10);
+      if (isNaN(day)) return { name: "Monday", abbr: "Mon" };
+      const date = new Date(year, month, day);
+      return {
+        name: date.toLocaleDateString("en-US", { weekday: "long" }),
+        abbr: date.toLocaleDateString("en-US", { weekday: "short" })
+      };
+    };
   }, [currentDate]);
 
-  const getLaundryForDay = (dayNum: number) => {
-    if (!laundryData || dayNum === 0) return null;
-    return laundryData.find((entry) => parseInt(entry.date, 10) === dayNum) || null;
-  };
+  const activeMonthStr = useMemo(() => {
+    return currentDate.toLocaleString("default", { month: "long", year: "numeric" });
+  }, [currentDate]);
 
-  const shell = (children: React.ReactNode) => (
-    <>{children}</>
-  );
+  const currentDayNum = useMemo(() => new Date().getDate(), []);
+  const currentMonthNum = useMemo(() => new Date().getMonth(), []);
+
+  const shell = (children: React.ReactNode) => <>{children}</>;
 
   if (authLoading || (loading && !laundryData)) {
     return shell(<LaundrySkeleton />);
@@ -204,22 +172,24 @@ export default function LaundryPage() {
   }
 
   return shell(
-    <div className="w-full space-y-6 flex flex-col flex-1">
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="pb-4 border-b border-border/20 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-        <div className="space-y-1">
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Shirt className="w-6 h-6 text-primary shrink-0" />
-            Laundry Calendar
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      <header className="flex items-start gap-2">
+        <Shirt className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
+        <div className="space-y-1 min-w-0">
+          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
+            Laundry
           </h1>
-          <p className="text-xs text-muted-foreground">
-            Hostel washing schedule and room ranges
+          <p className="text-xs text-muted-foreground leading-none pt-0.5">
+            Hostel washing schedule calendar and room allocations
           </p>
         </div>
       </header>
 
-      {/* ── Block Selection Options ────────────────────────────────────────── */}
-      <div className="flex items-center justify-between pb-4 border-b border-border/10">
+      {/* ── Block Selection Options ─────────────────────────────────────────── */}
+      <div className="flex items-center justify-between p-4 bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl">
         <span className="text-xs text-muted-foreground font-semibold">
           Select Hostel Block:
         </span>
@@ -230,7 +200,7 @@ export default function LaundryPage() {
             localStorage.setItem("deskly::settings::hostelBlock", val);
           }}
         >
-          <SelectTrigger className="w-[110px] h-8 rounded-xl bg-muted/10 border-border/20 text-xs">
+          <SelectTrigger className="w-[110px] h-8 rounded-xl bg-muted/20 border-border/10 text-xs shrink-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border/20 bg-card">
@@ -243,123 +213,109 @@ export default function LaundryPage() {
         </Select>
       </div>
 
-      {/* ── Calendar Header ────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm md:text-base font-bold text-foreground flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-muted-foreground/55 shrink-0" />
-          {currentDate.toLocaleString("default", { month: "long", year: "numeric" })}
-        </h2>
-      </div>
+      {/* ── Chronological Schedule List ──────────────────────────────────────── */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 leading-none uppercase">
+            <CalendarIcon className="w-4 h-4 text-sky-500 shrink-0" />
+            {activeMonthStr} Schedule
+          </h2>
+        </div>
 
-      {/* ── Calendar Grid ──────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className="w-full flex-1 min-h-0"
-      >
-        <div className="grid grid-cols-7 bg-background gap-y-3 pb-6">
-          {/* Weekday Names */}
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, idx) => (
-            <div 
-              key={day} 
-              className={`py-2 text-center select-none
-                ${idx !== 6 ? "border-r border-border/10" : ""}
-              `}
-            >
-              <span className="text-[10px] font-semibold tracking-wider text-muted-foreground/65 uppercase">
-                {day}
-              </span>
-            </div>
-          ))}
+        {sortedLaundryData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+            <Shirt className="w-8 h-8 text-muted-foreground/20" />
+            <p className="text-sm font-semibold text-foreground leading-none">No schedule available</p>
+            <p className="text-xs text-muted-foreground">Select a block or check back later.</p>
+          </div>
+        ) : (
+          <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+            {sortedLaundryData.map((item, idx) => {
+              const dayNum = parseInt(item.date, 10);
+              const isToday = dayNum === currentDayNum && currentDate.getMonth() === currentMonthNum;
+              
+              const roomNum = item.roomNumber || "";
+              const hasWashing = roomNum.trim() !== "" && !roomNum.toLowerCase().includes("no washing") && !roomNum.toLowerCase().includes("holiday") && !roomNum.toLowerCase().includes("sunday");
+              const details = getDayDetails(item.date);
 
-          {/* Day Cells */}
-          {calendarDays.map((cell, idx) => {
-            const isLastInRow = (idx + 1) % 7 === 0;
-
-            if (!cell.isCurrentMonth) {
               return (
                 <div
-                  key={idx}
-                  className={`min-h-[48px] sm:min-h-[75px] md:min-h-[95px] bg-muted/5 opacity-10 pointer-events-none
-                    ${!isLastInRow ? "border-r border-border/10" : ""}
-                  `}
-                />
-              );
-            }
-
-            const laundryEntry = getLaundryForDay(cell.day);
-            
-            const isToday =
-              cell.day === new Date().getDate() &&
-              cell.month === new Date().getMonth() &&
-              cell.year === new Date().getFullYear() &&
-              cell.isCurrentMonth;
-
-            return (
-              <div
-                key={idx}
-                className={`min-h-[48px] sm:min-h-[75px] md:min-h-[95px] p-2 flex flex-col justify-between select-none transition-colors duration-150 relative overflow-hidden group
-                  ${!isLastInRow ? "border-r border-border/10" : ""}
-                  ${isToday 
-                    ? "bg-primary/[0.03]" 
-                    : "bg-transparent hover:bg-muted/5"
-                  }
-                `}
-              >
-                {isToday && (
-                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary" />
-                )}
-                {laundryEntry?.roomNumber && (
-                  <button
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      const roomNumber = laundryEntry.roomNumber;
-                      if (!roomNumber) return;
-                      const url = getLaundryGCalLink(cell.day, roomNumber);
-                      try {
-                        await openUrl(url);
-                      } catch (err) {
-                        console.error("Failed to open calendar link:", err);
-                      }
-                    }}
-                    className="absolute top-1 right-1 p-0.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer"
-                    title="Add to Google Calendar"
-                  >
-                    <CalendarPlus className="w-3.5 h-3.5" />
-                  </button>
-                )}
-                <div className="flex items-center justify-center w-full">
-                  <span
-                    className={`text-xs md:text-sm font-semibold rounded-full flex items-center justify-center transition-all
+                  key={`${item.date}-${idx}`}
+                  className={`p-4 flex items-center justify-between gap-4 transition-colors duration-150
+                    ${isToday ? "bg-sky-500/10 text-sky-400 font-bold" : "hover:bg-muted/5 text-foreground"}`}
+                >
+                  {/* Date Column */}
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className={`w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 border
                       ${isToday
-                        ? "bg-primary text-primary-foreground font-bold w-5 h-5 sm:w-6 sm:h-6 shadow-sm shadow-primary/20"
-                        : "text-foreground/90"
-                      }
-                    `}
-                  >
-                    {cell.day}
-                  </span>
+                        ? "bg-sky-500 text-white border-sky-500 font-black"
+                        : "bg-muted/20 border-border/10 text-muted-foreground"
+                      }`}
+                    >
+                      <span className="text-base font-bold leading-none">{item.date}</span>
+                      <span className="text-[8px] font-bold uppercase leading-none mt-1">{details.abbr}</span>
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap leading-none">
+                        <span className="text-sm font-bold text-foreground truncate">
+                          {details.name}
+                        </span>
+                        {isToday && (
+                          <span className="text-[8px] font-black uppercase bg-sky-500 text-white px-1.5 py-0.5 rounded leading-none shrink-0">
+                            Today
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground/60 mt-1.5 leading-none">
+                        {hasWashing ? `Allocated Rooms` : "No washing slots"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Room Allocations / Actions */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    {hasWashing ? (
+                      <span className={`text-xs font-bold px-2 py-1 rounded-lg border leading-none
+                        ${isToday
+                          ? "bg-sky-500/20 border-sky-500/30 text-sky-400"
+                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                        }`}
+                      >
+                        {roomNum.toLowerCase().includes("all") 
+                          ? "All Rooms" 
+                          : roomNum.replace(/\s*-\s*/g, "-")}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-medium text-muted-foreground/40 leading-none">
+                        No Schedule
+                      </span>
+                    )}
+
+                    {hasWashing && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const url = getLaundryGCalLink(item.date, roomNum);
+                          try {
+                            await openUrl(url);
+                          } catch (err) {
+                            console.error("Failed to open calendar link:", err);
+                          }
+                        }}
+                        className="p-2 rounded-xl border border-border/10 bg-muted/10 text-muted-foreground hover:text-sky-400 hover:bg-muted/20 transition-colors cursor-pointer flex items-center justify-center shrink-0 border-0"
+                        title="Add to Google Calendar"
+                      >
+                        <CalendarPlus className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                
-                <div className="mt-auto pt-1 flex flex-col items-center justify-center gap-0.5 min-w-0 w-full">
-                  {laundryEntry?.roomNumber ? (
-                    <span className="text-[9px] sm:text-xs leading-none break-words tracking-tight font-medium text-foreground/80 truncate sm:whitespace-normal text-center w-full">
-                      {laundryEntry.roomNumber.toLowerCase().includes("all") 
-                        ? "All Rooms" 
-                        : laundryEntry.roomNumber.replace(/\s*-\s*/g, "-")}
-                    </span>
-                  ) : (
-                    <span className="text-[9px] sm:text-xs text-muted-foreground/25 font-semibold text-center w-full">
-                      —
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

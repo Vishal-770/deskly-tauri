@@ -52,7 +52,7 @@ function ProfileSkeleton() {
         </div>
       </div>
       {/* Fields */}
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ function ProfileSkeleton() {
         ))}
       </div>
       <Sk className="h-4 w-28" />
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ export default function StudentProfilePage() {
         <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
           Student Information
         </h2>
-        <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
           <InfoRow icon={User} label="Register No." value={student.registerNumber} />
           <InfoRow icon={User} label="Application No." value={student.applicationNumber} />
           <InfoRow icon={Layers} label="Program" value={student.program} />
@@ -229,7 +229,7 @@ export default function StudentProfilePage() {
               </div>
             </div>
           )}
-          <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
             {!proctor.photoUrl && <InfoRow icon={User} label="Name" value={proctor.name} />}
             <InfoRow icon={User} label="Faculty ID" value={proctor.facultyId} />
             <InfoRow icon={User} label="Designation" value={proctor.designation} />
@@ -247,7 +247,7 @@ export default function StudentProfilePage() {
           <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
             Hostel Details
           </h2>
-          <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
             <InfoRow icon={Home} label="Block Name" value={hostel.blockName} />
             <InfoRow icon={MapPin} label="Room Number" value={hostel.roomNumber} />
             <InfoRow icon={Layers} label="Bed Type" value={hostel.bedType} />

@@ -37,7 +37,7 @@ function MarksSkeleton() {
           <Sk key={i} className="h-14 w-28 rounded-xl shrink-0" />
         ))}
       </div>
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl p-4 space-y-4">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-4">
         <div className="space-y-2">
           <Sk className="h-5 w-32" />
           <Sk className="h-4 w-48" />
@@ -155,7 +155,7 @@ export default function MarksPage() {
 
       {/* ── Course Tabs (horizontal scrollable) ──────────────────────────────── */}
       {filteredCourses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-[#0e0e0f]/20 border border-border/10 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
           <Target className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No courses found</p>
           <p className="text-xs text-muted-foreground">Marks data is unavailable for this semester.</p>
@@ -188,7 +188,7 @@ export default function MarksPage() {
 
           {/* Active Course Card */}
           {activeCourse && (
-            <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden">
+            <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
               {/* Card Header */}
               <div className="p-4 border-b border-border/10 flex items-start justify-between gap-4">
                 <div className="space-y-1.5 min-w-0">

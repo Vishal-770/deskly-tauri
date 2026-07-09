@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useParams, useNavigate } from "@/router";
 import { getAttendanceDetail, AttendanceDetailRecord, AttendanceRecord } from "@/lib/attendance";
-import { ErrorDisplay } from "@/components/error-display";
+
 import {
   ArrowLeft,
   User,
@@ -10,28 +10,30 @@ import {
   XCircle,
   Clock,
   Calendar,
-  BarChart3,
+
+  School,
+  MinusCircle,
 } from "lucide-react";
 
 // ─── Circular Arc Progress ────────────────────────────────────────────────────
 
 function BigCircularProgress({ percentage }: { percentage: number }) {
-  const size = 80;
-  const radius = 32;
+  const size = 68;
+  const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
 
-  let stroke = "text-destructive";
-  if (percentage >= 75) stroke = "text-chart-2";
-  else if (percentage >= 50) stroke = "text-chart-3";
+  let stroke = "stroke-destructive";
+  if (percentage >= 75) stroke = "stroke-emerald-500";
+  else if (percentage >= 50) stroke = "stroke-amber-500";
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="transform -rotate-90">
-        <circle className="text-muted/30 stroke-current" strokeWidth="5" fill="transparent" r={radius} cx={size / 2} cy={size / 2} />
+        <circle className="text-muted/15 stroke-current" strokeWidth="4.5" fill="transparent" r={radius} cx={size / 2} cy={size / 2} />
         <circle
-          className={`${stroke} stroke-current transition-all duration-700`}
-          strokeWidth="5"
+          className={`${stroke} transition-all duration-700`}
+          strokeWidth="4.5"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
@@ -41,9 +43,7 @@ function BigCircularProgress({ percentage }: { percentage: number }) {
           cy={size / 2}
         />
       </svg>
-      <div className="absolute text-center">
-        <span className="text-xl font-black text-foreground leading-none block">{percentage}%</span>
-      </div>
+      <span className="absolute text-sm font-semibold text-foreground leading-none">{percentage}%</span>
     </div>
   );
 }
@@ -58,7 +58,7 @@ function StatusBadge({ status }: { status: string }) {
 
   if (isPresent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-chart-2 bg-chart-2/10 px-2.5 py-1 rounded-full leading-none">
+      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded-lg leading-none">
         <CheckCircle2 className="w-3 h-3" />
         Present
       </span>
@@ -66,7 +66,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isAbsent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-destructive bg-destructive/10 px-2.5 py-1 rounded-full leading-none">
+      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-destructive bg-destructive/5 border border-destructive/10 px-2 py-0.5 rounded-lg leading-none">
         <XCircle className="w-3 h-3" />
         Absent
       </span>
@@ -74,29 +74,18 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isOd) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full leading-none">
-        <span className="w-3.5 h-3.5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[7px] font-bold border border-primary/20 shrink-0">OD</span>
+      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 bg-sky-500/5 border border-sky-500/10 px-2 py-0.5 rounded-lg leading-none">
+        <span className="w-3.5 h-3.5 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-[7px] font-bold border border-sky-500/20 shrink-0">OD</span>
         {status}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full leading-none">
+    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/20 border border-border/10 px-2 py-0.5 rounded-lg leading-none">
       <Clock className="w-3 h-3" />
       {status}
     </span>
   );
-}
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function getCourseTypeColor(type: string): string {
-  const c = type.trim().toUpperCase();
-  if (c.includes("THEORY")) return "text-primary";
-  if (c.includes("LAB")) return "text-chart-2";
-  if (c.includes("ONLINE")) return "text-chart-1";
-  if (c.includes("SKILL")) return "text-chart-4";
-  return "text-muted-foreground";
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -107,46 +96,22 @@ function Sk({ className = "" }: { className?: string }) {
 
 function DetailSkeleton() {
   return (
-    <div className="w-full space-y-5">
-      <div className="flex items-center gap-3 pb-4 border-b border-border/20">
-        <Sk className="w-8 h-8 rounded-xl" />
+    <div className="w-full space-y-6 px-2 py-4 animate-pulse font-saira">
+      <div className="flex items-center gap-2">
+        <Sk className="h-6 w-32" />
+      </div>
+      <div className="flex justify-between items-center gap-4">
         <div className="space-y-2 flex-1">
-          <Sk className="h-5 w-48" />
-          <Sk className="h-3 w-64" />
+          <Sk className="h-4 w-20" />
+          <Sk className="h-6 w-48" />
+          <Sk className="h-4 w-32" />
         </div>
+        <Sk className="w-16 h-16 rounded-full shrink-0" />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 py-6 border-y border-border/10">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className={`pl-2 space-y-2 ${
-              i === 0
-                ? ""
-                : i === 2 || i === 4
-                ? "border-none sm:border-l sm:border-border/10"
-                : "border-l border-border/10"
-            } ${
-              i === 4 ? "col-span-2 sm:col-span-1 border-t border-border/10 pt-4 sm:border-t-0 sm:pt-0" : ""
-            }`}
-          >
-            <div className="flex justify-between items-center">
-              <Sk className="h-3 w-14" />
-              <Sk className="h-4 w-4 rounded" />
-            </div>
-            <Sk className="h-6 w-10 mt-1" />
-          </div>
-        ))}
-      </div>
-      <div className="space-y-1.5 pt-2">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="flex items-center gap-3 sm:gap-4 px-4 py-3 rounded-xl border border-transparent">
-            <Sk className="h-3 w-5" />
-            <Sk className="h-3.5 w-24" />
-            <Sk className="h-4 w-14 rounded-md" />
-            <Sk className="h-3 flex-1 hidden sm:block" />
-            <Sk className="h-5 w-16 rounded-full ml-auto" />
-          </div>
-        ))}
+      <Sk className="h-44 w-full rounded-2xl" />
+      <div className="space-y-4 pt-2">
+        <Sk className="h-8 w-28" />
+        <Sk className="h-32 w-full rounded-2xl" />
       </div>
     </div>
   );
@@ -159,12 +124,10 @@ export default function AttendanceDetailPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Record passed from the list page via router state, with cached fallback
   const [record, setRecord] = useState<AttendanceRecord | undefined>(location.state?.record);
-
   const [details, setDetails] = useState<AttendanceDetailRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!record && classId) {
@@ -204,35 +167,17 @@ export default function AttendanceDetailPage() {
     load();
   }, [classId, record]);
 
-  const isLab = record?.courseType.trim().toUpperCase().includes("LAB");
-  const multiplier = isLab ? 2 : 1;
-
-  const presentSlots = details.filter((d) => {
-    const s = d.status.trim().toLowerCase();
-    return s === "present" || s === "p" || s === "1";
-  }).length;
-
-  const absentSlots = details.filter((d) => {
-    const s = d.status.trim().toLowerCase();
-    return s === "absent" || s === "a" || s === "0";
-  }).length;
-
-  const odSlots = details.filter((d) => {
-    const s = d.status.trim().toLowerCase();
-    return s.includes("od") || s.includes("duty") || s === "on duty";
-  }).length;
-
-  const shell = (children: React.ReactNode) => (
-    <>{children}</>
-  );
+  if (loading && !record) {
+    return <DetailSkeleton />;
+  }
 
   if (!record) {
-    return shell(
-      <div className="flex flex-col items-center justify-center h-full gap-4">
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4 font-saira py-16">
         <p className="text-muted-foreground text-sm">No course data found.</p>
         <button
           onClick={() => navigate("/dashboard/attendance")}
-          className="text-xs font-bold text-primary underline underline-offset-2"
+          className="text-xs font-semibold text-sky-500 underline underline-offset-2 bg-transparent border-none cursor-pointer"
         >
           Go back to Attendance
         </button>
@@ -240,197 +185,181 @@ export default function AttendanceDetailPage() {
     );
   }
 
-  if (loading) {
-    return shell(<DetailSkeleton />);
-  }
+  const isLab = record.courseType.toLowerCase().includes("lab");
+  const displayType = isLab ? "Lab Only" : "Theory Only";
+  const badgeStyle = isLab
+    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10"
+    : "bg-sky-500/10 text-sky-400 border border-sky-500/10";
 
-  if (error) {
-    return shell(
-      <div className="flex h-full items-center justify-center">
-        <ErrorDisplay message={error} onRetry={() => window.location.reload()} />
-      </div>
-    );
-  }
+  // Calculate detailed fractions from logs
 
-  const need = Math.ceil(3 * record.totalClasses - 4 * record.attendedClasses);
-  const canSkip = Math.floor((4 * record.attendedClasses - 3 * record.totalClasses) / 3);
+  const odSlots = details.filter((d) => {
+    const s = d.status.trim().toLowerCase();
+    return s.includes("od") || s.includes("duty") || s === "on duty";
+  }).length;
 
-  const totalSlots = details.length > 0 ? details.length : Math.ceil(record.totalClasses / multiplier);
-  const attendedSlots = details.length > 0 ? (presentSlots + odSlots) : Math.ceil(record.attendedClasses / multiplier);
-  const normalPresentSlots = details.length > 0 ? presentSlots : Math.max(0, attendedSlots - odSlots);
-  const calculatedAbsentSlots = details.length > 0 ? absentSlots : Math.max(0, totalSlots - attendedSlots);
+  const totalClasses = record.totalClasses;
+  const attendedClasses = record.attendedClasses;
+  const absentClasses = totalClasses - attendedClasses;
 
-  const needSlots = need > 0 ? Math.ceil(need / multiplier) : 0;
-  const canSkipSlots = canSkip > 0 ? Math.floor(canSkip / multiplier) : 0;
+  return (
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+      {/* Google Font Saira Injection */}
+      <style>{`
+        .font-saira {
+          font-family: 'Saira', sans-serif !important;
+        }
+      `}</style>
 
-  return shell(
-    <div className="w-full space-y-5">
-
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="pb-4 border-b border-border/20">
+      {/* ── Header Row (Back Chevron + Title) ─────────────────────────────────── */}
+      <header className="flex items-center gap-1">
         <button
           onClick={() => navigate("/dashboard/attendance")}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors mb-3 group cursor-pointer bg-transparent border-none p-0"
+          className="inline-flex items-center gap-2 text-foreground/80 hover:text-foreground bg-transparent border-none p-0 cursor-pointer text-sm font-semibold"
         >
-          <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5 duration-150 relative -translate-y-[0.5px]" />
-          <span>Back to Attendance</span>
+          <ArrowLeft className="w-5 h-5 shrink-0" />
+          <span>My Attendance</span>
         </button>
-
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xl font-extrabold text-primary tracking-widest uppercase">
-                {record.courseCode}
-              </span>
-              <span className="font-mono text-xs font-black text-muted-foreground/60 bg-muted/60 px-2 py-0.5 rounded-md">
-                {record.slot}
-              </span>
-              <span className={`text-xs font-semibold ${getCourseTypeColor(record.courseType)}`}>
-                {record.courseType}
-              </span>
-            </div>
-            <h1 className="text-base font-bold text-foreground mt-1 leading-snug">
-              {record.courseTitle}
-            </h1>
-            {record.faculty?.name && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <User className="w-3 h-3 text-muted-foreground/40 shrink-0" />
-                <span className="text-xs text-muted-foreground/70 font-semibold">
-                  {record.faculty.name}
-                  {record.faculty.school && (
-                    <span className="text-muted-foreground/45 font-bold uppercase ml-1.5">· {record.faculty.school}</span>
-                  )}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Big circular progress */}
-          <div className="shrink-0 flex flex-col items-center gap-1">
-            <BigCircularProgress percentage={record.attendancePercentage} />
-            <p className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider">Attendance</p>
-          </div>
-        </div>
       </header>
 
-      {/* ── Summary Stats ────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 py-6 border-y border-border/10">
-        
-        {/* Total Slots */}
-        <div className="flex flex-col gap-1.5 pl-2">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Total Slots</span>
-          </div>
-          <span className="text-2xl font-bold text-foreground leading-none mt-1">{totalSlots}</span>
-        </div>
-
-        {/* Present */}
-        <div className="flex flex-col gap-1.5 pl-2 border-l border-border/10">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <CheckCircle2 className="w-3.5 h-3.5 text-chart-2 shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Present</span>
-          </div>
-          <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-bold text-foreground leading-none">{normalPresentSlots}</span>
-          </div>
-        </div>
-
-        {/* OD Slots */}
-        <div className="flex flex-col gap-1.5 pl-2 border-none sm:border-l sm:border-border/10">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <span className="w-3.5 h-3.5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[7px] font-bold shrink-0 border border-primary/20">OD</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider">OD Slots</span>
-          </div>
-          <span className="text-2xl font-bold text-primary leading-none mt-1">{odSlots}</span>
-        </div>
-
-        {/* Absent */}
-        <div className="flex flex-col gap-1.5 pl-2 border-l border-border/10">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <XCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Absent</span>
-          </div>
-          <div className="flex items-baseline gap-2 mt-1">
-            <span className="text-2xl font-bold text-foreground leading-none">{calculatedAbsentSlots}</span>
-          </div>
-        </div>
-
-        {/* Can Miss / Need */}
-        <div className="flex flex-col gap-1.5 pl-2 border-none sm:border-l sm:border-border/10 col-span-2 sm:col-span-1 border-t border-border/10 pt-4 sm:border-t-0 sm:pt-0">
-          <div className="flex items-center gap-1.5 text-muted-foreground">
-            <BarChart3 className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">
-              {needSlots > 0 ? "Need to Attend" : "Can Miss"}
+      {/* ── Course Hero Block ─────────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1.5 min-w-0 flex-1">
+          <div className="flex items-center gap-2 leading-none flex-wrap">
+            <span className="text-sm font-semibold tracking-wide text-sky-500 uppercase leading-none">
+              {record.courseCode}
+            </span>
+            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded leading-none ${badgeStyle}`}>
+              {displayType}
             </span>
           </div>
-          <div className="flex items-baseline gap-1.5 mt-1 flex-wrap">
-            {needSlots > 0 ? (
+          <h1 className="text-[20px] font-medium text-foreground leading-snug tracking-tight">
+            {record.courseTitle}
+          </h1>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono leading-none pt-0.5 flex-wrap">
+            {record.faculty?.name && (
+              <span className="flex items-center gap-1">
+                <User className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                {record.faculty.name}
+              </span>
+            )}
+            {record.faculty?.school && (
               <>
-                <span className="text-2xl font-bold text-destructive leading-none">{needSlots}</span>
-                <span className="text-[9px] text-muted-foreground/60 font-semibold">slots to reach 75%</span>
-              </>
-            ) : canSkipSlots > 0 ? (
-              <>
-                <span className="text-2xl font-bold text-chart-2 leading-none">{canSkipSlots}</span>
-                <span className="text-[9px] text-muted-foreground/60 font-semibold">slots safely</span>
-              </>
-            ) : (
-              <>
-                <span className="text-2xl font-bold text-foreground leading-none">0</span>
-                <span className="text-[9px] text-muted-foreground/60 font-semibold">On track at 75%</span>
+                <span>|</span>
+                <span className="flex items-center gap-1">
+                  <School className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                  {record.faculty.school}
+                </span>
               </>
             )}
           </div>
+        </div>
+
+        {/* Attendance circular progress */}
+        <div className="shrink-0 flex flex-col items-center gap-1.5">
+          <BigCircularProgress percentage={record.attendancePercentage} />
+          <p className="text-[9px] text-muted-foreground/60 font-semibold uppercase tracking-wider leading-none">
+            Attendance
+          </p>
         </div>
       </div>
 
-      {/* ── Date-wise Log ────────────────────────────────────────────────────── */}
-      <div>
-        <div className="flex items-center justify-between pb-3 border-b border-border/20 mb-1">
-          <div>
-            <h2 className="text-sm font-bold text-foreground tracking-tight">Session Log</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">{details.length} sessions recorded</p>
+      {/* ── 2x2 Grid Stats Card ───────────────────────────────────────────────── */}
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl grid grid-cols-2 overflow-hidden relative">
+        {/* Inner vertical separator line */}
+        <div className="absolute top-0 bottom-0 left-1/2 w-px bg-border/10 -translate-x-1/2" />
+        {/* Inner horizontal separator line */}
+        <div className="absolute left-0 right-0 top-1/2 h-px bg-border/10 -translate-y-1/2" />
+
+        {/* cell 1: Total Classes */}
+        <div className="p-4 flex flex-col gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
+            <Calendar className="w-4 h-4 text-blue-500 shrink-0" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Total Classes</span>
           </div>
+          <span className="text-3xl font-semibold text-foreground leading-none">{totalClasses}</span>
         </div>
 
-        {details.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+        {/* cell 2: Present */}
+        <div className="p-4 flex flex-col gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Present</span>
+          </div>
+          <span className="text-3xl font-semibold text-foreground leading-none">{attendedClasses}</span>
+        </div>
+
+        {/* cell 3: On Leave */}
+        <div className="p-4 flex flex-col gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
+            <MinusCircle className="w-4 h-4 text-sky-400 shrink-0" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">On Leave</span>
+          </div>
+          <span className="text-3xl font-semibold text-foreground leading-none">{odSlots}</span>
+        </div>
+
+        {/* cell 4: Absent */}
+        <div className="p-4 flex flex-col gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
+            <XCircle className="w-4 h-4 text-destructive shrink-0" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider">Absent</span>
+          </div>
+          <span className="text-3xl font-semibold text-foreground leading-none">{absentClasses}</span>
+        </div>
+      </div>
+
+      {/* ── Session Log Section ───────────────────────────────────────────────── */}
+      <div className="space-y-4 pt-1">
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
+            Session Log
+          </h2>
+          <p className="text-xs text-muted-foreground/75 leading-none">
+            {details.length || record.totalClasses} sessions recorded
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <Sk key={i} className="h-14 w-full rounded-2xl" />
+            ))}
+          </div>
+        ) : details.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
             <Calendar className="w-8 h-8 text-muted-foreground/20" />
-            <p className="text-sm font-bold text-foreground">No session data available</p>
-            <p className="text-xs text-muted-foreground">Detailed log hasn't been recorded yet.</p>
+            <p className="text-sm font-semibold text-foreground leading-none">No session logs available</p>
+            <p className="text-xs text-muted-foreground">Detailed logs haven't been synchronized.</p>
           </div>
         ) : (
-          <div className="space-y-1.5 pt-2">
+          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
             {details.map((row, i) => (
               <div
                 key={`${row.serialNo}-${i}`}
-                className="flex items-center gap-3 sm:gap-4 px-4 py-3 rounded-xl hover:bg-muted/10 transition-colors duration-150 border border-transparent hover:border-border/20"
+                className="flex items-center justify-between gap-4 p-4 hover:bg-muted/5 transition-colors duration-150"
               >
-                {/* Serial */}
-                <span className="text-[11px] font-bold text-muted-foreground/35 tabular-nums w-5 shrink-0 text-right">
+                {/* Left: Serial Number */}
+                <span className="text-xs font-semibold text-muted-foreground/35 tabular-nums w-4 shrink-0 text-left">
                   {row.serialNo ?? i + 1}
                 </span>
 
-                {/* Date */}
-                <div className="min-w-0 w-24 sm:w-28 shrink-0">
-                  <p className="text-xs font-bold text-foreground truncate">{row.date}</p>
+                {/* Middle: Date and Time Range */}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <p className="text-sm font-semibold text-foreground leading-none">
+                    {row.date}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/60 font-mono leading-none">
+                    {row.dayAndTime || "10:30 AM – 11:30 AM"}
+                  </p>
                 </div>
 
-                {/* Slot */}
-                <div className="shrink-0 w-14 sm:w-16">
-                  <span className="font-mono text-[10px] font-black text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded-md leading-none">
-                    {row.slot}
-                  </span>
-                </div>
+                {/* Slot Code (in blue) */}
+                <span className="text-xs font-semibold text-sky-500 font-mono shrink-0">
+                  {row.slot || record.slot}
+                </span>
 
-                {/* Day & Time */}
-                <div className="flex-1 min-w-0 hidden sm:block">
-                  <p className="text-xs text-muted-foreground/70 font-medium truncate">{row.dayAndTime}</p>
-                </div>
-
-                {/* Status badge */}
-                <div className="shrink-0 ml-auto">
+                {/* Right: Status badge */}
+                <div className="shrink-0">
                   <StatusBadge status={row.status} />
                 </div>
               </div>
@@ -438,7 +367,6 @@ export default function AttendanceDetailPage() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

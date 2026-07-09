@@ -45,7 +45,7 @@ function CoursesSkeleton() {
         <Sk className="h-7 w-44" />
         <Sk className="h-3 w-56" />
       </div>
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
         <div className="grid grid-cols-3 divide-x divide-border/10">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="p-4 space-y-2">
@@ -62,7 +62,7 @@ function CoursesSkeleton() {
           <Sk className="h-10 rounded-xl" />
         </div>
       </div>
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="flex items-center gap-4 p-4">
             <div className="flex-1 space-y-2">
@@ -207,7 +207,7 @@ export default function CoursesPage() {
       </header>
 
       {/* ── Stats Card ──────────────────────────────────────────────────────── */}
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden relative">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden relative">
         <div className="absolute top-0 bottom-0 left-1/3 w-px bg-border/10" />
         <div className="absolute top-0 bottom-0 left-2/3 w-px bg-border/10" />
         <div className="grid grid-cols-3">
@@ -262,13 +262,13 @@ export default function CoursesPage() {
 
       {/* ── Course List ──────────────────────────────────────────────────────── */}
       {filteredCourses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-[#0e0e0f]/20 border border-border/10 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No courses found</p>
           <p className="text-xs text-muted-foreground">Try modifying the type or category filters.</p>
         </div>
       ) : (
-        <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
           {filteredCourses.map((item, idx) => {
             const typeStyle = getCourseTypeStyle(item.courseType);
             return (
@@ -322,7 +322,7 @@ export default function CoursesPage() {
 
       {/* ── Footer Summary ───────────────────────────────────────────────────── */}
       {courses.length > 0 && (
-        <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl p-4 space-y-3">
+        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-3">
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">
             Credit Summary
           </h3>

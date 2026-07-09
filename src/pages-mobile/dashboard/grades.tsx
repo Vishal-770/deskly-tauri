@@ -52,7 +52,7 @@ function GradesSkeleton() {
         <Sk className="h-7 w-40" />
         <Sk className="h-3 w-52" />
       </div>
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
         <div className="grid grid-cols-3 divide-x divide-border/10">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="p-4 space-y-2">
@@ -66,7 +66,7 @@ function GradesSkeleton() {
         <Sk className="h-9 w-full rounded-xl" />
         <Sk className="h-9 w-full rounded-xl" />
       </div>
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="flex items-center gap-4 p-4">
             <Sk className="h-4 w-16" />
@@ -196,7 +196,7 @@ export default function GradesPage() {
       </header>
 
       {/* ── Stats Card ──────────────────────────────────────────────────────── */}
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden relative">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden relative">
         <div className="absolute top-0 bottom-0 left-1/3 w-px bg-border/10" />
         <div className="absolute top-0 bottom-0 left-2/3 w-px bg-border/10" />
         <div className="grid grid-cols-3">
@@ -253,13 +253,13 @@ export default function GradesPage() {
 
       {/* ── Grades List ──────────────────────────────────────────────────────── */}
       {filteredGrades.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-[#0e0e0f]/20 border border-border/10 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No grades found</p>
           <p className="text-xs text-muted-foreground">Try modifying your search or filter.</p>
         </div>
       ) : (
-        <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
           {filteredGrades.map((item, idx) => (
             <div
               key={`${item.courseCode}-${idx}`}
@@ -299,7 +299,7 @@ export default function GradesPage() {
 
       {/* ── Grade Distribution Footer ─────────────────────────────────────────── */}
       {data?.cgpa?.gradeDistribution && (
-        <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl p-4 space-y-3">
+        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-3">
           <div className="flex items-center gap-1.5">
             <HelpCircle className="w-4 h-4 text-muted-foreground/40 shrink-0" />
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">

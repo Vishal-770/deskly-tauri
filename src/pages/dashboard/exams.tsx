@@ -3,7 +3,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
 
 import { ErrorDisplay } from "@/components/error-display";
-import { motion } from "framer-motion";
 import {
   Clock,
   Calendar,
@@ -14,7 +13,6 @@ import {
   Info,
   CalendarRange,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import SingleExamExportModal from "@/components/single-exam-export-modal";
 import {
   generateExamGroupIcs,
@@ -371,22 +369,28 @@ export default function ExamSchedulePage() {
   );
 
   if (authLoading || (loading && groups.length === 0)) return shell(
-    <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
-      <div className="flex justify-between pb-6 border-b border-border/40 shrink-0">
-        <div className="space-y-2"><Sk className="h-7 w-36" /><Sk className="h-3 w-52" /></div>
+    <div className="w-full space-y-6 px-2 py-4">
+      <div className="space-y-1">
+        <Sk className="h-7 w-32" />
+        <Sk className="h-3 w-48" />
       </div>
-      <div className="shrink-0 flex gap-4 border-b border-border/20 pb-2">
-        <Sk className="h-10 w-24 rounded" />
-        <Sk className="h-10 w-24 rounded" />
-        <Sk className="h-10 w-24 rounded" />
+      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+        <Sk className="h-10 w-20 rounded-xl shrink-0" />
+        <Sk className="h-10 w-20 rounded-xl shrink-0" />
+        <Sk className="h-10 w-20 rounded-xl shrink-0" />
       </div>
-      <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden pt-4">
-        <div className="hidden xl:block xl:space-y-8 xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 xl:w-[280px]">
-          <SidebarSkeleton />
-        </div>
-        <div className="xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-3 w-full">
-          {[...Array(4)].map((_, i) => <ExamCardSkeleton key={i} />)}
-        </div>
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <Sk className="h-6 w-8 rounded" />
+              <Sk className="h-4 w-20" />
+              <Sk className="h-4 w-16 rounded-full ml-auto" />
+            </div>
+            <Sk className="h-5 w-48" />
+            <Sk className="h-3 w-36" />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -418,57 +422,50 @@ export default function ExamSchedulePage() {
         </div>
       )}
       
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-border/20 shrink-0">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">My Exams</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Your exam schedule at a glance</p>
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
+      <header className="flex items-start justify-between gap-4 shrink-0">
+        <div className="flex items-start gap-2 min-w-0">
+          <Calendar className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
+          <div className="space-y-1 min-w-0">
+            <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
+              My Exams
+            </h1>
+            <p className="text-xs text-muted-foreground leading-none pt-0.5">Your exam schedule at a glance</p>
+          </div>
         </div>
         {activeSchedules.length > 0 && (
-          <Button
-            variant="outline"
+          <button
             onClick={handleDownloadGroupIcs}
-            className="rounded-xl h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20 shrink-0"
+            className="flex items-center gap-1.5 text-xs font-semibold text-sky-400 bg-transparent border-none cursor-pointer shrink-0 pt-1"
           >
-            <CalendarRange className="size-3.5 text-primary shrink-0" />
-            <span>Export {formatExamTypeLabel(selectedTab)} Schedule</span>
-          </Button>
+            <CalendarRange className="w-4 h-4" />
+            <span>Export</span>
+          </button>
         )}
       </header>
 
-      {/* ── Exam Tabs selector (Premium Horizontal Tab Bar) ───────────────── */}
+      {/* ── Exam Type Tabs ────────────────────────────────────────────────────── */}
       {groups.length > 0 && (
-        <div className="border-b border-border/20 pb-2 shrink-0 flex gap-6 overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
           {tabsList.map((tab) => {
             const active = selectedTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setSelectedTab(tab.id)}
-                className={`relative pb-3 flex flex-col items-start cursor-pointer transition-colors duration-200 shrink-0 ${
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl border text-xs cursor-pointer transition-colors duration-150 shrink-0 min-w-[90px]
+                  ${active
+                    ? "bg-sky-500/15 border-sky-500/30 text-sky-400"
+                    : "bg-muted/10 border-border/10 text-muted-foreground hover:bg-muted/20"
+                  }`}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-extrabold tracking-wider">{tab.label}</span>
-                  <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
-                    active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-                  }`}>
-                    {tab.count}
-                  </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold tracking-wide text-[11px] uppercase">{tab.label}</span>
+                  <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full leading-none ${
+                    active ? "bg-sky-500/20 text-sky-400" : "bg-muted text-muted-foreground"
+                  }`}>{tab.count}</span>
                 </div>
-                <span className="text-[10px] font-semibold mt-1 leading-none opacity-60">
-                  {tab.range}
-                </span>
-
-                {/* Underline indicator */}
-                {active && (
-                  <motion.div
-                    layoutId="activeExamTabUnderline"
-                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
+                <span className="text-[10px] font-medium opacity-60 leading-none">{tab.range}</span>
               </button>
             );
           })}
