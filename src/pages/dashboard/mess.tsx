@@ -13,6 +13,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
+import { isNetworkError } from "@/lib/utils";
 import {
   Coffee,
   Utensils,
@@ -249,8 +250,14 @@ export default function MessMenuPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
-  if (!isOnline && !menuData) {
+  const showOffline = !menuData && (isOnline === false || isNetworkError(error, isOnline));
+
+  if (showOffline && !loading) {
     return shell(<OfflineDisplay onRetry={() => fetchMenu(selectedMess)} />);
+  }
+
+  if (authLoading || (loading && !menuData)) {
+    return shell(<MessSkeleton />);
   }
 
   if (error && !menuData) {
@@ -261,13 +268,19 @@ export default function MessMenuPage() {
     );
   }
 
-  const isLoading = authLoading || (loading && !menuData);
-
-  if (isLoading) return shell(<MessSkeleton />);
-
   return shell(
     <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Error banner */}
+      {error && !isNetworkError(error, isOnline) && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+          <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
+          <button onClick={() => fetchMenu(selectedMess)} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start justify-between gap-4">

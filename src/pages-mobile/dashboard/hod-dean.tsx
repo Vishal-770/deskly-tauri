@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getHodDeanDetails, HodDeanDetail } from "@/lib/features";
+import { isNetworkError } from "@/lib/utils";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -140,23 +141,37 @@ export default function HodDeanDetailsPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
-  if (!isOnline && !details && !loading) {
+  const showOffline = !details && (isOnline === false || isNetworkError(error, isOnline));
+
+  if (showOffline && !loading) {
     return shell(<OfflineDisplay onRetry={fetchDetails} />);
   }
 
-  if (authLoading || loading) return shell(<HodDeanSkeleton />);
+  if (authLoading || (loading && !details)) return shell(<HodDeanSkeleton />);
 
-  if (error || !details) {
+  if (error && !details) {
     return shell(
       <div className="flex h-full items-center justify-center font-saira">
-        <ErrorDisplay message={error ?? "No HOD or Dean data loaded."} onRetry={fetchDetails} />
+        <ErrorDisplay message={error} onRetry={fetchDetails} />
       </div>
     );
   }
 
+  if (!details) return null;
+
   return shell(
     <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Error banner */}
+      {error && !isNetworkError(error, isOnline) && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+          <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
+          <button onClick={fetchDetails} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">

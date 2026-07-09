@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
+import { isNetworkError } from "@/lib/utils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -262,7 +263,7 @@ export default function MobileDashboardHome() {
       `}</style>
 
       {/* Error banner */}
-      {error && (
+      {error && !isNetworkError(error, isOnline) && (
         <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button
@@ -277,10 +278,10 @@ export default function MobileDashboardHome() {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
-          <h1 className="text-[30px] font-medium tracking-tight text-foreground leading-tight truncate">
+          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
             {profile?.student?.name ? `Welcome, ${studentName}.` : "Dashboard"}
           </h1>
-          <p className="text-sm text-muted-foreground">{formattedDate}</p>
+          <p className="text-xs text-muted-foreground leading-none pt-0.5">{formattedDate}</p>
         </div>
         <button
           onClick={loadData}

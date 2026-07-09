@@ -6,6 +6,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { Input } from "@/components/ui/input";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
+import { isNetworkError } from "@/lib/utils";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import {
   GraduationCap,
@@ -155,7 +156,9 @@ export default function GradesPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
-  if (!isOnline && !data) {
+  const showOffline = !data && (isOnline === false || isNetworkError(error, isOnline));
+
+  if (showOffline && !loading) {
     return shell(<OfflineDisplay onRetry={load} />);
   }
 
@@ -174,7 +177,7 @@ export default function GradesPage() {
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Error banner */}
-      {error && (
+      {error && !isNetworkError(error, isOnline) && (
         <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">

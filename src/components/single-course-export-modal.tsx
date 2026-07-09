@@ -21,11 +21,13 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 interface SingleCourseExportModalProps {
   entry: ScheduleEntry;
   dayDate: Date;
+  fullWidth?: boolean;
 }
 
 export default function SingleCourseExportModal({
   entry,
   dayDate,
+  fullWidth = false,
 }: SingleCourseExportModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -49,13 +51,23 @@ export default function SingleCourseExportModal({
   return (
     <>
       {/* Trigger Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="p-1.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer shrink-0"
-        title="Export this course to your calendar"
-      >
-        <CalendarPlus className="w-4 h-4" />
-      </button>
+      {fullWidth ? (
+        <Button
+          onClick={() => setIsOpen(true)}
+          className="w-full rounded-[var(--radius)] h-11 text-sm font-semibold gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95 transition-all shadow-sm flex items-center justify-center border-none"
+        >
+          <CalendarPlus className="w-5 h-5" />
+          <span>Add to Calendar</span>
+        </Button>
+      ) : (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-1.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer shrink-0"
+          title="Export this course to your calendar"
+        >
+          <CalendarPlus className="w-4 h-4" />
+        </button>
+      )}
 
       {/* Modal Dialog */}
       <AnimatePresence>
@@ -79,45 +91,50 @@ export default function SingleCourseExportModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="relative w-full max-w-md max-h-[85vh] overflow-y-auto no-scrollbar rounded-2xl bg-card border border-border/40 shadow-2xl p-6 flex flex-col gap-5"
+              className="relative w-full max-w-[90vw] sm:max-w-md max-h-[85vh] overflow-y-auto no-scrollbar rounded-[var(--radius)] bg-card border border-border/30 shadow-2xl p-6 flex flex-col gap-5"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border/10 pb-3">
                 <div className="flex items-center gap-2">
                   <CalendarPlus className="w-5 h-5 text-primary" />
-                  <h3 className="text-sm font-bold text-foreground">Export Course Event</h3>
+                  <h3 className="text-base font-semibold text-foreground tracking-tight">Export Course Event</h3>
                 </div>
                 <button
                   onClick={() => {
                     setIsOpen(false);
                     setShowCalendar(false);
                   }}
-                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors cursor-pointer"
+                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors cursor-pointer border-none bg-transparent"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Course Info Card */}
-              <div className="p-3.5 rounded-xl bg-muted/5 border border-border/10 space-y-1.5">
-                <span className="text-[10px] font-bold text-primary tracking-wider uppercase bg-primary/10 px-2 py-0.5 rounded-full">
-                  {entry.courseCode} · Slot {entry.slot}
-                </span>
-                <h4 className="text-sm font-bold text-foreground mt-1">{entry.courseTitle}</h4>
-                <div className="flex flex-col gap-1 mt-2 text-[11px] text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+              <div className="p-4 rounded-[var(--radius)] bg-muted/5 border border-border/10 space-y-2">
+                <div className="flex items-center gap-2 leading-none">
+                  <span className="text-[10px] font-semibold text-primary tracking-wider uppercase">
+                    {entry.courseCode}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground/60">
+                    · Slot {entry.slot}
+                  </span>
+                </div>
+                <h4 className="text-sm font-semibold text-foreground mt-1 leading-snug">{entry.courseTitle}</h4>
+                <div className="flex flex-col gap-1.5 mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-muted-foreground/60 shrink-0" />
                     <span>{entry.startTime} – {entry.endTime}</span>
                   </div>
                   {entry.venue && (
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-muted-foreground/60 shrink-0" />
                       <span>{entry.venue}</span>
                     </div>
                   )}
                   {entry.faculty && (
-                    <div className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4 text-muted-foreground/60 shrink-0" />
                       <span className="truncate">{entry.faculty}</span>
                     </div>
                   )}
@@ -125,14 +142,14 @@ export default function SingleCourseExportModal({
               </div>
 
               {/* Date Input using shadcn Calendar */}
-              <div className="space-y-2 p-3.5 rounded-xl bg-muted/5 border border-border/10">
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                  Repeat Schedule Weekly Until:
+              <div className="space-y-3 p-4 rounded-[var(--radius)] bg-muted/5 border border-border/10">
+                <label className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase block leading-none">
+                  Repeat Schedule Weekly Until
                 </label>
                 <div className="relative mt-1">
                   <button
                     onClick={() => setShowCalendar(!showCalendar)}
-                    className="w-full h-9 rounded-xl bg-background border border-border/20 px-3 text-xs text-foreground outline-none focus:border-primary/50 transition-colors flex items-center justify-between cursor-pointer"
+                    className="w-full h-11 rounded-[var(--radius)] bg-background border border-border/20 px-3 text-sm text-foreground outline-none focus:border-primary/50 transition-colors flex items-center justify-between cursor-pointer"
                   >
                     <span>{format(parsedEndDate, "PPP")}</span>
                     <CalendarDays className="w-4 h-4 text-muted-foreground/60" />
@@ -179,7 +196,7 @@ export default function SingleCourseExportModal({
                       console.error("Failed to open calendar link:", err);
                     }
                   }}
-                  className="w-full rounded-xl h-9 text-xs font-semibold gap-1.5 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95"
+                  className="w-full rounded-[var(--radius)] h-11 text-sm font-semibold gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95 transition-all flex items-center justify-center border-none shadow-sm"
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span>Add to Google Calendar</span>

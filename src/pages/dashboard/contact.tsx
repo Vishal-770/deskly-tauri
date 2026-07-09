@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getContactInfo, ContactDetail } from "@/lib/features";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { isNetworkError } from "@/lib/utils";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -191,9 +192,13 @@ export default function ContactPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
-  if (!isOnline && !contacts && !loading) {
+  const showOffline = !contacts && (isOnline === false || isNetworkError(error, isOnline));
+
+  if (showOffline && !loading) {
     return shell(<OfflineDisplay onRetry={fetchContacts} />);
   }
+
+  if (authLoading || (loading && !contacts)) return shell(<ContactSkeleton />);
 
   if (error && !contacts) {
     return shell(
@@ -205,11 +210,19 @@ export default function ContactPage() {
 
   const isLoading = authLoading || loading;
 
-  if (isLoading) return shell(<ContactSkeleton />);
-
   return shell(
     <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Error banner */}
+      {error && !isNetworkError(error, isOnline) && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+          <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
+          <button onClick={fetchContacts} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">

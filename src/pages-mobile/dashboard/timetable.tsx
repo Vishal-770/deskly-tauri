@@ -5,6 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { ErrorDisplay } from "@/components/error-display";
+import { isNetworkError } from "@/lib/utils";
 import SingleCourseExportModal from "@/components/single-course-export-modal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -97,20 +98,17 @@ function todayIdx(): number {
 }
 
 function getPercentageColor(pct: number) {
-  if (pct >= 75) return "text-emerald-500";
-  if (pct >= 50) return "text-amber-500";
+  if (pct >= 75) return "text-primary";
   return "text-destructive";
 }
 
 function getCircleStrokeColor(pct: number) {
-  if (pct >= 75) return "stroke-emerald-500";
-  if (pct >= 50) return "stroke-amber-500";
+  if (pct >= 75) return "stroke-primary";
   return "stroke-destructive";
 }
 
 function getBarBgColor(pct: number) {
-  if (pct >= 75) return "bg-emerald-500";
-  if (pct >= 50) return "bg-amber-500";
+  if (pct >= 75) return "bg-primary";
   return "bg-destructive";
 }
 
@@ -240,17 +238,14 @@ function TimetableDrawer({
 
   const hasAtt = !!attendanceRecord;
   const pct = attendanceRecord ? attendanceRecord.attendancePercentage : 0;
-  const badgeStyle = item.courseType.toLowerCase().includes("lab")
-    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10"
-    : "bg-sky-500/10 text-sky-400 border border-sky-500/10";
   const displayType = item.courseType.toLowerCase().includes("lab") ? "Lab Only" : "Theory Only";
 
   const details = [
-    { icon: Hash,          label: "Course Code",  value: item.courseCode, color: "text-blue-500" },
-    { icon: LayoutGrid,    label: "Slot",         value: item.slot,       color: "text-sky-400" },
-    { icon: Clock,         label: "Class Time",   value: `${item.startTime} - ${item.endTime}`, color: "text-neutral-400" },
-    { icon: MapPin,        label: "Venue / Room", value: item.venue || "TBA", color: "text-amber-400" },
-    { icon: User,          label: "Faculty",      value: item.faculty || "TBA", color: "text-emerald-400" },
+    { icon: Hash,          label: "Course Code",  value: item.courseCode, color: "text-muted-foreground/60" },
+    { icon: LayoutGrid,    label: "Slot",         value: item.slot,       color: "text-muted-foreground/60" },
+    { icon: Clock,         label: "Class Time",   value: `${item.startTime} - ${item.endTime}`, color: "text-muted-foreground/60" },
+    { icon: MapPin,        label: "Venue / Room", value: item.venue || "TBA", color: "text-muted-foreground/60" },
+    { icon: User,          label: "Faculty",      value: item.faculty || "TBA", color: "text-muted-foreground/60" },
   ];
 
   return (
@@ -270,11 +265,11 @@ function TimetableDrawer({
               )}
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center gap-2 leading-none">
-                  <span className="text-sm font-medium tracking-wide text-sky-500 uppercase">
+                  <span className="text-sm font-medium tracking-wide text-primary uppercase">
                     {item.courseCode}
                   </span>
-                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${badgeStyle}`}>
-                    {displayType}
+                  <span className="text-[10px] font-medium text-muted-foreground/60">
+                    ({displayType})
                   </span>
                 </div>
                 <h2 className="text-xl font-medium text-foreground leading-snug tracking-tight">
@@ -356,7 +351,7 @@ function TimetableDrawer({
 
           {/* Action: Export Modal inside the drawer */}
           <div className="pt-2">
-            <SingleCourseExportModal entry={item} dayDate={dayDate} />
+            <SingleCourseExportModal entry={item} dayDate={dayDate} fullWidth />
           </div>
 
         </div>
@@ -500,8 +495,9 @@ export default function TimetablePage() {
   };
 
   const isScheduleEmpty = Object.values(schedule).every((arr) => arr.length === 0);
+  const showOffline = isScheduleEmpty && (isOnline === false || isNetworkError(error, isOnline));
 
-  if (!isOnline && isScheduleEmpty) {
+  if (showOffline) {
     return <OfflineDisplay onRetry={load} />;
   }
 
@@ -527,7 +523,7 @@ export default function TimetablePage() {
       `}</style>
 
       {/* Sync Error banner */}
-      {error && (
+      {error && !isNetworkError(error, isOnline) && (
         <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
           <p className="truncate">Sync failed: {error}</p>
           <button onClick={load} className="text-[10px] uppercase font-bold tracking-wider hover:underline shrink-0 border-none bg-transparent text-destructive">
@@ -540,7 +536,7 @@ export default function TimetablePage() {
       <header className="flex items-start justify-between gap-4">
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-sky-500 shrink-0" />
+            <Calendar className="w-6 h-6 text-primary shrink-0" />
             <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
               My Timetable
             </h1>
@@ -557,36 +553,24 @@ export default function TimetablePage() {
         <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full py-1 snap-x snap-mandatory">
           {weekDays.map((d, i) => {
             const active = selectedDay === i;
-            const isToday = i === todayIdx();
-            const count = schedule[DAY_KEYS[i]]?.length || 0;
 
             return (
               <button
                 key={d.full}
                 onClick={() => setSelectedDay(i)}
-                className={`relative flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl transition-all duration-200 cursor-pointer border-none min-w-[66px] shrink-0 snap-center ${
+                className={`relative flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl transition-all duration-200 cursor-pointer border-none min-w-[72px] shrink-0 snap-center ${
                   active
-                    ? "bg-sky-500/10 border-b-2 border-sky-500 text-sky-400"
+                    ? "bg-primary/10 border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground bg-transparent"
                 }`}
               >
-                {/* Dot for classes indicator */}
-                {count > 0 && (
-                  <span className="absolute top-1.5 w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0" />
-                )}
-                
-                <span className={`text-[10px] font-semibold uppercase tracking-wider ${active ? "text-sky-400" : "opacity-55"}`}>
+                <span className={`text-[10px] font-semibold uppercase tracking-wider ${active ? "text-primary" : "opacity-55"}`}>
                   {d.name}
                 </span>
                 
                 <span className={`text-[18px] font-semibold leading-none ${active ? "text-foreground font-bold" : "text-muted-foreground"}`}>
                   {d.num}
                 </span>
-
-                {/* Today tiny indicator dot at bottom */}
-                {isToday && !active && (
-                  <span className="absolute bottom-1.5 w-1 h-1 rounded-full bg-sky-500 shrink-0" />
-                )}
               </button>
             );
           })}
@@ -631,16 +615,12 @@ export default function TimetablePage() {
         ) : (
           <div className="divide-y divide-border/20">
             {daySchedule.map((item, idx) => {
-              const isLab = item.courseType?.toLowerCase().includes("lab") || item.slot?.startsWith("L");
               const att = getAtt(item.courseCode, item.slot);
               
               const attendancePct = att ? att.attendancePercentage : 0;
               const hasAttendance = !!att;
               
-              const badgeStyle = isLab
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10"
-                : "bg-sky-500/10 text-sky-400 border border-sky-500/10";
-              const barColor = hasAttendance ? getBarBgColor(attendancePct) : "bg-neutral-600";
+              const barColor = hasAttendance ? getBarBgColor(attendancePct) : "bg-muted";
 
               return (
                 <button
@@ -655,20 +635,17 @@ export default function TimetablePage() {
                     <EmptyCircularProgress />
                   )}
 
-                  {/* Middle: Details block with Time Range nested as a badge */}
+                  {/* Middle: Details block with slot next to code and time aligned right */}
                   <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap leading-none">
+                    <div className="flex items-center gap-2 leading-none">
                       <span className="text-sm font-semibold tracking-wide text-foreground uppercase">
                         {item.courseCode}
                       </span>
-                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${badgeStyle}`}>
-                        {isLab ? "Lab" : "Theory"}
+                      <span className="text-[10px] font-semibold text-muted-foreground/60 font-mono leading-none">
+                        ({item.slot})
                       </span>
-                      <span className="text-[10.5px] font-semibold px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/10 font-mono leading-none">
+                      <span className="text-[11px] font-medium text-muted-foreground/75 font-mono leading-none ml-auto">
                         {item.startTime} - {item.endTime}
-                      </span>
-                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted/20 text-muted-foreground font-mono leading-none">
-                        {item.slot}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground truncate leading-none">

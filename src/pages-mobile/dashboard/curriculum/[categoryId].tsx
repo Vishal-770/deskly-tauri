@@ -10,6 +10,9 @@ import {
 import { ErrorDisplay } from "@/components/error-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
+import { isNetworkError } from "@/lib/utils";
 import {
   ArrowLeft,
   BookOpen,
@@ -163,17 +166,21 @@ export default function CategoryCoursesPage() {
     }
   }
 
-  const shell = (children: React.ReactNode) => (
-    <>{children}</>
-  );
-
+  const shell = (children: React.ReactNode) => <>{children}</>;
+  const isOnline = useOnlineStatus();
   const isLoading = authLoading || loading;
+
+  const showOffline = courses.length === 0 && (isOnline === false || isNetworkError(error, isOnline));
+
+  if (showOffline && !loading) {
+    return shell(<OfflineDisplay onRetry={load} />);
+  }
 
   if (isLoading && courses.length === 0) {
     return shell(<CoursesDetailSkeleton />);
   }
 
-  if (error) {
+  if (error && courses.length === 0) {
     return shell(
       <div className="flex h-full items-center justify-center">
         <ErrorDisplay message={error} onRetry={load} />
@@ -183,6 +190,15 @@ export default function CategoryCoursesPage() {
 
   return shell(
     <div className="w-full space-y-6">
+      {/* Error banner */}
+      {error && !isNetworkError(error, isOnline) && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+          <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
+          <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
+            Retry
+          </button>
+        </div>
+      )}
       {/* ── Header with Back Navigation & Course Count ──────────────────────── */}
       <header className="pb-4 border-b border-border/20 flex flex-col gap-3">
         <button

@@ -11,6 +11,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
+import { isNetworkError } from "@/lib/utils";
 import { Calendar as CalendarIcon, Info, RefreshCw } from "lucide-react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
@@ -236,12 +237,13 @@ export default function AcademicCalendarPage() {
   }, [schedule, selectedOption]);
 
   const shell = (children: React.ReactNode) => <>{children}</>;
+  const showOffline = (!options || !schedule) && (isOnline === false || isNetworkError(error, isOnline));
 
-  if (!isOnline && !options) {
+  if (showOffline) {
     return shell(<OfflineDisplay onRetry={fetchOptions} />);
   }
 
-  if (error && !options) {
+  if (error && (!options || !schedule)) {
     return shell(
       <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay title="Calendar Unavailable" message={error} onRetry={fetchOptions} />

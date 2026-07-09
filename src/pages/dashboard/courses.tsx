@@ -6,6 +6,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
+import { isNetworkError } from "@/lib/utils";
 import {
   Layers,
   Monitor,
@@ -168,7 +169,9 @@ export default function CoursesPage() {
   const isLoading = authLoading || loading;
   const shell = (children: React.ReactNode) => <>{children}</>;
 
-  if (!isOnline && courses.length === 0) {
+  const showOffline = courses.length === 0 && (isOnline === false || isNetworkError(error, isOnline));
+
+  if (showOffline && !loading) {
     return shell(<OfflineDisplay onRetry={load} />);
   }
 
@@ -187,7 +190,7 @@ export default function CoursesPage() {
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Error banner */}
-      {error && (
+      {error && !isNetworkError(error, isOnline) && (
         <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getCurrentAttendance, AttendanceRecord } from "@/lib/attendance";
+import { isNetworkError } from "@/lib/utils";
 import { ErrorDisplay } from "@/components/error-display";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -487,7 +488,9 @@ export default function AttendancePage() {
     return <Outlet />;
   }
 
-  if (!isOnline && attendance.length === 0) {
+  const showOffline = attendance.length === 0 && (isOnline === false || isNetworkError(error, isOnline));
+
+  if (showOffline) {
     return <OfflineDisplay onRetry={load} />;
   }
 
@@ -513,7 +516,7 @@ export default function AttendancePage() {
       `}</style>
 
       {/* Error banner */}
-      {error && (
+      {error && !isNetworkError(error, isOnline) && (
         <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">

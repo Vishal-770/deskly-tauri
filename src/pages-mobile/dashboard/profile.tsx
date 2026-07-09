@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getStudentProfile, ProfileData } from "@/lib/features";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
+import { isNetworkError } from "@/lib/utils";
 
 import { ErrorDisplay } from "@/components/error-display";
 import {
@@ -145,21 +146,23 @@ export default function StudentProfilePage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
-  if (authLoading) return shell(<ProfileSkeleton />);
+  const showOffline = !profile && (isOnline === false || isNetworkError(error, isOnline));
 
-  if (!isOnline && !profile) {
+  if (showOffline && !loading) {
     return shell(<OfflineDisplay onRetry={fetchProfile} />);
   }
 
-  if (loading) return shell(<ProfileSkeleton />);
+  if (authLoading || (loading && !profile)) return shell(<ProfileSkeleton />);
 
-  if (error || !profile) {
+  if (error && !profile) {
     return shell(
       <div className="flex h-full items-center justify-center">
-        <ErrorDisplay message={error ?? "No profile data loaded."} onRetry={fetchProfile} />
+        <ErrorDisplay message={error} onRetry={fetchProfile} />
       </div>
     );
   }
+
+  if (!profile) return null;
 
   const { student, proctor, hostel } = profile;
 
@@ -171,6 +174,16 @@ export default function StudentProfilePage() {
   return shell(
     <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Error banner */}
+      {error && !isNetworkError(error, isOnline) && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+          <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
+          <button onClick={fetchProfile} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
