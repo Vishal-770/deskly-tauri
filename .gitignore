@@ -32,3 +32,6 @@ dist-ssr
 *.pub
 src-tauri/tauri.conf.json.enc
 src-tauri/tauri.conf.json.sig
+
+# Generated pages folder
+src/pages

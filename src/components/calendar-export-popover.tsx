@@ -13,6 +13,7 @@ import {
   Info,
   CalendarRange,
   CalendarDays,
+  Upload,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -20,11 +21,15 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 interface CalendarExportPopoverProps {
   schedule: WeeklySchedule;
   weekStartDate: Date;
+  className?: string;
+  triggerText?: string;
 }
 
 export default function CalendarExportPopover({
   schedule,
   weekStartDate,
+  className = "",
+  triggerText = "Export Schedule",
 }: CalendarExportPopoverProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -60,10 +65,14 @@ export default function CalendarExportPopover({
       <Button
         variant="outline"
         onClick={() => setIsOpen(true)}
-        className="rounded-xl h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20"
+        className={className || "rounded-xl h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20"}
       >
-        <CalendarRange className="size-3.5 text-primary shrink-0" />
-        <span>Export Schedule</span>
+        {triggerText === "Export" ? (
+          <Upload className="size-3.5 text-muted-foreground shrink-0" />
+        ) : (
+          <CalendarRange className="size-3.5 text-primary shrink-0" />
+        )}
+        <span>{triggerText}</span>
       </Button>
 
       {/* Modal Dialog */}
