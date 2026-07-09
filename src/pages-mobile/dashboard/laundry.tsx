@@ -8,13 +8,10 @@ import {
 import { LAUNDRY_BLOCKS } from "@/lib/constants";
 
 import { ErrorDisplay } from "@/components/error-display";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DrawerSelect } from "@/components/ui/drawer-select";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
+
 import { Shirt, Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -57,6 +54,7 @@ function LaundrySkeleton() {
 
 export default function LaundryPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
   const [selectedBlock, setSelectedBlock] = useState<LaundryBlock>("A");
   const [laundryData, setLaundryData] = useState<LaundryEntry[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,13 +153,17 @@ export default function LaundryPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && !laundryData) {
+    return shell(<OfflineDisplay onRetry={() => fetchSchedule(selectedBlock)} />);
+  }
+
   if (authLoading || (loading && !laundryData)) {
     return shell(<LaundrySkeleton />);
   }
 
   if (error && !laundryData) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay
           title="Laundry Schedule Unreachable"
           message={error}
@@ -193,24 +195,16 @@ export default function LaundryPage() {
         <span className="text-xs text-muted-foreground font-semibold">
           Select Hostel Block:
         </span>
-        <Select
+        <DrawerSelect
           value={selectedBlock}
           onValueChange={(val) => {
             setSelectedBlock(val as LaundryBlock);
             localStorage.setItem("deskly::settings::hostelBlock", val);
           }}
-        >
-          <SelectTrigger className="w-[110px] h-8 rounded-xl bg-muted/20 border-border/10 text-xs shrink-0">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/20 bg-card">
-            {LAUNDRY_BLOCKS.map((b) => (
-              <SelectItem key={b} value={b} className="text-xs">
-                Block {b}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          title="Select Hostel Block"
+          triggerClassName="h-8 w-[110px]"
+          options={LAUNDRY_BLOCKS.map((b) => ({ value: b, label: `Block ${b}` }))}
+        />
       </div>
 
       {/* ── Chronological Schedule List ──────────────────────────────────────── */}

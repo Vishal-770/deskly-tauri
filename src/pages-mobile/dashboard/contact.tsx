@@ -4,6 +4,8 @@ import { getContactInfo, ContactDetail } from "@/lib/features";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { ErrorDisplay } from "@/components/error-display";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import { Copy, Check, Phone, Search, Building2, X, Mail } from "lucide-react";
 
 // ─── Gmail SVG Icon ───────────────────────────────────────────────────────────
@@ -133,6 +135,7 @@ function ContactRow({ contact }: { contact: ContactDetail }) {
 
 export default function ContactPage() {
   const { loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
   const [contacts, setContacts] = useState<ContactDetail[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -188,9 +191,13 @@ export default function ContactPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && !contacts && !loading) {
+    return shell(<OfflineDisplay onRetry={fetchContacts} />);
+  }
+
   if (error && !contacts) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay title="Contacts Unavailable" message={error} onRetry={fetchContacts} />
       </div>
     );

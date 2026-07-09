@@ -3,20 +3,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
 
 import { ErrorDisplay } from "@/components/error-display";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import {
   Clock,
-  Calendar,
-  User,
   MapPin,
   FileText,
-  AlertCircle,
-  Info,
   CalendarRange,
+  ChevronRight,
 } from "lucide-react";
-import SingleExamExportModal from "@/components/single-exam-export-modal";
-import {
-  generateExamGroupIcs,
-} from "@/lib/calendar-export-utils";
+import { generateExamGroupIcs } from "@/lib/calendar-export-utils";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ExamScheduleEntry {
@@ -79,27 +76,6 @@ function getCalendarDayDifference(d1: Date, d2: Date): number {
   return Math.round((utc2 - utc1) / (1000 * 60 * 60 * 24));
 }
 
-function parseExamTime(examDate: Date, examTimeStr: string): Date {
-  const d = new Date(examDate.getTime());
-  const timeParts = examTimeStr.split("-");
-  if (timeParts.length === 0) return d;
-  
-  const startPart = timeParts[0].trim();
-  const match = startPart.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-  if (match) {
-    let hr = parseInt(match[1], 10);
-    const min = parseInt(match[2], 10);
-    const ampm = match[3]?.toUpperCase();
-    
-    if (ampm === "PM" && hr !== 12) hr += 12;
-    if (ampm === "AM" && hr === 12) hr = 0;
-    d.setHours(hr, min, 0, 0);
-  } else {
-    d.setHours(9, 0, 0, 0);
-  }
-  return d;
-}
-
 function formatExamTypeLabel(type: string): string {
   const clean = type.trim().toUpperCase();
   if (clean === "CAT1") return "CAT 1";
@@ -113,86 +89,56 @@ function Sk({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
-function ExamCardSkeleton() {
+function ExamSkeleton() {
   return (
-    <div className="flex items-start gap-4 md:gap-6 py-5 px-3 border border-transparent border-b border-border/20 last:border-b-0 animate-pulse">
-      <div className="w-[80px] shrink-0 flex flex-col items-end gap-1">
-        <Sk className="h-4 w-12" />
-        <Sk className="h-6 w-14" />
-        <Sk className="h-3.5 w-10" />
-      </div>
-      <div className="relative hidden md:flex flex-col items-center justify-center self-stretch shrink-0 w-6">
-        <Sk className="h-3.5 w-3.5 rounded-full shrink-0" />
-      </div>
-      <div className="flex-1 space-y-3">
-        <div className="flex items-center gap-2">
-          <Sk className="h-4 w-20" />
-          <Sk className="h-4.5 w-12 rounded-full" />
+    <div className="w-full space-y-6 px-2 py-4 animate-pulse font-saira">
+      <div className="flex justify-between items-start gap-4">
+        <div className="space-y-1">
+          <Sk className="h-7 w-32" />
+          <Sk className="h-3.5 w-48" />
         </div>
-        <Sk className="h-5 w-44" />
-        <div className="flex gap-4">
-          <Sk className="h-4 w-28" />
-          <Sk className="h-4 w-20" />
-        </div>
+        <Sk className="h-8 w-20 rounded-xl" />
       </div>
-    </div>
-  );
-}
-
-function SidebarSkeleton() {
-  return (
-    <div className="space-y-8 animate-pulse">
+      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+        <Sk className="h-14 w-28 rounded-2xl shrink-0" />
+        <Sk className="h-14 w-28 rounded-2xl shrink-0" />
+        <Sk className="h-14 w-28 rounded-2xl shrink-0" />
+      </div>
       <div className="space-y-3">
-        <Sk className="h-3.5 w-16" />
-        <div className="border-l-2 border-primary/20 pl-4 py-1.5 space-y-3">
-          <Sk className="h-5 w-36" />
-          <Sk className="h-10 w-48" />
-          <Sk className="h-6 w-40" />
-        </div>
-      </div>
-      <div className="space-y-4">
-        <Sk className="h-3.5 w-24 border-b border-border/10 pb-2 w-full" />
-        <div className="space-y-4">
-          <div className="flex gap-8">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="space-y-1.5 flex-1">
-                <Sk className="h-8 w-12" />
-                <Sk className="h-3 w-16" />
+        <Sk className="h-5 w-40" />
+        <div className="bg-muted/10 border border-border/10 rounded-2xl divide-y divide-border/10">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5 flex-1">
+                <Sk className="w-11 h-11 rounded-xl shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <Sk className="h-4 w-24" />
+                  <Sk className="h-4 w-40" />
+                  <Sk className="h-3.5 w-32" />
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="space-y-1.5 pt-1 border-t border-border/10">
-            <Sk className="h-8 w-24" />
-            <Sk className="h-3 w-16" />
-          </div>
+              <Sk className="w-8 h-8 rounded-lg shrink-0" />
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function ExamSchedulePage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
 
   const [groups, setGroups] = useState<ExamScheduleGroup[]>([]);
   const [selectedTab, setSelectedTab] = useState<string>("");
   const [loading, setLoading] = useState(true);
-
-  const handleDownloadGroupIcs = async () => {
-    try {
-      const icsContent = generateExamGroupIcs(activeSchedules);
-      const filename = `${formatExamTypeLabel(selectedTab).replace(/\s+/g, "_")}_Exam_Schedule.ics`;
-      await invoke("save_calendar_file", {
-        content: icsContent,
-        filename,
-      });
-    } catch (e) {
-      console.error("Failed to save calendar file", e);
-    }
-  };
   const [error, setError] = useState<string | null>(null);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+
+  // Selected exam details for the bottom drawer
+  const [selectedExam, setSelectedExam] = useState<ExamScheduleEntry | null>(null);
+
 
   // Load from Cache (SWR) first
   useEffect(() => {
@@ -209,12 +155,6 @@ export default function ExamSchedulePage() {
         console.error("Failed to parse cached exams", e);
       }
     }
-  }, []);
-
-  // Update Current Time every second for countdown
-  useEffect(() => {
-    const t = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(t);
   }, []);
 
   // Load fresh from backend
@@ -278,7 +218,7 @@ export default function ExamSchedulePage() {
     });
   }, [groups, selectedTab]);
 
-  // Formatted Tabs
+  // Formatted Tabs list
   const tabsList = useMemo(() => {
     return groups.map((g) => {
       const label = formatExamTypeLabel(g.examType);
@@ -300,100 +240,15 @@ export default function ExamSchedulePage() {
     });
   }, [groups]);
 
-  // Calculate Next Exam and its countdown stats
-  const nextExamInfo = useMemo(() => {
-    const allExams = groups.flatMap(g => g.schedules);
-    const futureExams = allExams
-      .map(s => {
-        const d = parseDateStr(s.examDate);
-        const targetDate = parseExamTime(d, s.examTime);
-        return { exam: s, targetDate };
-      })
-      .filter(({ targetDate }) => targetDate.getTime() > currentTime.getTime())
-      .sort((a, b) => a.targetDate.getTime() - b.targetDate.getTime());
+  const shell = (children: React.ReactNode) => <>{children}</>;
 
-    if (futureExams.length === 0) return null;
+  if (!isOnline && groups.length === 0) {
+    return shell(<OfflineDisplay onRetry={load} />);
+  }
 
-    const { exam, targetDate } = futureExams[0];
-    const diffMs = Math.max(0, targetDate.getTime() - currentTime.getTime());
-    
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-    const formattedOptions: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      day: "numeric",
-      month: "short",
-      year: "numeric"
-    };
-    const dateFormatted = targetDate.toLocaleDateString("en-US", formattedOptions);
-
-    return {
-      exam,
-      dateFormatted,
-      countdown: { days, hours, minutes, seconds }
-    };
-  }, [groups, currentTime]);
-
-  // Tab Stats computation
-  const tabStats = useMemo(() => {
-    if (activeSchedules.length === 0) {
-      return { totalExams: 0, upcomingExams: 0, span: "0 Days" };
-    }
-
-    const upcomingCount = activeSchedules.filter(s => {
-      const d = parseDateStr(s.examDate);
-      d.setHours(23, 59, 59, 999);
-      return d.getTime() > currentTime.getTime();
-    }).length;
-
-    const parsedDates = activeSchedules.map(s => parseDateStr(s.examDate).getTime());
-    const minDate = Math.min(...parsedDates);
-    const maxDate = Math.max(...parsedDates);
-    const diffMs = maxDate - minDate;
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-    const spanStr = `${days} ${days === 1 ? "Day" : "Days"}`;
-
-    return {
-      totalExams: activeSchedules.length,
-      upcomingExams: upcomingCount,
-      span: spanStr
-    };
-  }, [activeSchedules, currentTime]);
-
-  // Layout wrapper shell
-  const shell = (children: React.ReactNode) => (
-    <>{children}</>
-  );
-
-  if (authLoading || (loading && groups.length === 0)) return shell(
-    <div className="w-full space-y-6 px-2 py-4">
-      <div className="space-y-1">
-        <Sk className="h-7 w-32" />
-        <Sk className="h-3 w-48" />
-      </div>
-      <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-        <Sk className="h-10 w-20 rounded-xl shrink-0" />
-        <Sk className="h-10 w-20 rounded-xl shrink-0" />
-        <Sk className="h-10 w-20 rounded-xl shrink-0" />
-      </div>
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <Sk className="h-6 w-8 rounded" />
-              <Sk className="h-4 w-20" />
-              <Sk className="h-4 w-16 rounded-full ml-auto" />
-            </div>
-            <Sk className="h-5 w-48" />
-            <Sk className="h-3 w-36" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  if (authLoading || (loading && groups.length === 0)) {
+    return shell(<ExamSkeleton />);
+  }
 
   const isNotReleased = error?.includes("Could not find exam schedule table");
 
@@ -406,26 +261,27 @@ export default function ExamSchedulePage() {
   }
 
   return shell(
-    <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
-      {error && !isNotReleased && (
-        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
-            <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
-          </div>
-          <button 
-            onClick={load}
-            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
-          >
-            Retry
-          </button>
-        </div>
-      )}
-      
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start justify-between gap-4 shrink-0">
         <div className="flex items-start gap-2 min-w-0">
-          <Calendar className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
+          <div className="w-6 h-6 text-sky-500 shrink-0 mt-0.5 flex items-center justify-center">
+            {/* Blue Calendar grid icon */}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 2v4" />
+              <path d="M16 2v4" />
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <path d="M3 10h18" />
+              <path d="M8 14h.01" />
+              <path d="M12 14h.01" />
+              <path d="M16 14h.01" />
+              <path d="M8 18h.01" />
+              <path d="M12 18h.01" />
+              <path d="M16 18h.01" />
+            </svg>
+          </div>
           <div className="space-y-1 min-w-0">
             <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
               My Exams
@@ -433,314 +289,254 @@ export default function ExamSchedulePage() {
             <p className="text-xs text-muted-foreground leading-none pt-0.5">Your exam schedule at a glance</p>
           </div>
         </div>
-        {activeSchedules.length > 0 && (
-          <button
-            onClick={handleDownloadGroupIcs}
-            className="flex items-center gap-1.5 text-xs font-semibold text-sky-400 bg-transparent border-none cursor-pointer shrink-0 pt-1"
-          >
-            <CalendarRange className="w-4 h-4" />
-            <span>Export</span>
-          </button>
-        )}
       </header>
 
       {/* ── Exam Type Tabs ────────────────────────────────────────────────────── */}
       {groups.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
+        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
           {tabsList.map((tab) => {
             const active = selectedTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setSelectedTab(tab.id)}
-                className={`flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl border text-xs cursor-pointer transition-colors duration-150 shrink-0 min-w-[90px]
+                className={`flex flex-col items-start gap-1.5 px-4 py-3 rounded-2xl border text-left cursor-pointer transition-all duration-150 shrink-0 min-w-[130px]
                   ${active
-                    ? "bg-sky-500/15 border-sky-500/30 text-sky-400"
-                    : "bg-muted/10 border-border/10 text-muted-foreground hover:bg-muted/20"
+                    ? "bg-sky-500 border-sky-500 text-white shadow-lg shadow-sky-500/20"
+                    : "bg-muted/30 dark:bg-[#0e0e0f]/40 border-border/40 dark:border-border/10 text-muted-foreground hover:bg-muted/20"
                   }`}
               >
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold tracking-wide text-[11px] uppercase">{tab.label}</span>
-                  <span className={`text-[9px] font-bold px-1 py-0.5 rounded-full leading-none ${
-                    active ? "bg-sky-500/20 text-sky-400" : "bg-muted text-muted-foreground"
-                  }`}>{tab.count}</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-bold tracking-wide text-xs uppercase flex items-center gap-1.5">
+                    {tab.label}
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0
+                      ${active ? "bg-white" : "bg-muted-foreground/45"}`}
+                    />
+                  </span>
                 </div>
-                <span className="text-[10px] font-medium opacity-60 leading-none">{tab.range}</span>
+                <span className={`text-[10px] font-semibold leading-none
+                  ${active ? "text-white/80" : "text-muted-foreground/60"}`}
+                >
+                  {tab.range}
+                </span>
               </button>
             );
           })}
         </div>
       )}
 
-      {/* ── Main Split View ────────────────────────────────────────────────── */}
+      {/* ── Content View ────────────────────────────────────────────────────── */}
       {isNotReleased ? (
-        <div className="flex-1 flex flex-col items-center justify-center py-20 gap-3.5 text-center">
-          <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mx-auto mb-2 border border-border/10">
-            <CalendarRange className="w-6 h-6 text-primary/70" />
-          </div>
-          <div className="space-y-1.5">
-            <h2 className="text-base font-bold text-foreground">Exams Not Uploaded</h2>
-            <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+          <CalendarRange className="w-8 h-8 text-muted-foreground/20" />
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">Exams Not Uploaded</h2>
+            <p className="text-xs text-muted-foreground mt-1 max-w-xs px-4">
               The university has not released or uploaded the exam schedule for this semester on VTOP yet.
             </p>
           </div>
         </div>
+      ) : activeSchedules.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+          <FileText className="w-8 h-8 text-muted-foreground/20" />
+          <div>
+            <p className="text-sm font-bold text-foreground">No exam schedules loaded</p>
+            <p className="text-xs text-muted-foreground mt-1">Select a semester or check VTOP records.</p>
+          </div>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden pt-2">
-        
-        {/* ── Left Sidebar (Sticky details) ────────────────────────────────── */}
-        <div className="hidden xl:block xl:space-y-6 xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 shrink-0 xl:w-[280px]">
-          {loading && activeSchedules.length === 0 ? (
-            <SidebarSkeleton />
-          ) : (
-            <>
-              {/* Next Exam Countdown (Minimalist, borderless layout) */}
-              {nextExamInfo ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-border/10 pb-2">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" /> Next Exam
-                    </p>
-                  </div>
-                  <div className="border-l-2 border-primary pl-4 py-1.5 space-y-2">
-                    <span className="text-xs font-extrabold text-primary tracking-wide uppercase">
-                      {nextExamInfo.exam.courseCode}
-                    </span>
-                    <p className="text-base font-extrabold text-foreground leading-snug">{nextExamInfo.exam.courseTitle}</p>
-                    
-                    <div className="space-y-2 text-sm text-muted-foreground pt-1">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-muted-foreground/60" />
-                        <span className="font-semibold text-foreground">{nextExamInfo.dateFormatted}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-muted-foreground/60" />
-                        <span className="font-medium">{nextExamInfo.exam.venue || "TBA"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-muted-foreground/60" />
-                        <span className="font-medium">Seat {nextExamInfo.exam.seatNo} {nextExamInfo.exam.seatLocation !== "-" && `(${nextExamInfo.exam.seatLocation})`}</span>
-                      </div>
-                    </div>
-                  </div>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 leading-none uppercase">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-sky-500">
+                <rect width="18" height="18" x="3" y="4" rx="2" />
+                <path d="M3 10h18" />
+                <path d="M8 14h.01" />
+                <path d="M12 14h.01" />
+                <path d="M16 14h.01" />
+              </svg>
+              {formatExamTypeLabel(selectedTab)} Schedule
+            </h2>
+          </div>
 
-                  {/* Countdown Digits */}
-                  <div className="border border-border/20 rounded-xl p-4 space-y-2.5 text-center">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Starts in</span>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-1 pt-1">
-                      {[
-                        { label: "Days", val: nextExamInfo.countdown.days },
-                        { label: "Hours", val: nextExamInfo.countdown.hours },
-                        { label: "Mins", val: nextExamInfo.countdown.minutes },
-                        { label: "Secs", val: nextExamInfo.countdown.seconds },
-                      ].map(({ label, val }, idx) => (
-                        <div key={label} className="relative flex flex-col items-center">
-                          <span className="text-2xl font-black text-primary leading-none">
-                            {String(val).padStart(2, "0")}
+          <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+            {activeSchedules.map((item, idx) => {
+              const examDate = parseDateStr(item.examDate);
+              const dayNum = examDate.getDate();
+              const weekDayStr = examDate.toLocaleString("en-US", { weekday: "short" }).toUpperCase();
+              
+              // Calculate gap indicators between this exam and the next
+              let gapElement = null;
+              if (idx < activeSchedules.length - 1) {
+                const nextExam = activeSchedules[idx + 1];
+                const nextDate = parseDateStr(nextExam.examDate);
+                const dayDiff = getCalendarDayDifference(examDate, nextDate);
+                if (dayDiff > 1) {
+                  const gapDays = dayDiff - 1;
+                  gapElement = (
+                    <div className="flex justify-center py-2 bg-muted/5">
+                      <span className="bg-sky-500/10 text-sky-400 text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{gapDays} {gapDays === 1 ? "Day" : "Days"} Gap</span>
+                      </span>
+                    </div>
+                  );
+                }
+              }
+
+              return (
+                <div key={`${item.courseCode}-${idx}`} className="flex flex-col divide-y divide-border/10">
+                  <div
+                    onClick={() => setSelectedExam(item)}
+                    className="p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors duration-150"
+                  >
+                    {/* Date bubble */}
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 border border-border/10 bg-muted/20 text-muted-foreground">
+                        <span className="text-base font-bold leading-none">{dayNum}</span>
+                        <span className="text-[8px] font-bold uppercase leading-none mt-1">{weekDayStr}</span>
+                      </div>
+
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-black tracking-wider text-sky-400 uppercase leading-none">
+                            {item.courseCode}
                           </span>
-                          <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground mt-2">
-                            {label}
+                          <span className="text-[9px] font-bold text-muted-foreground/75 bg-muted/40 px-1.5 py-0.5 rounded leading-none">
+                            Slot: {item.slot}
                           </span>
-                          {idx < 3 && (
-                            <div className="hidden sm:block absolute right-0 top-1 bottom-4 w-px bg-border/20" />
-                          )}
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Next Exam</p>
-                  <div className="flex items-center gap-3 py-1">
-                    <div className="p-2 rounded-lg bg-muted shrink-0">
-                      <Calendar className="w-4 h-4 text-muted-foreground/60" />
-                    </div>
-                    <div>
-                      <p className="text-base font-extrabold text-foreground">No upcoming exams</p>
-                      <p className="text-sm text-muted-foreground mt-0.5">All scheduled exams are completed.</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Quick Overview Stats */}
-              <div className="space-y-4">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Quick Overview</p>
-                <div className="space-y-4 pt-1">
-                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
-                    {[
-                      { label: "Total Exams", val: tabStats.totalExams },
-                      { label: "Upcoming", val: tabStats.upcomingExams },
-                    ].map(({ label, val }) => (
-                      <div key={label} className="space-y-1.5 flex-1">
-                        <p className="font-black text-foreground text-3xl leading-none">{val}</p>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground leading-none">{label}</p>
+                        <h4 className="text-sm font-bold text-foreground truncate leading-snug">
+                          {item.courseTitle}
+                        </h4>
+                        <p className="text-xs text-muted-foreground/60 leading-none flex items-center gap-1 pt-0.5">
+                          <Clock className="w-3.5 h-3.5 text-muted-foreground/50" />
+                          <span>{item.examTime.split("-")[0].trim()}</span>
+                          <span className="mx-1">•</span>
+                          <MapPin className="w-3.5 h-3.5 text-muted-foreground/50" />
+                          <span className="truncate">{item.venue}</span>
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                  <div className="space-y-1.5 pt-1 border-t border-border/10">
-                    <p className="font-black text-foreground text-3xl leading-none">{tabStats.span}</p>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground leading-none">Total Exam Span</p>
-                  </div>
-                </div>
-              </div>
+                    </div>
 
-              {/* Important note */}
-              <div className="p-4 rounded-xl bg-destructive/[0.03] border border-destructive/10 text-xs leading-relaxed text-destructive/80 space-y-2">
-                <div className="flex items-center gap-1.5 font-bold uppercase tracking-widest">
-                  <AlertCircle className="w-4 h-4 shrink-0" /> Note
+                    {/* Seat & Icon */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-bold px-2 py-1 rounded-lg border border-border/10 bg-muted/10 text-foreground/80 leading-none">
+                        Seat {item.seatNo}
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/45" />
+                    </div>
+                  </div>
+
+                  {/* Render Day Gap element if applicable */}
+                  {gapElement}
                 </div>
-                <p className="font-semibold text-muted-foreground leading-snug">
-                  Please reach the exam venue at least 15 minutes before the reporting time.
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Slide-up Drawer for Details ─────────────────────────────────────── */}
+      <Drawer
+        open={selectedExam !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedExam(null);
+        }}
+      >
+        <DrawerContent className="pb-8 font-saira max-h-[85vh]">
+          <div className="overflow-y-auto no-scrollbar px-6 space-y-6 pt-5">
+            {/* Drawer Header */}
+            <div className="flex items-start justify-between gap-4 border-b border-border/10 pb-3">
+              <div className="space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-widest text-sky-400 leading-none">
+                  Exam Details ({selectedExam?.examType})
+                </span>
+                <h3 className="text-xl font-bold text-foreground leading-none">
+                  {selectedExam?.courseTitle}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {selectedExam ? `${selectedExam.courseCode} • ${selectedExam.examDate}` : ""}
                 </p>
               </div>
-            </>
-          )}
-        </div>
-
-        {/* ── Right Content: Chronological Timeline ────────────────────────── */}
-        <div className="xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-4 w-full">
-          <div className="flex items-center justify-between pb-3 border-b border-border/20 shrink-0">
-            <div>
-              <h2 className="text-base font-bold text-foreground tracking-tight">Exam Schedule ({formatExamTypeLabel(selectedTab)})</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">All times are as per reporting time at the venue</p>
+              <button
+                onClick={() => setSelectedExam(null)}
+                className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0 font-sans"
+              >
+                <span className="text-lg leading-none">×</span>
+              </button>
             </div>
-            {!loading && (
-              <span className="text-xs font-semibold bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
-                {activeSchedules.length} {activeSchedules.length === 1 ? "exam" : "exams"}
-              </span>
-            )}
-          </div>
 
-          {/* Timeline List */}
-          <div className="relative">
-            {loading && activeSchedules.length === 0 ? (
-              <div className="space-y-2 pt-2">
-                {[...Array(4)].map((_, i) => <ExamCardSkeleton key={i} />)}
-              </div>
-            ) : activeSchedules.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-                <FileText className="w-8 h-8 text-muted-foreground/20" />
-                <div>
-                  <p className="text-sm font-bold text-foreground">No exam schedules loaded</p>
-                  <p className="text-xs text-muted-foreground mt-1">Select a semester or check VTOP records.</p>
+            {/* Drawer Body details */}
+            {selectedExam && (
+              <div className="space-y-5">
+                {/* Visual Cards grid of details */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-muted/15 border border-border/10 rounded-xl space-y-1">
+                    <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest leading-none">Course Type</span>
+                    <p className="text-xs font-bold text-foreground leading-none">{selectedExam.courseType}</p>
+                  </div>
+                  <div className="p-3 bg-muted/15 border border-border/10 rounded-xl space-y-1">
+                    <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest leading-none">Class ID</span>
+                    <p className="text-xs font-bold text-foreground leading-none">{selectedExam.classId}</p>
+                  </div>
+                  <div className="p-3 bg-muted/15 border border-border/10 rounded-xl space-y-1">
+                    <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest leading-none">Slot & Session</span>
+                    <p className="text-xs font-bold text-foreground leading-none">{selectedExam.slot} ({selectedExam.examSession})</p>
+                  </div>
+                  <div className="p-3 bg-muted/15 border border-border/10 rounded-xl space-y-1">
+                    <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest leading-none">Seat Number</span>
+                    <p className="text-xs font-bold text-sky-400 leading-none">Seat {selectedExam.seatNo}</p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="relative">
-                {/* Continuous timeline vertical line on desktop */}
-                <div className="absolute top-0 bottom-0 left-[131px] w-[2px] bg-border/15 hidden md:block" />
 
-                <div className="space-y-1 pt-2">
-                  {activeSchedules.map((item, idx) => {
-                    const examDate = parseDateStr(item.examDate);
-                    
-                    // Formatted Date Bubbles
-                    const dayNum = examDate.getDate();
-                    const monthStr = examDate.toLocaleString("en-US", { month: "short" }).toUpperCase();
-                    const weekDayStr = examDate.toLocaleString("en-US", { weekday: "short" }).toUpperCase();
+                {/* Larger rows for Venue & Timing */}
+                <div className="space-y-3">
+                  <div className="p-4 bg-muted/15 border border-border/10 rounded-2xl flex items-start gap-3">
+                    <Clock className="w-5 h-5 text-sky-500 mt-0.5 shrink-0" />
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest leading-none">Exam Timing</span>
+                      <p className="text-sm font-bold text-foreground leading-none">{selectedExam.examTime}</p>
+                      <p className="text-xs text-muted-foreground/80 leading-none pt-0.5">Reporting Time: {selectedExam.reportingTime}</p>
+                    </div>
+                  </div>
 
-                    // Calculate gap indicators between this exam and the next
-                    let gapElement = null;
-                    if (idx < activeSchedules.length - 1) {
-                      const nextExam = activeSchedules[idx + 1];
-                      const nextDate = parseDateStr(nextExam.examDate);
-                      const dayDiff = getCalendarDayDifference(examDate, nextDate);
-                      if (dayDiff > 1) {
-                        const gapDays = dayDiff - 1;
-                        gapElement = (
-                          <div className="relative py-3 flex items-center justify-center">
-                            {/* Line separator */}
-                            <div className="absolute left-[131px] right-0 border-t border-dashed border-border/20 hidden md:block" />
-                            {/* Pill */}
-                            <div className="relative z-10 bg-muted/65 text-muted-foreground text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
-                              <Info className="w-3.5 h-3.5 text-muted-foreground/75" />
-                              <span>{gapDays} {gapDays === 1 ? "Day" : "Days"} Gap</span>
-                            </div>
-                          </div>
-                        );
-                      }
+                  <div className="p-4 bg-muted/15 border border-border/10 rounded-2xl flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-sky-500 mt-0.5 shrink-0" />
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest leading-none">Venue / Room</span>
+                      <p className="text-sm font-bold text-foreground leading-none">{selectedExam.venue}</p>
+                      {selectedExam.seatLocation !== "-" && (
+                        <p className="text-xs text-muted-foreground/80 leading-none pt-0.5">Location: {selectedExam.seatLocation}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Calendar Add Button */}
+                <button
+                  onClick={async () => {
+                    const icsContent = generateExamGroupIcs([selectedExam]);
+                    const filename = `${selectedExam.courseCode}_Exam.ics`;
+                    try {
+                      await invoke("save_calendar_file", {
+                        content: icsContent,
+                        filename,
+                      });
+                    } catch (e) {
+                      console.error("Failed to save calendar file", e);
                     }
-
-                    return (
-                      <div key={`${item.courseCode}-${idx}`} className="space-y-1">
-                        <div className="relative flex flex-col md:flex-row md:items-center gap-4 md:gap-6 py-5 px-3 md:px-4 rounded-xl border border-transparent hover:bg-muted/20 transition-all duration-200">
-                          
-                          {/* Date Bubble Column */}
-                          <div className="w-[80px] shrink-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1.5">
-                            <span className="text-3xl font-black text-foreground leading-none tracking-tighter">{dayNum}</span>
-                            <span className="text-xs font-bold text-muted-foreground leading-none uppercase">{monthStr}</span>
-                            <div className="flex items-center gap-1 md:flex-col md:items-end">
-                              <span className="text-[10px] font-extrabold text-muted-foreground/70 leading-none uppercase">{weekDayStr}</span>
-                              <span className="text-[9px] font-black text-muted-foreground/50 leading-none">{examDate.getFullYear()}</span>
-                            </div>
-                          </div>
-
-                          {/* Timeline dot node (Double Ring) */}
-                          <div className="relative hidden md:flex flex-col items-center justify-center self-stretch shrink-0 w-6">
-                            <div className="w-4 h-4 rounded-full border border-primary/20 bg-background z-10 flex items-center justify-center">
-                              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                            </div>
-                          </div>
-
-                          {/* Exam details content */}
-                          <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                            <div className="space-y-2 flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-sm font-extrabold tracking-wider text-primary uppercase">
-                                  {item.courseCode}
-                                </span>
-                                <span className="text-xs font-bold px-2 py-0.5 rounded-md leading-none bg-primary/10 text-primary">
-                                  {item.courseType}
-                                </span>
-                                <span className="font-mono text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-semibold leading-none">
-                                  Slot: {item.slot}
-                                </span>
-                              </div>
-                              <p className="text-base font-extrabold text-foreground leading-snug truncate">
-                                {item.courseTitle}
-                              </p>
-                              
-                              <div className="flex items-center gap-4 text-xs text-muted-foreground font-semibold flex-wrap pt-0.5">
-                                <span className="flex items-center gap-1.5">
-                                  <Clock className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
-                                  <span>{item.examTime} (Reporting: {item.reportingTime})</span>
-                                </span>
-                                <span className="flex items-center gap-1.5">
-                                  <MapPin className="w-3.5 h-3.5 shrink-0 text-muted-foreground/60" />
-                                  <span>{item.venue}</span>
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Seat & Export details */}
-                            <div className="shrink-0 flex items-center gap-3">
-                              <SingleExamExportModal entry={item} />
-                              <div className="flex flex-col items-end md:items-end justify-center bg-muted/20 border border-border/10 rounded-xl px-4 py-2 min-w-[100px]">
-                                <span className="text-lg font-black text-foreground leading-none">Seat {item.seatNo}</span>
-                                {item.seatLocation !== "-" && (
-                                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1.5">
-                                    {item.seatLocation}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Gap element if applicable */}
-                        {gapElement}
-                      </div>
-                    );
-                  })}
-                </div>
+                  }}
+                  className="w-full py-3.5 bg-sky-500 hover:bg-sky-600 active:opacity-75 transition-all text-white font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border-0 cursor-pointer"
+                >
+                  <CalendarRange className="w-4 h-4 shrink-0" />
+                  <span>Add to Calendar</span>
+                </button>
               </div>
             )}
           </div>
-        </div>
-      </div>
-      )}
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

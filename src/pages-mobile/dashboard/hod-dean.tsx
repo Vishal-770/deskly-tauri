@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { getHodDeanDetails, HodDeanDetail } from "@/lib/features";
 
 import { ErrorDisplay } from "@/components/error-display";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import {
   Mail,
   MapPin,
@@ -49,24 +51,39 @@ function Sk({ className = "" }: { className?: string }) {
 function HodDeanSkeleton() {
   return (
     <div className="w-full space-y-6 px-2 py-4 animate-pulse">
-      <div className="space-y-1">
-        <Sk className="h-7 w-48" />
-        <Sk className="h-3.5 w-72" />
+      {/* Header matching real icon + h1 pattern */}
+      <div className="flex items-start gap-2">
+        <Sk className="w-6 h-6 rounded-md shrink-0 mt-0.5" />
+        <div className="space-y-1.5 flex-1">
+          <Sk className="h-7 w-36" />
+          <Sk className="h-3.5 w-72" />
+        </div>
       </div>
+
+      {/* HOD/Dean cards */}
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-4">
+          <div key={i} className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-4">
+            {/* Photo + primary info row */}
             <div className="flex items-center gap-4">
               <Sk className="w-16 h-20 rounded-xl shrink-0" />
-              <div className="space-y-2 flex-1">
-                <Sk className="h-3 w-16 rounded-full" />
-                <Sk className="h-4.5 w-32" />
-                <Sk className="h-3.5 w-40" />
+              <div className="space-y-2 flex-1 min-w-0">
+                <Sk className="h-4 w-14 rounded-full" />
+                <Sk className="h-5 w-36" />
+                <Sk className="h-3.5 w-48" />
               </div>
             </div>
-            <div className="border-t border-border/10 pt-3 space-y-2">
-              <Sk className="h-3 w-full" />
-              <Sk className="h-3 w-full" />
+            {/* Info rows */}
+            <div className="border-t border-border/10 pt-3 space-y-2.5">
+              {[...Array(3)].map((_, j) => (
+                <div key={j} className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <Sk className="w-3.5 h-3.5 rounded" />
+                    <Sk className="h-2.5 w-16" />
+                  </div>
+                  <Sk className="h-3 w-32" />
+                </div>
+              ))}
             </div>
           </div>
         ))}
@@ -79,6 +96,7 @@ function HodDeanSkeleton() {
 
 export default function HodDeanDetailsPage() {
   const { loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
   const [details, setDetails] = useState<HodDeanDetail[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -122,11 +140,15 @@ export default function HodDeanDetailsPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && !details && !loading) {
+    return shell(<OfflineDisplay onRetry={fetchDetails} />);
+  }
+
   if (authLoading || loading) return shell(<HodDeanSkeleton />);
 
   if (error || !details) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay message={error ?? "No HOD or Dean data loaded."} onRetry={fetchDetails} />
       </div>
     );

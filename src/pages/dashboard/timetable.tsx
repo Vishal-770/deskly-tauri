@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
-
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import { ErrorDisplay } from "@/components/error-display";
 import SingleCourseExportModal from "@/components/single-course-export-modal";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -166,23 +167,54 @@ function EmptyCircularProgress() {
 function TimetableSkeleton() {
   return (
     <div className="space-y-6 px-2 py-4 animate-pulse font-saira">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-6 w-6 rounded-full" />
+      {/* Header: title + refresh */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-6 h-6 rounded-md" />
+            <Skeleton className="h-7 w-36" />
+          </div>
+          <Skeleton className="h-3.5 w-32" />
+        </div>
+        <Skeleton className="h-5 w-5 rounded-full shrink-0" />
       </div>
-      <div className="flex gap-3">
-        <Skeleton className="h-10 flex-1 rounded-xl" />
-        <Skeleton className="h-10 flex-[2] rounded-xl" />
-      </div>
+
+      {/* Day chip strip: 7 columns */}
       <div className="grid grid-cols-7 gap-2">
         {[...Array(7)].map((_, i) => (
           <Skeleton key={i} className="h-14 rounded-xl" />
         ))}
       </div>
+
       <Separator />
-      <div className="space-y-4">
+
+      {/* Active day info: class count */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1.5">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+        <Skeleton className="h-5 w-20 rounded-full" />
+      </div>
+
+      {/* Class rows: circle + slot chip + code/title + time + venue */}
+      <div className="divide-y divide-border/10">
         {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-16 rounded-xl w-full" />
+          <div key={i} className="flex items-center gap-4 py-4">
+            <Skeleton className="w-[46px] h-[46px] rounded-full shrink-0" />
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-3.5 w-8 rounded" />
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="h-4 w-12 rounded ml-auto" />
+              </div>
+              <Skeleton className="h-3 w-full max-w-[180px]" />
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -338,6 +370,7 @@ function TimetableDrawer({
 export default function TimetablePage() {
   const navigate = useNavigate();
   const { isLoggedIn, loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
 
   const [selectedDay, setSelectedDay] = useState(() => todayIdx());
   const [weekStart] = useState<Date>(() => {
@@ -467,6 +500,10 @@ export default function TimetablePage() {
   };
 
   const isScheduleEmpty = Object.values(schedule).every((arr) => arr.length === 0);
+
+  if (!isOnline && isScheduleEmpty) {
+    return <OfflineDisplay onRetry={load} />;
+  }
 
   if (authLoading || (loading && isScheduleEmpty)) {
     return <TimetableSkeleton />;

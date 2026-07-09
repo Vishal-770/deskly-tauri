@@ -3,13 +3,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { getTimetableCourses, TimetableCourse } from "@/lib/features";
 
 import { ErrorDisplay } from "@/components/error-display";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DrawerSelect } from "@/components/ui/drawer-select";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import {
   Layers,
   Monitor,
@@ -81,6 +77,7 @@ function CoursesSkeleton() {
 
 export default function CoursesPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
 
   const [courses, setCourses] = useState<TimetableCourse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,11 +168,15 @@ export default function CoursesPage() {
   const isLoading = authLoading || loading;
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && courses.length === 0) {
+    return shell(<OfflineDisplay onRetry={load} />);
+  }
+
   if (authLoading || (loading && courses.length === 0)) return shell(<CoursesSkeleton />);
 
   if (error && courses.length === 0) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay message={error} onRetry={load} />
       </div>
     );
@@ -230,28 +231,26 @@ export default function CoursesPage() {
       {/* ── Filters ─────────────────────────────────────────────────────────── */}
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
-          <Select value={selectedTypeFilter} onValueChange={setSelectedTypeFilter}>
-            <SelectTrigger className="h-10 rounded-xl bg-muted/20 border-border/10 text-xs">
-              <SelectValue placeholder="All Types" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-border/20 bg-card">
-              <SelectItem value="ALL">All Types</SelectItem>
-              {filterOptions.types.map((type) => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={selectedCategoryFilter} onValueChange={setSelectedCategoryFilter}>
-            <SelectTrigger className="h-10 rounded-xl bg-muted/20 border-border/10 text-xs">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-border/20 bg-card">
-              <SelectItem value="ALL">All Categories</SelectItem>
-              {filterOptions.categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <DrawerSelect
+            value={selectedTypeFilter}
+            onValueChange={setSelectedTypeFilter}
+            title="Filter by Type"
+            triggerClassName="w-full h-10"
+            options={[
+              { value: "ALL", label: "All Types" },
+              ...filterOptions.types.map((type) => ({ value: type, label: type })),
+            ]}
+          />
+          <DrawerSelect
+            value={selectedCategoryFilter}
+            onValueChange={setSelectedCategoryFilter}
+            title="Filter by Category"
+            triggerClassName="w-full h-10"
+            options={[
+              { value: "ALL", label: "All Categories" },
+              ...filterOptions.categories.map((cat) => ({ value: cat, label: cat })),
+            ]}
+          />
         </div>
       </div>
 

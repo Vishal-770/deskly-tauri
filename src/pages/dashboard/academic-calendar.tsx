@@ -8,13 +8,9 @@ import {
 } from "@/lib/features";
 
 import { ErrorDisplay } from "@/components/error-display";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DrawerSelect } from "@/components/ui/drawer-select";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import { Calendar as CalendarIcon, Info, RefreshCw } from "lucide-react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
@@ -94,6 +90,7 @@ type CalendarCell = {
 
 export default function AcademicCalendarPage() {
   const { loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
   const [options, setOptions] = useState<CalendarMonthOption[] | null>(null);
   const [selectedOption, setSelectedOption] = useState<CalendarMonthOption | null>(null);
   const [schedule, setSchedule] = useState<MonthlySchedule | null>(null);
@@ -240,9 +237,13 @@ export default function AcademicCalendarPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && !options) {
+    return shell(<OfflineDisplay onRetry={fetchOptions} />);
+  }
+
   if (error && !options) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay title="Calendar Unavailable" message={error} onRetry={fetchOptions} />
       </div>
     );
@@ -270,24 +271,16 @@ export default function AcademicCalendarPage() {
 
         {!isLoading && options && selectedOption && (
           <div className="flex items-center gap-2 shrink-0">
-            <Select
+            <DrawerSelect
               value={selectedOption.dateValue}
               onValueChange={(val) => {
                 const opt = options.find((o) => o.dateValue === val);
                 if (opt) setSelectedOption(opt);
               }}
-            >
-              <SelectTrigger className="w-[120px] h-9 rounded-xl bg-muted/20 border-border/10 text-xs shrink-0">
-                <SelectValue placeholder="Select Month" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border/20 bg-card">
-                {options.map((o) => (
-                  <SelectItem key={o.dateValue} value={o.dateValue} className="text-xs">
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              title="Select Month"
+              triggerClassName="h-9 w-[130px]"
+              options={options.map((o) => ({ value: o.dateValue, label: o.label }))}
+            />
 
             <button
               onClick={() => fetchView(selectedOption.dateValue)}

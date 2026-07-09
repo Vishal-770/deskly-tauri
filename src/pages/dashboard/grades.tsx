@@ -4,13 +4,9 @@ import { getGradesHistory, StudentHistoryData } from "@/lib/features";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
+import { DrawerSelect } from "@/components/ui/drawer-select";
 import {
   GraduationCap,
   BookOpen,
@@ -82,6 +78,7 @@ function GradesSkeleton() {
 // ─── Main Page Component ──────────────────────────────────────────────────────
 export default function GradesPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
 
   const [data, setData] = useState<StudentHistoryData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -158,11 +155,15 @@ export default function GradesPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && !data) {
+    return shell(<OfflineDisplay onRetry={load} />);
+  }
+
   if (authLoading || (loading && !data)) return shell(<GradesSkeleton />);
 
   if (error && !data) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay message={error} onRetry={load} />
       </div>
     );
@@ -228,17 +229,16 @@ export default function GradesPage() {
             className="pl-9 h-10 bg-muted/20 border-border/10 rounded-xl text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-primary/30"
           />
         </div>
-        <Select value={selectedGradeFilter} onValueChange={setSelectedGradeFilter}>
-          <SelectTrigger className="w-full h-10 rounded-xl bg-muted/20 border-border/10 text-xs">
-            <SelectValue placeholder="All Grades" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/20 bg-card">
-            <SelectItem value="ALL">All Grades</SelectItem>
-            {["S", "A", "B", "C", "D", "E", "F", "P", "N"].map((g) => (
-              <SelectItem key={g} value={g}>Grade {g}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <DrawerSelect
+          value={selectedGradeFilter}
+          onValueChange={setSelectedGradeFilter}
+          title="Filter by Grade"
+          triggerClassName="w-full h-10"
+          options={[
+            { value: "ALL", label: "All Grades" },
+            ...["S", "A", "B", "C", "D", "E", "F", "P", "N"].map((g) => ({ value: g, label: `Grade ${g}` })),
+          ]}
+        />
       </div>
 
       {/* ── Section Label ────────────────────────────────────────────────────── */}

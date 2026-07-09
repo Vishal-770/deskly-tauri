@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { getPaymentReceipts, Receipt } from "@/lib/features";
 
 import { ErrorDisplay } from "@/components/error-display";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import {
   ArrowLeft,
   Calendar,
@@ -45,21 +47,77 @@ function parseReceiptDate(dateStr: string): Date {
 // ─── Loader Skeleton Layout ───────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-full bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function PaymentReceiptsSkeleton() {
   return (
-    <div className="w-full space-y-6 px-2 py-4">
-      <div className="space-y-1">
-        <Sk className="h-7 w-36" />
-        <Sk className="h-3 w-56 animate-pulse" />
+    <div className="w-full space-y-6 px-2 py-4 animate-pulse">
+      {/* Header */}
+      <div className="space-y-1.5">
+        <Sk className="h-7 w-44" />
+        <Sk className="h-3.5 w-64" />
       </div>
-      <Sk className="h-24 w-full rounded-2xl" />
-      <Sk className="h-44 w-full rounded-2xl" />
+
+      {/* Registration Details card */}
+      <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center gap-4">
+        <Sk className="w-12 h-12 rounded-full shrink-0" />
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3 flex-1">
+          <div className="space-y-1.5">
+            <Sk className="h-2.5 w-16" />
+            <Sk className="h-4 w-24" />
+          </div>
+          <div className="space-y-1.5">
+            <Sk className="h-2.5 w-20" />
+            <Sk className="h-4 w-28" />
+          </div>
+          <div className="col-span-2 space-y-1.5">
+            <Sk className="h-2.5 w-20" />
+            <Sk className="h-4 w-20" />
+          </div>
+        </div>
+      </div>
+
+      {/* Overview stats card */}
+      <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
+        <div className="grid grid-cols-2 divide-x divide-border/10">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="p-4 flex items-center gap-3">
+              <Sk className="w-10 h-10 rounded-xl shrink-0" />
+              <div className="space-y-2 flex-1">
+                <Sk className="h-2.5 w-20" />
+                <Sk className="h-5 w-10" />
+                <Sk className="h-2 w-16" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="border-t border-border/10 p-4 flex items-center gap-3">
+          <Sk className="w-10 h-10 rounded-xl shrink-0" />
+          <div className="space-y-2 flex-1">
+            <Sk className="h-2.5 w-24" />
+            <Sk className="h-5 w-28" />
+            <Sk className="h-2 w-20" />
+          </div>
+        </div>
+      </div>
+
+      {/* Receipt records list */}
       <div className="space-y-3">
         {[...Array(4)].map((_, i) => (
-          <Sk key={i} className="h-16 w-full rounded-2xl" />
+          <div key={i} className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Sk className="w-10 h-10 rounded-xl shrink-0" />
+              <div className="space-y-2 flex-1 min-w-0">
+                <Sk className="h-4 w-32" />
+                <Sk className="h-3 w-20" />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Sk className="h-5 w-20" />
+              <Sk className="h-4 w-4 rounded" />
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -70,6 +128,7 @@ function PaymentReceiptsSkeleton() {
 
 export default function PaymentReceiptsPage() {
   const { loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -154,13 +213,17 @@ export default function PaymentReceiptsPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && receipts.length === 0 && !loading) {
+    return shell(<OfflineDisplay onRetry={load} />);
+  }
+
   if (authLoading || loading) {
     return shell(<PaymentReceiptsSkeleton />);
   }
 
   if (error && receipts.length === 0) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay message={error} onRetry={load} />
       </div>
     );

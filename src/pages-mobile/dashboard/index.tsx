@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -154,6 +156,7 @@ function DashboardSkeleton() {
 
 export default function MobileDashboardHome() {
   const { isLoggedIn, loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [cgpaData, setCgpaData] = useState<CgpaData | null>(null);
@@ -236,6 +239,10 @@ export default function MobileDashboardHome() {
   }, [isLoggedIn, authLoading]);
 
   const studentName = formatStudentName(profile?.student?.name);
+
+  if (!isOnline && !cgpaData && !feedbackData && !loading) {
+    return <OfflineDisplay onRetry={loadData} />;
+  }
 
   if (authLoading || (loading && !cgpaData && !feedbackData)) {
     return <DashboardSkeleton />;

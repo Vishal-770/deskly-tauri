@@ -3,6 +3,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { getCurrentAttendance, AttendanceRecord } from "@/lib/attendance";
 import { ErrorDisplay } from "@/components/error-display";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import { Separator } from "@/components/ui/separator";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Outlet, useMatch, useNavigate } from "react-router-dom";
@@ -20,13 +22,7 @@ import {
   GraduationCap,
   ArrowRight,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DrawerSelect } from "@/components/ui/drawer-select";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -146,20 +142,68 @@ function AttendanceHint({ attended, total }: { attended: number; total: number }
 function AttendanceSkeleton() {
   return (
     <div className="space-y-8 px-2 py-4 animate-pulse font-saira">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-44" />
-          <Skeleton className="h-3.5 w-32" />
+      {/* Header: icon + title + refresh */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-6 h-6 rounded-md" />
+            <Skeleton className="h-7 w-40" />
+          </div>
+          <Skeleton className="h-3.5 w-36" />
         </div>
-        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-5 w-5 rounded-full shrink-0" />
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <Skeleton className="h-20" />
-        <Skeleton className="h-20" />
+
+      {/* Stats: 2 circular columns with separator */}
+      <div className="flex items-center py-1">
+        <div className="flex-1 flex items-center gap-4 min-w-0">
+          <Skeleton className="w-[60px] h-[60px] rounded-full shrink-0" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-2.5 w-28" />
+            <Skeleton className="h-7 w-16" />
+            <Skeleton className="h-2.5 w-20" />
+          </div>
+        </div>
+        <div className="w-px h-14 mx-4 bg-border/20 shrink-0" />
+        <div className="flex-1 flex items-center gap-4 min-w-0">
+          <Skeleton className="w-[60px] h-[60px] rounded-full shrink-0" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-2.5 w-28" />
+            <Skeleton className="h-7 w-20" />
+            <Skeleton className="h-2.5 w-24" />
+          </div>
+        </div>
       </div>
+
       <Separator />
-      <div className="space-y-4">
-        {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+
+      {/* Section label + filter */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-1.5 flex-1">
+          <Skeleton className="h-4 w-36" />
+          <Skeleton className="h-3.5 w-20" />
+        </div>
+        <Skeleton className="h-8 w-24 rounded-lg shrink-0" />
+      </div>
+
+      {/* Course rows: circle progress + code/title + count + bar */}
+      <div className="space-y-1 divide-y divide-border/10">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="flex items-center gap-4 py-4">
+            <Skeleton className="w-[46px] h-[46px] rounded-full shrink-0" />
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-3.5 w-20" />
+                <Skeleton className="h-4 w-14 rounded" />
+              </div>
+              <Skeleton className="h-3 w-full max-w-[200px]" />
+            </div>
+            <div className="shrink-0 space-y-1.5 text-right">
+              <Skeleton className="h-4 w-14 ml-auto" />
+              <Skeleton className="h-1 w-16 rounded-full ml-auto" />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -359,6 +403,7 @@ export default function AttendancePage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const isDetailRoute = useMatch("/dashboard/attendance/:classId");
+  const isOnline = useOnlineStatus();
 
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [semesterId, setSemesterId] = useState("");
@@ -440,6 +485,10 @@ export default function AttendancePage() {
 
   if (isDetailRoute) {
     return <Outlet />;
+  }
+
+  if (!isOnline && attendance.length === 0) {
+    return <OfflineDisplay onRetry={load} />;
   }
 
   if (authLoading || (loading && attendance.length === 0)) {
@@ -543,16 +592,17 @@ export default function AttendancePage() {
           </div>
 
           {/* Filter selector */}
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-30 h-8 text-[11px] rounded-lg bg-muted/20 border-border/20 focus:ring-1 focus:ring-sky-500/20 font-medium">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="rounded-lg bg-popover/95 backdrop-blur-md text-[11px]">
-              <SelectItem value="all">All Courses</SelectItem>
-              <SelectItem value="theory">Theory Only</SelectItem>
-              <SelectItem value="lab">Lab Only</SelectItem>
-            </SelectContent>
-          </Select>
+          <DrawerSelect
+            value={filterType}
+            onValueChange={setFilterType}
+            title="Filter Courses"
+            triggerClassName="h-8 px-3"
+            options={[
+              { value: "all", label: "All Courses" },
+              { value: "theory", label: "Theory Only" },
+              { value: "lab", label: "Lab Only" },
+            ]}
+          />
         </div>
 
         {filteredAttendance.length === 0 ? (

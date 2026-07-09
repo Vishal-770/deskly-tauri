@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from "@/router";
 import type { Path } from "@/router";
 import type { ElementType } from "react";
@@ -23,12 +23,20 @@ import {
   Briefcase,
   Phone,
   Settings, 
-  X 
+  X,
+  ArrowLeft,
+  WifiOff,
 } from "lucide-react";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 export default function MobileDashboardLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+
+  // Show back button on all pages except the root dashboard
+  const rootPaths = new Set(["/dashboard", "/dashboard/timetable"]);
+  const isOnSubPage = !rootPaths.has(location.pathname);
 
   type NavItem = {
     label: string;
@@ -65,9 +73,33 @@ export default function MobileDashboardLayout() {
 
   // Grid items inside the "More" bottom sheet
   const moreGridItems: NavItem[] = allNavItems.filter((item) => !corePaths.has(item.path));
+  const isOnline = useOnlineStatus();
+
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-background text-foreground select-none relative">
-      
+
+      {/* Back Button Bar & Offline Alert — visible on sub-pages */}
+      <div className="shrink-0 flex items-center justify-between px-4 pt-3 pb-1 bg-background z-20">
+        {isOnSubPage ? (
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer border-0 bg-transparent p-0"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm font-medium">Back</span>
+          </button>
+        ) : (
+          <div /> // spacer
+        )}
+
+        {!isOnline && (
+          <div className="flex items-center gap-1 text-[10px] font-bold text-amber-500/80 uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/10">
+            <WifiOff className="w-3 h-3" />
+            <span>Offline</span>
+          </div>
+        )}
+      </div>
+
       {/* Main Content Area */}
       <main className="flex-1 min-h-0 overflow-y-auto no-scrollbar pt-4 pb-16 px-4 bg-background">
         <Outlet />

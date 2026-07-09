@@ -4,6 +4,8 @@ import { getMarks, StudentMarkEntry } from "@/lib/features";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { Target, BookOpen } from "lucide-react";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -59,6 +61,7 @@ function MarksSkeleton() {
 
 export default function MarksPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
 
   const [data, setData] = useState<StudentMarkEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,11 +119,15 @@ export default function MarksPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && data.length === 0) {
+    return shell(<OfflineDisplay onRetry={load} />);
+  }
+
   if (authLoading || (loading && data.length === 0)) return shell(<MarksSkeleton />);
 
   if (error && data.length === 0) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay message={error} onRetry={load} />
       </div>
     );

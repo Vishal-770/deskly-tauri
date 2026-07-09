@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getStudentProfile, ProfileData } from "@/lib/features";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 
 import { ErrorDisplay } from "@/components/error-display";
 import {
@@ -99,24 +101,23 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label:
 
 export default function StudentProfilePage() {
   const { loading: authLoading } = useAuth();
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
+  const isOnline = useOnlineStatus();
+  const [profile, setProfile] = useState<ProfileData | null>(() => {
     const cached = localStorage.getItem("deskly::cache::profile");
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
         if (parsed && parsed.student && parsed.student.name) {
-          setProfile(parsed);
-          setLoading(false);
+          return parsed;
         }
       } catch (e) {
         console.error("Failed to parse cached profile", e);
       }
     }
-  }, []);
+    return null;
+  });
+  const [loading, setLoading] = useState(!profile);
+  const [error, setError] = useState<string | null>(null);
 
   async function fetchProfile() {
     setLoading(profile ? false : true);
@@ -125,6 +126,7 @@ export default function StudentProfilePage() {
       if (res.success && res.data) {
         setProfile(res.data);
         localStorage.setItem("deskly::cache::profile", JSON.stringify(res.data));
+        setError(null);
       } else {
         setError(res.error ?? "Failed to fetch student profile details.");
       }
@@ -136,12 +138,20 @@ export default function StudentProfilePage() {
   }
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (isOnline) {
+      fetchProfile();
+    }
+  }, [isOnline]);
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
-  if (authLoading || loading) return shell(<ProfileSkeleton />);
+  if (authLoading) return shell(<ProfileSkeleton />);
+
+  if (!isOnline && !profile) {
+    return shell(<OfflineDisplay onRetry={fetchProfile} />);
+  }
+
+  if (loading) return shell(<ProfileSkeleton />);
 
   if (error || !profile) {
     return shell(

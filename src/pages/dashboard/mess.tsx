@@ -10,13 +10,9 @@ import {
 import { MESS_OPTIONS } from "@/lib/constants";
 
 import { ErrorDisplay } from "@/components/error-display";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { DrawerSelect } from "@/components/ui/drawer-select";
+import { useOnlineStatus } from "@/hooks/use-online-status";
+import { OfflineDisplay } from "@/components/offline-display";
 import {
   Coffee,
   Utensils,
@@ -127,6 +123,7 @@ function MessSkeleton() {
 
 export default function MessMenuPage() {
   const { loading: authLoading } = useAuth();
+  const isOnline = useOnlineStatus();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [selectedMess, setSelectedMess] = useState<MessType>("Veg-mens");
   const [menuData, setMenuData] = useState<MessMenuItem[] | null>(null);
@@ -252,9 +249,13 @@ export default function MessMenuPage() {
 
   const shell = (children: React.ReactNode) => <>{children}</>;
 
+  if (!isOnline && !menuData) {
+    return shell(<OfflineDisplay onRetry={() => fetchMenu(selectedMess)} />);
+  }
+
   if (error && !menuData) {
     return shell(
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center font-saira">
         <ErrorDisplay title="Mess Menu Unreachable" message={error} onRetry={() => fetchMenu(selectedMess)} />
       </div>
     );
@@ -287,18 +288,13 @@ export default function MessMenuPage() {
         </div>
 
         {/* Mess selector */}
-        <Select value={selectedMess} onValueChange={(val) => setSelectedMess(val as MessType)}>
-          <SelectTrigger className="w-[120px] h-9 rounded-xl bg-muted/20 border-border/10 text-xs shrink-0">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/20 bg-card">
-            {MESS_OPTIONS.map((m) => (
-              <SelectItem key={m} value={m} className="text-xs">
-                {formatMessTypeLabel(m)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <DrawerSelect
+          value={selectedMess}
+          onValueChange={(val) => setSelectedMess(val as MessType)}
+          title="Select Mess"
+          triggerClassName="h-9 w-[130px]"
+          options={MESS_OPTIONS.map((m) => ({ value: m, label: formatMessTypeLabel(m) }))}
+        />
       </header>
 
       {/* ── Today / Day Selector Dropdown label ────────────────────────────────── */}
