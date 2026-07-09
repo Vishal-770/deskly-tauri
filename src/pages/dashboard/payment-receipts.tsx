@@ -5,6 +5,7 @@ import { getPaymentReceipts, Receipt } from "@/lib/features";
 import { ErrorDisplay } from "@/components/error-display";
 import {
   ArrowLeft,
+  Search,
   Calendar,
   Receipt as ReceiptIcon,
   CreditCard,
@@ -166,6 +167,9 @@ export default function PaymentReceiptsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Search State
+  const [searchQuery, setSearchQuery] = useState("");
+
   // Load receipts data
   useEffect(() => {
     const cached = localStorage.getItem("deskly::cache::payment_receipts");
@@ -207,7 +211,15 @@ export default function PaymentReceiptsPage() {
     load();
   }, []);
 
-  const filteredReceipts = useMemo(() => receipts, [receipts]);
+  // Compute clean, filtered data
+  const filteredReceipts = useMemo(() => {
+    return receipts.filter((receipt) => {
+      return (
+        receipt.receiptNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        receipt.receiptId.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    });
+  }, [receipts, searchQuery]);
 
   // Compute Summary Statistics
   const stats = useMemo(() => {
@@ -260,10 +272,10 @@ export default function PaymentReceiptsPage() {
   }
 
   return shell(
-    <div className="w-full space-y-6 px-4 pt-4 pb-24 min-h-screen">
+    <div className="w-full space-y-6">
       
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="pb-4 border-b border-border/20 flex flex-col gap-4">
+      <header className="pb-4 border-b border-border/20 flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <button
@@ -272,7 +284,7 @@ export default function PaymentReceiptsPage() {
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <h1 className="text-xl font-extrabold tracking-tight bg-linear-to-r from-foreground via-foreground/95 to-muted-foreground bg-clip-text text-transparent">
+            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/95 to-muted-foreground bg-clip-text text-transparent">
               Receipt History
             </h1>
           </div>
@@ -284,12 +296,12 @@ export default function PaymentReceiptsPage() {
 
       {/* ── Student Profile Details ───────────────────────────────────────── */}
       {studentMeta && (
-        <div className="w-full py-4">
-          <div className="flex items-center gap-4 min-w-0 rounded-2xl border border-border/10 bg-muted/10 px-4 py-3">
+        <div className="w-full py-4 flex items-center justify-between gap-6">
+          <div className="flex items-center gap-4 min-w-0">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <User className="w-5 h-5 text-primary" />
             </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 min-w-0 flex-1">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-1 sm:gap-y-0.5">
               <div className="min-w-0">
                 <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Reg. No.</p>
                 <p className="text-sm font-black text-foreground truncate">{studentMeta.regNo}</p>
@@ -298,7 +310,7 @@ export default function PaymentReceiptsPage() {
                 <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Application No.</p>
                 <p className="text-sm font-bold text-foreground truncate">{studentMeta.applNo}</p>
               </div>
-              <div className="min-w-0 col-span-2">
+              <div className="min-w-0 col-span-2 md:col-span-1">
                 <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Campus Code</p>
                 <p className="text-sm font-bold text-foreground/80">{studentMeta.campusCode}</p>
               </div>
@@ -308,9 +320,9 @@ export default function PaymentReceiptsPage() {
       )}
 
       {/* ── Top Stats Summary Grid ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-3 py-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:grid-cols-3 py-2">
         {/* Total Receipts */}
-        <div className="flex items-center gap-4 py-3 px-4 rounded-2xl border border-border/10 bg-muted/10">
+        <div className="flex items-center gap-4 py-2">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
             <ReceiptIcon className="w-5 h-5 text-primary" />
           </div>
@@ -322,7 +334,7 @@ export default function PaymentReceiptsPage() {
         </div>
 
         {/* Total Amount Paid */}
-        <div className="flex items-center gap-4 py-3 px-4 rounded-2xl border border-border/10 bg-muted/10">
+        <div className="flex items-center gap-4 py-2">
           <div className="w-10 h-10 rounded-full bg-chart-2/10 flex items-center justify-center shrink-0">
             <CreditCard className="w-5 h-5 text-chart-2" />
           </div>
@@ -334,7 +346,7 @@ export default function PaymentReceiptsPage() {
         </div>
 
         {/* Latest Payment */}
-        <div className="flex items-center gap-4 py-3 px-4 rounded-2xl border border-border/10 bg-muted/10">
+        <div className="flex items-center gap-4 py-2">
           <div className="w-10 h-10 rounded-full bg-chart-4/10 flex items-center justify-center shrink-0">
             <Calendar className="w-5 h-5 text-chart-4" />
           </div>
@@ -346,50 +358,114 @@ export default function PaymentReceiptsPage() {
         </div>
       </div>
 
-      {/* ── Mobile Card List ─────────────────────────────────────────────── */}
-      <div className="w-full space-y-3">
+      {/* ── Search Controls ──────────────────────────────────────── print:hidden */}
+      <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden py-4">
+        {/* Search */}
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+          <input
+            type="text"
+            placeholder="Search by receipt number..."
+            className="h-10 w-full rounded-full border border-border/50 bg-background pl-9 pr-3 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all placeholder:text-muted-foreground/40 text-foreground"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* ── Table / Cards Container ───────────────────────────────────────── */}
+      <div className="w-full">
         {filteredReceipts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3 text-center border border-dashed border-border/60 rounded-3xl bg-accent/5">
             <ReceiptIcon className="w-10 h-10 text-muted-foreground/25" />
             <p className="text-sm font-bold text-foreground">No receipts found</p>
-            <p className="text-xs text-muted-foreground">No payment receipts are available right now.</p>
+            <p className="text-xs text-muted-foreground">
+              Try adjusting your search criteria.
+            </p>
           </div>
         ) : (
-          filteredReceipts.map((receipt) => (
-            <div key={receipt.receiptNumber} className="rounded-2xl border border-border/10 bg-muted/10 p-4 space-y-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                    <FileText className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-black text-foreground truncate">Receipt #{receipt.receiptNumber}</p>
-                    <p className="text-[10px] text-muted-foreground">{receipt.date}</p>
-                  </div>
-                </div>
-                <span className="text-sm font-extrabold text-chart-2 shrink-0">{formatINR(receipt.amount)}</span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-[10px]">
-                <div className="min-w-0">
-                  <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Receipt ID</p>
-                  <p className="font-mono text-foreground mt-0.5 truncate">{receipt.receiptId || "-"}</p>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Campus Code</p>
-                  <p className="font-semibold text-foreground mt-0.5 truncate">{receipt.campusCode}</p>
-                </div>
-                <div className="col-span-2 min-w-0">
-                  <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Application No.</p>
-                  <p className="font-semibold text-foreground mt-0.5 truncate">{receipt.applNo || "-"}</p>
-                </div>
-                <div className="col-span-2 min-w-0">
-                  <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Registration No.</p>
-                  <p className="font-semibold text-foreground mt-0.5 truncate">{receipt.regNo || "-"}</p>
-                </div>
-              </div>
+          <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto rounded-3xl">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="bg-accent/15 border-b border-border/30 text-[10px] font-black uppercase tracking-wider text-muted-foreground/80">
+                    <th className="py-3 px-4 w-12 text-center">Icon</th>
+                    <th className="py-3 px-4">Receipt Number</th>
+                    <th className="py-3 px-4">Date</th>
+                    <th className="py-3 px-4">Amount</th>
+                    <th className="py-3 px-4">Campus Code</th>
+                    <th className="py-3 px-4">Receipt ID</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/20 text-xs font-semibold text-foreground/90">
+                  {filteredReceipts.map((receipt) => {
+                    return (
+                      <tr
+                        key={receipt.receiptNumber}
+                        className="hover:bg-accent/5 transition-colors duration-150"
+                      >
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center mx-auto text-primary">
+                            <FileText className="w-4 h-4" />
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-foreground">{receipt.receiptNumber}</td>
+                        <td className="py-3.5 px-4 text-muted-foreground/80">{receipt.date}</td>
+                        <td className="py-3.5 px-4 font-extrabold text-chart-2">
+                          {formatINR(receipt.amount)}
+                        </td>
+                        <td className="py-3.5 px-4 text-muted-foreground/80">{receipt.campusCode}</td>
+                        <td className="py-3.5 px-4 font-mono text-[11px] text-muted-foreground/70 shrink-0">
+                          {receipt.receiptId || "-"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          ))
+
+            {/* Mobile List View (Flat, divider-based item list with no offset card color) */}
+            <div className="divide-y divide-border/20 md:hidden">
+              {filteredReceipts.map((receipt) => {
+                return (
+                  <div
+                    key={receipt.receiptNumber}
+                    className="py-4 flex flex-col gap-3"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-foreground">
+                            Receipt #{receipt.receiptNumber}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">{receipt.date}</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-extrabold text-chart-2">
+                        {formatINR(receipt.amount)}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[10px] pl-11">
+                      <div>
+                        <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Receipt ID</p>
+                        <p className="font-mono text-foreground mt-0.5 truncate">{receipt.receiptId || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Campus Code</p>
+                        <p className="font-semibold text-foreground mt-0.5">{receipt.campusCode}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 

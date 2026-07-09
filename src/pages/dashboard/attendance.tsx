@@ -1,90 +1,108 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate, useMatch, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getCurrentAttendance, AttendanceRecord } from "@/lib/attendance";
+
 import { ErrorDisplay } from "@/components/error-display";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { Outlet, useMatch, useNavigate } from "react-router-dom";
 import {
+  BookOpen,
+  CheckCircle,
   UserCheck,
-  CalendarDays,
+  AlertCircle,
   User,
-  School,
-  Hash,
-  LayoutGrid,
-  RefreshCw,
-  Trophy,
-  TrendingUp,
-  Clock,
-  GraduationCap,
-  ArrowRight,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Loader Skeleton Layout ───────────────────────────────────────────────────
 
-function getPercentageColor(pct: number) {
-  if (pct >= 75) return "text-emerald-500";
-  if (pct >= 50) return "text-amber-500";
-  return "text-destructive";
+function Sk({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-full bg-muted/65 ${className}`} />;
 }
 
-function getCircleStrokeColor(pct: number) {
-  if (pct >= 75) return "stroke-emerald-500";
-  if (pct >= 50) return "stroke-amber-500";
-  return "stroke-destructive";
+function AttendanceSkeleton() {
+  return (
+    <div className="w-full space-y-8 animate-pulse">
+      {/* Header skeleton */}
+      <div className="pb-4 border-b border-border/20 flex items-center gap-4">
+        <Sk className="w-8 h-8 rounded-full" />
+        <div className="space-y-2">
+          <Sk className="h-6 w-36 rounded-full" />
+          <Sk className="h-3 w-56 rounded-full" />
+        </div>
+      </div>
+
+      {/* Stats skeleton */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-4 border-b border-border/15">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="flex items-center gap-3 py-2">
+            <Sk className="w-9 h-9 rounded-full shrink-0" />
+            <div className="space-y-2 w-full">
+              <Sk className="h-2 w-16 rounded-full" />
+              <Sk className="h-4 w-24 rounded-full" />
+              <Sk className="h-1.5 w-20 rounded-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* List skeleton */}
+      <div className="space-y-6 pt-2">
+        <div className="space-y-2">
+          <Sk className="h-4 w-32 rounded-full" />
+          <Sk className="h-2.5 w-48 rounded-full" />
+        </div>
+        
+        <div className="flex flex-col border-t border-border/10 divide-y divide-border/10">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-5">
+              <div className="flex items-start gap-4 flex-1">
+                <Sk className="w-12 h-12 rounded-full shrink-0" />
+                <div className="space-y-2.5 flex-1">
+                  <div className="flex gap-2">
+                    <Sk className="h-3 w-20 rounded-full" />
+                    <Sk className="h-3 w-12 rounded-full" />
+                    <Sk className="h-3 w-16 rounded-full" />
+                  </div>
+                  <Sk className="h-4 w-64 rounded-full" />
+                  <Sk className="h-2.5 w-40 rounded-full" />
+                </div>
+              </div>
+              <div className="flex items-center gap-6 pt-3 sm:pt-0">
+                <Sk className="h-6 w-16 rounded-full" />
+                <Sk className="h-5 w-24 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function getBarBgColor(pct: number) {
-  if (pct >= 75) return "bg-emerald-500";
-  if (pct >= 50) return "bg-amber-500";
-  return "bg-destructive";
-}
+// ─── Circular Progress ────────────────────────────────────────────────────────
 
-function getCourseBadgeStyle(type: string) {
-  const t = type.toLowerCase();
-  if (t.includes("lab")) {
-    return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10";
-  }
-  return "bg-sky-500/10 text-sky-400 border border-sky-500/10";
-}
-
-function formatCourseType(type: string) {
-  const t = type.toLowerCase();
-  if (t.includes("embedded theory") || t.includes("theory")) return "Theory Only";
-  if (t.includes("embedded lab") || t.includes("lab")) return "Lab Only";
-  return type;
-}
-
-// ─── Circular Progress for stats ──────────────────────────────────────────────
-
-function StatCircularProgress({
-  percentage,
-  size = 64,
-  icon: Icon,
-}: {
-  percentage: number;
-  size?: number;
-  icon: React.ElementType;
-}) {
+function CircularProgress({ percentage, size = 48 }: { percentage: number; size?: number }) {
   const radius = (size - 6) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
 
+  let stroke = "text-destructive";
+  if (percentage >= 75) stroke = "text-chart-2";
+  else if (percentage >= 50) stroke = "text-chart-3";
+
   return (
     <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle className="text-muted/15 stroke-current" strokeWidth="4.5" fill="transparent" r={radius} cx={size / 2} cy={size / 2} />
+      <svg width={size} height={size} className="transform -rotate-90">
         <circle
-          className="stroke-sky-500 transition-all duration-500"
-          strokeWidth="4.5"
+          className="text-muted/30 stroke-current"
+          strokeWidth="3.5"
+          fill="transparent"
+          r={radius}
+          cx={size / 2}
+          cy={size / 2}
+        />
+        <circle
+          className={`${stroke} stroke-current transition-all duration-500`}
+          strokeWidth="3.5"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
@@ -94,310 +112,166 @@ function StatCircularProgress({
           cy={size / 2}
         />
       </svg>
-      <div className="absolute text-sky-500">
-        <Icon className="w-5 h-5" />
-      </div>
+      <span className="absolute text-[10px] font-black text-foreground leading-none">{percentage}%</span>
     </div>
   );
 }
 
-// ─── Circular Progress for list rows ──────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function ListCircularProgress({ percentage, size = 48 }: { percentage: number; size?: number }) {
-  const radius = (size - 5) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
-
-  return (
-    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="-rotate-90">
-        <circle className="text-muted/15 stroke-current" strokeWidth="3" fill="transparent" r={radius} cx={size / 2} cy={size / 2} />
-        <circle
-          className={`${getCircleStrokeColor(percentage)} transition-all duration-500`}
-          strokeWidth="3"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          fill="transparent"
-          r={radius}
-          cx={size / 2}
-          cy={size / 2}
-        />
-      </svg>
-      <span className="absolute text-[11px] font-semibold text-foreground leading-none">{percentage}%</span>
-    </div>
-  );
+function getCourseTypeStyle(type: string): string {
+  const c = type.trim().toUpperCase();
+  if (c.includes("EMBEDDED THEORY")) return "text-primary";
+  if (c.includes("EMBEDDED LAB")) return "text-chart-2";
+  if (c.includes("THEORY")) return "text-primary";
+  if (c.includes("LAB")) return "text-chart-2";
+  if (c.includes("ONLINE")) return "text-chart-1";
+  if (c.includes("SOFT SKILL") || c.includes("SKILL")) return "text-chart-4";
+  return "text-muted-foreground";
 }
-
-// ─── Attendance Hint ──────────────────────────────────────────────────────────
 
 function AttendanceHint({ attended, total }: { attended: number; total: number }) {
   const need = Math.ceil(3 * total - 4 * attended);
   const canSkip = Math.floor((4 * attended - 3 * total) / 3);
-  if (need > 0)
-    return <span className="text-xs font-medium text-destructive">Attend {need} more to reach 75%</span>;
-  if (canSkip > 0)
-    return <span className="text-xs font-medium text-emerald-500">Can miss {canSkip} more classes</span>;
-  return <span className="text-xs font-medium text-muted-foreground">On track ✓</span>;
+
+  if (need > 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-destructive bg-destructive/8 px-2 py-0.5 rounded-full">
+        Attend {need} more
+      </span>
+    );
+  }
+  if (canSkip > 0) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-chart-2 bg-chart-2/8 px-2 py-0.5 rounded-full">
+        Can miss {canSkip}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+      On track
+    </span>
+  );
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
+function AttendanceCard({ item, index }: { item: AttendanceRecord; index: number }) {
+  const typeColor = getCourseTypeStyle(item.courseType);
+  const navigate = useNavigate();
 
-function AttendanceSkeleton() {
   return (
-    <div className="space-y-8 px-2 py-4 animate-pulse font-saira">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-44" />
-          <Skeleton className="h-3.5 w-32" />
+    <div
+      onClick={() => {
+        navigate(`/dashboard/attendance/${item.classId}`, { state: { record: item } });
+      }}
+      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-6 border-b border-border/10 hover:bg-muted/5 cursor-pointer transition-colors min-w-0 w-full"
+    >
+      {/* Course Info */}
+      <div className="flex items-start gap-4 min-w-0 flex-1">
+        {/* Progress circle */}
+        <div className="shrink-0 pt-0.5">
+          <CircularProgress percentage={item.attendancePercentage} size={52} />
         </div>
-        <Skeleton className="h-6 w-6 rounded-full" />
+        
+        {/* Texts */}
+        <div className="space-y-1.5 min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <span className="text-[10px] font-bold text-muted-foreground/45 tabular-nums shrink-0">
+              {item.slNo ?? index + 1}
+            </span>
+            <span className="text-sm md:text-base font-extrabold tracking-widest text-primary uppercase leading-none shrink-0">
+              {item.courseCode}
+            </span>
+            <span className="font-mono text-[10px] font-black text-muted-foreground/60 bg-muted/70 px-1.5 py-0.5 rounded-md leading-none shrink-0">
+              {item.slot}
+            </span>
+            <span className={`text-xs font-semibold shrink-0 ${typeColor}`}>
+              {item.courseType}
+            </span>
+          </div>
+          
+          <p className="text-sm md:text-base lg:text-lg font-bold text-foreground leading-snug">
+            {item.courseTitle}
+          </p>
+          
+          {item.faculty?.name && (
+            <p className="text-xs md:text-sm text-muted-foreground/80 font-medium truncate flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+              <span>{item.faculty.name}</span>
+              {item.faculty.school && (
+                <span className="text-[10px] md:text-xs text-muted-foreground/50 font-bold uppercase">
+                  · {item.faculty.school}
+                </span>
+              )}
+            </p>
+          )}
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <Skeleton className="h-20" />
-        <Skeleton className="h-20" />
-      </div>
-      <Separator />
-      <div className="space-y-4">
-        {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+
+      {/* Attendance Stats & Action */}
+      <div className="flex items-center justify-between sm:justify-end gap-6 shrink-0 border-t border-border/5 sm:border-t-0 pt-3 sm:pt-0">
+        <div className="flex items-baseline gap-1">
+          <span className="text-xl md:text-2xl lg:text-3xl font-black text-foreground tabular-nums leading-none">
+            {item.attendedClasses}
+          </span>
+          <span className="text-muted-foreground/30 text-sm font-light">/</span>
+          <span className="text-sm md:text-base font-bold text-muted-foreground tabular-nums leading-none">
+            {item.totalClasses}
+          </span>
+          <span className="text-[10px] md:text-xs text-muted-foreground/50 font-medium ml-1">classes</span>
+        </div>
+        
+        <div className="w-28 flex justify-end">
+          <AttendanceHint attended={item.attendedClasses} total={item.totalClasses} />
+        </div>
       </div>
     </div>
   );
 }
-
-// ─── Attendance Row Component ──────────────────────────────────────────────────
-
-function AttendanceRow({
-  item,
-  onSelect,
-}: {
-  item: AttendanceRecord;
-  onSelect: () => void;
-}) {
-  const pct = item.attendancePercentage;
-  const badgeStyle = getCourseBadgeStyle(item.courseType);
-  const displayType = formatCourseType(item.courseType);
-
-  return (
-    <button
-      onClick={onSelect}
-      className="w-full flex items-center gap-4 py-4 text-left active:bg-muted/15 transition-colors border-none bg-transparent cursor-pointer"
-    >
-      <ListCircularProgress percentage={pct} size={46} />
-
-      <div className="flex-1 min-w-0 space-y-1">
-        <div className="flex items-center gap-2 flex-wrap leading-none">
-          <span className="text-sm font-semibold tracking-wide text-foreground uppercase">
-            {item.courseCode}
-          </span>
-          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${badgeStyle}`}>
-            {displayType}
-          </span>
-        </div>
-        <p className="text-xs text-muted-foreground truncate leading-none">
-          {item.courseTitle}
-        </p>
-      </div>
-
-            <div className="shrink-0 min-w-19 text-right space-y-1.5">
-              <p className="text-sm font-semibold text-foreground leading-none tabular-nums whitespace-nowrap">
-                {item.attendedClasses} <span className="text-muted-foreground/45 text-xs font-normal">/ {item.totalClasses}</span>
-        </p>
-        <div className="w-16 h-0.75 bg-muted/30 rounded-full overflow-hidden ml-auto">
-          <div
-            className={`h-full rounded-full ${getBarBgColor(pct)}`}
-            style={{ width: `${Math.min(pct, 100)}%` }}
-          />
-        </div>
-      </div>
-    </button>
-  );
-}
-
-// ─── Detail Drawer Component ──────────────────────────────────────────────────
-
-function AttendanceDrawer({
-  item,
-  open,
-  onOpenChange,
-  onViewDetail,
-}: {
-  item: AttendanceRecord | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onViewDetail: () => void;
-}) {
-  if (!item) return null;
-
-  const pct = item.attendancePercentage;
-  const badgeStyle = getCourseBadgeStyle(item.courseType);
-  const displayType = formatCourseType(item.courseType);
-
-  const details = [
-    { icon: Hash,          label: "Course Code",   value: item.courseCode,          color: "text-blue-500" },
-    { icon: LayoutGrid,    label: "Slot",          value: item.slot,                color: "text-sky-400" },
-    { icon: GraduationCap, label: "Course Type",   value: item.courseType,          color: "text-purple-400" },
-    { icon: User,          label: "Faculty",       value: item.faculty?.name ?? "—", color: "text-emerald-400" },
-    { icon: School,        label: "School",        value: item.faculty?.school ?? "—",color: "text-amber-400" },
-    { icon: CalendarDays,  label: "Registered On", value: item.registrationDate || "—", color: "text-blue-400" },
-    { icon: Clock,         label: "Last Updated",  value: item.attendanceDate || "—", color: "text-neutral-400" },
-  ];
-
-  return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="pb-8 font-saira max-h-[92vh]">
-        <div className="overflow-y-auto no-scrollbar px-6 space-y-7 pt-5">
-          
-          {/* Header Row */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              <ListCircularProgress percentage={pct} size={54} />
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-2 leading-none">
-                  <span className="text-sm font-medium tracking-wide text-sky-500 uppercase">
-                    {item.courseCode}
-                  </span>
-                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${badgeStyle}`}>
-                    {displayType}
-                  </span>
-                </div>
-                <h2 className="text-xl font-medium text-foreground leading-snug tracking-tight">
-                  {item.courseTitle}
-                </h2>
-              </div>
-            </div>
-            
-            {/* Close Button */}
-            <button
-              onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0"
-            >
-              <span className="text-lg leading-none font-sans">×</span>
-            </button>
-          </div>
-
-          {/* Attendance Status block */}
-          <div className="space-y-3 pt-2">
-            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
-              Attendance Status
-            </p>
-            
-            <div className="flex items-center gap-4">
-              <span className={`text-[32px] font-medium leading-none ${getPercentageColor(pct)}`}>
-                {pct}%
-              </span>
-              <div className="h-2.5 flex-1 bg-muted/30 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ${getBarBgColor(pct)}`}
-                  style={{ width: `${Math.min(pct, 100)}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground leading-none pt-0.5">
-              <AttendanceHint attended={item.attendedClasses} total={item.totalClasses} />
-              <span className="font-mono tabular-nums whitespace-nowrap shrink-0 text-right">
-                {item.attendedClasses} / {item.totalClasses} classes attended
-              </span>
-            </div>
-
-            {/* View Full Details button */}
-            <button
-              onClick={onViewDetail}
-              className="w-full flex items-center justify-between mt-3 px-4 py-3 rounded-xl bg-muted/30 border border-border/10 text-xs font-semibold text-foreground hover:bg-muted/50 active:opacity-85 transition-colors cursor-pointer"
-            >
-              <span>View Detailed Session Log</span>
-              <ArrowRight className="w-4 h-4 text-sky-500" />
-            </button>
-          </div>
-
-          {/* Course Information Timeline */}
-          <div className="space-y-4 pt-1">
-            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
-              Course Information
-            </p>
-
-            <div className="space-y-0">
-              {details.map(({ icon: Icon, label, value, color }, index) => (
-                <div key={label} className="flex gap-4 relative">
-                  
-                  {/* Icon */}
-                  <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                    <Icon className={`w-5 h-5 ${color} shrink-0`} />
-                  </div>
-                  
-                  {/* Timeline node */}
-                  <div className="relative flex flex-col items-center shrink-0 w-3">
-                    {/* Line */}
-                    {index < details.length - 1 && (
-                      <div className="absolute top-4 bottom-0 w-px bg-border/20 left-1/2 -translate-x-1/2" />
-                    )}
-                    {/* Dot */}
-                    <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/45 mt-2 z-10" />
-                  </div>
-                  
-                  {/* Text contents */}
-                  <div className="min-w-0 pb-5 space-y-0.5">
-                    <p className="text-xs text-muted-foreground leading-none">{label}</p>
-                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
-                  </div>
-                  
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      </DrawerContent>
-    </Drawer>
-  );
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AttendancePage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const isDetailRoute = useMatch("/dashboard/attendance/:classId");
 
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
-  const [semesterId, setSemesterId] = useState("");
+  const [semesterId, setSemesterId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<AttendanceRecord | null>(null);
-  const [filterType, setFilterType] = useState("all");
-
-
 
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem("deskly::cache::attendance");
-      const cachedSem = localStorage.getItem("deskly::cache::attendance_semester");
-      if (cached) {
+    const cached = localStorage.getItem("deskly::cache::attendance");
+    const cachedSem = localStorage.getItem("deskly::cache::attendance_semester");
+    if (cached) {
+      try {
         const parsed = JSON.parse(cached) as AttendanceRecord[];
         if (parsed.length > 0) {
           setAttendance(parsed);
           if (cachedSem) setSemesterId(cachedSem);
           setLoading(false);
         }
+      } catch (e) {
+        console.error("Failed to parse cached attendance", e);
       }
-    } catch {}
+    }
   }, []);
 
   async function load() {
-    if (authLoading || !isLoggedIn) return;
-    setError(null);
-    setLoading(attendance.length === 0);
     try {
+      if (!isLoggedIn && !authLoading) return;
+      setError(null);
+      if (authLoading) return;
+
+      setLoading(attendance.length > 0 ? false : true);
+
       const res = await getCurrentAttendance();
       if (res.success && res.data) {
         setAttendance(res.data);
-        const sem = res.semesterId ?? "";
+        const sem = res.semesterId || "";
         setSemesterId(sem);
         localStorage.setItem("deskly::cache::attendance", JSON.stringify(res.data));
         localStorage.setItem("deskly::cache::attendance_semester", sem);
       } else {
-        setError(res.error ?? "Failed to fetch attendance.");
+        setError(res.error ?? "Failed to fetch attendance records.");
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -414,207 +288,144 @@ export default function AttendancePage() {
     let totalAttended = 0;
     let totalClasses = 0;
     attendance.forEach((r) => {
-      totalAttended += r.attendedClasses ?? 0;
-      totalClasses += r.totalClasses ?? 0;
+      totalAttended += r.attendedClasses || 0;
+      totalClasses += r.totalClasses || 0;
     });
-    return {
-      totalCourses: attendance.length,
-      totalAttended,
-      totalClasses,
-      overallPercentage: totalClasses > 0 ? Math.round((totalAttended / totalClasses) * 100) : 0,
-    };
+    const overallPercentage =
+      totalClasses > 0 ? Math.round((totalAttended / totalClasses) * 100) : 0;
+    return { totalCourses: attendance.length, totalAttended, totalClasses, overallPercentage };
   }, [attendance]);
 
-  const filteredAttendance = useMemo(() => {
-    if (filterType === "theory") {
-      return attendance.filter((item) => {
-        const t = item.courseType.toLowerCase();
-        return t.includes("theory") && !t.includes("lab");
-      });
-    }
-    if (filterType === "lab") {
-      return attendance.filter((item) => item.courseType.toLowerCase().includes("lab"));
-    }
-    return attendance;
-  }, [attendance, filterType]);
 
+
+  // Detect if we're on a child route (detail page) — if so, render only the Outlet
+  const isDetailRoute = useMatch("/dashboard/attendance/:classId");
+
+  const shell = (children: React.ReactNode) => (
+    <>{children}</>
+  );
+
+  // If we're on the detail child route, render the Outlet (detail page) inside the shell
   if (isDetailRoute) {
-    return <Outlet />;
+    return shell(<Outlet />);
   }
 
   if (authLoading || (loading && attendance.length === 0)) {
-    return <AttendanceSkeleton />;
+    return shell(<AttendanceSkeleton />);
   }
 
   if (error && attendance.length === 0) {
-    return (
-      <div className="flex h-full items-center justify-center font-saira">
+    return shell(
+      <div className="flex h-full items-center justify-center">
         <ErrorDisplay message={error} onRetry={load} />
       </div>
     );
   }
 
-  return (
-    <div className="w-full space-y-10 px-2 py-4 font-saira select-none overscroll-y-contain">
-      {/* Google Font Saira Injection */}
-      <style>{`
-        .font-saira {
-          font-family: 'Saira', sans-serif !important;
-        }
-      `}</style>
-
-      {/* Error banner */}
+  return shell(
+    <div className="w-full space-y-8">
       {error && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
-          <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
-          <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
+            <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
+          </div>
+          <button 
+            onClick={load}
+            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+          >
             Retry
           </button>
         </div>
       )}
 
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start justify-between gap-4">
-        <div className="space-y-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <UserCheck className="w-6 h-6 text-sky-500 shrink-0" />
-            <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <header className="pb-4 border-b border-border/20">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              <UserCheck className="w-6 h-6 text-primary shrink-0" />
               My Attendance
             </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {semesterId
+                ? <>Semester: <code className="font-mono font-bold text-foreground">{semesterId}</code></>
+                : "Semester Overview"}
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Semester: {semesterId || "Odd 2024-25"}
-          </p>
         </div>
-        <button
-          onClick={load}
-          className="p-1 hover:opacity-80 text-foreground shrink-0 border-0 bg-transparent cursor-pointer"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </button>
       </header>
 
-      {/* ── Stats (Clean columns, no boxes, split by vertical line separator) ──── */}
-      <div className="flex items-center py-1">
-        {/* Average Attendance Column */}
-        <div className="flex-1 flex items-center gap-4 min-w-0">
-          <StatCircularProgress percentage={stats.overallPercentage} icon={TrendingUp} size={60} />
-          <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider leading-none">
-              Average Attendance
-            </p>
-            <p className="text-2xl font-semibold text-foreground leading-none py-1">
-              {stats.overallPercentage}%
-            </p>
-            <p className="text-[10px] text-muted-foreground leading-none">Overall Average</p>
+      {/* ── Stats Cards ─────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-4 border-b border-border/15">
+        {[
+          {
+            label: "Courses",
+            value: stats.totalCourses,
+            sub: "Registered",
+            icon: <BookOpen className="w-4 h-4 md:w-5 h-5 text-primary" />,
+          },
+          {
+            label: "Attended",
+            value: stats.totalAttended,
+            sub: `of ${stats.totalClasses} classes`,
+            icon: <CheckCircle className="w-4 h-4 md:w-5 h-5 text-primary" />,
+          },
+          {
+            label: "Overall",
+            value: `${stats.overallPercentage}%`,
+            sub: "Average Attendance",
+            icon: <UserCheck className="w-4 h-4 md:w-5 h-5 text-primary" />,
+          },
+          {
+            label: "Min. Required",
+            value: "75%",
+            sub: "Good standing Limit",
+            icon: <AlertCircle className="w-4 h-4 md:w-5 h-5 text-primary" />,
+          },
+        ].map((s) => (
+          <div
+            key={s.label}
+            className="flex items-center gap-3 md:gap-4 py-2 min-w-0"
+          >
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0">
+              {s.icon}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] md:text-xs font-bold text-muted-foreground/60 uppercase tracking-wider leading-none">
+                {s.label}
+              </p>
+              <p className="text-lg md:text-2xl lg:text-3xl font-black text-foreground mt-1.5 leading-none">{s.value}</p>
+              <p className="text-[9px] md:text-xs text-muted-foreground/65 font-bold mt-1.5 leading-none truncate">{s.sub}</p>
+            </div>
           </div>
-        </div>
-
-        <Separator orientation="vertical" className="h-14 mx-4 bg-border/20 shrink-0" />
-
-        {/* Classes Attended Column */}
-        <div className="flex-1 flex items-center gap-4 min-w-0">
-          <StatCircularProgress percentage={Math.round((stats.totalAttended / (stats.totalClasses || 1)) * 100)} icon={CalendarDays} size={60} />
-          <div className="min-w-0 space-y-0.5 shrink-0">
-            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider leading-none">
-              Classes Attended
-            </p>
-            <p className="text-xl font-semibold text-foreground leading-none py-1 tabular-nums whitespace-nowrap">
-              {stats.totalAttended} / {stats.totalClasses}
-            </p>
-            <p className="text-[10px] text-muted-foreground leading-none">Attended of Total</p>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <Separator className="bg-border/40" />
-
-      {/* ── Course List Section ──────────────────────────────────────────────── */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1.5 flex-1 min-w-0">
-            <div className="flex items-center gap-2 leading-none">
-              <span className="w-1 h-4 bg-sky-500 rounded-full shrink-0" />
-              <h2 className="text-lg font-medium tracking-tight text-foreground leading-none">
-                Course Attendance
-              </h2>
-            </div>
-            <p className="text-xs text-muted-foreground leading-none">{filteredAttendance.length} courses</p>
-          </div>
-
-          {/* Filter selector */}
-          <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-30 h-8 text-[11px] rounded-lg bg-muted/20 border-border/20 focus:ring-1 focus:ring-sky-500/20 font-medium">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="rounded-lg bg-popover/95 backdrop-blur-md text-[11px]">
-              <SelectItem value="all">All Courses</SelectItem>
-              <SelectItem value="theory">Theory Only</SelectItem>
-              <SelectItem value="lab">Lab Only</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* ── List Section ────────────────────────────────────────────────────── */}
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-sm md:text-base lg:text-lg font-bold text-foreground tracking-tight">Course Attendance</h2>
+          <p className="text-xs md:text-sm text-muted-foreground mt-0.5">{attendance.length} courses tracked</p>
         </div>
 
-        {filteredAttendance.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-            <UserCheck className="w-10 h-10 text-muted-foreground/20" />
-            <p className="text-sm font-semibold text-foreground leading-none">No records found</p>
-            <p className="text-xs text-muted-foreground">Check filter settings or reload.</p>
+        {attendance.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+            <UserCheck className="w-8 h-8 text-muted-foreground/20" />
+            <div>
+              <p className="text-sm font-bold text-foreground">No attendance records found</p>
+              <p className="text-xs text-muted-foreground mt-1">Check back later or refresh.</p>
+            </div>
           </div>
         ) : (
-          <div className="divide-y divide-border/20">
-            {filteredAttendance.map((item, idx) => (
-              <AttendanceRow
-                key={`${item.classId}-${idx}`}
-                item={item}
-                onSelect={() => setSelected(item)}
-              />
+          <div className="flex flex-col border-t border-border/10">
+            {attendance.map((item, idx) => (
+              <AttendanceCard key={`${item.classId}-${idx}`} item={item} index={idx} />
             ))}
           </div>
         )}
-      </section>
-
-      {/* ── Bottom Motivation Section (subtle separator-aligned bar) ──────────── */}
-      <div className="pt-2">
-        <div className="p-4 bg-sky-500/5 border border-sky-500/10 rounded-2xl flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500 shrink-0">
-              <Trophy className="w-5 h-5" />
-            </div>
-            <div className="min-w-0 space-y-1">
-              <p className="text-sm font-semibold text-foreground leading-none">Keep it up!</p>
-              <p className="text-xs text-muted-foreground leading-tight">
-                You're doing great. Aim for 75%+ overall attendance.
-              </p>
-            </div>
-          </div>
-          {/* Wave indicator inline SVG */}
-          <div className="w-16 h-8 shrink-0 flex items-center justify-center">
-            <svg width="60" height="24" viewBox="0 0 60 24" fill="none">
-              <path
-                d="M1 20 C 15 20, 15 5, 30 10 C 45 15, 45 2, 59 2"
-                stroke="#0ea5e9"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <circle cx="58" cy="2" r="2.5" fill="#0ea5e9" />
-            </svg>
-          </div>
-        </div>
       </div>
 
-      {/* ── Detail Drawer ────────────────────────────────────────────────────── */}
-      {selected && (
-        <AttendanceDrawer
-          open={!!selected}
-          onOpenChange={(o) => !o && setSelected(null)}
-          item={selected}
-          onViewDetail={() => {
-            setSelected(null);
-            navigate(`/dashboard/attendance/${selected.classId}`, { state: { record: selected } });
-          }}
-        />
-      )}
     </div>
   );
 }

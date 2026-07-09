@@ -4,6 +4,7 @@ import { getStudentProfile, ProfileData } from "@/lib/features";
 
 import { ErrorDisplay } from "@/components/error-display";
 import {
+  ArrowLeft,
   User,
   Mail,
   Phone,
@@ -25,72 +26,157 @@ function getSrcFromPhoto(photo: string): string {
     }
     return trimmed;
   }
+  // If it's a pure base64 string
   if (/^[A-Za-z0-9+/=]+$/.test(trimmed)) {
     return `data:image/jpeg;base64,${trimmed}`;
   }
   return trimmed;
 }
 
-function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
-}
+function renderPhoto(photoUrl: string, name: string, maxWClass = "max-w-[12rem]", maxHClass = "max-h-[16rem]") {
+  const src = photoUrl ? getSrcFromPhoto(photoUrl) : "";
+  if (src) {
+    return (
+      <div className={`relative ${maxWClass} shrink-0 overflow-hidden rounded-3xl border border-border/20 bg-muted/10 flex items-center justify-center p-1`}>
+        <img
+          src={src}
+          alt={name}
+          className={`w-full h-auto ${maxHClass} object-contain rounded-2xl`}
+        />
+      </div>
+    );
+  }
+  
+  // Fallback if no photo is available:
+  const initials = name
+    ? name
+        .split(" ")
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "?";
 
-function ProfileSkeleton() {
   return (
-    <div className="w-full space-y-6 px-2 py-4">
-      <div className="space-y-1">
-        <Sk className="h-7 w-36" />
-        <Sk className="h-3 w-56" />
-      </div>
-      {/* Photo + name */}
-      <div className="flex items-center gap-4">
-        <Sk className="w-20 h-20 rounded-2xl shrink-0" />
-        <div className="space-y-2 flex-1">
-          <Sk className="h-5 w-40" />
-          <Sk className="h-3 w-28" />
-          <Sk className="h-3 w-32" />
-        </div>
-      </div>
-      {/* Fields */}
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <Sk className="w-4 h-4 rounded-md" />
-              <Sk className="h-3 w-20" />
-            </div>
-            <Sk className="h-3 w-32" />
-          </div>
-        ))}
-      </div>
-      <Sk className="h-4 w-28" />
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <Sk className="w-4 h-4 rounded-md" />
-              <Sk className="h-3 w-20" />
-            </div>
-            <Sk className="h-3 w-28" />
-          </div>
-        ))}
-      </div>
+    <div className="w-40 h-48 rounded-3xl shrink-0 overflow-hidden bg-primary/10 flex items-center justify-center text-primary border border-border/20">
+      <span className="text-xl font-bold tracking-wider">{initials}</span>
     </div>
   );
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
+function renderDetailField(icon: React.ReactNode, label: string, value: string | null | undefined, className = "") {
   return (
-    <div className="flex items-center justify-between gap-4 p-4 hover:bg-muted/5 transition-colors duration-150">
-      <div className="flex items-center gap-3 shrink-0">
-        <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-        <span className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wide leading-none">
-          {label}
-        </span>
+    <div className={`flex items-center justify-between gap-4 py-3.5 border-b border-border/10 group hover:border-primary/25 transition-colors min-w-0 ${className}`}>
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center text-muted-foreground/70 group-hover:bg-primary/10 group-hover:text-primary transition-all shrink-0">
+          {icon}
+        </div>
+        <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">{label}</span>
       </div>
-      <span className="text-sm font-medium text-foreground text-right truncate max-w-[55%]">
-        {value || "—"}
-      </span>
+      <span className="text-xs sm:text-sm font-extrabold text-foreground/90 break-words text-right pl-4">{value || "N/A"}</span>
+    </div>
+  );
+}
+
+// ─── Loader Skeleton Layout ───────────────────────────────────────────────────
+
+function Sk({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-full bg-muted/65 ${className}`} />;
+}
+
+function ProfileSkeleton() {
+  return (
+    <div className="w-full space-y-12 animate-pulse">
+      {/* Header skeleton */}
+      <div className="pb-4 border-b border-border/20 flex items-center gap-4">
+        <Sk className="w-8 h-8 rounded-full" />
+        <div className="space-y-2">
+          <Sk className="h-6 w-36 rounded-full" />
+          <Sk className="h-3 w-56 rounded-full" />
+        </div>
+      </div>
+
+      {/* Student Section skeleton */}
+      <div className="space-y-6">
+        <Sk className="h-5 w-36 rounded-full" />
+        <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start w-full">
+          <Sk className="w-52 h-72 rounded-3xl shrink-0" />
+          <div className="flex-1 w-full space-y-6">
+            <div className="border-b border-border/10 pb-4 space-y-2">
+              <Sk className="h-2.5 w-16 rounded-full" />
+              <Sk className="h-8 w-64 rounded-full" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 w-full">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10">
+                  <div className="flex items-center gap-3">
+                    <Sk className="w-8 h-8 rounded-full shrink-0" />
+                    <Sk className="h-3 w-20 rounded-full" />
+                  </div>
+                  <Sk className="h-4 w-32 rounded-full" />
+                </div>
+              ))}
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10 md:col-span-2">
+                  <div className="flex items-center gap-3">
+                    <Sk className="w-8 h-8 rounded-full shrink-0" />
+                    <Sk className="h-3 w-24 rounded-full" />
+                  </div>
+                  <Sk className="h-4 w-48 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Proctor Section skeleton */}
+      <div className="space-y-6 pt-4 border-t border-border/10">
+        <Sk className="h-5 w-36 rounded-full" />
+        <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start w-full">
+          <Sk className="w-44 h-60 rounded-3xl shrink-0" />
+          <div className="flex-1 w-full space-y-6">
+            <div className="border-b border-border/10 pb-4 space-y-2">
+              <Sk className="h-2.5 w-16 rounded-full" />
+              <Sk className="h-7 w-48 rounded-full" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 w-full">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10">
+                  <div className="flex items-center gap-3">
+                    <Sk className="w-8 h-8 rounded-full shrink-0" />
+                    <Sk className="h-3 w-20 rounded-full" />
+                  </div>
+                  <Sk className="h-4 w-32 rounded-full" />
+                </div>
+              ))}
+              <div className="flex items-center justify-between py-3.5 border-b border-border/10 md:col-span-2">
+                <div className="flex items-center gap-3">
+                  <Sk className="w-8 h-8 rounded-full shrink-0" />
+                  <Sk className="h-3 w-24 rounded-full" />
+                </div>
+                <Sk className="h-4 w-48 rounded-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Residence Section skeleton */}
+      <div className="space-y-6 pt-4 border-t border-border/10">
+        <Sk className="h-5 w-36 rounded-full" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 w-full">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10">
+              <div className="flex items-center gap-3">
+                <Sk className="w-8 h-8 rounded-full shrink-0" />
+                <Sk className="h-3 w-24 rounded-full" />
+              </div>
+              <Sk className="h-4 w-36 rounded-full" />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -103,6 +189,7 @@ export default function StudentProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Load from cache first
   useEffect(() => {
     const cached = localStorage.getItem("deskly::cache::profile");
     if (cached) {
@@ -139,9 +226,13 @@ export default function StudentProfilePage() {
     fetchProfile();
   }, []);
 
-  const shell = (children: React.ReactNode) => <>{children}</>;
+  const shell = (children: React.ReactNode) => (
+    <>{children}</>
+  );
 
-  if (authLoading || loading) return shell(<ProfileSkeleton />);
+  if (authLoading || loading) {
+    return shell(<ProfileSkeleton />);
+  }
 
   if (error || !profile) {
     return shell(
@@ -153,105 +244,97 @@ export default function StudentProfilePage() {
 
   const { student, proctor, hostel } = profile;
 
-  const photoSrc = student.photoUrl ? getSrcFromPhoto(student.photoUrl) : "";
-  const initials = student.name
-    ? student.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
-    : "?";
-
   return shell(
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
-      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
-
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start gap-2">
-        <User className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
-            My Profile
-          </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Academic and personal details
+    <div className="w-full space-y-12">
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <header className="pb-4 border-b border-border/20 flex flex-col md:flex-row md:items-center md:justify-between gap-4 print:hidden">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.history.back()}
+              className="p-1.5 rounded-full hover:bg-accent text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-foreground via-foreground/95 to-muted-foreground bg-clip-text text-transparent">
+              My Profile
+            </h1>
+          </div>
+          <p className="text-xs text-muted-foreground pl-7">
+            Manage and view your academic, proctor, and hostel details
           </p>
         </div>
       </header>
 
-      {/* ── Student Hero Block ───────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4">
-        {/* Photo / Initials */}
-        {photoSrc ? (
-          <div className="w-20 h-20 rounded-2xl shrink-0 overflow-hidden border border-border/10 bg-muted/10">
-            <img src={photoSrc} alt={student.name} className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div className="w-20 h-20 rounded-2xl shrink-0 overflow-hidden border border-border/10 bg-primary/10 flex items-center justify-center">
-            <span className="text-xl font-bold text-primary tracking-wider">{initials}</span>
-          </div>
-        )}
-        <div className="space-y-1 min-w-0">
-          <h2 className="text-lg font-medium text-foreground leading-snug truncate">{student.name}</h2>
-          <p className="text-xs text-sky-500 font-semibold uppercase tracking-wide leading-none">{student.registerNumber}</p>
-          <p className="text-xs text-muted-foreground/60 leading-none truncate">{student.program}</p>
-        </div>
-      </div>
-
-      {/* ── Student Details ──────────────────────────────────────────────────── */}
-      <section className="space-y-3">
-        <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
+      {/* ── Section 1: Student Personal & Academic Details ───────────────── */}
+      <section className="space-y-6">
+        <h3 className="text-sm font-black text-foreground uppercase tracking-wider border-b border-border/10 pb-2">
           Student Information
-        </h2>
-        <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-          <InfoRow icon={User} label="Register No." value={student.registerNumber} />
-          <InfoRow icon={User} label="Application No." value={student.applicationNumber} />
-          <InfoRow icon={Layers} label="Program" value={student.program} />
-          <InfoRow icon={Calendar} label="Date of Birth" value={student.dob} />
-          <InfoRow icon={User} label="Gender" value={student.gender} />
-          <InfoRow icon={Phone} label="Mobile" value={student.mobile} />
-          <InfoRow icon={Mail} label="VIT Email" value={student.vitEmail} />
-          <InfoRow icon={Mail} label="Personal Email" value={student.personalEmail} />
+        </h3>
+        <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start w-full">
+          {/* Photo */}
+          {renderPhoto(student.photoUrl, student.name, "w-52 max-w-full shrink-0", "max-h-[20rem]")}
+          
+          {/* Details block */}
+          <div className="flex-1 w-full space-y-6">
+            <div className="border-b border-border/10 pb-4">
+              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Full Name</p>
+              <h2 className="text-2xl font-black tracking-tight text-foreground">{student.name}</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 w-full">
+              {renderDetailField(<User className="w-4 h-4" />, "Register No.", student.registerNumber)}
+              {renderDetailField(<User className="w-4 h-4" />, "Application No.", student.applicationNumber)}
+              {renderDetailField(<Layers className="w-4 h-4" />, "Program / Branch", student.program)}
+              {renderDetailField(<Calendar className="w-4 h-4" />, "Date of Birth", student.dob)}
+              {renderDetailField(<User className="w-4 h-4" />, "Gender", student.gender)}
+              {renderDetailField(<Phone className="w-4 h-4" />, "Mobile Number", student.mobile)}
+              {renderDetailField(<Mail className="w-4 h-4" />, "VIT Email ID", student.vitEmail, "md:col-span-2")}
+              {renderDetailField(<Mail className="w-4 h-4" />, "Personal Email ID", student.personalEmail, "md:col-span-2")}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── Proctor Details ──────────────────────────────────────────────────── */}
+      {/* ── Section 2: Proctor Details ───────────────────────────────────── */}
       {proctor && (
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
+        <section className="space-y-6 pt-4 border-t border-border/10">
+          <h3 className="text-sm font-black text-foreground uppercase tracking-wider border-b border-border/10 pb-2">
             Proctor Details
-          </h2>
-          {/* Proctor photo */}
-          {proctor.photoUrl && (
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl shrink-0 overflow-hidden border border-border/10 bg-muted/10">
-                <img src={getSrcFromPhoto(proctor.photoUrl)} alt={proctor.name} className="w-full h-full object-cover" />
+          </h3>
+          <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start w-full">
+            {/* Photo */}
+            {renderPhoto(proctor.photoUrl, proctor.name, "w-44 max-w-full shrink-0", "max-h-[16rem]")}
+            
+            {/* Details block */}
+            <div className="flex-1 w-full space-y-6">
+              <div className="border-b border-border/10 pb-4">
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Proctor Name</p>
+                <h2 className="text-xl font-black tracking-tight text-foreground">{proctor.name}</h2>
               </div>
-              <div className="space-y-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{proctor.name}</p>
-                <p className="text-xs text-muted-foreground/60 leading-none">{proctor.designation}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 w-full">
+                {renderDetailField(<User className="w-4 h-4" />, "Faculty ID", proctor.facultyId)}
+                {renderDetailField(<User className="w-4 h-4" />, "Designation", proctor.designation)}
+                {renderDetailField(<Layers className="w-4 h-4" />, "School", proctor.school)}
+                {renderDetailField(<MapPin className="w-4 h-4" />, "Cabin Room", proctor.cabin)}
+                {renderDetailField(<Phone className="w-4 h-4" />, "Mobile", proctor.mobile)}
+                {renderDetailField(<Mail className="w-4 h-4" />, "Email Address", proctor.email, "md:col-span-2")}
               </div>
             </div>
-          )}
-          <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-            {!proctor.photoUrl && <InfoRow icon={User} label="Name" value={proctor.name} />}
-            <InfoRow icon={User} label="Faculty ID" value={proctor.facultyId} />
-            <InfoRow icon={User} label="Designation" value={proctor.designation} />
-            <InfoRow icon={Layers} label="School" value={proctor.school} />
-            <InfoRow icon={MapPin} label="Cabin" value={proctor.cabin} />
-            <InfoRow icon={Phone} label="Mobile" value={proctor.mobile} />
-            <InfoRow icon={Mail} label="Email" value={proctor.email} />
           </div>
         </section>
       )}
 
-      {/* ── Hostel Details ───────────────────────────────────────────────────── */}
+      {/* ── Section 3: Hostel / Residence Details ─────────────────────────── */}
       {hostel && (
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
+        <section className="space-y-6 pt-4 border-t border-border/10">
+          <h3 className="text-sm font-black text-foreground uppercase tracking-wider border-b border-border/10 pb-2">
             Hostel Details
-          </h2>
-          <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-            <InfoRow icon={Home} label="Block Name" value={hostel.blockName} />
-            <InfoRow icon={MapPin} label="Room Number" value={hostel.roomNumber} />
-            <InfoRow icon={Layers} label="Bed Type" value={hostel.bedType} />
-            <InfoRow icon={Shield} label="Mess Type" value={hostel.messType} />
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 w-full">
+            {renderDetailField(<Home className="w-4 h-4" />, "Block Name", hostel.blockName)}
+            {renderDetailField(<MapPin className="w-4 h-4" />, "Room Number", hostel.roomNumber)}
+            {renderDetailField(<Layers className="w-4 h-4" />, "Bed Type", hostel.bedType)}
+            {renderDetailField(<Shield className="w-4 h-4" />, "Mess Choice", hostel.messType)}
           </div>
         </section>
       )}

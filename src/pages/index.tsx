@@ -1,11 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, Link } from "@/router";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Lock, LogIn, HelpCircle, Eye, EyeOff, Scale, AlertCircle } from "lucide-react";
+import { User, LogIn, HelpCircle, Eye, EyeOff, Scale } from "lucide-react";
+import { motion } from "framer-motion";
 import { getVersion } from "@tauri-apps/api/app";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
-export default function MobileHome() {
+export default function Home() {
   const navigate = useNavigate();
   const { authState, loading, error, login } = useAuth();
   const [regNo, setRegNo] = useState("");
@@ -43,146 +44,153 @@ export default function MobileHome() {
     }
   };
 
+  const smoothTransition = {
+    duration: 0.8,
+    ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
+  };
+
   return (
-    <main className="h-full w-full flex flex-col justify-between p-6 bg-background text-foreground antialiased overflow-y-auto no-scrollbar">
-      
-      {/* Centered card container for premium layout */}
-      <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-8 space-y-12">
-        
-        {/* Welcome Section */}
-        <div className="space-y-4 text-center">
-          <div className="flex justify-center">
-            <div className="p-4 bg-muted/30 rounded-3xl border border-border/10 shadow-sm">
-              <img src="/logo.png" className="w-11 h-11 object-contain" alt="Deskly Logo" />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <h1 className="text-3xl font-black tracking-tight text-foreground">
-              Sign In
-            </h1>
-            <p className="text-xs text-muted-foreground/60 leading-relaxed max-w-[240px] mx-auto font-medium">
-              Sync your student dashboard with your VTOP credentials.
-            </p>
-          </div>
-        </div>
-
-        {/* Credentials Form */}
-        <form className="space-y-6" onSubmit={onSubmit}>
-          <div className="space-y-4">
-            
-            {/* Registration Number Field */}
-            <div className="space-y-2">
-              <label
-                htmlFor="reg-no"
-                className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground/45 ml-2"
-              >
-                Registration Number
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="reg-no"
-                  value={regNo}
-                  onChange={(e) => setRegNo(e.target.value)}
-                  disabled={loading}
-                  className="block w-full h-12 pl-11 pr-4 bg-muted/20 focus:bg-muted/40 border border-border/5 focus:border-primary/20 focus:ring-2 focus:ring-primary/5 focus:outline-none text-sm font-semibold rounded-2xl transition-all duration-200"
-                  placeholder="e.g. 21BCE0001"
-                  required
-                />
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-                  <User className="w-4.5 h-4.5" />
-                </div>
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground/45 ml-2"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  className="block w-full h-12 pl-11 pr-12 bg-muted/20 focus:bg-muted/40 border border-border/5 focus:border-primary/20 focus:ring-2 focus:ring-primary/5 focus:outline-none text-sm font-semibold rounded-2xl transition-all duration-200"
-                  placeholder="••••••••"
-                  required
-                />
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-                  <Lock className="w-4.5 h-4.5" />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors focus:outline-none"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4.5 h-4.5" />
-                  ) : (
-                    <Eye className="w-4.5 h-4.5" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Errors */}
-          {(submitError || error) && (
-            <div className="text-xs text-destructive bg-destructive/10 border border-destructive/15 p-3.5 rounded-2xl font-bold leading-relaxed flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-destructive/80" />
-              <span>{submitError ?? error}</span>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-12 flex justify-center items-center bg-primary hover:bg-primary/95 text-primary-foreground text-sm font-bold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-primary/10 active:opacity-90"
-          >
-            <span>{loading ? "Authenticating..." : "Sign In"}</span>
-            {!loading && (
-              <LogIn className="w-4 h-4 ml-2 opacity-80" />
-            )}
-          </button>
-        </form>
+    <main className="h-full min-h-0 overflow-y-auto no-scrollbar relative bg-background text-foreground antialiased selection:bg-primary/20">
+      {/* Industrial Watermark - Subtle branding */}
+      <div className="hidden sm:block absolute top-24 right-24 text-[14rem] font-black text-foreground opacity-[0.015] pointer-events-none select-none leading-none tracking-tighter uppercase">
+        DESKLY
       </div>
 
-      {/* Footer */}
-      <footer className="flex items-center justify-between pt-6 border-t border-border/5 max-w-sm mx-auto w-full shrink-0">
-        <div className="flex gap-2.5">
-          <button
-            onClick={async () => {
-              try {
-                await openUrl("https://github.com/Vishal-770/deskly-tauri/issues");
-              } catch (err) {
-                console.error("Failed to open support link:", err);
-              }
-            }}
-            className="px-3.5 py-1.5 bg-muted/20 hover:bg-muted/40 border border-border/5 text-[11px] text-muted-foreground hover:text-foreground transition-all duration-200 font-bold rounded-full flex items-center gap-1.5 cursor-pointer focus:outline-none"
-          >
-            <HelpCircle className="w-3.5 h-3.5" />
-            Support
-          </button>
-          <Link
-            to="/legal"
-            className="px-3.5 py-1.5 bg-muted/20 hover:bg-muted/40 border border-border/5 text-[11px] text-muted-foreground hover:text-foreground transition-all duration-200 font-bold rounded-full flex items-center gap-1.5 cursor-pointer focus:outline-none"
-          >
-            <Scale className="w-3.5 h-3.5" />
-            Legal
-          </Link>
-        </div>
-        <span className="text-[11px] text-muted-foreground/35 font-bold select-none pr-1">
-          {version ? `v${version}` : "v3.0.2"}
-        </span>
-      </footer>
+      <div className="min-h-full w-full flex items-center justify-center p-6 sm:p-16">
+        <motion.section
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={smoothTransition}
+          className="w-full max-w-[400px] flex flex-col gap-16 py-10"
+        >
+          {/* Logo & Header */}
+          <div className="space-y-8 flex flex-col items-center sm:items-start text-center sm:text-left">
+            <img src="/logo.png" className="w-12 h-12 sm:w-14 sm:h-14 object-contain" alt="Deskly Logo" />
+            <div className="space-y-3">
+              <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-foreground leading-none">
+                Sign In
+              </h1>
+              <p className="text-sm text-muted-foreground/60 leading-relaxed max-w-[320px]">
+                Sync your student dashboard with your official VTOP credentials.
+              </p>
+            </div>
+          </div>
+
+          <form className="space-y-12" onSubmit={onSubmit}>
+            <div className="space-y-8">
+              
+              {/* Registration Number Field */}
+              <div className="group space-y-3">
+                <label
+                  htmlFor="reg-no"
+                  className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 ml-0.5"
+                >
+                  Registration Number
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="reg-no"
+                    value={regNo}
+                    onChange={(e) => setRegNo(e.target.value)}
+                    disabled={loading}
+                    className="block w-full h-12 pl-0 pr-12 bg-transparent border-b border-border/70 focus:border-primary focus:outline-none text-base font-normal text-foreground placeholder:text-muted-foreground/25 transition-colors rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    placeholder="Enter registration ID"
+                    required
+                  />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/30 transition-colors pointer-events-none group-focus-within:text-primary/70">
+                    <User className="w-4.5 h-4.5" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className="group space-y-3">
+                <label
+                  htmlFor="password"
+                  className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 ml-0.5"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    className="block w-full h-12 pl-0 pr-12 bg-transparent border-b border-border/70 focus:border-primary focus:outline-none text-base font-normal text-foreground placeholder:text-muted-foreground/25 transition-colors rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-foreground transition-colors focus:outline-none disabled:opacity-50"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4.5 h-4.5" />
+                    ) : (
+                      <Eye className="w-4.5 h-4.5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {(submitError || error) && (
+              <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-3 rounded-lg font-semibold leading-relaxed text-center">
+                {submitError ?? error}
+              </p>
+            )}
+
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 flex justify-center items-center bg-primary hover:bg-primary/95 text-primary-foreground text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+              >
+                <span>{loading ? "Authenticating..." : "Sign In"}</span>
+                {!loading && (
+                  <LogIn className="w-4 h-4 ml-2.5 opacity-80" />
+                )}
+              </button>
+            </div>
+          </form>
+
+          {/* Footer links */}
+          <footer className="flex items-center justify-between pt-10 border-t border-border/10">
+            <div className="flex gap-5">
+              <button
+                onClick={async () => {
+                  try {
+                    await openUrl("https://github.com/Vishal-770/deskly-tauri/issues");
+                  } catch (err) {
+                    console.error("Failed to open support link:", err);
+                  }
+                }}
+                className="text-xs text-muted-foreground/60 hover:text-primary transition-colors font-semibold flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+              >
+                <HelpCircle className="w-4 h-4" />
+                Support
+              </button>
+              <Link
+                to="/legal"
+                className="text-xs text-muted-foreground/60 hover:text-primary transition-colors font-semibold flex items-center gap-1.5 cursor-pointer bg-transparent border-none p-0 focus:outline-none"
+              >
+                <Scale className="w-4 h-4" />
+                Legal
+              </Link>
+            </div>
+            <span className="text-xs text-muted-foreground/35 font-bold select-none">
+              {version ? `v${version}` : "v1.0.7"}
+            </span>
+          </footer>
+        </motion.section>
+      </div>
     </main>
   );
 }
