@@ -137,23 +137,12 @@ jobs:
             release-assets/android/app-release-signed.aab
           if-no-files-found: error
 
-      - name: Generate latest.json
-        run: |
-          node scripts/generate-latest-json.mjs \
-            --assetsDir release-assets \
-            --repository "${GITHUB_REPOSITORY}" \
-            --tag "${GITHUB_REF_NAME}" \
-            --version "${GITHUB_REF_NAME#android-v}" \
-            --notes "Android release ${GITHUB_REF_NAME}" \
-            --pubDate "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-
       - name: Publish GitHub release assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Android Release ${{ github.ref_name }}
           files: |
-            release-assets/latest.json
             release-assets/android/*.apk
             release-assets/android/*.aab
           fail_on_unmatched_files: true

@@ -172,17 +172,17 @@ jobs:
           set -euo pipefail
 
           APP_DIR="src-tauri/gen/android/app/build/outputs"
-          APK_INPUT="$(find "$APP_DIR/apk" -name '*release-unsigned.apk' | sort | head -n 1)"
-          AAB_INPUT="$(find "$APP_DIR/bundle" -name '*.aab' | sort | head -n 1)"
+          APK_INPUT="$(find "$APP_DIR/apk" -name 'app-release.apk' -o -name '*release.apk' | sort | head -n 1)"
+          AAB_INPUT="$(find "$APP_DIR/bundle" -name 'app-release.aab' -o -name '*release.aab' | sort | head -n 1)"
           BUILD_TOOLS_DIR="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1)"
 
           if [ -z "$APK_INPUT" ] || [ ! -f "$APK_INPUT" ]; then
-            echo "Unsigned APK not found" >&2
+            echo "Signed APK not found in $APP_DIR/apk" >&2
             exit 1
           fi
 
           if [ -z "$AAB_INPUT" ] || [ ! -f "$AAB_INPUT" ]; then
-            echo "AAB not found" >&2
+            echo "AAB not found in $APP_DIR/bundle" >&2
             exit 1
           fi
 
@@ -190,22 +190,12 @@ jobs:
 
           export PATH="$BUILD_TOOLS_DIR:$PATH"
 
-          zipalign -p -f 4 "$APK_INPUT" release-assets/android/app-release-aligned.apk
+          zipalign -p -f 4 "$APK_INPUT" release-assets/android/app-release-signed.apk
           apksigner sign \
             --ks src-tauri/gen/android/app/keystore.jks \
             --ks-pass pass:"$ANDROID_KEYSTORE_PASSWORD" \
             --key-pass pass:"$ANDROID_KEY_PASSWORD" \
-            --out release-assets/android/app-release-signed.apk \
-            release-assets/android/app-release-aligned.apk
-
-          jarsigner \
-            -keystore src-tauri/gen/android/app/keystore.jks \
-            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
-            -keypass "$ANDROID_KEY_PASSWORD" \
-            -sigalg SHA256withRSA \
-            -digestalg SHA-256 \
-            "$AAB_INPUT" \
-            "$ANDROID_KEY_ALIAS"
+            release-assets/android/app-release-signed.apk
 
           cp "$AAB_INPUT" release-assets/android/app-release-signed.aab
 
