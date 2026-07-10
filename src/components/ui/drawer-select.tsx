@@ -83,13 +83,13 @@ export function DrawerSelect({
                     className={cn(
                       "w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-left transition-colors cursor-pointer border-0",
                       isSelected
-                        ? "bg-sky-500/10 text-sky-400"
+                        ? "bg-primary/10 text-primary"
                         : "text-foreground hover:bg-muted/20",
                       option.disabled && "opacity-40 cursor-not-allowed"
                     )}
                   >
                     <span>{option.label}</span>
-                    {isSelected && <Check className="w-4 h-4 text-sky-400 shrink-0" />}
+                    {isSelected && <Check className="w-4 h-4 text-primary shrink-0" />}
                   </button>
                 );
               })}

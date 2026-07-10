@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import * as Popover from "@radix-ui/react-popover";
 
 interface SingleCourseExportModalProps {
   entry: ScheduleEntry;
@@ -141,27 +142,28 @@ export default function SingleCourseExportModal({
                 </div>
               </div>
 
-              {/* Date Input using shadcn Calendar */}
+               {/* Date Input using Radix Popover */}
               <div className="space-y-3 p-4 rounded-[var(--radius)] bg-muted/5 border border-border/10">
                 <label className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase block leading-none">
                   Repeat Schedule Weekly Until
                 </label>
                 <div className="relative mt-1">
-                  <button
-                    onClick={() => setShowCalendar(!showCalendar)}
-                    className="w-full h-11 rounded-[var(--radius)] bg-background border border-border/20 px-3 text-sm text-foreground outline-none focus:border-primary/50 transition-colors flex items-center justify-between cursor-pointer"
-                  >
-                    <span>{format(parsedEndDate, "PPP")}</span>
-                    <CalendarDays className="w-4 h-4 text-muted-foreground/60" />
-                  </button>
+                  <Popover.Root open={showCalendar} onOpenChange={setShowCalendar}>
+                    <Popover.Trigger asChild>
+                      <button
+                        className="w-full h-11 rounded-[var(--radius)] bg-background border border-border/20 px-3 text-sm text-foreground outline-none focus:border-primary/50 transition-colors flex items-center justify-between cursor-pointer"
+                      >
+                        <span>{format(parsedEndDate, "PPP")}</span>
+                        <CalendarDays className="w-4 h-4 text-muted-foreground/60" />
+                      </button>
+                    </Popover.Trigger>
 
-                  <AnimatePresence>
-                    {showCalendar && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden mt-2 z-10 relative flex justify-center"
+                    <Popover.Portal>
+                      <Popover.Content
+                        align="center"
+                        side="bottom"
+                        sideOffset={8}
+                        className="z-50 bg-card border border-border/20 shadow-2xl rounded-[var(--radius)] p-3 outline-none"
                       >
                         <Calendar
                           mode="single"
@@ -177,9 +179,9 @@ export default function SingleCourseExportModal({
                           }}
                           disabled={(date) => date < new Date()}
                         />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                      </Popover.Content>
+                    </Popover.Portal>
+                  </Popover.Root>
                 </div>
                 <p className="text-[10px] text-muted-foreground/60 leading-normal">
                   This weekly class will repeat in your calendar until this chosen end date.

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getGradesHistory, StudentHistoryData } from "@/lib/features";
+import { Separator } from "@/components/ui/separator";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { Input } from "@/components/ui/input";
@@ -8,34 +9,106 @@ import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
 import { DrawerSelect } from "@/components/ui/drawer-select";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import {
   GraduationCap,
-  BookOpen,
-  Bookmark,
-  Award,
   Search,
-  HelpCircle,
-  FileText
+  FileText,
+  Hash,
+  Monitor,
+  CalendarDays,
+  Award,
+  ChevronRight,
 } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-function gradeColor(grade: string) {
-  const g = grade.trim().toUpperCase();
-  if (g === "S" || g === "A") return "text-emerald-400 bg-emerald-500/10 border-emerald-500/15";
-  if (g === "B") return "text-amber-400 bg-amber-500/10 border-amber-500/15";
-  if (g === "C" || g === "P") return "text-sky-400 bg-sky-500/10 border-sky-500/15";
-  if (g === "D") return "text-orange-400 bg-orange-500/10 border-orange-500/15";
-  if (g === "E" || g === "F") return "text-destructive bg-destructive/10 border-destructive/15";
-  return "text-muted-foreground bg-muted/30 border-border/20";
+function GradeDetailDrawer({
+  item,
+  open,
+  onOpenChange,
+}: {
+  item: StudentHistoryData["grades"][number] | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  if (!item) return null;
+
+  const details = [
+    { icon: Hash,          label: "Course Code",  value: item.courseCode },
+    { icon: GraduationCap, label: "Course Type",  value: item.courseType },
+    { icon: Monitor,       label: "Credits",      value: `${item.credits} Credits` },
+    { icon: CalendarDays,  label: "Exam Session", value: item.examMonth || "—" },
+    { icon: Award,         label: "Grade Earned", value: item.grade },
+  ];
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="pb-8 font-saira max-h-[92vh]">
+        <div className="overflow-y-auto no-scrollbar px-6 space-y-7 pt-5">
+          
+          {/* Header Row */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center gap-2 leading-none">
+                <span className="text-sm font-medium tracking-wide text-primary uppercase">
+                  {item.courseCode}
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground/60">
+                  (Grade {item.grade})
+                </span>
+              </div>
+              <h2 className="text-xl font-semibold text-foreground leading-snug tracking-tight">
+                {item.courseTitle}
+              </h2>
+            </div>
+            
+            {/* Close Button */}
+            <button
+              onClick={() => onOpenChange(false)}
+              className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0"
+            >
+              <span className="text-lg leading-none font-sans">×</span>
+            </button>
+          </div>
+
+          <Separator className="bg-border/25" />
+
+          {/* Grade Details List */}
+          <div className="space-y-3 pt-1">
+            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+              Grade Details
+            </p>
+
+            <div className="divide-y divide-border/10">
+              {details.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-center gap-4 py-3">
+                  {/* Left Column: Icon Box */}
+                  <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-primary shrink-0" />
+                  </div>
+                  
+                  {/* Right Column: Text contents */}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
 }
 
-function typeColor(type: string) {
-  const t = type.trim().toUpperCase();
-  if (t === "TH") return "text-sky-400 bg-sky-500/10 border-sky-500/15";
-  if (t === "LO" || t === "LA") return "text-emerald-400 bg-emerald-500/10 border-emerald-500/15";
-  if (t === "ETL") return "text-purple-400 bg-purple-500/10 border-purple-500/15";
-  if (t === "PJT") return "text-amber-400 bg-amber-500/10 border-amber-500/15";
-  return "text-muted-foreground bg-muted/30 border-border/20";
+function gradeTextColor(grade: string) {
+  const g = grade.trim().toUpperCase();
+  if (g === "S" || g === "A") return "text-emerald-500";
+  if (g === "B" || g === "C" || g === "D" || g === "P") return "text-primary";
+  if (g === "E" || g === "F") return "text-destructive";
+  return "text-muted-foreground";
 }
 
 function Sk({ className = "" }: { className?: string }) {
@@ -85,6 +158,9 @@ export default function GradesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  const [selectedGrade, setSelectedGrade] = useState<StudentHistoryData["grades"][number] | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGradeFilter, setSelectedGradeFilter] = useState("ALL");
 
@@ -190,35 +266,35 @@ export default function GradesPage() {
       <header className="flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
-            <GraduationCap className="w-6 h-6 text-sky-500 shrink-0" />
+            <GraduationCap className="w-6 h-6 text-primary shrink-0" />
             <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
               My Grades
             </h1>
           </div>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">Your complete academic records</p>
         </div>
       </header>
 
-      {/* ── Stats Card ──────────────────────────────────────────────────────── */}
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden relative">
-        <div className="absolute top-0 bottom-0 left-1/3 w-px bg-border/10" />
-        <div className="absolute top-0 bottom-0 left-2/3 w-px bg-border/10" />
-        <div className="grid grid-cols-3">
-          {[
-            { icon: BookOpen, label: "Subjects", value: totalSubjects, color: "text-sky-400" },
-            { icon: Bookmark, label: "Credits", value: totalCredits, color: "text-emerald-400" },
-            { icon: Award, label: "CGPA", value: cgpaVal, color: "text-amber-400" },
-          ].map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="p-4 flex flex-col gap-2">
-              <div className="flex items-center gap-1.5">
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${color}`} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">{label}</span>
-              </div>
-              <span className="text-2xl font-medium text-foreground leading-none">{value}</span>
-            </div>
-          ))}
+      <Separator className="bg-border/25" />
+
+      {/* ── Stats block ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between py-1 text-center">
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Subjects</p>
+          <p className="text-2xl font-bold text-foreground leading-none">{totalSubjects}</p>
+        </div>
+        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Credits</p>
+          <p className="text-2xl font-bold text-foreground leading-none">{totalCredits}</p>
+        </div>
+        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">CGPA</p>
+          <p className="text-2xl font-bold text-foreground leading-none">{cgpaVal}</p>
         </div>
       </div>
+
+      <Separator className="bg-border/25" />
 
       {/* ── Search & Filter ──────────────────────────────────────────────────── */}
       <div className="space-y-3">
@@ -262,39 +338,49 @@ export default function GradesPage() {
           <p className="text-xs text-muted-foreground">Try modifying your search or filter.</p>
         </div>
       ) : (
-        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
           {filteredGrades.map((item, idx) => (
             <div
               key={`${item.courseCode}-${idx}`}
-              className="flex items-center gap-3 p-4 hover:bg-muted/5 transition-colors duration-150"
+              onClick={() => {
+                setSelectedGrade(item);
+                setDrawerOpen(true);
+              }}
+              className="flex items-center justify-between gap-4 py-4 hover:bg-muted/5 active:opacity-75 transition-all cursor-pointer"
             >
-              {/* Serial */}
-              <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
-                {item.slNo ?? idx + 1}
-              </span>
+              <div className="flex-1 min-w-0 flex items-center gap-4">
+                {/* Serial */}
+                <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
+                  {item.slNo ?? idx + 1}
+                </span>
 
-              {/* Code + Title */}
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-xs font-semibold text-sky-500 uppercase tracking-wide leading-none">
-                    {item.courseCode}
-                  </span>
-                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none ${typeColor(item.courseType)}`}>
-                    {item.courseType.trim().toUpperCase()}
-                  </span>
+                {/* Code + Title */}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
+                      {item.courseCode}
+                    </span>
+                    <span>&bull;</span>
+                    <span className="uppercase">{item.courseType.trim()}</span>
+                    <span>&bull;</span>
+                    <span>{item.credits} Credits</span>
+                  </div>
+                  <p className="text-sm font-medium text-foreground leading-snug truncate">
+                    {item.courseTitle}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/50 font-mono leading-none pt-0.5">
+                    Exam Session: {item.examMonth}
+                  </p>
                 </div>
-                <p className="text-sm font-medium text-foreground leading-snug truncate">
-                  {item.courseTitle}
-                </p>
-                <p className="text-[10px] text-muted-foreground/60 font-mono leading-none">
-                  {item.examMonth} · {item.credits} Cr
-                </p>
+
+                {/* Grade text (large letter grade) */}
+                <span className={`text-xl font-bold tracking-tight shrink-0 w-8 text-center leading-none ${gradeTextColor(item.grade)}`}>
+                  {item.grade.trim().toUpperCase()}
+                </span>
               </div>
 
-              {/* Grade badge */}
-              <span className={`text-sm font-bold px-2.5 py-1 rounded-lg border leading-none shrink-0 ${gradeColor(item.grade)}`}>
-                {item.grade.trim().toUpperCase()}
-              </span>
+              {/* Chevron indicator */}
+              <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
             </div>
           ))}
         </div>
@@ -302,34 +388,39 @@ export default function GradesPage() {
 
       {/* ── Grade Distribution Footer ─────────────────────────────────────────── */}
       {data?.cgpa?.gradeDistribution && (
-        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-3">
+        <div className="space-y-4 pt-4 border-t border-border/10">
           <div className="flex items-center gap-1.5">
-            <HelpCircle className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">
+            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">
               Grade Distribution
             </h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {[
-              { label: "S", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/15" },
-              { label: "A", color: "text-emerald-400 bg-emerald-500/8 border-emerald-500/10" },
-              { label: "B", color: "text-amber-400 bg-amber-500/10 border-amber-500/15" },
-              { label: "C", color: "text-sky-400 bg-sky-500/10 border-sky-500/15" },
-              { label: "D", color: "text-orange-400 bg-orange-500/10 border-orange-500/15" },
-              { label: "E", color: "text-destructive bg-destructive/10 border-destructive/15" },
-              { label: "F", color: "text-destructive bg-destructive/15 border-destructive/20" },
-              { label: "P", color: "text-sky-400 bg-sky-500/8 border-sky-500/10" },
-              { label: "N", color: "text-muted-foreground bg-muted/30 border-border/20" },
-            ].map(({ label, color }) => (
-              <div key={label} className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold leading-none ${color}`}>
-                <span>{label}</span>
-                <span className="opacity-30">|</span>
-                <span>{gradeCounts[label] ?? 0}</span>
+              { label: "S", textColor: "text-emerald-500" },
+              { label: "A", textColor: "text-emerald-500" },
+              { label: "B", textColor: "text-primary" },
+              { label: "C", textColor: "text-primary" },
+              { label: "D", textColor: "text-primary" },
+              { label: "E", textColor: "text-destructive" },
+              { label: "F", textColor: "text-destructive" },
+              { label: "P", textColor: "text-primary" },
+              { label: "N", textColor: "text-muted-foreground" },
+            ].map(({ label, textColor }) => (
+              <div key={label} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/20 border border-border/5 rounded-md text-xs font-semibold leading-none">
+                <span className={textColor}>{label}</span>
+                <span className="text-muted-foreground/25 font-normal">&bull;</span>
+                <span className="text-foreground">{gradeCounts[label] ?? 0}</span>
               </div>
             ))}
           </div>
         </div>
       )}
+
+      <GradeDetailDrawer
+        item={selectedGrade}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </div>
   );
 }

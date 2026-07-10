@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getMarks, StudentMarkEntry } from "@/lib/features";
+import { Separator } from "@/components/ui/separator";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { Target, BookOpen } from "lucide-react";
@@ -10,14 +11,7 @@ import { isNetworkError } from "@/lib/utils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getCourseTypeStyle(type: string): { label: string; className: string } {
-  const clean = type.trim().toUpperCase();
-  if (clean.includes("EMBEDDED THEORY")) return { label: type, className: "text-sky-400 bg-sky-500/10 border-sky-500/15" };
-  if (clean.includes("EMBEDDED LAB")) return { label: type, className: "text-emerald-400 bg-emerald-500/10 border-emerald-500/15" };
-  if (clean.includes("THEORY")) return { label: type, className: "text-sky-400 bg-sky-500/10 border-sky-500/15" };
-  if (clean.includes("LAB")) return { label: type, className: "text-emerald-400 bg-emerald-500/10 border-emerald-500/15" };
-  return { label: type, className: "text-muted-foreground bg-muted/30 border-border/20" };
-}
+
 
 function Sk({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
@@ -152,14 +146,11 @@ export default function MarksPage() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
-        <Target className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
+        <Target className="w-6 h-6 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1 min-w-0">
           <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
             My Marks
           </h1>
-          <p className="text-xs text-muted-foreground leading-none">
-            Detailed breakdown of course assessments
-          </p>
         </div>
       </header>
 
@@ -176,44 +167,38 @@ export default function MarksPage() {
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2">
             {filteredCourses.map((course) => {
               const isActive = activeCourse?.courseCode === course.courseCode;
-              const totalWeighted = course.assessments.reduce((s, a) => s + a.weightageMark, 0);
               return (
                 <button
                   key={course.courseCode}
                   onClick={() => setSelectedCourseCode(course.courseCode)}
-                  className={`flex flex-col items-start gap-1 px-3 py-2.5 rounded-xl border text-xs cursor-pointer transition-colors duration-150 shrink-0 min-w-[110px]
+                  className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer border transition-all duration-150 shrink-0
                     ${isActive
-                      ? "bg-sky-500/15 border-sky-500/30 text-sky-400"
-                      : "bg-muted/10 border-border/10 text-muted-foreground hover:bg-muted/20"
+                      ? "bg-primary border-primary text-primary-foreground shadow shadow-primary/10"
+                      : "bg-muted/25 border-border/10 text-muted-foreground hover:bg-muted/35"
                     }`}
                 >
-                  <span className="font-bold uppercase tracking-wide text-[11px]">{course.courseCode}</span>
-                  <span className="text-[10px] font-medium opacity-70 leading-none">
-                    {course.assessments.length > 0 ? `${totalWeighted.toFixed(1)} / 100` : "No marks"}
-                  </span>
+                  {course.courseCode}
                 </button>
               );
             })}
           </div>
 
-          {/* Active Course Card */}
+          {/* Active Course Content */}
           {activeCourse && (
-            <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
-              {/* Card Header */}
-              <div className="p-4 border-b border-border/10 flex items-start justify-between gap-4">
+            <div className="space-y-4">
+              {/* Active Course Details Header */}
+              <div className="flex items-start justify-between gap-4 py-2">
                 <div className="space-y-1.5 min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-sm font-semibold text-sky-500 uppercase tracking-wide leading-none">
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                    <span className="text-sm font-semibold text-primary uppercase tracking-wide leading-none">
                       {activeCourse.courseCode}
                     </span>
-                    <span className="font-mono text-[10px] text-muted-foreground/60 bg-muted/40 px-1.5 py-0.5 rounded leading-none">
-                      {activeCourse.slot}
-                    </span>
-                    <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none ${getCourseTypeStyle(activeCourse.courseType).className}`}>
-                      {getCourseTypeStyle(activeCourse.courseType).label}
-                    </span>
+                    <span>&bull;</span>
+                    <span className="font-mono">{activeCourse.slot}</span>
+                    <span>&bull;</span>
+                    <span className="uppercase">{activeCourse.courseType}</span>
                   </div>
-                  <h2 className="text-base font-medium text-foreground leading-snug">
+                  <h2 className="text-base font-semibold text-foreground leading-snug">
                     {activeCourse.courseTitle}
                   </h2>
                   <p className="text-xs text-muted-foreground/60 leading-none">
@@ -223,13 +208,10 @@ export default function MarksPage() {
                 <div className="shrink-0 text-right">
                   {activeCourse.assessments.length > 0 ? (
                     <>
-                      <span className="text-2xl font-medium text-foreground leading-none">
+                      <span className="text-2xl font-bold text-foreground leading-none">
                         {activeCourse.assessments.reduce((s, a) => s + a.weightageMark, 0).toFixed(2)}
                       </span>
                       <span className="text-xs text-muted-foreground/50 font-medium ml-1">/ 100</span>
-                      <p className="text-[10px] text-muted-foreground/40 font-medium mt-1 leading-none">
-                        {activeCourse.assessments.reduce((s, a) => s + a.weightagePercent, 0).toFixed(1)}% graded
-                      </p>
                     </>
                   ) : (
                     <span className="text-sm text-muted-foreground/50 font-medium">No marks</span>
@@ -237,20 +219,21 @@ export default function MarksPage() {
                 </div>
               </div>
 
+              <Separator className="bg-border/25" />
+
               {/* Assessments list */}
               {activeCourse.assessments.length > 0 ? (
-                <div className="divide-y divide-border/10">
+                <div className="divide-y divide-border/10 border-t border-b border-border/10">
                   {/* Table header */}
-                  <div className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="flex items-center gap-3 py-2.5">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 w-5 shrink-0">#</span>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 flex-1">Assessment</span>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 w-20 text-center">Score</span>
                     <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 w-16 text-center">Wtd.</span>
                   </div>
                   {activeCourse.assessments.map((ass, index) => {
-                    const pct = ass.maxMark > 0 ? (ass.scoredMark / ass.maxMark) * 100 : 0;
                     return (
-                      <div key={`${ass.slNo}-${index}`} className="flex items-center gap-3 px-4 py-3">
+                      <div key={`${ass.slNo}-${index}`} className="flex items-center gap-3 py-3">
                         <span className="text-xs text-muted-foreground/30 tabular-nums w-5 shrink-0">
                           {ass.slNo ?? index + 1}
                         </span>
@@ -263,12 +246,9 @@ export default function MarksPage() {
                           </span>
                           <span className="text-xs text-muted-foreground/30 mx-0.5">/</span>
                           <span className="text-xs text-muted-foreground/60">{ass.maxMark}</span>
-                          <span className="text-[10px] text-muted-foreground/40 block leading-none mt-0.5">
-                            {pct.toFixed(0)}%
-                          </span>
                         </div>
                         <div className="w-16 text-center shrink-0">
-                          <span className="text-sm font-semibold text-sky-400 tabular-nums">
+                          <span className="text-sm font-semibold text-primary tabular-nums">
                             {ass.weightageMark}
                           </span>
                           <span className="text-xs text-muted-foreground/30 mx-0.5">/</span>

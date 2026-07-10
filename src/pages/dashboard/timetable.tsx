@@ -18,6 +18,7 @@ import {
 
   Hash,
   LayoutGrid,
+  ChevronRight,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -98,30 +99,59 @@ function todayIdx(): number {
 }
 
 function getPercentageColor(pct: number) {
-  if (pct >= 75) return "text-primary";
+  if (pct >= 75) return "text-emerald-500";
   return "text-destructive";
 }
 
 function getCircleStrokeColor(pct: number) {
-  if (pct >= 75) return "stroke-primary";
+  if (pct >= 75) return "stroke-emerald-500";
   return "stroke-destructive";
 }
 
 function getBarBgColor(pct: number) {
-  if (pct >= 75) return "bg-primary";
+  if (pct >= 75) return "bg-emerald-500";
   return "bg-destructive";
 }
 
 // ─── Attendance Hint ──────────────────────────────────────────────────────────
 
-function AttendanceHint({ attended, total }: { attended: number; total: number }) {
-  const need = Math.ceil(3 * total - 4 * attended);
-  const canSkip = Math.floor((4 * attended - 3 * total) / 3);
-  if (need > 0)
-    return <span className="text-xs font-medium text-destructive">Attend {need} more to reach 75%</span>;
-  if (canSkip > 0)
-    return <span className="text-xs font-medium text-emerald-500">Can miss {canSkip} more classes</span>;
-  return <span className="text-xs font-medium text-muted-foreground">On track ✓</span>;
+function AttendanceHint({ attended, total, courseType }: { attended: number; total: number; courseType?: string }) {
+  if (total === 0) {
+    return <span className="text-xs font-medium text-muted-foreground">No classes conducted yet</span>;
+  }
+  const isLab = courseType?.toLowerCase().includes("lab") ?? false;
+  const factor = isLab ? 2 : 1;
+  const unit = isLab ? "lab" : "class";
+  const unitPlural = isLab ? "labs" : "classes";
+
+  const rawNeed = 3 * total - 4 * attended;
+  const need = Math.ceil(rawNeed / factor);
+
+  const rawCanSkip = Math.floor((4 * attended - 3 * total) / 3);
+  const canSkip = Math.floor(rawCanSkip / factor);
+
+  if (need > 0) {
+    return (
+      <span className="text-xs font-medium text-destructive">
+        Attend {need} more {need === 1 ? unit : unitPlural} to reach 75%
+      </span>
+    );
+  }
+  if (canSkip === 0) {
+    const nextSkipNeed = isLab 
+      ? Math.ceil((3 * total - 4 * attended + 6) / 2)
+      : (3 * total - 4 * attended + 3);
+    return (
+      <span className="text-xs font-medium text-emerald-500">
+        Can skip 1 if you attend {nextSkipNeed} more {nextSkipNeed === 1 ? unit : unitPlural}
+      </span>
+    );
+  }
+  return (
+    <span className="text-xs font-medium text-emerald-500">
+      Can skip {canSkip} more {canSkip === 1 ? unit : unitPlural}
+    </span>
+  );
 }
 
 // ─── Circular Progress ────────────────────────────────────────────────────────
@@ -147,7 +177,7 @@ function ListCircularProgress({ percentage, size = 46 }: { percentage: number; s
           cy={size / 2}
         />
       </svg>
-      <span className="absolute text-[10px] font-semibold text-foreground leading-none">{percentage}%</span>
+      <span className="absolute text-[10px] font-semibold text-foreground leading-none">{Math.round(percentage)}%</span>
     </div>
   );
 }
@@ -241,11 +271,11 @@ function TimetableDrawer({
   const displayType = item.courseType.toLowerCase().includes("lab") ? "Lab Only" : "Theory Only";
 
   const details = [
-    { icon: Hash,          label: "Course Code",  value: item.courseCode, color: "text-muted-foreground/60" },
-    { icon: LayoutGrid,    label: "Slot",         value: item.slot,       color: "text-muted-foreground/60" },
-    { icon: Clock,         label: "Class Time",   value: `${item.startTime} - ${item.endTime}`, color: "text-muted-foreground/60" },
-    { icon: MapPin,        label: "Venue / Room", value: item.venue || "TBA", color: "text-muted-foreground/60" },
-    { icon: User,          label: "Faculty",      value: item.faculty || "TBA", color: "text-muted-foreground/60" },
+    { icon: Hash,          label: "Course Code",  value: item.courseCode },
+    { icon: LayoutGrid,    label: "Slot",         value: item.slot },
+    { icon: Clock,         label: "Class Time",   value: `${item.startTime} - ${item.endTime}` },
+    { icon: MapPin,        label: "Venue / Room", value: item.venue || "TBA" },
+    { icon: User,          label: "Faculty",      value: item.faculty || "TBA" },
   ];
 
   return (
@@ -255,27 +285,18 @@ function TimetableDrawer({
           
           {/* Header Row */}
           <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1 min-w-0">
-              {hasAtt ? (
-                <ListCircularProgress percentage={pct} size={54} />
-              ) : (
-                <div className="w-[54px] h-[54px] rounded-full bg-muted/10 flex items-center justify-center text-muted-foreground shrink-0 border border-border/5">
-                  <Calendar className="w-6 h-6 text-muted-foreground/60" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-2 leading-none">
-                  <span className="text-sm font-medium tracking-wide text-primary uppercase">
-                    {item.courseCode}
-                  </span>
-                  <span className="text-[10px] font-medium text-muted-foreground/60">
-                    ({displayType})
-                  </span>
-                </div>
-                <h2 className="text-xl font-medium text-foreground leading-snug tracking-tight">
-                  {item.courseTitle}
-                </h2>
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center gap-2 leading-none">
+                <span className="text-sm font-medium tracking-wide text-primary uppercase">
+                  {item.courseCode}
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground/60">
+                  ({displayType})
+                </span>
               </div>
+              <h2 className="text-xl font-medium text-foreground leading-snug tracking-tight">
+                {item.courseTitle}
+              </h2>
             </div>
             
             {/* Close Button */}
@@ -307,43 +328,35 @@ function TimetableDrawer({
               </div>
 
               <div className="flex items-center justify-between text-xs text-muted-foreground leading-none pt-0.5">
-                <AttendanceHint attended={attendanceRecord.attendedClasses} total={attendanceRecord.totalClasses} />
-                <span className="font-mono">{attendanceRecord.attendedClasses} / {attendanceRecord.totalClasses} classes attended</span>
+                <AttendanceHint attended={attendanceRecord.attendedClasses} total={attendanceRecord.totalClasses} courseType={item.courseType} />
+                <span className="font-mono">
+                  {item.courseType.toLowerCase().includes("lab") ? attendanceRecord.attendedClasses / 2 : attendanceRecord.attendedClasses} /{" "}
+                  {item.courseType.toLowerCase().includes("lab") ? attendanceRecord.totalClasses / 2 : attendanceRecord.totalClasses}{" "}
+                  {item.courseType.toLowerCase().includes("lab") ? "labs" : "classes"} attended
+                </span>
               </div>
             </div>
           )}
 
-          {/* Course Details Timeline */}
-          <div className="space-y-4 pt-1">
+          {/* Course Details List */}
+          <div className="space-y-3 pt-1">
             <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
               Class Schedule Details
             </p>
 
-            <div className="space-y-0">
-              {details.map(({ icon: Icon, label, value, color }, index) => (
-                <div key={label} className="flex gap-4 relative">
-                  
-                  {/* Left Column: Icon */}
-                  <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-[1px]">
-                    <Icon className={`w-5 h-5 ${color} shrink-0`} />
-                  </div>
-                  
-                  {/* Middle Column: Timeline node */}
-                  <div className="relative flex flex-col items-center shrink-0 w-3">
-                    {/* Line */}
-                    {index < details.length - 1 && (
-                      <div className="absolute top-[22px] bottom-0 w-px bg-border/20 left-1/2 -translate-x-1/2" />
-                    )}
-                    {/* Dot */}
-                    <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/45 mt-2.5 z-10" />
+            <div className="divide-y divide-border/10">
+              {details.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-center gap-4 py-3">
+                  {/* Left Column: Icon Box */}
+                  <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-muted-foreground/75 shrink-0" />
                   </div>
                   
                   {/* Right Column: Text contents */}
-                  <div className="min-w-0 pb-5 pt-[3px] flex-1">
-                    <p className="text-xs text-muted-foreground leading-none mb-1">{label}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
                     <p className="text-sm font-medium text-foreground truncate">{value}</p>
                   </div>
-                  
                 </div>
               ))}
             </div>
@@ -490,8 +503,9 @@ export default function TimetablePage() {
     return m;
   }, [attendance]);
 
-  const getAtt = (code: string, slot: string) => {
-    return attMap.get(`${code}::${slot.toUpperCase().startsWith("L") ? "lab" : "th"}`);
+  const getAtt = (code: string, courseType: string) => {
+    const isLab = courseType.toLowerCase().includes("lab");
+    return attMap.get(`${code}::${isLab ? "lab" : "th"}`);
   };
 
   const isScheduleEmpty = Object.values(schedule).every((arr) => arr.length === 0);
@@ -549,7 +563,7 @@ export default function TimetablePage() {
       </header>
 
       {/* ── Calendar Days Horizontally Scrollable / Slidable Row ────────────────── */}
-      <div className="border-b border-border/10 pb-4 overflow-hidden">
+      <div className="pb-4 overflow-hidden">
         <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full py-1 snap-x snap-mandatory">
           {weekDays.map((d, i) => {
             const active = selectedDay === i;
@@ -576,6 +590,8 @@ export default function TimetablePage() {
           })}
         </div>
       </div>
+
+      <Separator className="bg-border/50" />
 
       {/* ── Active Day Info ───────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between py-1">
@@ -615,28 +631,27 @@ export default function TimetablePage() {
         ) : (
           <div className="divide-y divide-border/20">
             {daySchedule.map((item, idx) => {
-              const att = getAtt(item.courseCode, item.slot);
+              const att = getAtt(item.courseCode, item.courseType);
               
               const attendancePct = att ? att.attendancePercentage : 0;
               const hasAttendance = !!att;
               
-              const barColor = hasAttendance ? getBarBgColor(attendancePct) : "bg-muted";
-
               return (
                 <button
                   key={`${item.courseCode}-${item.slot}-${idx}`}
                   onClick={() => setSelected(item)}
-                  className="w-full flex items-center gap-4 py-4 text-left border-none bg-transparent cursor-pointer active:bg-muted/15 transition-colors"
+                  className="w-full flex items-center gap-4 py-4 px-3 text-left border-none bg-transparent hover:bg-muted/5 active:bg-muted/15 rounded-xl transition-all cursor-pointer"
                 >
-                  {/* Left: Circular progress matching attendance circular progress */}
+                  {/* Left: Circular progress */}
                   {hasAttendance ? (
-                    <ListCircularProgress percentage={attendancePct} size={46} />
+                    <ListCircularProgress percentage={attendancePct} size={48} />
                   ) : (
                     <EmptyCircularProgress />
                   )}
 
-                  {/* Middle: Details block with slot next to code and time aligned right */}
-                  <div className="flex-1 min-w-0 space-y-1">
+                  {/* Middle: Spacious details column */}
+                  <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                    {/* First line: Course Code & Slot */}
                     <div className="flex items-center gap-2 leading-none">
                       <span className="text-sm font-semibold tracking-wide text-foreground uppercase">
                         {item.courseCode}
@@ -644,30 +659,34 @@ export default function TimetablePage() {
                       <span className="text-[10px] font-semibold text-muted-foreground/60 font-mono leading-none">
                         ({item.slot})
                       </span>
-                      <span className="text-[11px] font-medium text-muted-foreground/75 font-mono leading-none ml-auto">
-                        {item.startTime} - {item.endTime}
-                      </span>
                     </div>
+
+                    {/* Second line: Course Title */}
                     <p className="text-xs text-muted-foreground truncate leading-none">
                       {item.courseTitle}
                     </p>
-                  </div>
-                  {/* Right: Progress bar & fraction details */}
-                  {hasAttendance ? (
-                    <div className="shrink-0 text-right space-y-1.5">
-                      <p className="text-base font-semibold text-foreground leading-none tabular-nums">
-                        {att.attendedClasses} <span className="text-muted-foreground/45 text-xs font-normal">/ {att.totalClasses}</span>
-                      </p>
-                      <div className="w-16 h-[3px] bg-muted/30 rounded-full overflow-hidden ml-auto">
-                        <div
-                          className={`h-full rounded-full ${barColor}`}
-                          style={{ width: `${Math.min(attendancePct, 100)}%` }}
-                        />
-                      </div>
+
+                    {/* Third line: Time Range with Clock Icon */}
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80 font-mono leading-none">
+                      <Clock className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                      <span>{item.startTime} - {item.endTime}</span>
                     </div>
-                  ) : (
-                    <div className="w-16 shrink-0" />
-                  )}
+                  </div>
+
+                  {/* Right: Attendance fraction details & Chevron */}
+                  <div className="flex items-center gap-3 shrink-0">
+                    {hasAttendance && (
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-foreground leading-none tabular-nums">
+                          {item.courseType.toLowerCase().includes("lab") ? att.attendedClasses / 2 : att.attendedClasses}{" "}
+                          <span className="text-muted-foreground/45 text-xs font-normal">
+                            / {item.courseType.toLowerCase().includes("lab") ? att.totalClasses / 2 : att.totalClasses}
+                          </span>
+                        </p>
+                      </div>
+                    )}
+                    <ChevronRight className="w-5 h-5 text-muted-foreground/35 shrink-0" />
+                  </div>
                 </button>
               );
             })}
@@ -681,7 +700,7 @@ export default function TimetablePage() {
           open={!!selected}
           onOpenChange={(o) => !o && setSelected(null)}
           item={selected}
-          attendanceRecord={getAtt(selected.courseCode, selected.slot)}
+          attendanceRecord={getAtt(selected.courseCode, selected.courseType)}
           dayDate={weekDays[selectedDay].date}
         />
       )}

@@ -29,28 +29,25 @@ import { DrawerSelect } from "@/components/ui/drawer-select";
 
 function getPercentageColor(pct: number) {
   if (pct >= 75) return "text-emerald-500";
-  if (pct >= 50) return "text-amber-500";
   return "text-destructive";
 }
 
 function getCircleStrokeColor(pct: number) {
   if (pct >= 75) return "stroke-emerald-500";
-  if (pct >= 50) return "stroke-amber-500";
   return "stroke-destructive";
 }
 
 function getBarBgColor(pct: number) {
   if (pct >= 75) return "bg-emerald-500";
-  if (pct >= 50) return "bg-amber-500";
   return "bg-destructive";
 }
 
 function getCourseBadgeStyle(type: string) {
   const t = type.toLowerCase();
   if (t.includes("lab")) {
-    return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10";
+    return "bg-primary/10 text-primary border border-primary/15";
   }
-  return "bg-sky-500/10 text-sky-400 border border-sky-500/10";
+  return "bg-muted text-muted-foreground border border-border/20";
 }
 
 function formatCourseType(type: string) {
@@ -80,7 +77,7 @@ function StatCircularProgress({
       <svg width={size} height={size} className="-rotate-90">
         <circle className="text-muted/15 stroke-current" strokeWidth="4.5" fill="transparent" r={radius} cx={size / 2} cy={size / 2} />
         <circle
-          className="stroke-sky-500 transition-all duration-500"
+          className="stroke-primary transition-all duration-500"
           strokeWidth="4.5"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -91,7 +88,7 @@ function StatCircularProgress({
           cy={size / 2}
         />
       </svg>
-      <div className="absolute text-sky-500">
+      <div className="absolute text-primary">
         <Icon className="w-5 h-5" />
       </div>
     </div>
@@ -121,21 +118,50 @@ function ListCircularProgress({ percentage, size = 48 }: { percentage: number; s
           cy={size / 2}
         />
       </svg>
-      <span className="absolute text-[11px] font-semibold text-foreground leading-none">{percentage}%</span>
+      <span className="absolute text-[11px] font-semibold text-foreground leading-none">{Math.round(percentage)}%</span>
     </div>
   );
 }
 
 // ─── Attendance Hint ──────────────────────────────────────────────────────────
 
-function AttendanceHint({ attended, total }: { attended: number; total: number }) {
-  const need = Math.ceil(3 * total - 4 * attended);
-  const canSkip = Math.floor((4 * attended - 3 * total) / 3);
-  if (need > 0)
-    return <span className="text-xs font-medium text-destructive">Attend {need} more to reach 75%</span>;
-  if (canSkip > 0)
-    return <span className="text-xs font-medium text-emerald-500">Can miss {canSkip} more classes</span>;
-  return <span className="text-xs font-medium text-muted-foreground">On track ✓</span>;
+function AttendanceHint({ attended, total, courseType }: { attended: number; total: number; courseType?: string }) {
+  if (total === 0) {
+    return <span className="text-xs font-medium text-muted-foreground">No classes conducted yet</span>;
+  }
+  const isLab = courseType?.toLowerCase().includes("lab") ?? false;
+  const factor = isLab ? 2 : 1;
+  const unit = isLab ? "lab" : "class";
+  const unitPlural = isLab ? "labs" : "classes";
+
+  const rawNeed = 3 * total - 4 * attended;
+  const need = Math.ceil(rawNeed / factor);
+
+  const rawCanSkip = Math.floor((4 * attended - 3 * total) / 3);
+  const canSkip = Math.floor(rawCanSkip / factor);
+
+  if (need > 0) {
+    return (
+      <span className="text-xs font-medium text-destructive">
+        Attend {need} more {need === 1 ? unit : unitPlural} to reach 75%
+      </span>
+    );
+  }
+  if (canSkip === 0) {
+    const nextSkipNeed = isLab 
+      ? Math.ceil((3 * total - 4 * attended + 6) / 2)
+      : (3 * total - 4 * attended + 3);
+    return (
+      <span className="text-xs font-medium text-emerald-500">
+        Can skip 1 if you attend {nextSkipNeed} more {nextSkipNeed === 1 ? unit : unitPlural}
+      </span>
+    );
+  }
+  return (
+    <span className="text-xs font-medium text-emerald-500">
+      Can skip {canSkip} more {canSkip === 1 ? unit : unitPlural}
+    </span>
+  );
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -246,7 +272,10 @@ function AttendanceRow({
 
             <div className="shrink-0 min-w-19 text-right space-y-1.5">
               <p className="text-sm font-semibold text-foreground leading-none tabular-nums whitespace-nowrap">
-                {item.attendedClasses} <span className="text-muted-foreground/45 text-xs font-normal">/ {item.totalClasses}</span>
+                {item.courseType.toLowerCase().includes("lab") ? item.attendedClasses / 2 : item.attendedClasses}{" "}
+                <span className="text-muted-foreground/45 text-xs font-normal">
+                  / {item.courseType.toLowerCase().includes("lab") ? item.totalClasses / 2 : item.totalClasses}
+                </span>
         </p>
         <div className="w-16 h-0.75 bg-muted/30 rounded-full overflow-hidden ml-auto">
           <div
@@ -275,17 +304,16 @@ function AttendanceDrawer({
   if (!item) return null;
 
   const pct = item.attendancePercentage;
-  const badgeStyle = getCourseBadgeStyle(item.courseType);
   const displayType = formatCourseType(item.courseType);
 
   const details = [
-    { icon: Hash,          label: "Course Code",   value: item.courseCode,          color: "text-blue-500" },
-    { icon: LayoutGrid,    label: "Slot",          value: item.slot,                color: "text-sky-400" },
-    { icon: GraduationCap, label: "Course Type",   value: item.courseType,          color: "text-purple-400" },
-    { icon: User,          label: "Faculty",       value: item.faculty?.name ?? "—", color: "text-emerald-400" },
-    { icon: School,        label: "School",        value: item.faculty?.school ?? "—",color: "text-amber-400" },
-    { icon: CalendarDays,  label: "Registered On", value: item.registrationDate || "—", color: "text-blue-400" },
-    { icon: Clock,         label: "Last Updated",  value: item.attendanceDate || "—", color: "text-neutral-400" },
+    { icon: Hash,          label: "Course Code",   value: item.courseCode },
+    { icon: LayoutGrid,    label: "Slot",          value: item.slot },
+    { icon: GraduationCap, label: "Course Type",   value: item.courseType },
+    { icon: User,          label: "Faculty",       value: item.faculty?.name ?? "—" },
+    { icon: School,        label: "School",        value: item.faculty?.school ?? "—" },
+    { icon: CalendarDays,  label: "Registered On", value: item.registrationDate || "—" },
+    { icon: Clock,         label: "Last Updated",  value: item.attendanceDate || "—" },
   ];
 
   return (
@@ -299,11 +327,11 @@ function AttendanceDrawer({
               <ListCircularProgress percentage={pct} size={54} />
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center gap-2 leading-none">
-                  <span className="text-sm font-medium tracking-wide text-sky-500 uppercase">
+                  <span className="text-sm font-medium tracking-wide text-primary uppercase">
                     {item.courseCode}
                   </span>
-                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${badgeStyle}`}>
-                    {displayType}
+                  <span className="text-[10px] font-medium text-muted-foreground/60">
+                    ({displayType})
                   </span>
                 </div>
                 <h2 className="text-xl font-medium text-foreground leading-snug tracking-tight">
@@ -340,9 +368,11 @@ function AttendanceDrawer({
             </div>
 
             <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground leading-none pt-0.5">
-              <AttendanceHint attended={item.attendedClasses} total={item.totalClasses} />
+              <AttendanceHint attended={item.attendedClasses} total={item.totalClasses} courseType={item.courseType} />
               <span className="font-mono tabular-nums whitespace-nowrap shrink-0 text-right">
-                {item.attendedClasses} / {item.totalClasses} classes attended
+                {item.courseType.toLowerCase().includes("lab") ? item.attendedClasses / 2 : item.attendedClasses} /{" "}
+                {item.courseType.toLowerCase().includes("lab") ? item.totalClasses / 2 : item.totalClasses}{" "}
+                {item.courseType.toLowerCase().includes("lab") ? "labs" : "classes"} attended
               </span>
             </div>
 
@@ -352,41 +382,29 @@ function AttendanceDrawer({
               className="w-full flex items-center justify-between mt-3 px-4 py-3 rounded-xl bg-muted/30 border border-border/10 text-xs font-semibold text-foreground hover:bg-muted/50 active:opacity-85 transition-colors cursor-pointer"
             >
               <span>View Detailed Session Log</span>
-              <ArrowRight className="w-4 h-4 text-sky-500" />
+              <ArrowRight className="w-4 h-4 text-primary" />
             </button>
           </div>
 
-          {/* Course Information Timeline */}
-          <div className="space-y-4 pt-1">
+          {/* Course Information Details */}
+          <div className="space-y-3 pt-1">
             <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
               Course Information
             </p>
 
-            <div className="space-y-0">
-              {details.map(({ icon: Icon, label, value, color }, index) => (
-                <div key={label} className="flex gap-4 relative">
-                  
-                  {/* Icon */}
-                  <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                    <Icon className={`w-5 h-5 ${color} shrink-0`} />
+            <div className="divide-y divide-border/10">
+              {details.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-center gap-4 py-3">
+                  {/* Left Column: Icon Box */}
+                  <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-muted-foreground/75 shrink-0" />
                   </div>
                   
-                  {/* Timeline node */}
-                  <div className="relative flex flex-col items-center shrink-0 w-3">
-                    {/* Line */}
-                    {index < details.length - 1 && (
-                      <div className="absolute top-4 bottom-0 w-px bg-border/20 left-1/2 -translate-x-1/2" />
-                    )}
-                    {/* Dot */}
-                    <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/45 mt-2 z-10" />
-                  </div>
-                  
-                  {/* Text contents */}
-                  <div className="min-w-0 pb-5 space-y-0.5">
-                    <p className="text-xs text-muted-foreground leading-none">{label}</p>
+                  {/* Right Column: Text contents */}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
                     <p className="text-sm font-medium text-foreground truncate">{value}</p>
                   </div>
-                  
                 </div>
               ))}
             </div>
@@ -407,7 +425,6 @@ export default function AttendancePage() {
   const isOnline = useOnlineStatus();
 
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
-  const [semesterId, setSemesterId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AttendanceRecord | null>(null);
@@ -418,12 +435,10 @@ export default function AttendancePage() {
   useEffect(() => {
     try {
       const cached = localStorage.getItem("deskly::cache::attendance");
-      const cachedSem = localStorage.getItem("deskly::cache::attendance_semester");
       if (cached) {
         const parsed = JSON.parse(cached) as AttendanceRecord[];
         if (parsed.length > 0) {
           setAttendance(parsed);
-          if (cachedSem) setSemesterId(cachedSem);
           setLoading(false);
         }
       }
@@ -439,7 +454,6 @@ export default function AttendancePage() {
       if (res.success && res.data) {
         setAttendance(res.data);
         const sem = res.semesterId ?? "";
-        setSemesterId(sem);
         localStorage.setItem("deskly::cache::attendance", JSON.stringify(res.data));
         localStorage.setItem("deskly::cache::attendance_semester", sem);
       } else {
@@ -529,14 +543,11 @@ export default function AttendancePage() {
       <header className="flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
-            <UserCheck className="w-6 h-6 text-sky-500 shrink-0" />
+            <UserCheck className="w-6 h-6 text-primary shrink-0" />
             <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
               My Attendance
             </h1>
           </div>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Semester: {semesterId || "Odd 2024-25"}
-          </p>
         </div>
         <button
           onClick={load}
@@ -558,7 +569,6 @@ export default function AttendancePage() {
             <p className="text-2xl font-semibold text-foreground leading-none py-1">
               {stats.overallPercentage}%
             </p>
-            <p className="text-[10px] text-muted-foreground leading-none">Overall Average</p>
           </div>
         </div>
 
@@ -574,7 +584,6 @@ export default function AttendancePage() {
             <p className="text-xl font-semibold text-foreground leading-none py-1 tabular-nums whitespace-nowrap">
               {stats.totalAttended} / {stats.totalClasses}
             </p>
-            <p className="text-[10px] text-muted-foreground leading-none">Attended of Total</p>
           </div>
         </div>
       </div>
@@ -586,7 +595,7 @@ export default function AttendancePage() {
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1.5 flex-1 min-w-0">
             <div className="flex items-center gap-2 leading-none">
-              <span className="w-1 h-4 bg-sky-500 rounded-full shrink-0" />
+              <span className="w-1 h-4 bg-primary rounded-full shrink-0" />
               <h2 className="text-lg font-medium tracking-tight text-foreground leading-none">
                 Course Attendance
               </h2>
@@ -629,9 +638,9 @@ export default function AttendancePage() {
 
       {/* ── Bottom Motivation Section (subtle separator-aligned bar) ──────────── */}
       <div className="pt-2">
-        <div className="p-4 bg-sky-500/5 border border-sky-500/10 rounded-2xl flex items-center justify-between gap-4">
+        <div className="p-4 bg-primary/5 border border-primary/10 rounded-2xl flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-full bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500 shrink-0">
+            <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               <Trophy className="w-5 h-5" />
             </div>
             <div className="min-w-0 space-y-1">
@@ -646,11 +655,12 @@ export default function AttendancePage() {
             <svg width="60" height="24" viewBox="0 0 60 24" fill="none">
               <path
                 d="M1 20 C 15 20, 15 5, 30 10 C 45 15, 45 2, 59 2"
-                stroke="#0ea5e9"
+                stroke="currentColor"
+                className="text-primary"
                 strokeWidth="2"
                 strokeLinecap="round"
               />
-              <circle cx="58" cy="2" r="2.5" fill="#0ea5e9" />
+              <circle cx="58" cy="2" r="2.5" fill="currentColor" className="text-primary" />
             </svg>
           </div>
         </div>

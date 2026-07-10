@@ -2,17 +2,10 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useParams, useNavigate } from "@/router";
 import { getAttendanceDetail, AttendanceDetailRecord, AttendanceRecord } from "@/lib/attendance";
+import { Separator } from "@/components/ui/separator";
 
 import {
-  ArrowLeft,
-  User,
-  CheckCircle2,
-  XCircle,
-  Clock,
   Calendar,
-
-  School,
-  MinusCircle,
 } from "lucide-react";
 
 // ─── Circular Arc Progress ────────────────────────────────────────────────────
@@ -23,9 +16,7 @@ function BigCircularProgress({ percentage }: { percentage: number }) {
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (Math.min(percentage, 100) / 100) * circumference;
 
-  let stroke = "stroke-destructive";
-  if (percentage >= 75) stroke = "stroke-emerald-500";
-  else if (percentage >= 50) stroke = "stroke-amber-500";
+  const stroke = percentage >= 75 ? "stroke-emerald-500" : "stroke-destructive";
 
   return (
     <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
@@ -58,31 +49,31 @@ function StatusBadge({ status }: { status: string }) {
 
   if (isPresent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded-lg leading-none">
-        <CheckCircle2 className="w-3 h-3" />
+      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-500 leading-none">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
         Present
       </span>
     );
   }
   if (isAbsent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-destructive bg-destructive/5 border border-destructive/10 px-2 py-0.5 rounded-lg leading-none">
-        <XCircle className="w-3 h-3" />
+      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-destructive leading-none">
+        <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
         Absent
       </span>
     );
   }
   if (isOd) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 bg-sky-500/5 border border-sky-500/10 px-2 py-0.5 rounded-lg leading-none">
-        <span className="w-3.5 h-3.5 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-[7px] font-bold border border-sky-500/20 shrink-0">OD</span>
+      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary leading-none">
+        <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
         {status}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/20 border border-border/10 px-2 py-0.5 rounded-lg leading-none">
-      <Clock className="w-3 h-3" />
+    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground leading-none">
+      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 shrink-0" />
       {status}
     </span>
   );
@@ -177,7 +168,7 @@ export default function AttendanceDetailPage() {
         <p className="text-muted-foreground text-sm">No course data found.</p>
         <button
           onClick={() => navigate("/dashboard/attendance")}
-          className="text-xs font-semibold text-sky-500 underline underline-offset-2 bg-transparent border-none cursor-pointer"
+          className="text-xs font-semibold text-primary underline underline-offset-2 bg-transparent border-none cursor-pointer"
         >
           Go back to Attendance
         </button>
@@ -187,9 +178,6 @@ export default function AttendanceDetailPage() {
 
   const isLab = record.courseType.toLowerCase().includes("lab");
   const displayType = isLab ? "Lab Only" : "Theory Only";
-  const badgeStyle = isLab
-    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10"
-    : "bg-sky-500/10 text-sky-400 border border-sky-500/10";
 
   // Calculate detailed fractions from logs
 
@@ -198,8 +186,8 @@ export default function AttendanceDetailPage() {
     return s.includes("od") || s.includes("duty") || s === "on duty";
   }).length;
 
-  const totalClasses = record.totalClasses;
-  const attendedClasses = record.attendedClasses;
+  const totalClasses = isLab ? record.totalClasses / 2 : record.totalClasses;
+  const attendedClasses = isLab ? record.attendedClasses / 2 : record.attendedClasses;
   const absentClasses = totalClasses - attendedClasses;
 
   return (
@@ -211,48 +199,20 @@ export default function AttendanceDetailPage() {
         }
       `}</style>
 
-      {/* ── Header Row (Back Chevron + Title) ─────────────────────────────────── */}
-      <header className="flex items-center gap-1">
-        <button
-          onClick={() => navigate("/dashboard/attendance")}
-          className="inline-flex items-center gap-2 text-foreground/80 hover:text-foreground bg-transparent border-none p-0 cursor-pointer text-sm font-semibold"
-        >
-          <ArrowLeft className="w-5 h-5 shrink-0" />
-          <span>My Attendance</span>
-        </button>
-      </header>
+
 
       {/* ── Course Hero Block ─────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1.5 min-w-0 flex-1">
-          <div className="flex items-center gap-2 leading-none flex-wrap">
-            <span className="text-sm font-semibold tracking-wide text-sky-500 uppercase leading-none">
-              {record.courseCode}
-            </span>
-            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded leading-none ${badgeStyle}`}>
-              {displayType}
-            </span>
-          </div>
-          <h1 className="text-[20px] font-medium text-foreground leading-snug tracking-tight">
+        <div className="space-y-1 min-w-0 flex-1">
+          <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+            {record.courseCode}
+          </p>
+          <h1 className="text-[22px] font-bold text-foreground leading-snug tracking-tight">
             {record.courseTitle}
           </h1>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono leading-none pt-0.5 flex-wrap">
-            {record.faculty?.name && (
-              <span className="flex items-center gap-1">
-                <User className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                {record.faculty.name}
-              </span>
-            )}
-            {record.faculty?.school && (
-              <>
-                <span>|</span>
-                <span className="flex items-center gap-1">
-                  <School className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                  {record.faculty.school}
-                </span>
-              </>
-            )}
-          </div>
+          <p className="text-xs text-muted-foreground leading-normal pt-0.5">
+            {displayType} &bull; {record.faculty?.name} {record.faculty?.school ? `(${record.faculty.school})` : ""}
+          </p>
         </div>
 
         {/* Attendance circular progress */}
@@ -264,49 +224,40 @@ export default function AttendanceDetailPage() {
         </div>
       </div>
 
-      {/* ── 2x2 Grid Stats Card ───────────────────────────────────────────────── */}
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl grid grid-cols-2 overflow-hidden relative">
-        {/* Inner vertical separator line */}
-        <div className="absolute top-0 bottom-0 left-1/2 w-px bg-border/10 -translate-x-1/2" />
-        {/* Inner horizontal separator line */}
-        <div className="absolute left-0 right-0 top-1/2 h-px bg-border/10 -translate-y-1/2" />
+      <Separator className="bg-border/25" />
 
-        {/* cell 1: Total Classes */}
-        <div className="p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
-            <Calendar className="w-4 h-4 text-blue-500 shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Total Classes</span>
-          </div>
-          <span className="text-3xl font-semibold text-foreground leading-none">{totalClasses}</span>
+      {/* ── 4-Column Stats Layout ────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between py-1 text-center">
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">
+            {isLab ? "Total Labs" : "Total Classes"}
+          </p>
+          <p className="text-2xl font-bold text-foreground leading-none">{totalClasses}</p>
         </div>
-
-        {/* cell 2: Present */}
-        <div className="p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Present</span>
-          </div>
-          <span className="text-3xl font-semibold text-foreground leading-none">{attendedClasses}</span>
+        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">
+            Present
+          </p>
+          <p className="text-2xl font-bold text-emerald-500 leading-none">{attendedClasses}</p>
         </div>
-
-        {/* cell 3: On Leave */}
-        <div className="p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
-            <MinusCircle className="w-4 h-4 text-sky-400 shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">On Leave</span>
-          </div>
-          <span className="text-3xl font-semibold text-foreground leading-none">{odSlots}</span>
+        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">
+            OD
+          </p>
+          <p className="text-2xl font-bold text-foreground leading-none">{odSlots}</p>
         </div>
-
-        {/* cell 4: Absent */}
-        <div className="p-4 flex flex-col gap-2">
-          <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
-            <XCircle className="w-4 h-4 text-destructive shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Absent</span>
-          </div>
-          <span className="text-3xl font-semibold text-foreground leading-none">{absentClasses}</span>
+        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">
+            Absent
+          </p>
+          <p className="text-2xl font-bold text-destructive leading-none">{absentClasses}</p>
         </div>
       </div>
+
+      <Separator className="bg-border/25" />
 
       {/* ── Session Log Section ───────────────────────────────────────────────── */}
       <div className="space-y-4 pt-1">
@@ -332,11 +283,11 @@ export default function AttendanceDetailPage() {
             <p className="text-xs text-muted-foreground">Detailed logs haven't been synchronized.</p>
           </div>
         ) : (
-          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+          <div className="divide-y divide-border/10 border-t border-b border-border/10">
             {details.map((row, i) => (
               <div
                 key={`${row.serialNo}-${i}`}
-                className="flex items-center justify-between gap-4 p-4 hover:bg-muted/5 transition-colors duration-150"
+                className="flex items-center justify-between gap-4 py-4 hover:bg-muted/5 transition-colors duration-150"
               >
                 {/* Left: Serial Number */}
                 <span className="text-xs font-semibold text-muted-foreground/35 tabular-nums w-4 shrink-0 text-left">
@@ -353,8 +304,8 @@ export default function AttendanceDetailPage() {
                   </p>
                 </div>
 
-                {/* Slot Code (in blue) */}
-                <span className="text-xs font-semibold text-sky-500 font-mono shrink-0">
+                {/* Slot Code (in primary theme color) */}
+                <span className="text-xs font-semibold text-primary font-mono shrink-0">
                   {row.slot || record.slot}
                 </span>
 

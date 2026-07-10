@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getTimetableCourses, TimetableCourse } from "@/lib/features";
+import { Separator } from "@/components/ui/separator";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { DrawerSelect } from "@/components/ui/drawer-select";
@@ -16,19 +18,98 @@ import {
   FileText,
   User,
   MapPin,
+  Hash,
+  LayoutGrid,
+  GraduationCap,
+  School,
+  ChevronRight,
 } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getCourseTypeStyle(type: string): { label: string; className: string } {
-  const clean = type.trim().toUpperCase();
-  if (clean.includes("EMBEDDED THEORY")) return { label: type, className: "text-sky-400 bg-sky-500/10 border-sky-500/15" };
-  if (clean.includes("EMBEDDED LAB")) return { label: type, className: "text-emerald-400 bg-emerald-500/10 border-emerald-500/15" };
-  if (clean.includes("THEORY")) return { label: type, className: "text-sky-400 bg-sky-500/10 border-sky-500/15" };
-  if (clean.includes("LAB")) return { label: type, className: "text-emerald-400 bg-emerald-500/10 border-emerald-500/15" };
-  if (clean.includes("ONLINE")) return { label: type, className: "text-purple-400 bg-purple-500/10 border-purple-500/15" };
-  if (clean.includes("SOFT SKILL") || clean.includes("SKILL")) return { label: type, className: "text-amber-400 bg-amber-500/10 border-amber-500/15" };
-  return { label: type, className: "text-muted-foreground bg-muted/30 border-border/20" };
+function CourseDetailDrawer({
+  item,
+  open,
+  onOpenChange,
+}: {
+  item: TimetableCourse | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  if (!item) return null;
+
+  const displayType = item.courseType.toLowerCase().includes("lab") ? "Lab Only" : "Theory Only";
+
+  const details = [
+    { icon: Hash,          label: "Course Code",  value: item.code },
+    { icon: LayoutGrid,    label: "Slot",         value: item.slot || "—" },
+    { icon: GraduationCap, label: "Course Type",  value: item.courseType },
+    { icon: Monitor,       label: "Credits",      value: `${item.credits?.total ?? 0} Credits` },
+    { icon: User,          label: "Faculty",      value: item.faculty?.name ?? "—" },
+    { icon: School,        label: "School",       value: item.faculty?.school ?? "—" },
+    { icon: MapPin,        label: "Venue / Room", value: item.venue || "—" },
+  ];
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="pb-8 font-saira max-h-[92vh]">
+        <div className="overflow-y-auto no-scrollbar px-6 space-y-7 pt-5">
+          
+          {/* Header Row */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center gap-2 leading-none">
+                <span className="text-sm font-medium tracking-wide text-primary uppercase">
+                  {item.code}
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground/60">
+                  ({displayType})
+                </span>
+              </div>
+              <h2 className="text-xl font-semibold text-foreground leading-snug tracking-tight">
+                {item.title}
+              </h2>
+            </div>
+            
+            {/* Close Button */}
+            <button
+              onClick={() => onOpenChange(false)}
+              className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0"
+            >
+              <span className="text-lg leading-none font-sans">×</span>
+            </button>
+          </div>
+
+          <Separator className="bg-border/25" />
+
+          {/* Course Details List */}
+          <div className="space-y-3 pt-1">
+            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+              Course Details
+            </p>
+
+            <div className="divide-y divide-border/10">
+              {details.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-center gap-4 py-3">
+                  {/* Left Column: Icon Box */}
+                  <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-primary shrink-0" />
+                  </div>
+                  
+                  {/* Right Column: Text contents */}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
 }
 
 function Sk({ className = "" }: { className?: string }) {
@@ -83,6 +164,9 @@ export default function CoursesPage() {
   const [courses, setCourses] = useState<TimetableCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [selectedCourse, setSelectedCourse] = useState<TimetableCourse | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [selectedTypeFilter, setSelectedTypeFilter] = useState("ALL");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("ALL");
@@ -166,7 +250,6 @@ export default function CoursesPage() {
     return { total, theory: { count: theoryCount, credits: theoryCredits }, lab: { count: labCount, credits: labCredits }, online: { count: onlineCount, credits: onlineCredits }, softSkill: { count: softSkillCount, credits: softSkillCredits }, totalCredits };
   }, [courses]);
 
-  const isLoading = authLoading || loading;
   const shell = (children: React.ReactNode) => <>{children}</>;
 
   const showOffline = courses.length === 0 && (isOnline === false || isNetworkError(error, isOnline));
@@ -199,37 +282,35 @@ export default function CoursesPage() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
-        <Layers className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
+        <Layers className="w-6 h-6 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1 min-w-0">
           <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
             My Courses
           </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            {!isLoading ? `${filteredCourses.length} of ${courses.length} courses` : "Registered this semester"}
-          </p>
         </div>
       </header>
 
-      {/* ── Stats Card ──────────────────────────────────────────────────────── */}
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden relative">
-        <div className="absolute top-0 bottom-0 left-1/3 w-px bg-border/10" />
-        <div className="absolute top-0 bottom-0 left-2/3 w-px bg-border/10" />
-        <div className="grid grid-cols-3">
-          {[
-            { icon: Layers, label: "Total", value: courseStats.total, color: "text-sky-400" },
-            { icon: Monitor, label: "Credits", value: courseStats.totalCredits, color: "text-emerald-400" },
-            { icon: Beaker, label: "Labs", value: courseStats.lab.count, color: "text-amber-400" },
-          ].map(({ icon: Icon, label, value, color }) => (
-            <div key={label} className="p-4 flex flex-col gap-2">
-              <div className="flex items-center gap-1.5">
-                <Icon className={`w-3.5 h-3.5 shrink-0 ${color}`} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">{label}</span>
-              </div>
-              <span className="text-2xl font-medium text-foreground leading-none">{value}</span>
-            </div>
-          ))}
+      <Separator className="bg-border/25" />
+
+      {/* ── Stats block ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between py-1 text-center">
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Total</p>
+          <p className="text-2xl font-bold text-foreground leading-none">{courseStats.total}</p>
+        </div>
+        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Credits</p>
+          <p className="text-2xl font-bold text-foreground leading-none">{courseStats.totalCredits}</p>
+        </div>
+        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Labs</p>
+          <p className="text-2xl font-bold text-foreground leading-none">{courseStats.lab.count}</p>
         </div>
       </div>
+
+      <Separator className="bg-border/25" />
 
       {/* ── Filters ─────────────────────────────────────────────────────────── */}
       <div className="space-y-3">
@@ -270,52 +351,62 @@ export default function CoursesPage() {
           <p className="text-xs text-muted-foreground">Try modifying the type or category filters.</p>
         </div>
       ) : (
-        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
           {filteredCourses.map((item, idx) => {
-            const typeStyle = getCourseTypeStyle(item.courseType);
             return (
-              <div key={`${item.code}-${idx}`} className="p-4 space-y-3">
-                {/* Top row: index, code, type badge */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[11px] font-medium text-muted-foreground/30 tabular-nums w-5 shrink-0">
-                    {(idx + 1).toString().padStart(2, "0")}
-                  </span>
-                  <span className="text-xs font-semibold text-sky-500 uppercase tracking-wide leading-none">
-                    {item.code}
-                  </span>
-                  {item.slot && (
-                    <span className="font-mono text-[10px] text-muted-foreground/60 bg-muted/40 px-1.5 py-0.5 rounded leading-none">
-                      {item.slot}
+              <div
+                key={`${item.code}-${idx}`}
+                onClick={() => {
+                  setSelectedCourse(item);
+                  setDrawerOpen(true);
+                }}
+                className="py-4 flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer"
+              >
+                <div className="flex-1 min-w-0 space-y-3">
+                  {/* Top row: index, code, type, slot, credits as plain text items */}
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                    <span className="font-semibold text-muted-foreground/30 tabular-nums w-4 shrink-0">
+                      {idx + 1}
                     </span>
-                  )}
-                  <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border leading-none ${typeStyle.className}`}>
-                    {typeStyle.label}
-                  </span>
-                  <span className="text-[10px] font-medium text-muted-foreground/50 bg-muted/30 border border-border/20 px-1.5 py-0.5 rounded leading-none ml-auto">
-                    {item.credits?.total ?? 0} Cr
-                  </span>
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
+                      {item.code}
+                    </span>
+                    <span>&bull;</span>
+                    <span className="uppercase">{item.courseType}</span>
+                    {item.slot && (
+                      <>
+                        <span>&bull;</span>
+                        <span className="font-mono">{item.slot}</span>
+                      </>
+                    )}
+                    <span>&bull;</span>
+                    <span>{item.credits?.total ?? 0} Credits</span>
+                  </div>
+
+                  {/* Title */}
+                  <p className="text-sm font-medium text-foreground leading-snug">
+                    {item.title}
+                  </p>
+
+                  {/* Faculty & Venue */}
+                  <div className="flex items-center gap-4 flex-wrap">
+                    {item.faculty?.name && (
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <User className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                        <span className="text-xs text-muted-foreground/75 truncate">{item.faculty.name}</span>
+                      </div>
+                    )}
+                    {item.venue && (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                        <span className="text-xs text-muted-foreground/75">{item.venue}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Title */}
-                <p className="text-sm font-medium text-foreground leading-snug">
-                  {item.title}
-                </p>
-
-                {/* Faculty & Venue */}
-                <div className="flex items-center gap-4 flex-wrap">
-                  {item.faculty?.name && (
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <User className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
-                      <span className="text-xs text-muted-foreground/70 truncate">{item.faculty.name}</span>
-                    </div>
-                  )}
-                  {item.venue && (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <MapPin className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
-                      <span className="text-xs text-muted-foreground/70">{item.venue}</span>
-                    </div>
-                  )}
-                </div>
+                {/* Chevron indicator */}
+                <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
               </div>
             );
           })}
@@ -324,24 +415,25 @@ export default function CoursesPage() {
 
       {/* ── Footer Summary ───────────────────────────────────────────────────── */}
       {courses.length > 0 && (
-        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-3">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">
+        <div className="space-y-4 pt-4 border-t border-border/10">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">
             Credit Summary
           </h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {[
-              { icon: Monitor, label: "Theory", count: courseStats.theory.count, credits: courseStats.theory.credits, color: "text-sky-400" },
-              { icon: Beaker, label: "Lab", count: courseStats.lab.count, credits: courseStats.lab.credits, color: "text-emerald-400" },
-              { icon: Globe, label: "Online", count: courseStats.online.count, credits: courseStats.online.credits, color: "text-purple-400" },
-              { icon: Users, label: "Soft Skill", count: courseStats.softSkill.count, credits: courseStats.softSkill.credits, color: "text-amber-400" },
-            ].map(({ icon: Icon, label, count, credits, color }) => (
-              <div key={label} className="flex items-center gap-2">
-                <Icon className={`w-4 h-4 shrink-0 ${color}`} />
+              { icon: Monitor, label: "Theory", count: courseStats.theory.count, credits: courseStats.theory.credits },
+              { icon: Beaker, label: "Lab", count: courseStats.lab.count, credits: courseStats.lab.credits },
+              { icon: Globe, label: "Online", count: courseStats.online.count, credits: courseStats.online.credits },
+              { icon: Users, label: "Soft Skill", count: courseStats.softSkill.count, credits: courseStats.softSkill.credits },
+            ].map(({ icon: Icon, label, count, credits }) => (
+              <div key={label} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-primary shrink-0" />
+                </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/50 leading-none">{label}</p>
-                  <p className="text-sm font-semibold text-foreground leading-tight mt-0.5">
-                    {count}
-                    <span className="text-[10px] font-medium text-muted-foreground/50 ml-1">({credits} Cr)</span>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 leading-none mb-1">{label}</p>
+                  <p className="text-sm font-semibold text-foreground leading-none">
+                    {count} <span className="text-[10px] font-normal text-muted-foreground/50 ml-0.5">({credits} Cr)</span>
                   </p>
                 </div>
               </div>
@@ -349,6 +441,12 @@ export default function CoursesPage() {
           </div>
         </div>
       )}
+
+      <CourseDetailDrawer
+        item={selectedCourse}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </div>
   );
 }
