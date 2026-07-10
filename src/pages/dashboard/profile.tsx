@@ -151,7 +151,8 @@ export default function StudentProfilePage() {
     : "?";
 
   return shell(
-    <div className="w-full space-y-8 px-2 py-4 select-none overscroll-y-contain">
+    <div className="w-full space-y-8 px-2 py-4 font-saira select-none overscroll-y-contain">
+      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
