@@ -36,8 +36,8 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label:
   return (
     <div className="flex items-center justify-between gap-4 py-3.5">
       <div className="flex items-center gap-3 shrink-0">
-        <Icon className="w-4 h-4 text-muted-foreground/35 shrink-0" />
-        <span className="text-xs font-medium text-muted-foreground/55 uppercase tracking-wide leading-none">
+        <Icon className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+        <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">
           {label}
         </span>
       </div>
@@ -56,20 +56,18 @@ function Sk({ className = "" }: { className?: string }) {
 
 function HodDeanSkeleton() {
   return (
-    <div className="w-full space-y-6 px-2 py-4 animate-pulse">
-      {/* Header */}
-      <div className="flex items-start gap-2">
-        <Sk className="w-6 h-6 rounded-md shrink-0 mt-0.5" />
+    <div className="w-full space-y-8 px-2 py-4 animate-pulse">
+      <div className="flex items-center gap-2.5">
+        <Sk className="w-6 h-6 rounded-md shrink-0" />
         <Sk className="h-7 w-36" />
       </div>
-
-      {/* Cards */}
       {[...Array(3)].map((_, i) => (
         <div key={i} className="space-y-4">
+          {i > 0 && <div className="h-px bg-border/20" />}
           <div className="flex items-center gap-4">
             <Sk className="w-16 h-20 rounded-xl shrink-0" />
             <div className="space-y-2 flex-1 min-w-0">
-              <Sk className="h-3 w-14" />
+              <Sk className="h-3 w-12" />
               <Sk className="h-5 w-36" />
               <Sk className="h-3 w-48" />
             </div>
@@ -100,7 +98,6 @@ export default function HodDeanDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load from cache first
   useEffect(() => {
     const cached = localStorage.getItem("deskly::cache::hod_dean");
     if (cached) {
@@ -138,51 +135,35 @@ export default function HodDeanDetailsPage() {
   }, []);
 
   const shell = (children: React.ReactNode) => <>{children}</>;
-
   const showOffline = !details && (isOnline === false || isNetworkError(error, isOnline));
 
-  if (showOffline && !loading) {
-    return shell(<OfflineDisplay onRetry={fetchDetails} />);
-  }
-
+  if (showOffline && !loading) return shell(<OfflineDisplay onRetry={fetchDetails} />);
   if (authLoading || (loading && !details)) return shell(<HodDeanSkeleton />);
-
-  if (error && !details) {
-    return shell(
-      <div className="flex h-full items-center justify-center">
-        <ErrorDisplay message={error} onRetry={fetchDetails} />
-      </div>
-    );
-  }
-
+  if (error && !details) return shell(<div className="flex h-full items-center justify-center"><ErrorDisplay message={error} onRetry={fetchDetails} /></div>);
   if (!details) return null;
 
   return shell(
-    <div className="w-full space-y-6 px-2 py-4 select-none overscroll-y-contain">
+    <div className="w-full space-y-8 px-2 py-4 select-none overscroll-y-contain">
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
         <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
-          <button onClick={fetchDetails} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
-            Retry
-          </button>
+          <button onClick={fetchDetails} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start gap-2">
-        <Building2 className="w-6 h-6 text-primary shrink-0 mt-0.5" />
-        <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
-          HOD &amp; Dean
-        </h1>
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <header className="flex items-center gap-2.5">
+        <Building2 className="w-6 h-6 text-primary shrink-0" />
+        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">HOD &amp; Dean</h1>
       </header>
 
-      {/* ── Details List ────────────────────────────────────────────────────── */}
+      {/* ── Details List ───────────────────────────────────────────────────── */}
       {details.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
           <Building className="w-8 h-8 text-muted-foreground/20" />
-          <p className="text-sm font-semibold text-foreground leading-none">No details found</p>
+          <p className="text-sm font-semibold text-foreground">No details found</p>
           <p className="text-xs text-muted-foreground">Please try reloading the page later.</p>
         </div>
       ) : (
@@ -195,26 +176,29 @@ export default function HodDeanDetailsPage() {
 
             return (
               <section key={idx} className="space-y-4">
-                {/* Divider between entries */}
                 {idx > 0 && <Separator className="bg-border/20" />}
 
-                {/* Photo + primary info */}
+                {/* Role label */}
+                <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest leading-none">
+                  {item.role || "Faculty"}
+                </p>
+
+                {/* Photo + identity */}
                 <div className="flex items-center gap-4">
                   {photoSrc ? (
-                    <div className="w-16 h-20 rounded-xl shrink-0 border border-border/15 bg-muted/20 flex items-center justify-center overflow-hidden">
-                      <img src={photoSrc} alt={item.name} className="w-full h-full object-contain" />
-                    </div>
+                    <img
+                      src={photoSrc}
+                      alt={item.name}
+                      className="w-16 h-20 rounded-xl shrink-0 object-contain"
+                    />
                   ) : (
-                    <div className="w-16 h-20 rounded-xl shrink-0 border border-border/15 bg-primary/10 flex items-center justify-center">
-                      <span className="text-base font-bold text-primary tracking-wider">{initials}</span>
+                    <div className="w-16 h-20 rounded-xl shrink-0 bg-muted/30 flex items-center justify-center">
+                      <span className="text-base font-bold text-muted-foreground tracking-wider">{initials}</span>
                     </div>
                   )}
 
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest leading-none">
-                      {item.role || "Faculty"}
-                    </p>
-                    <h2 className="text-base font-bold text-foreground leading-snug">{item.name}</h2>
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <h2 className="text-lg font-bold text-foreground leading-snug">{item.name}</h2>
                     <p className="text-xs text-muted-foreground/60 leading-none">{item.school}</p>
                   </div>
                 </div>
@@ -223,7 +207,7 @@ export default function HodDeanDetailsPage() {
                 <div className="divide-y divide-border/10 border-t border-b border-border/10">
                   <InfoRow icon={MapPin} label="Cabin Room" value={item.cabin} />
                   {item.intercom && <InfoRow icon={Phone} label="Intercom" value={item.intercom} />}
-                  <InfoRow icon={Mail} label="Email Address" value={item.email} />
+                  <InfoRow icon={Mail} label="Email" value={item.email} />
                 </div>
               </section>
             );
