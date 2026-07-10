@@ -4,6 +4,7 @@ import { getStudentProfile, ProfileData } from "@/lib/features";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 import { ErrorDisplay } from "@/components/error-display";
 import {
@@ -43,7 +44,6 @@ function ProfileSkeleton() {
     <div className="w-full space-y-6 px-2 py-4">
       <div className="space-y-1">
         <Sk className="h-7 w-36" />
-        <Sk className="h-3 w-56" />
       </div>
       {/* Photo + name */}
       <div className="flex items-center gap-4">
@@ -54,27 +54,16 @@ function ProfileSkeleton() {
           <Sk className="h-3 w-32" />
         </div>
       </div>
+      <Separator className="bg-border/20" />
       {/* Fields */}
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <div className="divide-y divide-border/10 border-t border-b border-border/10">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="flex items-center justify-between p-4">
+          <div key={i} className="flex items-center justify-between py-3.5">
             <div className="flex items-center gap-3">
               <Sk className="w-4 h-4 rounded-md" />
               <Sk className="h-3 w-20" />
             </div>
             <Sk className="h-3 w-32" />
-          </div>
-        ))}
-      </div>
-      <Sk className="h-4 w-28" />
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <Sk className="w-4 h-4 rounded-md" />
-              <Sk className="h-3 w-20" />
-            </div>
-            <Sk className="h-3 w-28" />
           </div>
         ))}
       </div>
@@ -84,10 +73,10 @@ function ProfileSkeleton() {
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
   return (
-    <div className="flex items-center justify-between gap-4 p-4 hover:bg-muted/5 transition-colors duration-150">
+    <div className="flex items-center justify-between gap-4 py-3.5">
       <div className="flex items-center gap-3 shrink-0">
-        <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-        <span className="text-xs font-medium text-muted-foreground/60 uppercase tracking-wide leading-none">
+        <Icon className="w-4 h-4 text-muted-foreground/35 shrink-0" />
+        <span className="text-xs font-medium text-muted-foreground/55 uppercase tracking-wide leading-none">
           {label}
         </span>
       </div>
@@ -172,8 +161,7 @@ export default function StudentProfilePage() {
     : "?";
 
   return shell(
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
-      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+    <div className="w-full space-y-6 px-2 py-4 select-none overscroll-y-contain">
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
@@ -187,42 +175,36 @@ export default function StudentProfilePage() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
-        <User className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
-            My Profile
-          </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Academic and personal details
-          </p>
-        </div>
+        <User className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+        <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
+          My Profile
+        </h1>
       </header>
 
       {/* ── Student Hero Block ───────────────────────────────────────────────── */}
       <div className="flex items-center gap-4">
-        {/* Photo / Initials */}
         {photoSrc ? (
-          <div className="w-20 h-20 rounded-2xl shrink-0 overflow-hidden border border-border/10 bg-muted/10">
-            <img src={photoSrc} alt={student.name} className="w-full h-full object-cover" />
+          <div className="w-20 h-20 rounded-2xl shrink-0 border border-border/15 bg-muted/20 flex items-center justify-center overflow-hidden">
+            <img src={photoSrc} alt={student.name} className="w-full h-full object-contain" />
           </div>
         ) : (
-          <div className="w-20 h-20 rounded-2xl shrink-0 overflow-hidden border border-border/10 bg-primary/10 flex items-center justify-center">
+          <div className="w-20 h-20 rounded-2xl shrink-0 border border-border/15 bg-primary/10 flex items-center justify-center">
             <span className="text-xl font-bold text-primary tracking-wider">{initials}</span>
           </div>
         )}
         <div className="space-y-1 min-w-0">
-          <h2 className="text-lg font-medium text-foreground leading-snug truncate">{student.name}</h2>
-          <p className="text-xs text-sky-500 font-semibold uppercase tracking-wide leading-none">{student.registerNumber}</p>
+          <h2 className="text-lg font-semibold text-foreground leading-snug truncate">{student.name}</h2>
+          <p className="text-xs text-primary font-semibold uppercase tracking-wide leading-none">{student.registerNumber}</p>
           <p className="text-xs text-muted-foreground/60 leading-none truncate">{student.program}</p>
         </div>
       </div>
 
+      <Separator className="bg-border/20" />
+
       {/* ── Student Details ──────────────────────────────────────────────────── */}
-      <section className="space-y-3">
-        <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
-          Student Information
-        </h2>
-        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <section className="space-y-1">
+        <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest pb-1">Student Information</p>
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
           <InfoRow icon={User} label="Register No." value={student.registerNumber} />
           <InfoRow icon={User} label="Application No." value={student.applicationNumber} />
           <InfoRow icon={Layers} label="Program" value={student.program} />
@@ -236,26 +218,30 @@ export default function StudentProfilePage() {
 
       {/* ── Proctor Details ──────────────────────────────────────────────────── */}
       {proctor && (
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
-            Proctor Details
-          </h2>
-          {/* Proctor photo */}
-          {proctor.photoUrl && (
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl shrink-0 overflow-hidden border border-border/10 bg-muted/10">
-                <img src={getSrcFromPhoto(proctor.photoUrl)} alt={proctor.name} className="w-full h-full object-cover" />
+        <section className="space-y-4">
+          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest">Proctor Details</p>
+
+          {/* Proctor photo + name */}
+          <div className="flex items-center gap-4">
+            {proctor.photoUrl ? (
+              <div className="w-16 h-16 rounded-xl shrink-0 border border-border/15 bg-muted/20 flex items-center justify-center overflow-hidden">
+                <img src={getSrcFromPhoto(proctor.photoUrl)} alt={proctor.name} className="w-full h-full object-contain" />
               </div>
-              <div className="space-y-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{proctor.name}</p>
-                <p className="text-xs text-muted-foreground/60 leading-none">{proctor.designation}</p>
+            ) : (
+              <div className="w-16 h-16 rounded-xl shrink-0 border border-border/15 bg-primary/10 flex items-center justify-center">
+                <span className="text-base font-bold text-primary tracking-wider">
+                  {proctor.name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "?"}
+                </span>
               </div>
+            )}
+            <div className="space-y-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground truncate">{proctor.name}</p>
+              <p className="text-xs text-muted-foreground/60 leading-none">{proctor.designation}</p>
             </div>
-          )}
-          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-            {!proctor.photoUrl && <InfoRow icon={User} label="Name" value={proctor.name} />}
+          </div>
+
+          <div className="divide-y divide-border/10 border-t border-b border-border/10">
             <InfoRow icon={User} label="Faculty ID" value={proctor.facultyId} />
-            <InfoRow icon={User} label="Designation" value={proctor.designation} />
             <InfoRow icon={Layers} label="School" value={proctor.school} />
             <InfoRow icon={MapPin} label="Cabin" value={proctor.cabin} />
             <InfoRow icon={Phone} label="Mobile" value={proctor.mobile} />
@@ -266,11 +252,9 @@ export default function StudentProfilePage() {
 
       {/* ── Hostel Details ───────────────────────────────────────────────────── */}
       {hostel && (
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
-            Hostel Details
-          </h2>
-          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+        <section className="space-y-1">
+          <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest pb-1">Hostel Details</p>
+          <div className="divide-y divide-border/10 border-t border-b border-border/10">
             <InfoRow icon={Home} label="Block Name" value={hostel.blockName} />
             <InfoRow icon={MapPin} label="Room Number" value={hostel.roomNumber} />
             <InfoRow icon={Layers} label="Bed Type" value={hostel.bedType} />
