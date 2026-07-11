@@ -21,7 +21,6 @@ import {
   Soup,
   MapPin,
   Clock,
-  ChevronDown,
   Home
 } from "lucide-react";
 
@@ -45,30 +44,22 @@ function formatMessTypeLabel(type: MessType): string {
   return map[type] ?? type;
 }
 
-const MEAL_META: Record<string, { timing: string; icon: (cls: string) => React.ReactNode; accent: string; bgAccent: string }> = {
+const MEAL_META: Record<string, { timing: string; icon: (cls: string) => React.ReactNode }> = {
   Breakfast: {
     timing: "07:30 AM – 09:30 AM",
-    icon: (cls) => <Coffee className={`${cls} text-amber-500`} />,
-    accent: "bg-amber-500/10 border-amber-500/20",
-    bgAccent: "border-amber-500/10",
+    icon: (cls) => <Coffee className={cls} />,
   },
   Lunch: {
     timing: "12:30 PM – 02:30 PM",
-    icon: (cls) => <Utensils className={`${cls} text-emerald-500`} />,
-    accent: "bg-emerald-500/10 border-emerald-500/20",
-    bgAccent: "border-emerald-500/10",
+    icon: (cls) => <Utensils className={cls} />,
   },
   Snacks: {
     timing: "05:00 PM – 06:30 PM",
-    icon: (cls) => <Cookie className={`${cls} text-orange-500`} />,
-    accent: "bg-orange-500/10 border-orange-500/20",
-    bgAccent: "border-orange-500/10",
+    icon: (cls) => <Cookie className={cls} />,
   },
   Dinner: {
     timing: "07:30 PM – 09:30 PM",
-    icon: (cls) => <Soup className={`${cls} text-indigo-500`} />,
-    accent: "bg-indigo-500/10 border-indigo-500/20",
-    bgAccent: "border-indigo-500/10",
+    icon: (cls) => <Soup className={cls} />,
   },
 };
 
@@ -78,40 +69,38 @@ const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satur
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
 }
 
 function MessSkeleton() {
   return (
-    <div className="w-full space-y-6 px-2 py-4">
+    <div className="w-full space-y-6 px-2 py-4 font-saira">
       {/* Header */}
       <div className="space-y-2">
         <Sk className="h-7 w-32" />
-        <Sk className="h-3.5 w-56" />
         <Sk className="h-3 w-40" />
       </div>
       {/* Weekday selector */}
       <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
         {[...Array(7)].map((_, i) => (
-          <Sk key={i} className="h-10 w-12 rounded-xl shrink-0" />
+          <Sk key={i} className="h-12 w-11 rounded-xl shrink-0" />
         ))}
       </div>
       {/* Meal cards list */}
-      <div className="space-y-4">
+      <div className="divide-y divide-border/10 border-t border-b border-border/10 animate-pulse">
         {MEALS.map((m) => (
-          <div key={m} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-4">
+          <div key={m} className="py-4 space-y-4">
             <div className="flex items-center gap-3">
-              <Sk className="w-10 h-10 rounded-full shrink-0" />
+              <Sk className="w-8 h-8 rounded-lg shrink-0" />
               <div className="space-y-2 flex-1">
-                <Sk className="h-4.5 w-24" />
+                <Sk className="h-4 w-24" />
                 <Sk className="h-3 w-36" />
               </div>
-              <Sk className="h-4 w-12 rounded ml-auto" />
+              <Sk className="h-3 w-12 rounded ml-auto" />
             </div>
-            <div className="space-y-2 pt-2 border-t border-border/10">
-              <Sk className="h-4 w-3/4" />
-              <Sk className="h-4 w-2/3" />
-              <Sk className="h-4 w-5/6" />
+            <div className="space-y-2 pl-11">
+              <Sk className="h-4.5 w-3/4" />
+              <Sk className="h-4.5 w-2/3" />
             </div>
           </div>
         ))}
@@ -216,7 +205,9 @@ export default function MessMenuPage() {
   }, [activeDay, menuData]);
 
   const parseItems = (str: string) =>
-    str.split(/[+,•]/).map((i) => i.replace(/\d+/g, "").trim()).filter(Boolean);
+    str.split(/[+,•]/)
+      .map((i) => i.trim().replace(/^\d+[\s.\-)]+/, "").trim())
+      .filter(Boolean);
 
   const weekDays = useMemo(() => {
     const current = new Date();
@@ -285,17 +276,14 @@ export default function MessMenuPage() {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground flex items-center gap-2 leading-none">
-            <Home className="w-6 h-6 text-sky-500 shrink-0" />
-            Mess Menu
+          <h1 className="text-[26px] font-semibold tracking-tight text-foreground flex items-center gap-2 leading-none">
+            <Home className="w-6 h-6 text-primary shrink-0" />
+            Mess
           </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Weekly meal schedule for student hostels
-          </p>
           {profile?.hostel?.blockName && (
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1 leading-none pt-1">
-              <MapPin className="w-3.5 h-3.5 text-sky-500" />
-              <span>Hostel: <span className="font-semibold text-foreground">{profile.hostel.blockName} – {profile.hostel.roomNumber}</span></span>
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1 leading-none pt-1">
+              <MapPin className="w-3.5 h-3.5 text-muted-foreground/45 shrink-0" />
+              <span>Block {profile.hostel.blockName} &bull; Room {profile.hostel.roomNumber}</span>
             </p>
           )}
         </div>
@@ -310,81 +298,79 @@ export default function MessMenuPage() {
         />
       </header>
 
-      {/* ── Today / Day Selector Dropdown label ────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-foreground cursor-pointer">
-          <span className="text-sm font-semibold capitalize">{activeDayLabel}</span>
-          <ChevronDown className="w-4 h-4 text-muted-foreground" />
-        </div>
-      </div>
-
       {/* ── Weekday Selector Horizontal Strip ──────────────────────────────────── */}
-      <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
+      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
         {weekDays.map((d) => {
           const isSelected = d.name.toLowerCase() === activeDay.toLowerCase();
+          const isToday = d.name.toLowerCase() === currentWeekday.toLowerCase();
+
           return (
             <button
               key={d.name}
               onClick={() => setActiveDay(d.name)}
-              className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs cursor-pointer transition-colors duration-150 shrink-0 min-w-[52px]
+              className={`flex flex-col items-center justify-center py-2.5 rounded-xl border text-xs cursor-pointer transition-colors duration-150 shrink-0 w-11
                 ${isSelected
-                  ? "bg-sky-500/15 border-sky-500/30 text-sky-400 font-bold"
-                  : "bg-muted/10 border-border/10 text-muted-foreground hover:bg-muted/20"
+                  ? "bg-primary/10 border-primary/25 text-primary font-bold"
+                  : "bg-muted/15 border-transparent text-muted-foreground hover:bg-muted/30"
                 }`}
             >
-              {isSelected ? (
-                <div className="flex flex-col items-center">
-                  <span className="text-[10px] leading-none mb-1">{d.abbr}</span>
-                  <span className="text-xs font-semibold leading-none uppercase">{d.displayLabel}</span>
-                </div>
-              ) : (
-                <span className="text-xs font-semibold leading-none">{d.abbr}</span>
+              <span className="text-[9px] uppercase tracking-wider leading-none text-muted-foreground/60">{d.abbr}</span>
+              <span className="text-sm font-bold leading-none mt-1.5">{d.dateNum}</span>
+              {isToday && !isSelected && (
+                <span className="w-1 h-1 rounded-full bg-primary mt-1" />
               )}
             </button>
           );
         })}
       </div>
 
+      {/* ── Active Day Title ─────────────────────────────────────────────────── */}
+      <div className="pt-2">
+        <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
+          {activeDayLabel} Menu
+        </h2>
+      </div>
+
       {/* ── Meal Cards List ───────────────────────────────────────────────────── */}
       {activeDayMenu && (
-        <div className="space-y-4">
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
           {MEALS.map((meal) => {
             const meta = MEAL_META[meal];
             const items = parseItems(activeDayMenu[meal.toLowerCase() as keyof MessMenuItem] as string || "");
 
             return (
-              <div key={meal} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-4">
+              <div key={meal} className="py-4 space-y-3">
                 {/* Header of meal card */}
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full ${meta.accent} flex items-center justify-center shrink-0`}>
-                      {meta.icon("w-5 h-5")}
+                    <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0 text-primary">
+                      {meta.icon("w-4.5 h-4.5")}
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-foreground leading-none">{meal}</h3>
+                      <h3 className="text-sm font-bold text-foreground leading-none">{meal}</h3>
                       <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground/60 leading-none">
                         <Clock className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
                         <span>{meta.timing}</span>
                       </div>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-sky-500 uppercase leading-none">
+                  <span className="text-[9px] font-bold text-primary uppercase leading-none">
                     {items.length} ITEMS
                   </span>
                 </div>
 
                 {/* Items list inside card */}
                 {items.length > 0 ? (
-                  <ul className="space-y-2 pt-2 border-t border-border/10 pl-0.5">
+                  <ul className="space-y-1.5 pl-11">
                     {items.map((item, i) => (
                       <li key={i} className="text-xs font-semibold text-foreground/80 flex items-start gap-2.5 leading-relaxed">
-                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0 mt-1.5" />
+                        <span className="w-1 h-1 rounded-full bg-primary/45 shrink-0 mt-2" />
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div className="text-xs text-muted-foreground/40 italic pt-2 border-t border-border/10">
+                  <div className="text-xs text-muted-foreground/40 italic pl-11">
                     No items scheduled
                   </div>
                 )}

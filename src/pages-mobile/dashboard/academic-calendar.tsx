@@ -58,7 +58,6 @@ function AcademicCalendarSkeleton() {
     <div className="w-full space-y-6 px-2 py-4 animate-pulse font-saira">
       <div className="space-y-1">
         <Sk className="h-7 w-48" />
-        <Sk className="h-3.5 w-72" />
       </div>
       <div className="flex justify-between items-center gap-4">
         <Sk className="h-10 w-48 rounded-xl" />
@@ -66,7 +65,7 @@ function AcademicCalendarSkeleton() {
       </div>
       <div className="space-y-3">
         <Sk className="h-5 w-40" />
-        <div className="grid grid-cols-7 gap-1 bg-muted/10 border border-border/10 rounded-2xl p-3">
+        <div className="grid grid-cols-7 gap-1 border-t border-b border-border/10 py-3">
           {[...Array(7)].map((_, i) => (
             <Sk key={i} className="h-6 w-full rounded-md" />
           ))}
@@ -261,15 +260,10 @@ export default function AcademicCalendarPage() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start justify-between gap-4">
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground flex items-center gap-2 leading-none">
-            <CalendarIcon className="w-6 h-6 text-sky-500 shrink-0" />
-            Calendar
-          </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Instructional working days, holidays, and exams schedule
-          </p>
-        </div>
+        <h1 className="text-[26px] font-semibold tracking-tight text-foreground flex items-center gap-2 leading-none">
+          <CalendarIcon className="w-6 h-6 text-primary shrink-0" />
+          Calendar
+        </h1>
 
         {!isLoading && options && selectedOption && (
           <div className="flex items-center gap-2 shrink-0">
@@ -301,7 +295,7 @@ export default function AcademicCalendarPage() {
           {schedule?.month}
         </h2>
 
-        <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-2.5 overflow-hidden">
+        <div className="border-t border-b border-border/10 py-3 overflow-hidden">
           <div className="grid grid-cols-7 gap-1">
             {/* Weekday Names */}
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -339,14 +333,14 @@ export default function AcademicCalendarPage() {
                   onClick={() => setSelectedCell(cell)}
                   className={`min-h-[58px] p-1.5 flex flex-col justify-between rounded-xl relative overflow-hidden group border transition-all duration-150 cursor-pointer
                     ${isToday 
-                      ? "bg-sky-500/10 border-sky-500/30 text-sky-400 font-bold" 
+                      ? "bg-primary/10 border-primary/30 text-primary font-bold" 
                       : isSelected
-                        ? "bg-muted/20 border-sky-500/20 text-sky-400"
+                        ? "bg-muted/20 border-primary/20 text-primary"
                         : "bg-transparent border-transparent text-foreground/90 hover:bg-muted/5"
                     }`}
                 >
                   <span className={`text-[11px] font-bold leading-none w-4 h-4 rounded-full flex items-center justify-center
-                    ${isToday ? "bg-sky-500 text-white font-black" : ""}`}
+                    ${isToday ? "bg-primary text-primary-foreground font-black" : ""}`}
                   >
                     {cell.dayNumber}
                   </span>

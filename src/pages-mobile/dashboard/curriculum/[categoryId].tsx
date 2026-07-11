@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams } from "@/router";
 import { useAuth } from "@/hooks/useAuth";
+import { save } from "@tauri-apps/plugin-dialog";
+import { writeFile } from "@tauri-apps/plugin-fs";
+import { sendNotification } from "@tauri-apps/plugin-notification";
 import {
   getCurriculumCategoryCourses,
   downloadCurriculumSyllabus,
@@ -108,16 +111,49 @@ export default function CategoryCoursesPage() {
     setDownloading((prev) => ({ ...prev, [courseCode]: true }));
     setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
     try {
+      // 1. Download syllabus to memory (base64) from VTOP
       const res = await downloadCurriculumSyllabus(courseCode);
-      if (res.success && res.data) {
-        setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: true, message: "Saved!" } }));
-      } else {
-        if (res.error === "Save cancelled") {
-          setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
-        } else {
-          setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: false, message: res.error ?? "Failed to download syllabus." } }));
-        }
+      
+      if (!res.success || !res.data) {
+        setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: false, message: res.error ?? "Failed to download syllabus." } }));
+        return;
       }
+
+      // 2. Prompt user where to save it with the correct filename returned by the server
+      const defaultFilename = res.data.filename;
+      const fileExt = defaultFilename.split(".").pop() || "zip";
+      const savePath = await save({
+        filters: [{
+          name: "Syllabus File",
+          extensions: [fileExt]
+        }],
+        defaultPath: defaultFilename
+      });
+
+      if (!savePath) {
+        setDownloading((prev) => ({ ...prev, [courseCode]: false }));
+        return;
+      }
+
+      // 3. Write file content to chosen path using native plugin-fs ContentResolver
+      const base64Data = res.data.contentBase64;
+      if (base64Data) {
+        const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        await writeFile(savePath, binaryData);
+      }
+
+      setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: true, message: "Saved!" } }));
+      
+      // Native notification feedback
+      try {
+        sendNotification({
+          title: "Syllabus Saved",
+          body: `Syllabus successfully saved to: ${defaultFilename}`
+        });
+      } catch (err) {
+        console.error("Failed to trigger native notification", err);
+      }
+
     } catch (e) {
       setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: false, message: e instanceof Error ? e.message : String(e) } }));
     } finally {

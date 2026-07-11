@@ -163,6 +163,8 @@ pub struct CurriculumCoursesResponse {
 pub struct SyllabusData {
     pub filename: String,
     pub save_path: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub content_base64: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]

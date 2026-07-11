@@ -8,8 +8,7 @@ import {
   MapPin,
   User,
   Mail,
-  ChevronRight,
-
+  ChevronRight
 } from "lucide-react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import rawFacultyData from "@/data/faculty_info.json";
@@ -98,11 +97,11 @@ function FacultyDetailDrawer({
   };
 
   const details = [
-    { icon: User,          label: "Employee ID",  value: faculty.empId, color: "text-sky-400" },
-    { icon: User,          label: "Designation",  value: faculty.designation, color: "text-emerald-400" },
-    { icon: Users,         label: "School / Dept", value: `${faculty.school} (${faculty.schoolAbbr})`, color: "text-amber-400" },
-    { icon: MapPin,        label: "Cabin / Room", value: faculty.cabin !== "Not Available" ? faculty.cabin : "TBA", color: "text-purple-400" },
-    { icon: MapPin,        label: "Building",     value: faculty.building !== "Not Available" ? faculty.building : "TBA", color: "text-sky-400" },
+    { icon: User,          label: "Employee ID",  value: faculty.empId },
+    { icon: User,          label: "Designation",  value: faculty.designation },
+    { icon: Users,         label: "School / Dept", value: `${faculty.school} (${faculty.schoolAbbr})` },
+    { icon: MapPin,        label: "Cabin / Room", value: faculty.cabin !== "Not Available" ? faculty.cabin : "TBA" },
+    { icon: MapPin,        label: "Building",     value: faculty.building !== "Not Available" ? faculty.building : "TBA" },
   ];
 
   return (
@@ -113,12 +112,12 @@ function FacultyDetailDrawer({
           {/* Header Row */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
-              <div className="w-[54px] h-[54px] rounded-full bg-sky-500/10 flex items-center justify-center text-sky-400 shrink-0 border border-sky-500/20">
+              <div className="w-[54px] h-[54px] rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
                 <span className="text-base font-bold">{initials}</span>
               </div>
               <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center gap-2 leading-none">
-                  <span className="text-xs font-semibold text-sky-500 uppercase tracking-wide">
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wide">
                     Faculty Profile
                   </span>
                 </div>
@@ -137,23 +136,21 @@ function FacultyDetailDrawer({
             </button>
           </div>
 
-          {/* Email Card (with Copy button) */}
-          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center justify-between gap-4">
+          {/* Email Row */}
+          <div className="py-3 border-t border-b border-border/10 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 shrink-0">
-                <Mail className="w-5 h-5" />
-              </div>
+              <Mail className="w-4 h-4 text-muted-foreground/30 shrink-0" />
               <div className="min-w-0">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Email Address</span>
-                <span className="text-sm font-semibold text-sky-400 truncate block mt-0.5">{email}</span>
+                <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider block">Email Address</span>
+                <span className="text-sm font-semibold text-foreground truncate block mt-0.5">{email}</span>
               </div>
             </div>
             <button
               onClick={handleCopy}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-150 shrink-0 border cursor-pointer
                 ${copied
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                  : "bg-sky-500/15 border-sky-500/20 text-sky-400 hover:bg-sky-500/25"
+                  ? "bg-primary/10 border-primary/20 text-primary"
+                  : "bg-muted border-border/40 text-muted-foreground hover:bg-muted/60"
                 }`}
             >
               {copied ? "Copied!" : "Copy Email"}
@@ -161,36 +158,23 @@ function FacultyDetailDrawer({
           </div>
 
           {/* Details list */}
-          <div className="space-y-4 pt-1">
+          <div className="space-y-3">
             <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
               Additional Info
             </p>
 
-            <div className="space-y-0">
-              {details.map(({ icon: Icon, label, value, color }, index) => (
-                <div key={label} className="flex gap-4 relative">
-                  
-                  {/* Left Column: Icon */}
-                  <div className="w-6 h-6 flex items-center justify-center shrink-0 mt-[1px]">
-                    <Icon className={`w-5 h-5 ${color} shrink-0`} />
+            <div className="divide-y divide-border/10 border-t border-b border-border/10">
+              {details.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-center justify-between gap-4 py-3.5">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Icon className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                    <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">
+                      {label}
+                    </span>
                   </div>
-                  
-                  {/* Middle Column: Timeline node */}
-                  <div className="relative flex flex-col items-center shrink-0 w-3">
-                    {/* Line */}
-                    {index < details.length - 1 && (
-                      <div className="absolute top-[22px] bottom-0 w-px bg-border/20 left-1/2 -translate-x-1/2" />
-                    )}
-                    {/* Dot */}
-                    <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/45 mt-2.5 z-10" />
-                  </div>
-                  
-                  {/* Right Column: Text contents */}
-                  <div className="min-w-0 pb-5 pt-[3px] flex-1">
-                    <p className="text-xs text-muted-foreground leading-none mb-1">{label}</p>
-                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
-                  </div>
-                  
+                  <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">
+                    {value || "—"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -205,16 +189,14 @@ function FacultyDetailDrawer({
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
 }
 
 function FacultySkeleton() {
   return (
-    <div className="w-full space-y-6 px-2 py-4">
+    <div className="w-full space-y-6 px-2 py-4 font-saira">
       <div className="space-y-1">
         <Sk className="h-7 w-40" />
-        <Sk className="h-3.5 w-72" />
-        <Sk className="h-3 w-36" />
       </div>
       <div className="flex gap-2">
         <Sk className="h-10 flex-1 rounded-xl" />
@@ -225,9 +207,9 @@ function FacultySkeleton() {
           <Sk key={i} className="h-8 w-20 rounded-full shrink-0" />
         ))}
       </div>
-      <div className="space-y-3">
+      <div className="divide-y divide-border/10 border-t border-b border-border/10">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div key={i} className="py-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3.5 flex-1">
               <Sk className="w-11 h-11 rounded-full shrink-0" />
               <div className="space-y-2 flex-1">
@@ -236,7 +218,7 @@ function FacultySkeleton() {
                 <Sk className="h-3 w-40" />
               </div>
             </div>
-            <Sk className="w-4 h-4 rounded" />
+            <Sk className="w-4 h-4 rounded shrink-0" />
           </div>
         ))}
       </div>
@@ -330,20 +312,10 @@ export default function FacultyInfoPage() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
-        <Users className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
-            Faculty Info
-          </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Search and view details of all VIT faculty members and explore.
-          </p>
-          {!isLoading && filteredList.length > 0 && (
-            <p className="text-[10px] text-sky-400 font-extrabold uppercase tracking-wide pt-1 leading-none">
-              Showing {Math.min(visibleCount, filteredList.length)} of {filteredList.length} Faculty
-            </p>
-          )}
-        </div>
+        <Users className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">
+          Faculty
+        </h1>
       </header>
 
       {/* ── Search Bar & Filter ───────────────────────────────────────────────── */}
@@ -377,7 +349,7 @@ export default function FacultyInfoPage() {
                 onClick={() => setActiveSchool(school)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer border shrink-0
                   ${active
-                    ? "bg-sky-500 text-white border-sky-500"
+                    ? "bg-primary text-primary-foreground border-primary"
                     : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/10"
                   }`}
               >
@@ -390,13 +362,13 @@ export default function FacultyInfoPage() {
 
       {/* ── Faculty Listing ───────────────────────────────────────────────────── */}
       {filteredList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
           <Users className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No faculty members found</p>
           <p className="text-xs text-muted-foreground">Try modifying your search or choosing a different school.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
           {visibleFaculty.map((faculty, i) => {
             const initials = getInitials(faculty.name);
             const hasLocation =
@@ -407,11 +379,11 @@ export default function FacultyInfoPage() {
               <div
                 key={`${faculty.empId}-${i}`}
                 onClick={() => setSelectedFaculty(faculty)}
-                className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 hover:border-sky-500/20 active:opacity-75 transition-all duration-200 rounded-2xl p-4 flex items-center justify-between gap-4 cursor-pointer"
+                className="py-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-all"
               >
                 <div className="flex items-center gap-3.5 min-w-0 flex-1">
                   {/* Initials Avatar */}
-                  <div className="w-11 h-11 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-sm shrink-0">
                     {initials}
                   </div>
 
@@ -423,8 +395,8 @@ export default function FacultyInfoPage() {
                       <User className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
                       <span className="truncate">{faculty.designation}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-sky-400 leading-none">
-                      <Mail className="w-3.5 h-3.5 shrink-0 text-sky-500/80" />
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 leading-none">
+                      <Mail className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40" />
                       <span className="truncate">{getFacultyEmail(faculty.name)}</span>
                     </div>
                     {hasLocation && (

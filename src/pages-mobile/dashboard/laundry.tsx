@@ -27,14 +27,13 @@ function LaundrySkeleton() {
     <div className="w-full space-y-6 px-2 py-4 animate-pulse font-saira">
       <div className="space-y-1">
         <Sk className="h-7 w-40" />
-        <Sk className="h-3.5 w-72" />
       </div>
-      <Sk className="h-16 w-full rounded-xl" />
+      <Sk className="h-10 w-full rounded-xl" />
       <div className="space-y-3">
         <Sk className="h-5 w-32" />
-        <div className="bg-muted/10 border border-border/10 rounded-2xl divide-y divide-border/10">
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="p-4 flex items-center justify-between gap-4">
+            <div key={i} className="py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
                 <Sk className="w-10 h-10 rounded-xl shrink-0" />
                 <div className="space-y-2 flex-1">
@@ -211,19 +210,14 @@ export default function LaundryPage() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
-        <Shirt className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
-            Laundry
-          </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Hostel washing schedule calendar and room allocations
-          </p>
-        </div>
+        <Shirt className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">
+          Laundry
+        </h1>
       </header>
 
       {/* ── Block Selection Options ─────────────────────────────────────────── */}
-      <div className="flex items-center justify-between p-4 bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl">
+      <div className="flex items-center justify-between py-2.5 border-t border-b border-border/10">
         <span className="text-xs text-muted-foreground font-semibold">
           Select Hostel Block:
         </span>
@@ -243,19 +237,19 @@ export default function LaundryPage() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 leading-none uppercase">
-            <CalendarIcon className="w-4 h-4 text-sky-500 shrink-0" />
+            <CalendarIcon className="w-4 h-4 text-primary shrink-0" />
             {activeMonthStr} Schedule
           </h2>
         </div>
 
         {sortedLaundryData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
             <Shirt className="w-8 h-8 text-muted-foreground/20" />
             <p className="text-sm font-semibold text-foreground leading-none">No schedule available</p>
             <p className="text-xs text-muted-foreground">Select a block or check back later.</p>
           </div>
         ) : (
-          <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+          <div className="divide-y divide-border/10 border-t border-b border-border/10">
             {sortedLaundryData.map((item, idx) => {
               const dayNum = parseInt(item.date, 10);
               const isToday = dayNum === currentDayNum && currentDate.getMonth() === currentMonthNum;
@@ -267,14 +261,14 @@ export default function LaundryPage() {
               return (
                 <div
                   key={`${item.date}-${idx}`}
-                  className={`p-4 flex items-center justify-between gap-4 transition-colors duration-150
-                    ${isToday ? "bg-sky-500/10 text-sky-400 font-bold" : "hover:bg-muted/5 text-foreground"}`}
+                  className={`py-4 flex items-center justify-between gap-4 transition-colors duration-150
+                    ${isToday ? "bg-primary/5 text-primary font-bold" : "hover:bg-muted/5 text-foreground"}`}
                 >
                   {/* Date Column */}
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className={`w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 border
                       ${isToday
-                        ? "bg-sky-500 text-white border-sky-500 font-black"
+                        ? "bg-primary text-primary-foreground border-primary font-black"
                         : "bg-muted/20 border-border/10 text-muted-foreground"
                       }`}
                     >
@@ -288,7 +282,7 @@ export default function LaundryPage() {
                           {details.name}
                         </span>
                         {isToday && (
-                          <span className="text-[8px] font-black uppercase bg-sky-500 text-white px-1.5 py-0.5 rounded leading-none shrink-0">
+                          <span className="text-[8px] font-black uppercase bg-primary text-primary-foreground px-1.5 py-0.5 rounded leading-none shrink-0">
                             Today
                           </span>
                         )}
@@ -304,8 +298,8 @@ export default function LaundryPage() {
                     {hasWashing ? (
                       <span className={`text-xs font-bold px-2 py-1 rounded-lg border leading-none
                         ${isToday
-                          ? "bg-sky-500/20 border-sky-500/30 text-sky-400"
-                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                          ? "bg-primary/10 border-primary/25 text-primary"
+                          : "bg-muted border-border/40 text-muted-foreground"
                         }`}
                       >
                         {roomNum.toLowerCase().includes("all") 
@@ -329,7 +323,7 @@ export default function LaundryPage() {
                             console.error("Failed to open calendar link:", err);
                           }
                         }}
-                        className="p-2 rounded-xl border border-border/10 bg-muted/10 text-muted-foreground hover:text-sky-400 hover:bg-muted/20 transition-colors cursor-pointer flex items-center justify-center shrink-0 border-0"
+                        className="p-2 rounded-xl border border-border/10 bg-muted/10 text-muted-foreground hover:text-primary hover:bg-muted/20 transition-colors cursor-pointer flex items-center justify-center shrink-0 border-0"
                         title="Add to Google Calendar"
                       >
                         <CalendarPlus className="w-4 h-4" />

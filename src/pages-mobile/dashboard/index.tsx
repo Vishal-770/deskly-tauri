@@ -10,7 +10,6 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
@@ -79,7 +78,7 @@ function StatColumn({
         </p>
         <p className="text-3xl font-semibold text-foreground tracking-tight">{value}</p>
       </div>
-      <Icon className="w-5 h-5 text-sky-500 shrink-0" />
+      <Icon className="w-5 h-5 text-primary shrink-0" />
     </div>
   );
 }
@@ -91,19 +90,19 @@ function FeedbackItem({ item }: { item: FeedbackStatus }) {
   const tee = parseFeedbackText(item.teeSemester);
 
   return (
-    <div className="space-y-3 py-5">
-      <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-sky-500 leading-none">
+    <div className="space-y-2 py-4">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-primary leading-none">
         {item.type}
       </p>
-      <h3 className="text-lg font-semibold text-foreground leading-none">{label}</h3>
-      <div className="flex items-center gap-2.5 text-base text-muted-foreground font-mono leading-none">
+      <h3 className="text-sm font-semibold text-foreground leading-none">{label}</h3>
+      <div className="flex items-center gap-2.5 text-xs text-muted-foreground font-semibold leading-none pt-1">
         <span>Mid:</span>
-        <span className={mid.isGiven ? "text-emerald-500 font-medium" : "text-destructive font-medium"}>
+        <span className={mid.isGiven ? "text-primary font-bold" : "text-destructive font-bold"}>
           {mid.isGiven ? "Given" : "Pending"}
         </span>
-        <span className="text-muted-foreground/20">|</span>
+        <span className="text-muted-foreground/25">|</span>
         <span>TEE:</span>
-        <span className={tee.isGiven ? "text-emerald-500 font-medium" : "text-destructive font-medium"}>
+        <span className={tee.isGiven ? "text-primary font-bold" : "text-destructive font-bold"}>
           {tee.isGiven ? "Given" : "Pending"}
         </span>
       </div>
@@ -146,8 +145,18 @@ function DashboardSkeleton() {
       {/* Feedback block */}
       <div className="space-y-4">
         <Skeleton className="h-4 w-40" />
-        <Skeleton className="h-20 rounded-2xl" />
-        <Skeleton className="h-20 rounded-2xl" />
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
+          <div className="py-4 space-y-2">
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <div className="py-4 space-y-2">
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -278,7 +287,7 @@ export default function MobileDashboardHome() {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
+          <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none truncate">
             {profile?.student?.name ? `Welcome, ${studentName}.` : "Dashboard"}
           </h1>
           <p className="text-xs text-muted-foreground leading-none pt-0.5">{formattedDate}</p>
@@ -316,7 +325,7 @@ export default function MobileDashboardHome() {
             </div>
             <div className="h-[3px] w-full bg-muted/30 rounded-full overflow-hidden">
               <div
-                className="h-full bg-sky-500 rounded-full transition-all duration-700"
+                className="h-full bg-primary rounded-full transition-all duration-700"
                 style={{
                   width: `${(cgpaData.earnedCredits / cgpaData.totalCreditsRequired) * 100}%`,
                 }}
@@ -336,23 +345,16 @@ export default function MobileDashboardHome() {
       {/* ── Feedback Status ──────────────────────────────────────────────────── */}
       {feedbackData && feedbackData.length > 0 && (
         <section className="space-y-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-foreground font-medium">
-              <MessageSquare className="w-5 h-5 text-sky-500" />
-              <h2 className="text-xl font-medium tracking-tight">Feedback Checklist</h2>
-            </div>
-            <p className="text-sm text-muted-foreground">VTOP feedback submission status</p>
+          <div className="flex items-center gap-2 text-foreground font-medium">
+            <MessageSquare className="w-5 h-5 text-primary" />
+            <h2 className="text-xl font-semibold tracking-tight leading-none">Feedback</h2>
           </div>
 
-          <Separator className="bg-border/40" />
-
-          <div className="divide-y divide-border/20">
+          <div className="divide-y divide-border/10 border-t border-b border-border/10">
             {feedbackData.map((item, idx) => (
               <FeedbackItem key={idx} item={item} />
             ))}
           </div>
-
-          <Separator className="bg-border/40" />
         </section>
       )}
 

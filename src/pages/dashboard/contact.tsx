@@ -7,7 +7,7 @@ import { isNetworkError } from "@/lib/utils";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { Copy, Check, Phone, Search, Building2, X, Mail } from "lucide-react";
+import { Copy, Check, Phone, Search, X, Mail } from "lucide-react";
 
 // ─── Gmail SVG Icon ───────────────────────────────────────────────────────────
 
@@ -28,20 +28,19 @@ function GmailIcon({ className }: { className?: string }) {
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
 }
 
 function ContactSkeleton() {
   return (
-    <div className="w-full space-y-6 px-2 py-4 animate-pulse">
+    <div className="w-full space-y-6 px-2 py-4 animate-pulse font-saira">
       <div className="space-y-1">
         <Sk className="h-7 w-32" />
-        <Sk className="h-3.5 w-56" />
       </div>
       <Sk className="h-10 w-full rounded-xl" />
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <div className="divide-y divide-border/10 border-t border-b border-border/10">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="p-4 flex items-center justify-between gap-4">
+          <div key={i} className="py-4 flex items-center justify-between gap-4">
             <div className="space-y-2 flex-1">
               <Sk className="h-4.5 w-1/3" />
               <Sk className="h-3.5 w-2/3" />
@@ -83,7 +82,7 @@ function ContactRow({ contact }: { contact: ContactDetail }) {
   };
 
   return (
-    <div className="p-4 flex items-center justify-between gap-4 hover:bg-muted/5 transition-colors duration-150">
+    <div className="py-4 flex items-center justify-between gap-4 hover:bg-muted/5 transition-colors duration-150">
       {/* Left section: Name + Description + Email */}
       <div className="min-w-0 flex-1 space-y-1">
         <h3 className="text-sm font-bold text-foreground leading-none">
@@ -94,8 +93,8 @@ function ContactRow({ contact }: { contact: ContactDetail }) {
             {contact.description}
           </p>
         )}
-        <div className="flex items-center gap-1 text-xs text-sky-400 leading-none pt-0.5">
-          <Mail className="w-3.5 h-3.5 shrink-0 text-sky-500/80" />
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 leading-none pt-0.5">
+          <Mail className="w-3.5 h-3.5 shrink-0 text-muted-foreground/45" />
           <span className="truncate">{contact.email}</span>
         </div>
       </div>
@@ -108,12 +107,12 @@ function ContactRow({ contact }: { contact: ContactDetail }) {
           title="Copy email address"
           className={`p-2 rounded-xl border transition-colors cursor-pointer flex items-center justify-center bg-transparent
             ${copied
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+              ? "bg-primary/10 border-primary/20 text-primary"
               : "bg-muted/10 border border-border/10 text-muted-foreground hover:text-foreground hover:bg-muted/20"
             }`}
         >
           {copied ? (
-            <Check className="w-4 h-4 text-emerald-400" />
+            <Check className="w-4 h-4 text-primary" />
           ) : (
             <Copy className="w-4 h-4" />
           )}
@@ -208,8 +207,6 @@ export default function ContactPage() {
     );
   }
 
-  const isLoading = authLoading || loading;
-
   return shell(
     <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
@@ -226,20 +223,10 @@ export default function ContactPage() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
-        <Phone className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
-            Contacts
-          </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            University department directory and support contacts
-          </p>
-          {!isLoading && contacts && (
-            <p className="text-[10px] text-sky-400 font-extrabold uppercase tracking-wide pt-1 leading-none">
-              Showing {filtered.length} of {contacts.length} departments
-            </p>
-          )}
-        </div>
+        <Phone className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">
+          Contacts
+        </h1>
       </header>
 
       {/* ── Search ──────────────────────────────────────────────────────────── */}
@@ -264,13 +251,13 @@ export default function ContactPage() {
 
       {/* ── Directory ───────────────────────────────────────────────────────── */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
-          <Building2 className="w-8 h-8 text-muted-foreground/20" />
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+          <Phone className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No contacts found</p>
           <p className="text-xs text-muted-foreground">Try a different search term.</p>
         </div>
       ) : (
-        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
           {filtered.map((contact) => (
             <ContactRow key={contact.department} contact={contact} />
           ))}

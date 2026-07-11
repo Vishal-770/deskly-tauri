@@ -7,12 +7,7 @@ import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
 import {
-  ArrowLeft,
-  Calendar,
-  Receipt as ReceiptIcon,
-  CreditCard,
   FileText,
-  User,
   ChevronDown
 } from "lucide-react";
 
@@ -48,76 +43,63 @@ function parseReceiptDate(dateStr: string): Date {
 // ─── Loader Skeleton Layout ───────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
 }
 
 function PaymentReceiptsSkeleton() {
   return (
-    <div className="w-full space-y-6 px-2 py-4 animate-pulse">
+    <div className="w-full space-y-6 px-2 py-4 animate-pulse font-saira">
       {/* Header */}
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         <Sk className="h-7 w-44" />
-        <Sk className="h-3.5 w-64" />
       </div>
 
-      {/* Registration Details card */}
-      <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center gap-4">
-        <Sk className="w-12 h-12 rounded-full shrink-0" />
-        <div className="grid grid-cols-2 gap-x-6 gap-y-3 flex-1">
-          <div className="space-y-1.5">
-            <Sk className="h-2.5 w-16" />
-            <Sk className="h-4 w-24" />
-          </div>
-          <div className="space-y-1.5">
-            <Sk className="h-2.5 w-20" />
-            <Sk className="h-4 w-28" />
-          </div>
-          <div className="col-span-2 space-y-1.5">
-            <Sk className="h-2.5 w-20" />
-            <Sk className="h-4 w-20" />
-          </div>
+      {/* Registration Details */}
+      <div className="grid grid-cols-3 gap-4 py-3 border-t border-b border-border/10">
+        <div className="space-y-1">
+          <Sk className="h-2 w-10" />
+          <Sk className="h-3.5 w-16" />
+        </div>
+        <div className="space-y-1">
+          <Sk className="h-2 w-10" />
+          <Sk className="h-3.5 w-16" />
+        </div>
+        <div className="space-y-1">
+          <Sk className="h-2 w-10" />
+          <Sk className="h-3.5 w-16" />
         </div>
       </div>
 
-      {/* Overview stats card */}
-      <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
-        <div className="grid grid-cols-2 divide-x divide-border/10">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="p-4 flex items-center gap-3">
-              <Sk className="w-10 h-10 rounded-xl shrink-0" />
-              <div className="space-y-2 flex-1">
-                <Sk className="h-2.5 w-20" />
-                <Sk className="h-5 w-10" />
-                <Sk className="h-2 w-16" />
-              </div>
-            </div>
-          ))}
+      {/* Overview Stats */}
+      <div className="flex justify-between border-t border-b border-border/10 py-4">
+        <div className="flex-1 space-y-1 text-center flex flex-col items-center">
+          <Sk className="h-2 w-16" />
+          <Sk className="h-4 w-10 mt-1" />
         </div>
-        <div className="border-t border-border/10 p-4 flex items-center gap-3">
-          <Sk className="w-10 h-10 rounded-xl shrink-0" />
-          <div className="space-y-2 flex-1">
-            <Sk className="h-2.5 w-24" />
-            <Sk className="h-5 w-28" />
-            <Sk className="h-2 w-20" />
-          </div>
+        <div className="w-px h-8 bg-border/10" />
+        <div className="flex-1 space-y-1 text-center flex flex-col items-center">
+          <Sk className="h-2 w-16" />
+          <Sk className="h-4 w-16 mt-1" />
+        </div>
+        <div className="w-px h-8 bg-border/10" />
+        <div className="flex-1 space-y-1 text-center flex flex-col items-center">
+          <Sk className="h-2 w-16" />
+          <Sk className="h-4 w-12 mt-1" />
         </div>
       </div>
 
-      {/* Receipt records list */}
-      <div className="space-y-3">
+      {/* Receipt Records */}
+      <div className="divide-y divide-border/10 border-t border-b border-border/10">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center justify-between gap-4">
+          <div key={i} className="py-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Sk className="w-10 h-10 rounded-xl shrink-0" />
-              <div className="space-y-2 flex-1 min-w-0">
-                <Sk className="h-4 w-32" />
-                <Sk className="h-3 w-20" />
+              <Sk className="w-4 h-4 rounded shrink-0" />
+              <div className="space-y-1.5 flex-1 min-w-0">
+                <Sk className="h-3.5 w-32" />
+                <Sk className="h-2 w-20" />
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <Sk className="h-5 w-20" />
-              <Sk className="h-4 w-4 rounded" />
-            </div>
+            <Sk className="h-4 w-14 shrink-0" />
           </div>
         ))}
       </div>
@@ -247,162 +229,125 @@ export default function PaymentReceiptsPage() {
       )}
       
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-center gap-4">
-        <button
-          onClick={() => window.history.back()}
-          className="p-1 text-foreground shrink-0 border-0 bg-transparent cursor-pointer"
-        >
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <div className="space-y-0.5">
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Receipt History</h1>
-          <p className="text-xs text-muted-foreground">View all fee receipts and payment details</p>
-        </div>
+      <header className="flex items-start gap-2">
+        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">Receipts</h1>
       </header>
 
       {/* ── Registration Details ────────────────────────────────────────────── */}
       {studentMeta && (
-        <section className="space-y-3">
+        <section className="space-y-2.5">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-4 bg-sky-500 rounded-full" />
-            <h2 className="text-sm font-semibold tracking-tight text-foreground">Registration Details</h2>
+            <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">Registration</h2>
           </div>
           
-          <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center shrink-0">
-              <User className="w-6 h-6 text-sky-400" />
+          <div className="grid grid-cols-3 gap-4 py-3 border-t border-b border-border/10">
+            <div>
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Reg. No.</span>
+              <span className="text-xs font-bold text-foreground block mt-1.5 leading-none">{studentMeta.regNo}</span>
             </div>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 flex-1">
-              <div>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Reg. No.</span>
-                <span className="text-sm font-semibold text-foreground">{studentMeta.regNo}</span>
-              </div>
-              <div>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Application No.</span>
-                <span className="text-sm font-semibold text-foreground">{studentMeta.applNo}</span>
-              </div>
-              <div className="col-span-2">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">Campus Code</span>
-                <span className="text-sm font-semibold text-foreground">{studentMeta.campusCode}</span>
-              </div>
+            <div>
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Appl. No.</span>
+              <span className="text-xs font-bold text-foreground block mt-1.5 leading-none">{studentMeta.applNo}</span>
+            </div>
+            <div>
+              <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Campus</span>
+              <span className="text-xs font-bold text-foreground block mt-1.5 leading-none">{studentMeta.campusCode}</span>
             </div>
           </div>
         </section>
       )}
 
       {/* ── Overview Stats (3 stats card) ─────────────────────────────────────── */}
-      <section className="space-y-3">
+      <section className="space-y-2.5">
         <div className="flex items-center gap-2">
-          <div className="w-1 h-4 bg-sky-500 rounded-full" />
-          <h2 className="text-sm font-semibold tracking-tight text-foreground">Overview</h2>
+          <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">Overview</h2>
         </div>
 
-        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-          <div className="grid grid-cols-2 divide-x divide-border/10">
-            {/* Cell 1: Total Receipts */}
-            <div className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center shrink-0 text-sky-400">
-                <ReceiptIcon className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Total Receipts</span>
-                <span className="text-lg font-bold text-foreground block mt-1 leading-none">{stats.count}</span>
-                <span className="text-[9px] text-muted-foreground/60 block mt-1 leading-none">Successfully paid</span>
-              </div>
-            </div>
-            {/* Cell 2: Total Amount Paid */}
-            <div className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0 text-emerald-400">
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Total Amount Paid</span>
-                <span className="text-lg font-bold text-emerald-400 block mt-1 leading-none">{formatINR(stats.totalPaid)}</span>
-                <span className="text-[9px] text-muted-foreground/60 block mt-1 leading-none">All time</span>
-              </div>
-            </div>
+        <div className="flex items-center justify-between border-t border-b border-border/10 py-4">
+          {/* Cell 1: Total Receipts */}
+          <div className="flex-1 text-center">
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Total Receipts</span>
+            <span className="text-lg font-bold text-foreground block mt-1.5 leading-none">{stats.count}</span>
           </div>
+          {/* Divider */}
+          <div className="w-px h-8 bg-border/10" />
+          {/* Cell 2: Total Amount Paid */}
+          <div className="flex-1 text-center">
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Total Paid</span>
+            <span className="text-lg font-bold text-foreground block mt-1.5 leading-none">{formatINR(stats.totalPaid)}</span>
+          </div>
+          {/* Divider */}
+          <div className="w-px h-8 bg-border/10" />
           {/* Cell 3: Latest Payment */}
-          <div className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0 text-purple-400">
-              <Calendar className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Latest Payment</span>
-              <span className="text-lg font-bold text-foreground block mt-1 leading-none">{stats.latestDate}</span>
-              <span className="text-[9px] text-muted-foreground/60 block mt-1 leading-none">Fee: {formatINR(stats.latestAmount)}</span>
-            </div>
+          <div className="flex-1 text-center">
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider block leading-none">Latest Payment</span>
+            <span className="text-lg font-bold text-foreground block mt-1.5 leading-none">{stats.latestDate}</span>
           </div>
         </div>
       </section>
 
       {/* ── Receipt Records Collapsible List ──────────────────────────────────── */}
-      <section className="space-y-3">
+      <section className="space-y-2.5">
         <div className="flex items-center gap-2">
-          <div className="w-1 h-4 bg-sky-500 rounded-full" />
-          <h2 className="text-sm font-semibold tracking-tight text-foreground">Receipt Records</h2>
+          <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">Receipt Records</h2>
         </div>
 
-        <div className="space-y-3">
-          {filteredReceipts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
-              <ReceiptIcon className="w-8 h-8 text-muted-foreground/20" />
-              <p className="text-sm font-semibold text-foreground leading-none">No receipts found</p>
-              <p className="text-xs text-muted-foreground">No payment records are available.</p>
-            </div>
-          ) : (
-            filteredReceipts.map((receipt) => {
+        {filteredReceipts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+            <FileText className="w-8 h-8 text-muted-foreground/20" />
+            <p className="text-sm font-semibold text-foreground leading-none">No receipts found</p>
+            <p className="text-xs text-muted-foreground">No payment records are available.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-border/10 border-t border-b border-border/10">
+            {filteredReceipts.map((receipt) => {
               const isExpanded = expandedId === receipt.receiptNumber;
               return (
-                <div key={receipt.receiptNumber} className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
+                <div key={receipt.receiptNumber} className="py-4">
                   {/* Accordion Trigger */}
                   <button
                     onClick={() => setExpandedId(isExpanded ? null : receipt.receiptNumber)}
-                    className="w-full text-left p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors border-0 bg-transparent"
+                    className="w-full text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 transition-colors border-0 bg-transparent"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 shrink-0">
-                        <FileText className="w-5 h-5" />
-                      </div>
+                      <FileText className="w-4 h-4 text-muted-foreground/30 shrink-0" />
                       <div className="min-w-0">
                         <h3 className="text-sm font-semibold text-foreground leading-none truncate">Receipt #{receipt.receiptNumber}</h3>
                         <p className="text-[10px] text-muted-foreground mt-1.5 leading-none">{receipt.date}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-sm font-bold text-emerald-400">{formatINR(receipt.amount)}</span>
+                      <span className="text-sm font-bold text-foreground">{formatINR(receipt.amount)}</span>
                       <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
                     </div>
                   </button>
 
                   {/* Accordion Content */}
                   {isExpanded && (
-                    <div className="px-4 pb-4 pt-2 border-t border-border/10 bg-muted/[0.02]">
-                      <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-[10px] pt-2">
-                        <div>
-                          <span className="text-muted-foreground/60 font-semibold uppercase tracking-wider block">Receipt ID</span>
-                          <span className="font-mono text-foreground mt-0.5 block">{receipt.receiptId || "N/A"}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground/60 font-semibold uppercase tracking-wider block">Campus Code</span>
-                          <span className="text-foreground mt-0.5 block">{receipt.campusCode}</span>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground/60 font-semibold uppercase tracking-wider block">Application No.</span>
-                          <span className="text-foreground mt-0.5 block">{receipt.applNo || "N/A"}</span>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground/60 font-semibold uppercase tracking-wider block">Registration ID</span>
-                          <span className="text-foreground mt-0.5 block">{receipt.regNo || "N/A"}</span>
-                        </div>
+                    <div className="mt-2.5 pt-2.5 border-t border-border/5 grid grid-cols-2 gap-y-3 gap-x-6 text-[10px] text-muted-foreground">
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/50 uppercase tracking-wider block">Receipt ID</span>
+                        <span className="font-mono text-foreground block mt-1 leading-none">{receipt.receiptId || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/50 uppercase tracking-wider block">Campus Code</span>
+                        <span className="text-foreground block mt-1 leading-none">{receipt.campusCode}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/50 uppercase tracking-wider block">Application No.</span>
+                        <span className="text-foreground block mt-1 leading-none">{receipt.applNo || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] text-muted-foreground/50 uppercase tracking-wider block">Registration ID</span>
+                        <span className="text-foreground block mt-1 leading-none">{receipt.regNo || "—"}</span>
                       </div>
                     </div>
                   )}
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </section>
     </div>
   );

@@ -226,7 +226,9 @@ export default function MessMenuPage() {
   }, [activeDay, menuData]);
 
   const parseItems = (str: string) =>
-    str.split(/[+,•]/).map((i) => i.replace(/\d+/g, "").trim()).filter(Boolean);
+    str.split(/[+,•]/)
+      .map((i) => i.trim().replace(/^\d+[\s.\-)]+/, "").trim())
+      .filter(Boolean);
 
   const shell = (children: React.ReactNode) => (
     <>{children}</>

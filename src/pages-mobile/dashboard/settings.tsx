@@ -12,7 +12,6 @@ import {
   Mail,
   Phone,
   Calendar,
-  ShieldCheck,
   KeyRound,
   Cookie,
   RefreshCw,
@@ -28,7 +27,7 @@ import { useOnlineStatus } from "@/hooks/use-online-status";
 // ─── Skeleton Helper ──────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
 }
 
 function SettingsSkeleton() {
@@ -37,74 +36,43 @@ function SettingsSkeleton() {
       {/* Header */}
       <div className="space-y-1">
         <Sk className="h-7 w-32" />
-        <Sk className="h-3.5 w-56" />
       </div>
 
-      {/* Profile card */}
-      <div className="flex items-center gap-4 p-4 bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl">
-        <Sk className="w-14 h-14 rounded-full shrink-0" />
-        <div className="space-y-2 flex-1">
-          <Sk className="h-4.5 w-36" />
+      {/* Profile info skeleton */}
+      <div className="flex items-center gap-4 py-4 border-t border-b border-border/10">
+        <Sk className="w-12 h-12 rounded-full shrink-0" />
+        <div className="space-y-1.5 flex-1">
+          <Sk className="h-4 w-36" />
           <Sk className="h-3 w-24" />
-          <Sk className="h-3 w-48" />
         </div>
       </div>
 
-      {/* Student details card */}
-      <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl p-4 space-y-4">
+      {/* Details list skeleton */}
+      <div className="divide-y divide-border/10 border-t border-b border-border/10">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <Sk className="w-4 h-4 rounded shrink-0" />
-            <div className="space-y-1.5 flex-1">
-              <Sk className="h-2 w-14" />
-              <Sk className="h-3.5 w-40" />
+          <div key={i} className="py-3.5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Sk className="w-4 h-4 rounded shrink-0" />
+              <Sk className="h-3.5 w-20" />
             </div>
+            <Sk className="h-4 w-32" />
           </div>
         ))}
       </div>
 
-      {/* Appearance section */}
+      {/* Preferences list skeleton */}
       <div className="space-y-3">
-        <Sk className="h-3.5 w-24" />
-        <div className="flex justify-between items-center p-4 bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl">
-          <div className="space-y-1.5 flex-1">
-            <Sk className="h-4 w-24" />
-            <Sk className="h-3 w-48" />
-          </div>
-          <Sk className="h-9 w-28 rounded-xl shrink-0 ml-4" />
-        </div>
-      </div>
-
-      {/* Academic Settings section */}
-      <div className="space-y-3">
-        <Sk className="h-3.5 w-32" />
-        <div className="flex justify-between items-center p-4 bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl">
-          <div className="space-y-1.5 flex-1">
-            <Sk className="h-4 w-32" />
-            <Sk className="h-3 w-56" />
-          </div>
-          <Sk className="h-9 w-28 rounded-xl shrink-0 ml-4" />
-        </div>
-      </div>
-
-      {/* Keyring status rows */}
-      <div className="space-y-3">
-        <Sk className="h-3.5 w-28" />
-        <div className="bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between gap-4 px-4 py-3">
-              <div className="flex items-center gap-3">
-                <Sk className="w-4 h-4 rounded" />
-                <Sk className="h-3.5 w-20" />
-              </div>
-              <Sk className="h-5 w-16 rounded-full" />
+        <Sk className="h-3 w-24" />
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
+          <div className="py-4 flex justify-between items-center">
+            <div className="space-y-1.5">
+              <Sk className="h-4 w-28" />
+              <Sk className="h-3 w-48" />
             </div>
-          ))}
+            <Sk className="h-9 w-28 rounded-xl shrink-0" />
+          </div>
         </div>
       </div>
-
-      {/* Sign out button */}
-      <Sk className="h-11 w-full rounded-2xl" />
     </div>
   );
 }
@@ -169,21 +137,21 @@ export default function MobileSettings() {
   // Keyring rows list
   const credItems = [
     {
-      icon: <User className="w-4 h-4 text-muted-foreground/60" />,
+      icon: <User className="w-4 h-4 text-muted-foreground/30" />,
       label: "Username / Reg No",
       value: credStatus?.userId ?? null,
       stored: credStatus ? !!credStatus.userId : null,
       loading: credLoading,
     },
     {
-      icon: <KeyRound className="w-4 h-4 text-muted-foreground/60" />,
+      icon: <KeyRound className="w-4 h-4 text-muted-foreground/30" />,
       label: "Password (Keyring)",
       value: credStatus?.hasPasswordStored ? "Stored securely in system keyring" : "Not stored",
       stored: credStatus ? credStatus.hasPasswordStored : null,
       loading: credLoading,
     },
     {
-      icon: <Cookie className="w-4 h-4 text-muted-foreground/60" />,
+      icon: <Cookie className="w-4 h-4 text-muted-foreground/30" />,
       label: "Session Cookies",
       value: hasCookies ? "Active session tokens present" : "No session cookies stored",
       stored: hasCookies,
@@ -201,140 +169,135 @@ export default function MobileSettings() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
-        <Settings className="w-6 h-6 text-sky-500 shrink-0 mt-0.5" />
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
-            Settings
-          </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Manage your student profile and application preferences
-          </p>
-        </div>
+        <Settings className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">
+          Settings
+        </h1>
       </header>
 
       {/* ── Profile Section ─────────────────────────────────────────────────── */}
       <div className="space-y-4">
-        <div className="flex items-center gap-4 p-4 bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl">
-          <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-400 shrink-0 border border-sky-500/20">
+        <div className="flex items-center gap-4 py-4 border-t border-b border-border/10">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
             <User className="w-6 h-6" />
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-bold text-foreground truncate">
               {profile?.student?.name ?? "Student"}
             </h2>
-            <p className="text-xs text-sky-500 uppercase tracking-wide font-semibold mt-0.5">
+            <p className="text-xs text-primary uppercase tracking-wide font-semibold mt-0.5">
               {profile?.student?.registerNumber ?? "—"}
             </p>
           </div>
         </div>
 
-        {/* Student Details Info Box */}
+        {/* Student Details Info List */}
         {profile?.student && (
-          <div className="p-4 bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl space-y-4 text-xs">
-            <div className="flex items-center gap-3">
-              <GraduationCap className="w-4 h-4 text-muted-foreground/60 shrink-0" />
-              <div>
-                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Program</p>
-                <p className="font-semibold text-foreground mt-0.5">{profile.student.program}</p>
-              </div>
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
+                Student Details
+              </h2>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Mail className="w-4 h-4 text-muted-foreground/60 shrink-0" />
-              <div>
-                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Email</p>
-                <p className="font-semibold text-foreground mt-0.5">{profile.student.vitEmail ?? "—"}</p>
+            <div className="divide-y divide-border/10 border-t border-b border-border/10">
+              <div className="flex items-center justify-between gap-4 py-3.5">
+                <div className="flex items-center gap-3 shrink-0">
+                  <GraduationCap className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                  <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">Program</span>
+                </div>
+                <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">{profile.student.program}</span>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-muted-foreground/60 shrink-0" />
-              <div>
-                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Phone</p>
-                <p className="font-semibold text-foreground mt-0.5">{profile.student.mobile ?? "—"}</p>
+              <div className="flex items-center justify-between gap-4 py-3.5">
+                <div className="flex items-center gap-3 shrink-0">
+                  <Mail className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                  <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">Email</span>
+                </div>
+                <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">{profile.student.vitEmail ?? "—"}</span>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3">
-              <Calendar className="w-4 h-4 text-muted-foreground/60 shrink-0" />
-              <div>
-                <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Date of Birth</p>
-                <p className="font-semibold text-foreground mt-0.5">{profile.student.dob ?? "—"}</p>
+              <div className="flex items-center justify-between gap-4 py-3.5">
+                <div className="flex items-center gap-3 shrink-0">
+                  <Phone className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                  <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">Phone</span>
+                </div>
+                <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">{profile.student.mobile ?? "—"}</span>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 py-3.5">
+                <div className="flex items-center gap-3 shrink-0">
+                  <Calendar className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                  <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">Date of Birth</span>
+                </div>
+                <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">{profile.student.dob ?? "—"}</span>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* ── Theme Preference ────────────────────────────────────────────────── */}
-      <div className="space-y-3">
+      {/* ── Preferences ─────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5">
         <div className="flex items-center gap-2">
-          <Sun className="w-4 h-4 text-sky-500" />
-          <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/75">
-            Appearance
+          <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
+            Preferences
           </h2>
         </div>
 
-        <div className="flex items-center justify-between gap-3 p-4 bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl">
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-bold text-foreground">Visual Theme</h3>
-            <p className="text-[11px] text-muted-foreground/60 mt-0.5 leading-relaxed">
-              Switch between light, dark, and system themes.
-            </p>
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
+          {/* Theme Row */}
+          <div className="flex items-center justify-between gap-3 py-4">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-semibold text-foreground">Visual Theme</h3>
+              <p className="text-[11px] text-muted-foreground/50 mt-1 leading-relaxed">
+                Switch between light, dark, and system themes.
+              </p>
+            </div>
+
+            <DrawerSelect
+              value={theme}
+              onValueChange={(val) => setTheme(val as any)}
+              title="Visual Theme"
+              triggerClassName="w-[120px] h-9"
+              options={[
+                { value: "light", label: <span className="flex items-center gap-1.5"><Sun className="w-3.5 h-3.5" /> Light</span> },
+                { value: "dark", label: <span className="flex items-center gap-1.5"><Moon className="w-3.5 h-3.5" /> Dark</span> },
+                { value: "system", label: <span className="flex items-center gap-1.5"><Laptop className="w-3.5 h-3.5" /> System</span> },
+              ]}
+            />
           </div>
 
-          <DrawerSelect
-            value={theme}
-            onValueChange={(val) => setTheme(val as any)}
-            title="Visual Theme"
-            triggerClassName="w-[120px] h-9"
-            options={[
-              { value: "light", label: <span className="flex items-center gap-1.5"><Sun className="w-3.5 h-3.5" /> Light</span> },
-              { value: "dark", label: <span className="flex items-center gap-1.5"><Moon className="w-3.5 h-3.5" /> Dark</span> },
-              { value: "system", label: <span className="flex items-center gap-1.5"><Laptop className="w-3.5 h-3.5" /> System</span> },
-            ]}
-          />
-        </div>
-      </div>
+          {/* Semester Row */}
+          <div className="flex items-center justify-between gap-3 py-4">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-sm font-semibold text-foreground">Active Semester</h3>
+              <p className="text-[11px] text-muted-foreground/50 mt-1 leading-relaxed">
+                Select the default semester used across dashboard listings.
+              </p>
+              {semesterError && (
+                <p className="text-[10px] text-destructive mt-1 font-semibold">{semesterError}</p>
+              )}
+            </div>
 
-      {/* ── Active Semester ─────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Settings className="w-4 h-4 text-sky-500" />
-          <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/75">
-            Academic Settings
-          </h2>
-        </div>
-
-        <div className="flex items-center justify-between gap-3 p-4 bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl">
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-bold text-foreground">Active Semester</h3>
-            <p className="text-[11px] text-muted-foreground/60 mt-0.5 leading-relaxed">
-              Select the default semester used across dashboard listings.
-            </p>
-            {semesterError && (
-              <p className="text-[10px] text-destructive mt-1 font-semibold">{semesterError}</p>
-            )}
+            <DrawerSelect
+              value={currentSemester?.id || ""}
+              onValueChange={handleSemesterChange}
+              disabled={!isOnline || semesterLoading || semesters.length === 0}
+              title="Active Semester"
+              triggerClassName="w-[130px] h-9"
+              placeholder={!isOnline ? "Offline" : semesterLoading ? "Loading..." : "Select"}
+              options={semesters.map((semester) => ({ value: semester.id, label: semester.name }))}
+            />
           </div>
-
-          <DrawerSelect
-            value={currentSemester?.id || ""}
-            onValueChange={handleSemesterChange}
-            disabled={!isOnline || semesterLoading || semesters.length === 0}
-            title="Active Semester"
-            triggerClassName="w-[130px] h-9"
-            placeholder={!isOnline ? "Offline" : semesterLoading ? "Loading..." : "Select"}
-            options={semesters.map((semester) => ({ value: semester.id, label: semester.name }))}
-          />
         </div>
-      </div>
+      </section>
 
-      {/* ── Keyring / Credential Status ───────────────────────────────────── */}
-      <div className="space-y-3">
+      {/* ── Keyring Status ─────────────────────────────────────────────────── */}
+      <div className="space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-sky-500" />
-            <h2 className="text-xs font-black uppercase tracking-widest text-muted-foreground/75">
+            <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
               Keyring Status
             </h2>
           </div>
@@ -356,13 +319,13 @@ export default function MobileSettings() {
           </div>
         )}
 
-        <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl divide-y divide-border/10 overflow-hidden">
+        <div className="divide-y divide-border/10 border-t border-b border-border/10">
           {credItems.map((item) => (
-            <div key={item.label} className="flex items-center justify-between gap-3 px-4 py-3.5">
+            <div key={item.label} className="flex items-center justify-between gap-3 py-3.5">
               <div className="flex items-center gap-3 min-w-0">
                 {item.icon}
                 <div className="min-w-0">
-                  <p className="text-[9px] text-muted-foreground/60 font-black uppercase tracking-wider leading-none">
+                  <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider leading-none">
                     {item.label}
                   </p>
                   {item.loading ? (
@@ -384,11 +347,11 @@ export default function MobileSettings() {
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black shrink-0 ${
                     item.stored
-                      ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                      ? "bg-primary/10 text-primary border border-primary/20"
                       : "bg-destructive/10 text-destructive border border-destructive/15"
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${item.stored ? "bg-emerald-500" : "bg-destructive"}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${item.stored ? "bg-primary" : "bg-destructive"}`} />
                   {item.stored ? "Stored" : "Missing"}
                 </span>
               )}
@@ -397,7 +360,7 @@ export default function MobileSettings() {
         </div>
 
         <p className="text-[10px] text-muted-foreground/50 leading-relaxed px-1 font-medium">
-          Credentials are stored in your device's secure system keyring. Session cookies are held in memory and refreshed automatically on re-login.
+          Credentials are stored securely in your device's native keyring. Session cookies are held in memory and refreshed automatically.
         </p>
       </div>
 
