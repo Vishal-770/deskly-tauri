@@ -129,6 +129,10 @@ pub async fn curriculum_download_syllabus(
             .body(format!("Syllabus successfully saved to: {}", result.0))
             .show();
 
+        // Open the downloaded file using the default mobile handler or share sheet
+        use tauri_plugin_opener::OpenerExt;
+        let _ = app.opener().open_path(&save_path, None::<String>);
+
         Ok(SyllabusResponse {
             success: true,
             data: Some(SyllabusData {
