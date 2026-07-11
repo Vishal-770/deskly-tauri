@@ -228,7 +228,10 @@ export default function MessMenuPage() {
   const parseItems = (str: string) =>
     str.split(/[+,•]/)
       .map((i) => i.trim().replace(/^\d+[\s.\-)]+/, "").trim())
+      .flatMap((i) => i.split(/\s+\d+\.\s+/))
+      .map((i) => i.trim())
       .filter(Boolean);
+
 
   const shell = (children: React.ReactNode) => (
     <>{children}</>
