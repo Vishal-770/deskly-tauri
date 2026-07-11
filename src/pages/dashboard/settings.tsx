@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "@/router";
+import { useNavigate, Link } from "@/router";
 import { useAuth } from "@/hooks/useAuth";
 import { useSemester } from "@/hooks/useSemester";
 import { useCredentialStatus } from "@/hooks/useCredentialStatus";
@@ -20,7 +20,9 @@ import {
   Settings,
   Sun,
   Moon,
-  Laptop
+  Laptop,
+  Scale,
+  ChevronRight,
 } from "lucide-react";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -365,6 +367,21 @@ export default function MobileSettings() {
           Credentials are stored securely in your device's native keyring. Session cookies are held in memory and refreshed automatically.
         </p>
       </div>
+
+      {/* Legal Link */}
+      <Link
+        to="/legal"
+        className="flex items-center justify-between py-3.5 px-1 text-muted-foreground hover:text-foreground transition-colors border-t border-border/10"
+      >
+        <div className="flex items-center gap-3">
+          <Scale className="w-4 h-4 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Legal &amp; Privacy</p>
+            <p className="text-[11px] text-muted-foreground/60 mt-0.5">View disclaimers and data policies</p>
+          </div>
+        </div>
+        <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground/40" />
+      </Link>
 
       {/* Logout Action */}
       <div className="pt-2">
