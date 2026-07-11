@@ -28,6 +28,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 export default function MobileDashboardLayout() {
   const location = useLocation();
@@ -69,10 +70,10 @@ export default function MobileDashboardLayout() {
     { label: "Timetable", path: "/dashboard/timetable", icon: Clock },
   ] as const;
 
-  const corePaths: Set<string> = new Set(coreNavItems.map((item) => item.path));
 
-  // Grid items inside the "More" bottom sheet
-  const moreGridItems: NavItem[] = allNavItems.filter((item) => !corePaths.has(item.path));
+
+  const corePaths = new Set(coreNavItems.map((item) => item.path));
+  const moreGridItems = allNavItems.filter((item) => !corePaths.has(item.path));
   const isOnline = useOnlineStatus();
 
   return (
@@ -142,31 +143,25 @@ export default function MobileDashboardLayout() {
       </nav>
 
       {/* "More" Bottom Sheet Overlay */}
-      {isMoreOpen && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-xs z-40 flex flex-col justify-end transition-opacity duration-300">
-          
-          {/* Backdrop click close */}
-          <div className="flex-1" onClick={() => setIsMoreOpen(false)} />
-
-          {/* Drawer container */}
-          <div className="bg-background border-t border-border/15 rounded-t-3xl p-6 space-y-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] animate-in slide-in-from-bottom duration-300">
-            
-            {/* Header Handle Bar */}
-            <div className="flex justify-between items-center pb-2">
-              <div className="space-y-0.5">
-                <h3 className="text-sm font-bold text-foreground">Explore Features</h3>
-                <p className="text-[10px] text-muted-foreground">Select an academic view</p>
-              </div>
-              <button 
-                onClick={() => setIsMoreOpen(false)}
-                className="p-1.5 bg-muted/30 hover:bg-muted/50 rounded-full border-0 text-foreground cursor-pointer transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+      <Drawer open={isMoreOpen} onOpenChange={setIsMoreOpen} showSwipeHandle>
+        <DrawerContent className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] bg-background border-t border-border/10 max-h-[85vh] rounded-t-[32px] flex flex-col">
+          {/* Header */}
+          <div className="flex justify-between items-center pb-4 shrink-0">
+            <div className="space-y-0.5">
+              <h3 className="text-base font-bold text-foreground font-saira tracking-tight">Explore Features</h3>
+              <p className="text-xs text-muted-foreground">Access academic & campus services</p>
             </div>
+            <button 
+              onClick={() => setIsMoreOpen(false)}
+              className="p-2 bg-muted/40 hover:bg-muted/60 rounded-full border-0 text-foreground cursor-pointer transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
-            {/* Grid of features */}
-            <div className="grid grid-cols-3 gap-x-4 gap-y-6 pt-2">
+          {/* Grid of features */}
+          <div className="flex-1 overflow-y-auto no-scrollbar pt-2">
+            <div className="grid grid-cols-3 gap-2.5">
               {moreGridItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -175,14 +170,22 @@ export default function MobileDashboardLayout() {
                     key={item.path}
                     to={item.path as any}
                     onClick={() => setIsMoreOpen(false)}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${
+                    className={`group flex flex-col items-center justify-center p-3 rounded-2xl bg-muted/20 border border-transparent transition-all duration-200 active:bg-muted/40 cursor-pointer ${
                       isActive 
-                        ? "bg-primary/10 border-primary/20 text-primary" 
-                        : "bg-muted/15 border-transparent hover:bg-muted/30 text-foreground"
+                        ? "bg-primary/5 dark:bg-primary/10 border-primary/10 text-primary" 
+                        : "text-foreground"
                     }`}
                   >
-                    <Icon className="w-5 h-5 mb-1.5 shrink-0" />
-                    <span className="text-[10px] text-center font-bold tracking-tight leading-tight w-full truncate">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary/15 text-primary"
+                        : "bg-muted-foreground/5 text-muted-foreground group-hover:text-foreground group-hover:bg-muted-foreground/10"
+                    }`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className={`text-[10.5px] text-center font-medium tracking-tight mt-2 leading-none w-full truncate ${
+                      isActive ? "text-primary font-semibold" : "text-muted-foreground group-hover:text-foreground"
+                    }`}>
                       {item.label}
                     </span>
                   </Link>
@@ -190,8 +193,8 @@ export default function MobileDashboardLayout() {
               })}
             </div>
           </div>
-        </div>
-      )}
+        </DrawerContent>
+      </Drawer>
 
     </div>
   );

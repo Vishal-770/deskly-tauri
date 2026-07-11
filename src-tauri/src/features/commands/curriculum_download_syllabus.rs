@@ -1,5 +1,6 @@
 use reqwest::header::{CONTENT_TYPE, COOKIE, REFERER};
 use tauri::State;
+use tauri_plugin_notification::NotificationExt;
 
 use crate::auth::constants::VTOP_BASE_URL;
 use crate::auth::helpers::{
@@ -108,24 +109,90 @@ pub async fn curriculum_download_syllabus(
         break (filename, bytes);
     };
 
-    use tauri::Manager;
-    let downloads_dir = app
-        .path()
-        .download_dir()
-        .map_err(|e| format!("Failed to resolve downloads directory: {e}"))?;
-    let file_path = downloads_dir.join(&result.0);
+    #[cfg(mobile)]
+    {
+        use tauri::Manager;
+        let downloads_dir = app
+            .path()
+            .download_dir()
+            .map_err(|e| format!("Failed to resolve downloads directory: {e}"))?;
+        let file_path = downloads_dir.join(&result.0);
 
-    std::fs::write(&file_path, &result.1)
-        .map_err(|e| format!("Failed to save syllabus to disk: {e}"))?;
+        std::fs::write(&file_path, &result.1)
+            .map_err(|e| format!("Failed to save syllabus to disk: {e}"))?;
 
-    let save_path = file_path.to_string_lossy().to_string();
+        let save_path = file_path.to_string_lossy().to_string();
 
-    Ok(SyllabusResponse {
-        success: true,
-        data: Some(SyllabusData {
-            filename: result.0,
-            save_path,
-        }),
-        error: None,
-    })
+        let _ = app.notification()
+            .builder()
+            .title("Syllabus Downloaded")
+            .body(format!("Syllabus successfully saved to: {}", result.0))
+            .show();
+
+        Ok(SyllabusResponse {
+            success: true,
+            data: Some(SyllabusData {
+                filename: result.0,
+                save_path,
+            }),
+            error: None,
+        })
+    }
+
+    #[cfg(desktop)]
+    {
+        use rfd::FileDialog;
+
+        let filename = &result.0;
+        let ext = std::path::Path::new(filename)
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("zip");
+
+        let path = FileDialog::new()
+            .set_file_name(filename)
+            .add_filter("Syllabus File", &[ext])
+            .save_file();
+
+        if let Some(path) = path {
+            std::fs::write(&path, &result.1)
+                .map_err(|e| format!("Failed to save syllabus to disk: {e}"))?;
+
+            let save_path = path.to_string_lossy().to_string();
+            let saved_filename = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+
+            // Trigger a native notification
+            let _ = app.notification()
+                .builder()
+                .title("Syllabus Saved")
+                .body(format!("Syllabus successfully saved to: {}", saved_filename))
+                .show();
+
+            // Linux development notification fallback
+            #[cfg(target_os = "linux")]
+            {
+                let _ = std::process::Command::new("notify-send")
+                    .args([
+                        "Syllabus Saved",
+                        &format!("Syllabus successfully saved to: {}", saved_filename)
+                    ])
+                    .spawn();
+            }
+
+            Ok(SyllabusResponse {
+                success: true,
+                data: Some(SyllabusData {
+                    filename: saved_filename,
+                    save_path,
+                }),
+                error: None,
+            })
+        } else {
+            Ok(SyllabusResponse {
+                success: false,
+                data: None,
+                error: Some("Save cancelled".to_string()),
+            })
+        }
+    }
 }

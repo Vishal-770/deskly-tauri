@@ -110,9 +110,13 @@ export default function CategoryCoursesPage() {
     try {
       const res = await downloadCurriculumSyllabus(courseCode);
       if (res.success && res.data) {
-        setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: true, message: `Saved to: ${res.data!.savePath}` } }));
+        setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: true, message: "Saved!" } }));
       } else {
-        setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: false, message: res.error ?? "Failed to download syllabus." } }));
+        if (res.error === "Save cancelled") {
+          setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
+        } else {
+          setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: false, message: res.error ?? "Failed to download syllabus." } }));
+        }
       }
     } catch (e) {
       setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: false, message: e instanceof Error ? e.message : String(e) } }));
