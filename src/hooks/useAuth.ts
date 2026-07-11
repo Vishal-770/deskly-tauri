@@ -116,6 +116,7 @@ export function useAuth(): UseAuthReturn {
       await authClearSemester();
       setAuthState(null);
       setHasTokens(false);
+      localStorage.clear();
     } catch (err) {
       handleError(err);
       throw err;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from "@/router";
 import type { Path } from "@/router";
@@ -29,11 +29,24 @@ import {
 } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function MobileDashboardLayout() {
+  const { isLoggedIn, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const isOnline = useOnlineStatus();
+
+  useEffect(() => {
+    if (!loading && !isLoggedIn) {
+      navigate("/");
+    }
+  }, [isLoggedIn, loading, navigate]);
+
+  if (loading || !isLoggedIn) {
+    return null;
+  }
 
   // Show back button on all pages except the root dashboard
   const rootPaths = new Set(["/dashboard", "/dashboard/timetable"]);
@@ -74,7 +87,6 @@ export default function MobileDashboardLayout() {
 
   const corePaths = new Set(coreNavItems.map((item) => item.path));
   const moreGridItems = allNavItems.filter((item) => !corePaths.has(item.path));
-  const isOnline = useOnlineStatus();
 
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-background text-foreground select-none relative">

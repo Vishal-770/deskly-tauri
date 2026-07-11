@@ -1,7 +1,17 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, Link } from "@/router";
 import { useAuth } from "@/hooks/useAuth";
-import { User, Lock, LogIn, HelpCircle, Eye, EyeOff, Scale, AlertCircle } from "lucide-react";
+import {
+  User,
+  Lock,
+  HelpCircle,
+  Eye,
+  EyeOff,
+  Scale,
+  AlertCircle,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 import { getVersion } from "@tauri-apps/api/app";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -44,120 +54,134 @@ export default function MobileHome() {
   };
 
   return (
-    <main className="h-full w-full flex flex-col justify-between p-6 bg-background text-foreground antialiased overflow-y-auto no-scrollbar">
-      
-      {/* Centered card container for premium layout */}
-      <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full py-8 space-y-12">
-        
-        {/* Welcome Section */}
-        <div className="space-y-4 text-center">
-          <div className="flex justify-center">
-            <div className="p-4 bg-muted/30 rounded-3xl border border-border/10 shadow-sm">
-              <img src="/logo.png" className="w-11 h-11 object-contain" alt="Deskly Logo" />
-            </div>
+    <main className="h-full w-full flex flex-col text-foreground antialiased overflow-y-auto no-scrollbar relative bg-background">
+
+      {/* Subtle glow behind logo — top */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 55% 28% at 50% 14%, rgba(255,255,255,0.06) 0%, transparent 100%)",
+        }}
+      />
+
+      {/* Subtle concentric glow at bottom center — creates depth in the empty space */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 90% 55% at 50% 100%, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 40%, transparent 70%)",
+        }}
+      />
+
+      {/* ── Main content ── */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center px-7 py-10 gap-12">
+
+        {/* Logo + Header */}
+        <div className="flex flex-col items-center gap-6 text-center">
+          {/* Circular logo */}
+          <div className="w-[72px] h-[72px] rounded-full bg-muted/30 flex items-center justify-center">
+            <img
+              src="/logo.png"
+              className="w-10 h-10 object-contain"
+              alt="Deskly Logo"
+            />
           </div>
-          <div className="space-y-1.5">
-            <h1 className="text-3xl font-black tracking-tight text-foreground">
+
+          <div className="space-y-2">
+            <h1 className="text-[32px] font-bold tracking-tight text-foreground leading-tight">
               Sign In
             </h1>
-            <p className="text-xs text-muted-foreground/60 leading-relaxed max-w-[240px] mx-auto font-medium">
+            <p className="text-[13px] text-muted-foreground leading-relaxed max-w-[240px] mx-auto">
               Sync your student dashboard with your VTOP credentials.
             </p>
           </div>
         </div>
 
-        {/* Credentials Form */}
-        <form className="space-y-6" onSubmit={onSubmit}>
-          <div className="space-y-4">
-            
-            {/* Registration Number Field */}
-            <div className="space-y-2">
-              <label
-                htmlFor="reg-no"
-                className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground/45 ml-2"
-              >
-                Registration Number
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="reg-no"
-                  value={regNo}
-                  onChange={(e) => setRegNo(e.target.value)}
-                  disabled={loading}
-                  className="block w-full h-12 pl-11 pr-4 bg-muted/20 focus:bg-muted/40 border border-border/5 focus:border-primary/20 focus:ring-2 focus:ring-primary/5 focus:outline-none text-sm font-semibold rounded-2xl transition-all duration-200"
-                  placeholder="e.g. 21BCE0001"
-                  required
-                />
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-                  <User className="w-4.5 h-4.5" />
-                </div>
-              </div>
+        {/* Form */}
+        <form className="flex flex-col gap-10" onSubmit={onSubmit}>
+
+          {/* Fields */}
+          <div className="flex flex-col gap-7">
+
+            {/* Registration Number */}
+            <div className="relative flex items-center border-b border-border/50 focus-within:border-foreground transition-colors duration-200 pb-3">
+              <User className="w-[18px] h-[18px] text-muted-foreground/50 shrink-0 mr-3" />
+              <input
+                type="text"
+                id="reg-no"
+                value={regNo}
+                onChange={(e) => setRegNo(e.target.value)}
+                disabled={loading}
+                className="flex-1 bg-transparent border-none outline-none text-[15px] text-foreground placeholder:text-muted-foreground/35 font-normal disabled:opacity-50"
+                placeholder="e.g. 21BCE0001"
+                required
+                autoComplete="username"
+                autoCapitalize="characters"
+              />
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="block text-[10px] font-black uppercase tracking-widest text-muted-foreground/45 ml-2"
+            {/* Password */}
+            <div className="relative flex items-center border-b border-border/50 focus-within:border-foreground transition-colors duration-200 pb-3">
+              <Lock className="w-[18px] h-[18px] text-muted-foreground/50 shrink-0 mr-3" />
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                className="flex-1 bg-transparent border-none outline-none text-[15px] text-foreground placeholder:text-muted-foreground/35 font-normal disabled:opacity-50"
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                className="ml-2 text-muted-foreground/40 hover:text-muted-foreground transition-colors focus:outline-none shrink-0 cursor-pointer"
               >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  className="block w-full h-12 pl-11 pr-12 bg-muted/20 focus:bg-muted/40 border border-border/5 focus:border-primary/20 focus:ring-2 focus:ring-primary/5 focus:outline-none text-sm font-semibold rounded-2xl transition-all duration-200"
-                  placeholder="••••••••"
-                  required
-                />
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none">
-                  <Lock className="w-4.5 h-4.5" />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors focus:outline-none"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-4.5 h-4.5" />
-                  ) : (
-                    <Eye className="w-4.5 h-4.5" />
-                  )}
-                </button>
-              </div>
+                {showPassword ? (
+                  <EyeOff className="w-[18px] h-[18px]" />
+                ) : (
+                  <Eye className="w-[18px] h-[18px]" />
+                )}
+              </button>
             </div>
           </div>
 
-          {/* Errors */}
+          {/* Error */}
           {(submitError || error) && (
-            <div className="text-xs text-destructive bg-destructive/10 border border-destructive/15 p-3.5 rounded-2xl font-bold leading-relaxed flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-destructive/80" />
+            <div className="flex items-start gap-2 text-destructive text-[13px] font-medium leading-relaxed -mt-4">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{submitError ?? error}</span>
             </div>
           )}
 
-          {/* Submit Button */}
+          {/* Sign In Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-12 flex justify-center items-center bg-primary hover:bg-primary/95 text-primary-foreground text-sm font-bold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-primary/10 active:opacity-90"
+            className="w-full h-[54px] flex items-center justify-center gap-2 bg-foreground text-background text-[15px] font-semibold rounded-full transition-opacity duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:opacity-80"
           >
-            <span>{loading ? "Authenticating..." : "Sign In"}</span>
-            {!loading && (
-              <LogIn className="w-4 h-4 ml-2 opacity-80" />
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Signing In…</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
             )}
           </button>
         </form>
       </div>
 
       {/* Footer */}
-      <footer className="flex items-center justify-between pt-6 border-t border-border/5 max-w-sm mx-auto w-full shrink-0">
-        <div className="flex gap-2.5">
+      <footer className="relative z-10 shrink-0 flex items-center justify-between px-7 py-5 border-t border-border/10">
+        <div className="flex items-center gap-5">
           <button
             onClick={async () => {
               try {
@@ -166,21 +190,21 @@ export default function MobileHome() {
                 console.error("Failed to open support link:", err);
               }
             }}
-            className="px-3.5 py-1.5 bg-muted/20 hover:bg-muted/40 border border-border/5 text-[11px] text-muted-foreground hover:text-foreground transition-all duration-200 font-bold rounded-full flex items-center gap-1.5 cursor-pointer focus:outline-none"
+            className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer bg-transparent border-none focus:outline-none"
           >
             <HelpCircle className="w-3.5 h-3.5" />
-            Support
+            <span>Support</span>
           </button>
           <Link
             to="/legal"
-            className="px-3.5 py-1.5 bg-muted/20 hover:bg-muted/40 border border-border/5 text-[11px] text-muted-foreground hover:text-foreground transition-all duration-200 font-bold rounded-full flex items-center gap-1.5 cursor-pointer focus:outline-none"
+            className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-foreground transition-colors"
           >
             <Scale className="w-3.5 h-3.5" />
-            Legal
+            <span>Legal</span>
           </Link>
         </div>
-        <span className="text-[11px] text-muted-foreground/35 font-bold select-none pr-1">
-          {version ? `v${version}` : "v3.0.2"}
+        <span className="text-[12px] text-muted-foreground/35 select-none">
+          {version ? `v${version}` : "v3.0.7"}
         </span>
       </footer>
     </main>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "@/router";
 import { useAuth } from "@/hooks/useAuth";
 import { useSemester } from "@/hooks/useSemester";
 import { useCredentialStatus } from "@/hooks/useCredentialStatus";
@@ -81,6 +82,7 @@ function SettingsSkeleton() {
 
 export default function MobileSettings() {
   const { logout, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const { currentSemester, semesters, loading: semesterLoading, error: semesterError, setSemester } = useSemester();
   const { theme, setTheme } = useTheme();
@@ -367,7 +369,17 @@ export default function MobileSettings() {
       {/* Logout Action */}
       <div className="pt-2">
         <button
-          onClick={() => logout()}
+          onClick={async () => {
+            try {
+              await logout();
+            } catch (e) {
+              console.error("Logout error:", e);
+            } finally {
+              // Hard replace to root — forces full app remount and
+              // reinitialises all auth hook instances so redirect triggers
+              navigate("/");
+            }
+          }}
           className="w-full h-11 flex justify-center items-center gap-2 bg-destructive/10 hover:bg-destructive/15 text-destructive border border-destructive/20 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
