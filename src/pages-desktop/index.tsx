@@ -14,6 +14,20 @@ export default function Home() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [version, setVersion] = useState("");
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (authState?.loggedIn) {
@@ -36,11 +50,32 @@ export default function Home() {
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitError(null);
+
+    if (!navigator.onLine) {
+      setIsOffline(true);
+      return;
+    }
+
     try {
       await login(regNo, password);
       navigate("/dashboard");
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : String(err));
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const lowerErr = errMsg.toLowerCase();
+      const isNetworkError = 
+        lowerErr.includes("request failed") ||
+        lowerErr.includes("failed to fetch") ||
+        lowerErr.includes("timeout") ||
+        lowerErr.includes("connect error") ||
+        lowerErr.includes("connection") ||
+        lowerErr.includes("dns") ||
+        lowerErr.includes("network");
+
+      if (isNetworkError) {
+        setSubmitError("Network error. Please check your internet connection and try again.");
+      } else {
+        setSubmitError(errMsg);
+      }
     }
   };
 
@@ -48,6 +83,26 @@ export default function Home() {
     duration: 0.8,
     ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
   };
+
+  if (authState === null && loading) {
+    return (
+      <main className="h-full min-h-0 flex items-center justify-center bg-background text-foreground antialiased p-6">
+        <div className="w-full max-w-[400px] flex flex-col gap-16 py-10 items-center sm:items-start">
+          <div className="w-12 h-12 bg-muted/30 rounded-xl animate-pulse" />
+          <div className="w-full space-y-8">
+            <div className="space-y-3">
+              <div className="h-8 bg-muted/30 rounded animate-pulse w-1/2" />
+              <div className="h-4 bg-muted/20 rounded animate-pulse w-3/4" />
+            </div>
+            <div className="space-y-6 pt-4">
+              <div className="h-12 bg-muted/20 rounded-lg animate-pulse" />
+              <div className="h-12 bg-muted/20 rounded-lg animate-pulse" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="h-full min-h-0 overflow-y-auto no-scrollbar relative bg-background text-foreground antialiased selection:bg-primary/20">
@@ -93,9 +148,9 @@ export default function Home() {
                     id="reg-no"
                     value={regNo}
                     onChange={(e) => setRegNo(e.target.value)}
-                    disabled={loading}
+                    disabled={loading || isOffline}
                     className="block w-full h-12 pl-0 pr-12 bg-transparent border-b border-border/70 focus:border-primary focus:outline-none text-base font-normal text-foreground placeholder:text-muted-foreground/25 transition-colors rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
-                    placeholder="Enter registration ID"
+                    placeholder="Username"
                     required
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/30 transition-colors pointer-events-none group-focus-within:text-primary/70">
@@ -118,7 +173,7 @@ export default function Home() {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
+                    disabled={loading || isOffline}
                     className="block w-full h-12 pl-0 pr-12 bg-transparent border-b border-border/70 focus:border-primary focus:outline-none text-base font-normal text-foreground placeholder:text-muted-foreground/25 transition-colors rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
                     placeholder="••••••••"
                     required
@@ -126,7 +181,7 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    disabled={loading}
+                    disabled={loading || isOffline}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-foreground transition-colors focus:outline-none disabled:opacity-50"
                   >
                     {showPassword ? (
@@ -139,18 +194,22 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Error Message */}
-            {(submitError || error) && (
+            {/* Error Message / Offline Status */}
+            {isOffline ? (
+              <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-3 rounded-lg font-semibold leading-relaxed text-center">
+                You are currently offline. Please check your internet connection.
+              </p>
+            ) : (submitError || error) ? (
               <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-3 rounded-lg font-semibold leading-relaxed text-center">
                 {submitError ?? error}
               </p>
-            )}
+            ) : null}
 
             {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || isOffline}
                 className="w-full h-12 flex justify-center items-center bg-primary hover:bg-primary/95 text-primary-foreground text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
               >
                 <span>{loading ? "Authenticating..." : "Sign In"}</span>
