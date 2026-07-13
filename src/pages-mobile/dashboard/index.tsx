@@ -3,16 +3,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
 import { getStudentProfile, getFeedbackStatus, ProfileData } from "@/lib/features";
 import {
-  RefreshCw,
-  Trophy,
   BookOpen,
   Clock,
-  MessageSquare,
+  FileText,
+  ClipboardList,
+  GraduationCap,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
+import dashboardImg from "@/assets/dashboard.png";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -22,6 +23,13 @@ function formatStudentName(name: string | undefined) {
   return parts
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(" ");
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return "Good morning,";
+  if (hour >= 12 && hour < 17) return "Good afternoon,";
+  return "Good evening,";
 }
 
 // Check for the "NOT Given" status
@@ -58,59 +66,6 @@ async function getCgpaPage(): Promise<{ success: boolean; cgpaData?: CgpaData; e
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-function StatColumn({
-  icon: Icon,
-  label,
-  value,
-  showBorder,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: number;
-  showBorder: boolean;
-}) {
-  return (
-    <div className={`flex flex-col items-center justify-between py-2.5 text-center h-24 ${showBorder ? "border-r border-border/10" : ""}`}>
-      <div className="space-y-0.5">
-        <p className="text-[11px] font-medium tracking-[0.15em] text-muted-foreground/60 uppercase leading-none">
-          {label}
-        </p>
-        <p className="text-3xl font-semibold text-foreground tracking-tight">{value}</p>
-      </div>
-      <Icon className="w-5 h-5 text-primary shrink-0" />
-    </div>
-  );
-}
-
-function FeedbackItem({ item }: { item: FeedbackStatus }) {
-  const isCurriculum = item.type.toLowerCase().includes("curriculum");
-  const label = isCurriculum ? "Content Feedback" : "General Feedback";
-  const mid = parseFeedbackText(item.midSemester);
-  const tee = parseFeedbackText(item.teeSemester);
-
-  return (
-    <div className="space-y-2 py-4">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-primary leading-none">
-        {item.type}
-      </p>
-      <h3 className="text-sm font-semibold text-foreground leading-none">{label}</h3>
-      <div className="flex items-center gap-2.5 text-xs text-muted-foreground font-semibold leading-none pt-1">
-        <span>Mid:</span>
-        <span className={mid.isGiven ? "text-primary font-bold" : "text-destructive font-bold"}>
-          {mid.isGiven ? "Given" : "Pending"}
-        </span>
-        <span className="text-muted-foreground/25">|</span>
-        <span>TEE:</span>
-        <span className={tee.isGiven ? "text-primary font-bold" : "text-destructive font-bold"}>
-          {tee.isGiven ? "Given" : "Pending"}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ─── Loading Skeleton ──────────────────────────────────────────────────────────
 
 function DashboardSkeleton() {
   return (
@@ -263,7 +218,7 @@ export default function MobileDashboardHome() {
     : "0";
 
   return (
-    <div className="w-full space-y-6 px-2 pt-1 pb-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full space-y-7 px-0 pt-2 pb-6 font-saira select-none overscroll-y-contain relative">
       {/* Google Font Saira Injection */}
       <style>{`
         .font-saira {
@@ -271,9 +226,22 @@ export default function MobileDashboardHome() {
         }
       `}</style>
 
+      {/* Illustration image absolute header */}
+      <div className="absolute -top-4 right-0 w-[200px] h-[160px] pointer-events-none select-none z-0">
+        <img
+          src={dashboardImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+          }}
+          alt="Dashboard Illustration"
+        />
+      </div>
+
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button
             onClick={loadData}
@@ -285,75 +253,142 @@ export default function MobileDashboardHome() {
       )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start justify-between gap-4">
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none truncate">
-            {profile?.student?.name ? `Welcome, ${studentName}.` : "Dashboard"}
+      <header className="relative z-10 flex items-start justify-between gap-4">
+        <div className="space-y-1.5 min-w-0 pt-2">
+          <p className="text-[15px] font-medium text-muted-foreground/60 leading-none">
+            {getGreeting()}
+          </p>
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight leading-tight truncate">
+            {profile?.student?.name ? studentName : "Student"}
           </h1>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">{formattedDate}</p>
+          <p className="text-xs text-muted-foreground/40 leading-none pt-0.5">{formattedDate}</p>
         </div>
-        <button
-          onClick={loadData}
-          className="p-1 hover:opacity-80 text-foreground shrink-0 border-0 bg-transparent cursor-pointer"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </button>
       </header>
 
-      {/* ── CGPA ────────────────────────────────────────────────────────────── */}
+      {/* ── CGPA Card ───────────────────────────────────────────────────────── */}
       {cgpaData && (
-        <section className="space-y-5">
-          <div className="space-y-1.5">
-            <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
-              Cumulative GPA
-            </p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-[62px] font-medium text-foreground leading-none tracking-tight">
+        <section className="relative z-10 space-y-6">
+          <div className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-6 rounded-[30px] shadow-sm space-y-6">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold tracking-wider text-muted-foreground/50 uppercase leading-none">
+                Cumulative GPA
+              </span>
+            </div>
+            
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-5xl font-extrabold text-foreground leading-none tracking-tight">
                 {cgpaData.currentCgpa.toFixed(2)}
               </span>
-              <span className="text-base font-medium text-muted-foreground">/ 10.00</span>
+              <span className="text-sm font-medium text-muted-foreground/45 leading-none">/ 10.00</span>
+            </div>
+
+            <div className="space-y-2.5 pt-1">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-muted-foreground/60">Credits Completed</span>
+                <span className="text-foreground tracking-tight">
+                  {cgpaData.earnedCredits} / {cgpaData.totalCreditsRequired} ({creditPct}%)
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-muted/20 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-700"
+                  style={{
+                    width: `${(cgpaData.earnedCredits / cgpaData.totalCreditsRequired) * 100}%`,
+                  }}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Progress bar info */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-sm font-medium">
-              <span className="text-muted-foreground">Credits Completed</span>
-              <span className="text-foreground">
-                {cgpaData.earnedCredits} / {cgpaData.totalCreditsRequired} ({creditPct}%)
-              </span>
+          {/* Three Circular Stats Badges */}
+          <div className="grid grid-cols-3 gap-4 pt-2">
+            
+            {/* Earned */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-[60px] h-[60px] rounded-full border-2 border-t-primary/45 border-x-primary/45 border-b-transparent flex items-center justify-center text-primary shrink-0">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <div className="text-center space-y-0.5">
+                <p className="text-lg font-extrabold text-foreground leading-tight">{cgpaData.earnedCredits}</p>
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wide">Earned</p>
+              </div>
             </div>
-            <div className="h-[3px] w-full bg-muted/30 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-700"
-                style={{
-                  width: `${(cgpaData.earnedCredits / cgpaData.totalCreditsRequired) * 100}%`,
-                }}
-              />
-            </div>
-          </div>
 
-          {/* Stat columns */}
-          <div className="grid grid-cols-3 pt-2">
-            <StatColumn icon={Trophy} label="Earned" value={cgpaData.earnedCredits} showBorder={true} />
-            <StatColumn icon={BookOpen} label="Required" value={cgpaData.totalCreditsRequired} showBorder={true} />
-            <StatColumn icon={Clock} label="Non-Graded" value={cgpaData.nonGradedCore} showBorder={false} />
+            {/* Required */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-[60px] h-[60px] rounded-full border-2 border-t-border border-x-border border-b-transparent flex items-center justify-center text-muted-foreground shrink-0">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div className="text-center space-y-0.5">
+                <p className="text-lg font-extrabold text-foreground leading-tight">{cgpaData.totalCreditsRequired}</p>
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wide">Required</p>
+              </div>
+            </div>
+
+            {/* Non-Graded */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-[60px] h-[60px] rounded-full border-2 border-t-border border-x-border border-b-transparent flex items-center justify-center text-muted-foreground shrink-0">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div className="text-center space-y-0.5">
+                <p className="text-lg font-extrabold text-foreground leading-tight">{cgpaData.nonGradedCore}</p>
+                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wide">Non-Graded</p>
+              </div>
+            </div>
+
           </div>
         </section>
       )}
 
       {/* ── Feedback Status ──────────────────────────────────────────────────── */}
       {feedbackData && feedbackData.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center gap-2 text-foreground font-medium">
-            <MessageSquare className="w-5 h-5 text-primary" />
-            <h2 className="text-xl font-semibold tracking-tight leading-none">Feedback</h2>
+        <section className="relative z-10 space-y-4">
+          <div className="flex items-center justify-between text-foreground">
+            <div className="space-y-1">
+              <h2 className="text-lg font-extrabold tracking-tight leading-none">Feedback</h2>
+              <div className="w-6 h-0.5 bg-foreground rounded" />
+            </div>
           </div>
 
-          <div className="divide-y divide-border/10 border-t border-b border-border/10">
-            {feedbackData.map((item, idx) => (
-              <FeedbackItem key={idx} item={item} />
-            ))}
+          <div className="flex flex-col gap-3">
+            {feedbackData.map((item, idx) => {
+              const isCurriculum = item.type.toLowerCase().includes("curriculum");
+              const label = isCurriculum ? "Content Feedback" : "General Feedback";
+              const mid = parseFeedbackText(item.midSemester);
+              const tee = parseFeedbackText(item.teeSemester);
+              const Icon = isCurriculum ? FileText : ClipboardList;
+              const iconColor = "text-primary bg-primary/10";
+
+              return (
+                <div
+                  key={idx}
+                  className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4.5 rounded-[24px] flex items-center justify-between shadow-sm"
+                >
+                  <div className="flex items-center min-w-0">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 mr-4 ${iconColor}`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0 space-y-1">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/45 leading-none truncate">
+                        {item.type}
+                      </p>
+                      <h3 className="text-[13.5px] font-bold text-foreground leading-none">{label}</h3>
+                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-semibold leading-none pt-0.5">
+                        <span>Mid:</span>
+                        <span className={mid.isGiven ? "text-primary" : "text-destructive font-extrabold"}>
+                          {mid.isGiven ? "Given" : "Pending"}
+                        </span>
+                        <span className="text-muted-foreground/15">|</span>
+                        <span>TEE:</span>
+                        <span className={tee.isGiven ? "text-primary" : "text-destructive font-extrabold"}>
+                          {tee.isGiven ? "Given" : "Pending"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

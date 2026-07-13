@@ -107,8 +107,8 @@ export default function MobileHome() {
               src={loginImg}
               className="w-full max-w-[320px] aspect-[4/3] object-contain"
               style={{
-                maskImage: "linear-gradient(to bottom, black 35%, rgba(0,0,0,0.9) 55%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.15) 90%, transparent 100%)",
-                WebkitMaskImage: "linear-gradient(to bottom, black 35%, rgba(0,0,0,0.9) 55%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.15) 90%, transparent 100%)"
+                maskImage: "linear-gradient(to bottom, #fff 35%, rgba(255,255,255,0.9) 55%, rgba(255,255,255,0.5) 75%, rgba(255,255,255,0.15) 90%, transparent 100%)",
+                WebkitMaskImage: "linear-gradient(to bottom, #fff 35%, rgba(255,255,255,0.9) 55%, rgba(255,255,255,0.5) 75%, rgba(255,255,255,0.15) 90%, transparent 100%)"
               }}
               alt="Login Illustration"
             />
