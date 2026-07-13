@@ -1,0 +1,120 @@
+name: iOS Release
+
+on:
+  push:
+    tags:
+      - "ios-v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ios:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios, aarch64-apple-ios-sim
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Apple Certificates & Profiles (Optional)
+        id: xcode-signing
+        run: |
+          if [ -n "${{ secrets.APPLE_CERTIFICATE_BASE64 }}" ] && [ -n "${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}" ]; then
+            echo "Signing secrets found. Configuring signing..."
+            echo "has_signing=true" >> $GITHUB_OUTPUT
+          else
+            echo "Signing secrets missing. Building unsigned simulator bundle..."
+            echo "has_signing=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Import Apple Certificates
+        if: steps.xcode-signing.outputs.has_signing == 'true'
+        uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
+          p12-password: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+
+      - name: Install Provisioning Profiles
+        if: steps.xcode-signing.outputs.has_signing == 'true'
+        uses: apple-actions/download-provisioning-profiles@v3
+        with:
+          bundle-id: 'com.deskly.app'
+          profile-type: 'IOS_APP_STORE'
+          profile-base64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+
+      - name: Initialize Tauri iOS project
+        run: pnpm tauri ios init
+
+      - name: Build signed iOS App (IPA)
+        if: steps.xcode-signing.outputs.has_signing == 'true'
+        run: pnpm tauri ios build
+        env:
+          DEVELOPMENT_TEAM: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
+
+      - name: Build unsigned simulator iOS App
+        if: steps.xcode-signing.outputs.has_signing != 'true'
+        run: pnpm tauri ios build --no-ipa
+
+      - name: Prepare release artifacts
+        shell: bash
+        run: |
+          mkdir -p release-assets/ios
+          if [ "${{ steps.xcode-signing.outputs.has_signing }}" = "true" ]; then
+            # Find and copy the IPA output
+            IPA_PATH=$(find src-tauri/gen/apple/build/arm64 -name "*.ipa" | head -n 1)
+            if [ -n "$IPA_PATH" ] && [ -f "$IPA_PATH" ]; then
+              cp "$IPA_PATH" release-assets/ios/Deskly.ipa
+              echo "Copied IPA release asset."
+            else
+              echo "IPA file not found!" >&2
+              exit 1
+            fi
+          else
+            # Find and copy the unsigned .app bundle
+            APP_PATH=$(find src-tauri/gen/apple/build -name "*.app" | head -n 1)
+            if [ -n "$APP_PATH" ] && [ -d "$APP_PATH" ]; then
+              tar -czf release-assets/ios/Deskly-Simulator.app.tar.gz -C "$(dirname "$APP_PATH")" "$(basename "$APP_PATH")"
+              echo "Packaged and copied Simulator .app bundle."
+            else
+              echo "App bundle not found!" >&2
+              exit 1
+            fi
+          fi
+
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios
+          path: release-assets/ios/*
+          if-no-files-found: error
+
+      - name: Publish GitHub release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: iOS Release ${{ github.ref_name }}
+          files: |
+            release-assets/ios/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          draft: false
+          prerelease: false
