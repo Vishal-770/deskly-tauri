@@ -7,18 +7,16 @@ import { OfflineDisplay } from "@/components/offline-display";
 import { ErrorDisplay } from "@/components/error-display";
 import { isNetworkError } from "@/lib/utils";
 import SingleCourseExportModal from "@/components/single-course-export-modal";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Separator } from "@/components/ui/separator";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import {
   Clock,
   Calendar,
   User,
   MapPin,
-
   Hash,
   LayoutGrid,
   ChevronRight,
+  X,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -113,6 +111,13 @@ function getBarBgColor(pct: number) {
   return "bg-destructive";
 }
 
+function formatCourseType(type: string) {
+  const t = type.toLowerCase();
+  if (t.includes("embedded theory") || t.includes("theory")) return "Theory Only";
+  if (t.includes("embedded lab") || t.includes("lab")) return "Lab Only";
+  return type;
+}
+
 // ─── Attendance Hint ──────────────────────────────────────────────────────────
 
 function AttendanceHint({ attended, total, courseType }: { attended: number; total: number; courseType?: string }) {
@@ -177,72 +182,43 @@ function ListCircularProgress({ percentage, size = 46 }: { percentage: number; s
           cy={size / 2}
         />
       </svg>
-      <span className="absolute text-[10px] font-semibold text-foreground leading-none">{Math.round(percentage)}%</span>
+      <span className="absolute text-[10px] font-bold text-foreground leading-none">{Math.round(percentage)}%</span>
     </div>
   );
 }
 
 function EmptyCircularProgress() {
   return (
-    <div className="w-[46px] h-[46px] rounded-full bg-muted/10 flex items-center justify-center text-muted-foreground shrink-0 border border-border/5">
-      <Calendar className="w-5 h-5 text-muted-foreground/60" />
+    <div className="w-[46px] h-[46px] rounded-full bg-muted/10 flex items-center justify-center text-muted-foreground shrink-0 border border-border/20">
+      <Calendar className="w-5 h-5 text-muted-foreground/50" />
     </div>
   );
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
+function Sk({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
+}
+
 function TimetableSkeleton() {
   return (
     <div className="space-y-6 px-2 py-4 animate-pulse font-saira">
-      {/* Header: title + refresh */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <Skeleton className="w-6 h-6 rounded-md" />
-            <Skeleton className="h-7 w-36" />
-          </div>
-          <Skeleton className="h-3.5 w-32" />
-        </div>
-        <Skeleton className="h-5 w-5 rounded-full shrink-0" />
+      <div className="flex items-center gap-2">
+        <Sk className="w-6 h-6 rounded-md" />
+        <Sk className="h-7 w-36" />
       </div>
 
-      {/* Day chip strip: 7 columns */}
       <div className="grid grid-cols-7 gap-2">
         {[...Array(7)].map((_, i) => (
-          <Skeleton key={i} className="h-14 rounded-xl" />
+          <Sk key={i} className="h-16 rounded-[20px]" />
         ))}
       </div>
 
-      <Separator />
-
-      {/* Active day info: class count */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1.5">
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-3 w-16" />
-        </div>
-        <Skeleton className="h-5 w-20 rounded-full" />
-      </div>
-
-      {/* Class rows: circle + slot chip + code/title + time + venue */}
-      <div className="divide-y divide-border/10">
+      <div className="space-y-3 pt-2">
+        <Sk className="h-5 w-32" />
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4 py-4">
-            <Skeleton className="w-[46px] h-[46px] rounded-full shrink-0" />
-            <div className="flex-1 min-w-0 space-y-2">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-3.5 w-8 rounded" />
-                <Skeleton className="h-3.5 w-24" />
-                <Skeleton className="h-4 w-12 rounded ml-auto" />
-              </div>
-              <Skeleton className="h-3 w-full max-w-[180px]" />
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-3 w-20" />
-              </div>
-            </div>
-          </div>
+          <Sk key={i} className="h-20 w-full rounded-[24px]" />
         ))}
       </div>
     </div>
@@ -268,7 +244,7 @@ function TimetableDrawer({
 
   const hasAtt = !!attendanceRecord;
   const pct = attendanceRecord ? attendanceRecord.attendancePercentage : 0;
-  const displayType = item.courseType.toLowerCase().includes("lab") ? "Lab Only" : "Theory Only";
+  const displayType = formatCourseType(item.courseType);
 
   const details = [
     { icon: Hash,          label: "Course Code",  value: item.courseCode },
@@ -281,20 +257,20 @@ function TimetableDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="pb-8 font-saira max-h-[92vh]">
-        <div className="overflow-y-auto no-scrollbar px-6 space-y-7 pt-5">
+        <div className="overflow-y-auto no-scrollbar px-6 space-y-6 pt-6">
           
           {/* Header Row */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-1">
               <div className="flex items-center gap-2 leading-none">
-                <span className="text-sm font-medium tracking-wide text-primary uppercase">
+                <span className="text-xs font-semibold text-primary uppercase tracking-wide">
                   {item.courseCode}
                 </span>
                 <span className="text-[10px] font-medium text-muted-foreground/60">
                   ({displayType})
                 </span>
               </div>
-              <h2 className="text-xl font-medium text-foreground leading-snug tracking-tight">
+              <h2 className="text-xl font-bold text-foreground leading-snug tracking-tight">
                 {item.courseTitle}
               </h2>
             </div>
@@ -302,21 +278,21 @@ function TimetableDrawer({
             {/* Close Button */}
             <button
               onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0"
+              className="p-2 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-all border-none cursor-pointer shrink-0"
             >
-              <span className="text-lg leading-none font-sans">×</span>
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Attendance Status block */}
           {hasAtt && (
-            <div className="space-y-3 pt-2">
-              <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+            <div className="space-y-3 pt-1">
+              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
                 Attendance Status
               </p>
               
               <div className="flex items-center gap-4">
-                <span className={`text-[32px] font-medium leading-none ${getPercentageColor(pct)}`}>
+                <span className={`text-3xl font-extrabold leading-none ${getPercentageColor(pct)}`}>
                   {pct}%
                 </span>
                 <div className="h-2.5 flex-1 bg-muted/30 rounded-full overflow-hidden">
@@ -329,7 +305,7 @@ function TimetableDrawer({
 
               <div className="flex items-center justify-between text-xs text-muted-foreground leading-none pt-0.5">
                 <AttendanceHint attended={attendanceRecord.attendedClasses} total={attendanceRecord.totalClasses} courseType={item.courseType} />
-                <span className="font-mono">
+                <span className="font-mono tabular-nums whitespace-nowrap shrink-0 text-right">
                   {item.courseType.toLowerCase().includes("lab") ? attendanceRecord.attendedClasses / 2 : attendanceRecord.attendedClasses} /{" "}
                   {item.courseType.toLowerCase().includes("lab") ? attendanceRecord.totalClasses / 2 : attendanceRecord.totalClasses}{" "}
                   {item.courseType.toLowerCase().includes("lab") ? "labs" : "classes"} attended
@@ -340,30 +316,25 @@ function TimetableDrawer({
 
           {/* Course Details List */}
           <div className="space-y-3 pt-1">
-            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
               Class Schedule Details
             </p>
 
-            <div className="divide-y divide-border/10">
+            <div className="divide-y divide-border/15 border-t border-b border-border/15">
               {details.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-center gap-4 py-3">
-                  {/* Left Column: Icon Box */}
-                  <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4 text-muted-foreground/75 shrink-0" />
+                <div key={label} className="flex items-center justify-between gap-4 py-3.5">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide leading-none">{label}</span>
                   </div>
-                  
-                  {/* Right Column: Text contents */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
-                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
-                  </div>
+                  <span className="text-sm font-semibold text-foreground text-right truncate max-w-[60%]">{value || "—"}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Action: Export Modal inside the drawer */}
-          <div className="pt-2">
+          {/* Export Modal */}
+          <div className="pt-1">
             <SingleCourseExportModal entry={item} dayDate={dayDate} fullWidth />
           </div>
 
@@ -398,7 +369,6 @@ export default function TimetablePage() {
     if (!authLoading && !isLoggedIn) navigate("/");
   }, [isLoggedIn, authLoading]);
 
-  // Load from Cache (SWR) first
   useEffect(() => {
     try {
       const cachedTt = localStorage.getItem("deskly::cache::timetable");
@@ -491,8 +461,6 @@ export default function TimetablePage() {
     });
   }, [weekStart]);
 
-
-
   const daySchedule = useMemo(() => schedule[DAY_KEYS[selectedDay]] || [], [schedule, selectedDay]);
 
   const attMap = useMemo(() => {
@@ -528,173 +496,144 @@ export default function TimetablePage() {
   }
 
   return (
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
-      {/* Google Font Saira Injection */}
-      <style>{`
-        .font-saira {
-          font-family: 'Saira', sans-serif !important;
-        }
-      `}</style>
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain relative">
+      <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Sync Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
-          <p className="truncate">Sync failed: {error}</p>
-          <button onClick={load} className="text-[10px] uppercase font-bold tracking-wider hover:underline shrink-0 border-none bg-transparent text-destructive">
-            Retry
-          </button>
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
+          <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
+          <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start justify-between gap-4">
-        <div className="space-y-0.5 min-w-0">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-6 h-6 text-primary shrink-0" />
-            <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
-              My Timetable
-            </h1>
-          </div>
-          <p className="text-xs text-muted-foreground leading-none pt-0.5">
-            Stay on track with your classes
-          </p>
-        </div>
-
+      {/* Header */}
+      <header className="flex items-center gap-2">
+        <Clock className="w-6 h-6 text-primary shrink-0" />
+        <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
+          My Timetable
+        </h1>
       </header>
 
-      {/* ── Calendar Days Horizontally Scrollable / Slidable Row ────────────────── */}
-      <div className="pb-4 overflow-hidden">
-        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar w-full py-1 snap-x snap-mandatory">
-          {weekDays.map((d, i) => {
-            const active = selectedDay === i;
-
-            return (
-              <button
-                key={d.full}
-                onClick={() => setSelectedDay(i)}
-                className={`relative flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl transition-all duration-200 cursor-pointer border-none min-w-[72px] shrink-0 snap-center ${
-                  active
-                    ? "bg-primary/10 border-b-2 border-primary text-primary"
-                    : "text-muted-foreground hover:text-foreground bg-transparent"
+      {/* Calendar Days Row */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-2 px-2 pb-0.5">
+        {weekDays.map((d, i) => {
+          const active = selectedDay === i;
+          return (
+            <button
+              key={d.full}
+              onClick={() => setSelectedDay(i)}
+              className={`py-3 px-3.5 rounded-[20px] transition-all cursor-pointer border flex flex-col items-center gap-1 shrink-0 min-w-[64px]
+                ${active
+                  ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                  : "bg-card/80 border-border/40 text-muted-foreground hover:bg-muted/10 backdrop-blur-md"
                 }`}
-              >
-                <span className={`text-[10px] font-semibold uppercase tracking-wider ${active ? "text-primary" : "opacity-55"}`}>
-                  {d.name}
-                </span>
-                
-                <span className={`text-[18px] font-semibold leading-none ${active ? "text-foreground font-bold" : "text-muted-foreground"}`}>
-                  {d.num}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+            >
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${active ? "text-primary-foreground/90" : "text-muted-foreground/60"}`}>
+                {d.name}
+              </span>
+              <span className={`text-base font-extrabold leading-none ${active ? "text-primary-foreground" : "text-foreground"}`}>
+                {d.num}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      <Separator className="bg-border/50" />
-
-      {/* ── Active Day Info ───────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between py-1">
-        <div>
-          <h2 className="text-xl font-semibold text-foreground tracking-tight leading-none">
+      {/* Active Day Header */}
+      <div className="flex items-center justify-between pt-1">
+        <div className="space-y-1">
+          <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
             {weekDays[selectedDay].full}
           </h2>
-          <p className="text-xs text-muted-foreground mt-1.5 leading-none">
-            {weekDays[selectedDay].date.toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
+          <p className="text-xs text-muted-foreground/60 font-semibold">
+            {weekDays[selectedDay].date.toLocaleDateString("en-US", { month: "long", day: "numeric" })}
           </p>
         </div>
         {!loading && (
-          <span className="text-xs font-semibold bg-muted/20 text-muted-foreground px-3 py-1 rounded-full shrink-0">
+          <span className="text-xs font-bold bg-muted/20 border border-border/20 text-muted-foreground px-3 py-1 rounded-full shrink-0">
             {daySchedule.length} {daySchedule.length === 1 ? "Class" : "Classes"}
           </span>
         )}
       </div>
 
-      {/* ── Class List (Clean, Separator-divided layout like attendance page) ─── */}
-      <div className="pt-2">
-        {loading ? (
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-16 rounded-xl w-full" />
-            ))}
-          </div>
-        ) : daySchedule.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
-            <Calendar className="w-10 h-10 text-muted-foreground/20" />
-            <p className="text-sm font-semibold text-foreground leading-none">No classes scheduled</p>
-            <p className="text-xs text-muted-foreground">Enjoy your day off!</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-border/20">
-            {daySchedule.map((item, idx) => {
-              const att = getAtt(item.courseCode, item.courseType);
-              
-              const attendancePct = att ? att.attendancePercentage : 0;
-              const hasAttendance = !!att;
-              
-              return (
-                <button
-                  key={`${item.courseCode}-${item.slot}-${idx}`}
-                  onClick={() => setSelected(item)}
-                  className="w-full flex items-center gap-4 py-4 px-3 text-left border-none bg-transparent hover:bg-muted/5 active:bg-muted/15 rounded-xl transition-all cursor-pointer"
-                >
-                  {/* Left: Circular progress */}
-                  {hasAttendance ? (
-                    <ListCircularProgress percentage={attendancePct} size={48} />
-                  ) : (
-                    <EmptyCircularProgress />
-                  )}
+      {/* Class Cards List */}
+      {daySchedule.length === 0 ? (
+        <div className="p-8 flex flex-col items-center justify-center gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
+          <Calendar className="w-8 h-8 text-muted-foreground/20" />
+          <p className="text-sm font-semibold text-foreground leading-none">No classes scheduled</p>
+          <p className="text-xs text-muted-foreground">Enjoy your day off!</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {daySchedule.map((item, idx) => {
+            const att = getAtt(item.courseCode, item.courseType);
+            const attendancePct = att ? att.attendancePercentage : 0;
+            const hasAttendance = !!att;
+            const displayType = formatCourseType(item.courseType);
 
-                  {/* Middle: Spacious details column */}
-                  <div className="flex-1 min-w-0 flex flex-col gap-1.5">
-                    {/* First line: Course Code & Slot */}
-                    <div className="flex items-center gap-2 leading-none">
-                      <span className="text-sm font-semibold tracking-wide text-foreground uppercase">
-                        {item.courseCode}
-                      </span>
-                      <span className="text-[10px] font-semibold text-muted-foreground/60 font-mono leading-none">
-                        ({item.slot})
-                      </span>
-                    </div>
+            return (
+              <div
+                key={`${item.courseCode}-${item.slot}-${idx}`}
+                onClick={() => setSelected(item)}
+                className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer"
+              >
+                {/* Left: Circular progress or Empty */}
+                {hasAttendance ? (
+                  <ListCircularProgress percentage={attendancePct} size={48} />
+                ) : (
+                  <EmptyCircularProgress />
+                )}
 
-                    {/* Second line: Course Title */}
-                    <p className="text-xs text-muted-foreground truncate leading-none">
-                      {item.courseTitle}
-                    </p>
-
-                    {/* Third line: Time Range with Clock Icon */}
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80 font-mono leading-none">
-                      <Clock className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                      <span>{item.startTime} - {item.endTime}</span>
-                    </div>
+                {/* Middle: Details column */}
+                <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
+                      {item.courseCode}
+                    </span>
+                    <span>&bull;</span>
+                    <span className="uppercase">{displayType}</span>
+                    <span>&bull;</span>
+                    <span className="font-mono">{item.slot}</span>
                   </div>
-
-                  {/* Right: Attendance fraction details & Chevron */}
-                  <div className="flex items-center gap-3 shrink-0">
-                    {hasAttendance && (
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-foreground leading-none tabular-nums">
-                          {item.courseType.toLowerCase().includes("lab") ? att.attendedClasses / 2 : att.attendedClasses}{" "}
-                          <span className="text-muted-foreground/45 text-xs font-normal">
-                            / {item.courseType.toLowerCase().includes("lab") ? att.totalClasses / 2 : att.totalClasses}
-                          </span>
-                        </p>
-                      </div>
+                  <p className="text-sm font-bold text-foreground leading-snug truncate">
+                    {item.courseTitle}
+                  </p>
+                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground/50 font-mono leading-none pt-0.5">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                      {item.startTime} - {item.endTime}
+                    </span>
+                    {item.venue && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                        {item.venue}
+                      </span>
                     )}
-                    <ChevronRight className="w-5 h-5 text-muted-foreground/35 shrink-0" />
                   </div>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                </div>
 
-      {/* ── Detail Drawer ────────────────────────────────────────────────────── */}
+                {/* Right: Attendance count & Chevron */}
+                <div className="flex items-center gap-3 shrink-0">
+                  {hasAttendance && (
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-foreground leading-none tabular-nums">
+                        {item.courseType.toLowerCase().includes("lab") ? att.attendedClasses / 2 : att.attendedClasses}{" "}
+                        <span className="text-muted-foreground/45 text-xs font-normal">
+                          / {item.courseType.toLowerCase().includes("lab") ? att.totalClasses / 2 : att.totalClasses}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Detail Drawer */}
       {selected && (
         <TimetableDrawer
           open={!!selected}
