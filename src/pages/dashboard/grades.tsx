@@ -7,7 +7,7 @@ import {
   SemesterGradeViewData,
   SemesterGradeEntry,
 } from "@/lib/features";
-import { getSemesters, Semester } from "@/lib/attendance";
+import { SemesterOption } from "@/lib/features";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -276,7 +276,7 @@ export default function GradesPage() {
   const [activeTab, setActiveTab] = useState<"semester" | "history">("semester");
 
   // Semesters list state
-  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [semesters, setSemesters] = useState<SemesterOption[]>([]);
   const [selectedSemId, setSelectedSemId] = useState<string>("");
 
   // Semester Grade View State
@@ -294,32 +294,17 @@ export default function GradesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGradeFilter, setSelectedGradeFilter] = useState("ALL");
 
-  // Load Semesters List
-  useEffect(() => {
-    async function loadSemesters() {
-      try {
-        const res = await getSemesters();
-        if (res.success && res.semesters && res.semesters.length > 0) {
-          setSemesters(res.semesters);
-          if (!selectedSemId) {
-            setSelectedSemId(res.semesters[0].id);
-          }
-        }
-      } catch (e) {
-        console.error("Failed to fetch semesters list", e);
-      }
-    }
-    if (isLoggedIn) loadSemesters();
-  }, [isLoggedIn]);
-
   // Load Semester Grade View
   async function loadSemesterGrade(semId?: string) {
     setSemLoading(semGradeData && semGradeData.grades.length > 0 ? false : true);
     setSemError(null);
     try {
-      const res = await getStudentGradeView(semId || selectedSemId || undefined);
+      const res = await getStudentGradeView(semId || undefined);
       if (res.success && res.data) {
         setSemGradeData(res.data);
+        if (res.data.semesters && res.data.semesters.length > 0) {
+          setSemesters(res.data.semesters);
+        }
         if (res.data.semesterSubId) {
           setSelectedSemId(res.data.semesterSubId);
         }
@@ -353,10 +338,10 @@ export default function GradesPage() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      loadSemesterGrade(selectedSemId);
+      loadSemesterGrade();
       loadHistory();
     }
-  }, [isLoggedIn, selectedSemId]);
+  }, [isLoggedIn]);
 
   // Grade History Metrics
   const totalSubjects = useMemo(() => historyData?.grades?.length ?? 0, [historyData]);

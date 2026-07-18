@@ -532,8 +532,14 @@ export type SemesterGradeEntry = {
   courseId?: string;
 };
 
+export type SemesterOption = {
+  id: string;
+  name: string;
+};
+
 export type SemesterGradeViewData = {
   semesterSubId: string;
+  semesters: SemesterOption[];
   gpa?: number;
   grades: SemesterGradeEntry[];
 };

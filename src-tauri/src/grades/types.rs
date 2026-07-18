@@ -115,8 +115,16 @@ pub struct SemesterGradeEntry {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct SemesterOption {
+    pub id: String,
+    pub name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SemesterGradeViewData {
     pub semester_sub_id: String,
+    pub semesters: Vec<SemesterOption>,
     pub gpa: Option<f64>,
     pub grades: Vec<SemesterGradeEntry>,
 }

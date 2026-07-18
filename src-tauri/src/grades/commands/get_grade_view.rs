@@ -4,7 +4,6 @@ use tauri::State;
 
 use crate::auth::constants::VTOP_BASE_URL;
 use crate::auth::helpers::response_text_with_auth_retry;
-use crate::auth::helpers::{get_default_semester_id, selected_semester_id_from_store};
 use crate::auth::http::build_http_client;
 use crate::auth::store::AuthStore;
 
@@ -17,18 +16,7 @@ pub async fn grades_get_student_grade_view(
     semester_sub_id: Option<String>,
     store: State<'_, AuthStore>,
 ) -> Result<SemesterGradeViewResponse, String> {
-    // Determine the semester ID to request
-    let selected_semester_id = selected_semester_id_from_store(&store)?;
-    let target_semester_id = if let Some(id) = semester_sub_id.as_ref().filter(|id| !id.trim().is_empty()) {
-        id.clone()
-    } else if let Some(id) = selected_semester_id {
-        id
-    } else {
-        let tokens = crate::auth::helpers::auth_tokens_from_store(&store)?;
-        get_default_semester_id(&tokens).await?
-    };
-
-    let semester_id_for_req = target_semester_id.clone();
+    let target_semester_id = semester_sub_id.unwrap_or_default();
 
     let html = crate::with_auto_relogin!(app, store, tokens, {
         let client = build_http_client()?;
@@ -41,7 +29,7 @@ pub async fn grades_get_student_grade_view(
             .header(REFERER, format!("{VTOP_BASE_URL}/vtop/content"))
             .form(&[
                 ("authorizedID", tokens.authorized_id.as_str()),
-                ("semesterSubId", semester_id_for_req.as_str()),
+                ("semesterSubId", target_semester_id.as_str()),
                 ("_csrf", tokens.csrf.as_str()),
                 ("x", &Utc::now().to_rfc2822()),
             ])

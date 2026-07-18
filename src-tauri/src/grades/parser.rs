@@ -196,10 +196,34 @@ pub fn parse_student_history(html: &str) -> Result<StudentHistoryData, String> {
     })
 }
 
-pub fn parse_semester_grade_view(semester_sub_id: &str, html: &str) -> SemesterGradeViewData {
+pub fn parse_semester_grade_view(fallback_sem_id: &str, html: &str) -> SemesterGradeViewData {
     let document = Html::parse_document(html);
+    let select_selector = Selector::parse("select#semesterSubId, select[name='semesterSubId']").unwrap();
+    let option_selector = Selector::parse("option").unwrap();
     let row_selector = Selector::parse("tr").unwrap();
     let td_selector = Selector::parse("td").unwrap();
+
+    let mut semesters = Vec::new();
+    let mut selected_sem_id = fallback_sem_id.to_string();
+
+    if let Some(select_elem) = document.select(&select_selector).next() {
+        for option in select_elem.select(&option_selector) {
+            let val = option.value().attr("value").unwrap_or("").trim().to_string();
+            let text = clean_text(&option.text().collect::<String>());
+
+            if !val.is_empty() {
+                let is_selected = option.value().attr("selected").is_some() || option.html().contains("selected");
+                if is_selected || selected_sem_id.is_empty() {
+                    selected_sem_id = val.clone();
+                }
+
+                semesters.push(super::types::SemesterOption {
+                    id: val,
+                    name: text,
+                });
+            }
+        }
+    }
 
     let mut grades = Vec::new();
     let mut gpa = None;
@@ -273,7 +297,8 @@ pub fn parse_semester_grade_view(semester_sub_id: &str, html: &str) -> SemesterG
     }
 
     SemesterGradeViewData {
-        semester_sub_id: semester_sub_id.to_string(),
+        semester_sub_id: selected_sem_id,
+        semesters,
         gpa,
         grades,
     }
