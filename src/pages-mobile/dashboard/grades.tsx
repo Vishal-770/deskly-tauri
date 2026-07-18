@@ -299,7 +299,8 @@ export default function GradesPage() {
     setSemLoading(semGradeData && semGradeData.grades.length > 0 ? false : true);
     setSemError(null);
     try {
-      const res = await getStudentGradeView(semId || undefined);
+      const targetSem = semId !== undefined ? semId : selectedSemId;
+      const res = await getStudentGradeView(targetSem || undefined);
       if (res.success && res.data) {
         setSemGradeData(res.data);
         if (res.data.semesters && res.data.semesters.length > 0) {
@@ -409,10 +410,10 @@ export default function GradesPage() {
       <div className="absolute -top-4 right-0 w-[200px] h-[160px] pointer-events-none select-none z-0">
         <img
           src={gradeHistoryImg}
-          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          className="w-full h-full object-contain opacity-90 dark:opacity-70"
           style={{
-            maskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
-            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+            maskImage: "radial-gradient(ellipse at 30% 40%, black 30%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, black 30%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.2) 80%, transparent 95%)"
           }}
           alt="Grade History Illustration"
         />

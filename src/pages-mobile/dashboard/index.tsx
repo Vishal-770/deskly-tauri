@@ -1,13 +1,14 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
-import { getStudentProfile, getFeedbackStatus, ProfileData } from "@/lib/features";
+import { getStudentProfile, getFeedbackStatus, getStudentGradeView, ProfileData } from "@/lib/features";
 import {
   BookOpen,
   Clock,
   FileText,
   ClipboardList,
   GraduationCap,
+  TrendingUp,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -32,12 +33,32 @@ function getGreeting() {
   return "Good evening,";
 }
 
-// Check for the "NOT Given" status
 function parseFeedbackText(text: string) {
   const n = text.toLowerCase();
   const isGiven =
     (n.includes("given") && !n.includes("not given")) || n.includes("submitted");
   return { isGiven };
+}
+
+function getCubicBezierPath(points: { x: number; y: number }[]): string {
+  if (points.length === 0) return "";
+  if (points.length === 1) return `M ${points[0].x} ${points[0].y}`;
+
+  let d = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i === 0 ? i : i - 1];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2 < points.length ? i + 2 : i + 1];
+
+    const cp1x = p1.x + (p2.x - p0.x) * 0.15;
+    const cp1y = p1.y + (p2.y - p0.y) * 0.15;
+    const cp2x = p2.x - (p3.x - p1.x) * 0.15;
+    const cp2y = p2.y - (p3.y - p1.y) * 0.15;
+
+    d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return d;
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -53,6 +74,12 @@ type FeedbackStatus = {
   type: string;
   midSemester: string;
   teeSemester: string;
+};
+
+type GpaTrendPoint = {
+  id: string;
+  name: string;
+  gpa: number;
 };
 
 // ─── API ──────────────────────────────────────────────────────────────────────
@@ -97,21 +124,170 @@ function DashboardSkeleton() {
         </div>
       </div>
 
-      {/* Feedback block */}
-      <div className="space-y-4">
-        <Skeleton className="h-4 w-40" />
-        <div className="divide-y divide-border/10 border-t border-b border-border/10">
-          <div className="py-4 space-y-2">
-            <Skeleton className="h-3.5 w-28" />
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-          <div className="py-4 space-y-2">
-            <Skeleton className="h-3.5 w-28" />
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-3 w-24" />
+      {/* Graph Skeleton */}
+      <Skeleton className="h-44 w-full rounded-[28px]" />
+    </div>
+  );
+}
+
+function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
+  const [activePointIndex, setActivePointIndex] = useState<number | null>(points.length - 1);
+
+  if (!points || points.length === 0) return null;
+
+  const gpaValues = points.map((p) => p.gpa);
+  const highestGpa = Math.max(...gpaValues);
+  const avgGpa = gpaValues.reduce((a, b) => a + b, 0) / points.length;
+  const latestGpa = points[points.length - 1].gpa;
+
+  const minGpa = Math.max(0, Math.floor(Math.min(...gpaValues) - 0.8));
+  const maxGpa = 10;
+  const range = maxGpa - minGpa || 1;
+
+  const width = 340;
+  const height = 130;
+  const paddingX = 28;
+  const paddingY = 24;
+
+  const chartWidth = width - paddingX * 2;
+  const chartHeight = height - paddingY * 2;
+
+  const coords = points.map((pt, i) => {
+    const x = paddingX + (i / Math.max(1, points.length - 1)) * chartWidth;
+    const y = paddingY + chartHeight - ((pt.gpa - minGpa) / range) * chartHeight;
+    const prevGpa = i > 0 ? points[i - 1].gpa : null;
+    const diff = prevGpa !== null ? pt.gpa - prevGpa : null;
+    return { x, y, pt, diff };
+  });
+
+  const smoothLinePath = getCubicBezierPath(coords.map((c) => ({ x: c.x, y: c.y })));
+  const activeIdx = activePointIndex !== null && coords[activePointIndex] ? activePointIndex : coords.length - 1;
+  const active = coords[activeIdx];
+
+  return (
+    <div className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-5 rounded-[28px] shadow-sm space-y-4 font-saira">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-4.5 h-4.5 text-primary shrink-0" />
+          <h3 className="text-base font-bold text-foreground leading-none">
+            GPA History
+          </h3>
+        </div>
+        <span className="text-[10px] font-semibold text-muted-foreground bg-muted/40 border border-border/30 rounded-full px-2.5 py-0.5">
+          {points.length} Semesters
+        </span>
+      </div>
+
+      {/* Hero Metrics Row */}
+      <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 border border-border/30 rounded-[16px]">
+        <div className="text-center space-y-0.5">
+          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Latest</span>
+          <span className="text-sm font-black text-foreground">{latestGpa.toFixed(2)}</span>
+        </div>
+        <div className="text-center space-y-0.5 border-x border-border/30">
+          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Peak</span>
+          <span className="text-sm font-black text-primary">{highestGpa.toFixed(2)}</span>
+        </div>
+        <div className="text-center space-y-0.5">
+          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Average</span>
+          <span className="text-sm font-black text-foreground">{avgGpa.toFixed(2)}</span>
+        </div>
+      </div>
+
+      {/* Selected Node Details Bar */}
+      {active && (
+        <div className="flex items-center justify-between px-1 text-xs">
+          <span className="font-semibold text-muted-foreground truncate">{active.pt.name}</span>
+          <div className="flex items-center gap-2 font-bold shrink-0">
+            <span className="text-foreground">{active.pt.gpa.toFixed(2)} GPA</span>
+            {active.diff !== null && (
+              <span className={active.diff >= 0 ? "text-emerald-500" : "text-rose-500"}>
+                {active.diff >= 0 ? `(+${active.diff.toFixed(2)})` : `(${active.diff.toFixed(2)})`}
+              </span>
+            )}
           </div>
         </div>
+      )}
+
+      {/* Simple Clean SVG Line Graph */}
+      <div className="relative w-full pt-1 px-1">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
+          {/* Dashed Gridlines */}
+          {[10, 8, 6].filter((v) => v >= minGpa && v <= maxGpa).map((val) => {
+            const y = paddingY + chartHeight - ((val - minGpa) / range) * chartHeight;
+            return (
+              <g key={val}>
+                <line
+                  x1={paddingX - 10}
+                  y1={y}
+                  x2={width - paddingX + 10}
+                  y2={y}
+                  stroke="var(--border)"
+                  strokeOpacity="0.4"
+                  strokeDasharray="3 3"
+                  strokeWidth="1"
+                />
+                <text x={paddingX - 14} y={y + 3} textAnchor="end" className="text-[8px] font-semibold fill-muted-foreground">
+                  {val}.0
+                </text>
+              </g>
+            );
+          })}
+
+          {/* Clean Line Path (No gradient fill underneath) */}
+          <path
+            d={smoothLinePath}
+            fill="none"
+            stroke="var(--primary)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {/* Point Nodes */}
+          {coords.map((c, i) => {
+            const isSelected = activeIdx === i;
+            return (
+              <g key={c.pt.id} onClick={() => setActivePointIndex(i)} className="cursor-pointer">
+                {isSelected && (
+                  <circle
+                    cx={c.x}
+                    cy={c.y}
+                    r="8"
+                    fill="var(--primary)"
+                    fillOpacity="0.15"
+                  />
+                )}
+                <circle
+                  cx={c.x}
+                  cy={c.y}
+                  r={isSelected ? "4.5" : "3"}
+                  fill={isSelected ? "var(--background)" : "var(--primary)"}
+                  stroke="var(--primary)"
+                  strokeWidth={isSelected ? "2.5" : "0"}
+                  className="transition-all duration-150"
+                />
+                <text
+                  x={c.x}
+                  y={c.y - 9}
+                  textAnchor="middle"
+                  className={`text-[9px] font-bold transition-colors ${
+                    isSelected ? "fill-primary text-xs" : "fill-foreground/80"
+                  }`}
+                >
+                  {c.pt.gpa.toFixed(2)}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Footer Timeline Labels */}
+      <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground pt-1 border-t border-border/20">
+        <span className="truncate max-w-[130px]">{points[0]?.name}</span>
+        <span className="truncate max-w-[130px] text-right">{points[points.length - 1]?.name}</span>
       </div>
     </div>
   );
@@ -126,6 +302,7 @@ export default function MobileDashboardHome() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [cgpaData, setCgpaData] = useState<CgpaData | null>(null);
   const [feedbackData, setFeedbackData] = useState<FeedbackStatus[] | null>(null);
+  const [gpaTrend, setGpaTrend] = useState<GpaTrendPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -149,6 +326,7 @@ export default function MobileDashboardHome() {
         if (p?.cgpaData) setCgpaData(p.cgpaData);
         if (p?.feedbackData) setFeedbackData(p.feedbackData);
         if (p?.profile) setProfile(p.profile);
+        if (p?.gpaTrend) setGpaTrend(p.gpaTrend);
         if (p?.cgpaData || p?.feedbackData || p?.profile) setLoading(false);
       }
     } catch {}
@@ -168,6 +346,7 @@ export default function MobileDashboardHome() {
       let updatedCgpa = cgpaData;
       let updatedFeedback = feedbackData;
       let updatedProfile = profile;
+      let updatedGpaTrend = gpaTrend;
 
       if (cgpaRes.success && cgpaRes.cgpaData) {
         setCgpaData(cgpaRes.cgpaData);
@@ -188,9 +367,48 @@ export default function MobileDashboardHome() {
         updatedProfile = profileRes.data;
       }
 
+      // Fetch GPA trend in parallel for all semesters
+      try {
+        const initialGradeRes = await getStudentGradeView().catch(() => null);
+        if (initialGradeRes?.success && initialGradeRes.data) {
+          const semesters = initialGradeRes.data.semesters || [];
+          if (semesters.length > 0) {
+            const semResults = await Promise.all(
+              semesters.map(async (sem) => {
+                if (sem.id === initialGradeRes.data?.semesterSubId) {
+                  return { id: sem.id, name: sem.name, gpa: initialGradeRes.data.gpa ?? null };
+                }
+                const res = await getStudentGradeView(sem.id).catch(() => null);
+                return {
+                  id: sem.id,
+                  name: sem.name,
+                  gpa: res?.success && res.data?.gpa !== undefined ? res.data.gpa : null,
+                };
+              })
+            );
+
+            const validPoints = semResults
+              .filter((r): r is { id: string; name: string; gpa: number } => r.gpa !== null && r.gpa !== undefined)
+              .reverse();
+
+            if (validPoints.length > 0) {
+              setGpaTrend(validPoints);
+              updatedGpaTrend = validPoints;
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch GPA trend points", e);
+      }
+
       localStorage.setItem(
         "deskly::cache::dashboard",
-        JSON.stringify({ cgpaData: updatedCgpa, feedbackData: updatedFeedback, profile: updatedProfile })
+        JSON.stringify({
+          cgpaData: updatedCgpa,
+          feedbackData: updatedFeedback,
+          profile: updatedProfile,
+          gpaTrend: updatedGpaTrend,
+        })
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -232,8 +450,8 @@ export default function MobileDashboardHome() {
           src={dashboardImg}
           className="w-full h-full object-contain opacity-95 dark:opacity-75"
           style={{
-            maskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
-            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+            maskImage: "radial-gradient(ellipse at 30% 40%, black 30%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, black 30%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.2) 80%, transparent 95%)"
           }}
           alt="Dashboard Illustration"
         />
@@ -302,7 +520,6 @@ export default function MobileDashboardHome() {
 
           {/* Three Circular Stats Badges */}
           <div className="grid grid-cols-3 gap-4 pt-2">
-            
             {/* Earned */}
             <div className="flex flex-col items-center gap-3">
               <div className="w-[60px] h-[60px] rounded-full border-2 border-t-primary/45 border-x-primary/45 border-b-transparent flex items-center justify-center text-primary shrink-0">
@@ -335,8 +552,14 @@ export default function MobileDashboardHome() {
                 <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wide">Non-Graded</p>
               </div>
             </div>
-
           </div>
+        </section>
+      )}
+
+      {/* ── GPA Trend Graph ─────────────────────────────────────────────────── */}
+      {gpaTrend && gpaTrend.length > 0 && (
+        <section className="relative z-10">
+          <GpaTrendGraph points={gpaTrend} />
         </section>
       )}
 
@@ -392,7 +615,6 @@ export default function MobileDashboardHome() {
           </div>
         </section>
       )}
-
     </div>
   );
 }
