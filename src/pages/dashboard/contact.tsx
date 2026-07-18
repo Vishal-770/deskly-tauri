@@ -18,19 +18,19 @@ function GmailIcon({ className }: { className?: string }) {
 }
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
 }
 
 function ContactSkeleton() {
   return (
-    <div className="w-full flex flex-col gap-5 px-2 py-4">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira">
       <div className="space-y-1">
         <Sk className="h-7 w-32" />
       </div>
       <Sk className="h-10 w-full rounded-xl" />
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
-          <Sk key={i} className="h-20 w-full rounded-2xl" />
+          <Sk key={i} className="h-[76px] w-full rounded-[24px]" />
         ))}
       </div>
     </div>
@@ -60,20 +60,19 @@ function ContactCard({ contact }: { contact: ContactDetail }) {
   };
 
   return (
-    <div className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl px-4 py-4 flex items-center gap-3 shadow-sm">
-      {/* Icon */}
-      <div className="shrink-0 w-9 h-9 rounded-xl bg-muted/50 border border-border/25 flex items-center justify-center">
-        <Mail className="w-4 h-4 text-muted-foreground/45" />
-      </div>
+    <div className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
+      {/* Icon + Info */}
+      <div className="flex-1 min-w-0 flex items-center gap-3.5">
+        <div className="w-10 h-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
+          <Mail className="w-4 h-4" />
+        </div>
 
-      {/* Info */}
-      <div className="flex-1 min-w-0 space-y-1">
-        <p className="text-[13px] font-bold text-foreground leading-snug truncate">{contact.department}</p>
-        {contact.description && (
-          <p className="text-[11px] text-muted-foreground/55 leading-snug">{contact.description}</p>
-        )}
-        <div className="flex items-center gap-1 text-[11px] text-muted-foreground/45 leading-none">
-          <span className="truncate font-mono">{contact.email}</span>
+        <div className="flex-1 min-w-0 space-y-1">
+          <p className="text-sm font-bold text-foreground leading-snug truncate">{contact.department}</p>
+          {contact.description && (
+            <p className="text-xs text-muted-foreground/60 leading-none truncate">{contact.description}</p>
+          )}
+          <p className="text-[10px] text-muted-foreground/50 font-mono leading-none truncate pt-0.5">{contact.email}</p>
         </div>
       </div>
 
@@ -81,18 +80,22 @@ function ContactCard({ contact }: { contact: ContactDetail }) {
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={handleCopy}
-          title="Copy email"
-          className={`w-8 h-8 rounded-xl border flex items-center justify-center cursor-pointer transition-colors
-            ${copied ? "bg-primary/10 border-primary/20 text-primary" : "bg-muted/30 border-border/25 text-muted-foreground"}`}
+          title="Copy email address"
+          className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center bg-transparent
+            ${copied
+              ? "bg-primary/10 border-primary/20 text-primary"
+              : "bg-muted/10 border-border/20 text-muted-foreground hover:text-foreground hover:bg-muted/20"
+            }`}
         >
-          {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+          {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4" />}
         </button>
+
         <button
           onClick={handleOpenGmail}
-          title="Open in Gmail"
-          className="w-8 h-8 rounded-xl border border-border/25 bg-muted/30 text-muted-foreground flex items-center justify-center cursor-pointer transition-colors"
+          title="Compose Email"
+          className="p-2 rounded-xl border border-border/20 bg-muted/10 text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-all flex items-center justify-center cursor-pointer"
         >
-          <GmailIcon className="w-3.5 h-3.5" />
+          <GmailIcon className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -168,37 +171,37 @@ export default function ContactPage() {
   }
 
   return shell(
-    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={fetchContacts} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
       {/* Header */}
-      <header className="flex items-center gap-2.5">
-        <Phone className="w-5 h-5 text-primary shrink-0" />
+      <header className="flex items-center gap-2">
+        <Phone className="w-6 h-6 text-primary shrink-0" />
         <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">Contacts</h1>
       </header>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search department or email..."
-          className="w-full h-11 pl-9 pr-9 bg-card/70 backdrop-blur-sm border border-border/30 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground/35 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
+          className="w-full h-10 pl-9 pr-9 bg-muted/20 border-border/10 rounded-xl text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
         />
         {query && (
           <button
             onClick={() => setQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 cursor-pointer border-0 bg-transparent"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground cursor-pointer border-0 bg-transparent"
           >
             <X className="w-4 h-4" />
           </button>
@@ -207,13 +210,13 @@ export default function ContactPage() {
 
       {/* Contact Cards */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/60 backdrop-blur-md border border-border/25 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
           <Phone className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No contacts found</p>
           <p className="text-xs text-muted-foreground">Try a different search term.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {filtered.map((contact) => (
             <ContactCard key={contact.department} contact={contact} />
           ))}

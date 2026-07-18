@@ -20,28 +20,28 @@ function getSrcFromPhoto(photo: string): string {
 }
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
 }
 
 function ProfileSkeleton() {
   return (
     <div className="w-full flex flex-col gap-5 px-2 py-4">
       <Sk className="h-7 w-32" />
-      <Sk className="h-32 w-full rounded-2xl" />
-      <Sk className="h-52 w-full rounded-2xl" />
-      <Sk className="h-36 w-full rounded-2xl" />
+      <Sk className="h-36 w-full rounded-[24px]" />
+      <Sk className="h-60 w-full rounded-[24px]" />
+      <Sk className="h-44 w-full rounded-[24px]" />
     </div>
   );
 }
 
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 border-b border-border/20 last:border-0">
-      <div className="flex items-center gap-2.5 shrink-0">
-        <Icon className="w-3.5 h-3.5 text-muted-foreground/35 shrink-0" />
-        <span className="text-[10px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none">{label}</span>
+    <div className="flex items-center justify-between gap-4 py-3 border-b border-border/15 last:border-0">
+      <div className="flex items-center gap-3 shrink-0">
+        <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+        <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide leading-none">{label}</span>
       </div>
-      <span className="text-[13px] font-semibold text-foreground text-right truncate max-w-[55%]">{value || "—"}</span>
+      <span className="text-sm font-semibold text-foreground text-right truncate max-w-[60%]">{value || "—"}</span>
     </div>
   );
 }
@@ -95,47 +95,52 @@ export default function StudentProfilePage() {
     : "?";
 
   return shell(
-    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={fetchProfile} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
       {/* Header */}
-      <header className="flex items-center gap-2.5">
-        <User className="w-5 h-5 text-primary shrink-0" />
+      <header className="flex items-center gap-2">
+        <User className="w-6 h-6 text-primary shrink-0" />
         <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">My Profile</h1>
       </header>
 
       {/* Hero Card */}
-      <div className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl p-5 flex items-center gap-5 shadow-sm">
+      <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center gap-4">
         {photoSrc ? (
-          <div className="w-16 h-20 shrink-0 overflow-hidden rounded-xl border border-border/20 bg-muted/20 flex items-center justify-center">
-            <img src={photoSrc} alt={student.name} className="w-full h-full object-contain" />
+          <div className="w-20 h-24 shrink-0 overflow-hidden rounded-[18px] border border-border/30 bg-muted/20 flex items-center justify-center p-0.5">
+            <img src={photoSrc} alt={student.name} className="w-full h-full object-contain rounded-[14px]" />
           </div>
         ) : (
-          <div className="w-16 h-20 rounded-xl shrink-0 bg-muted/40 border border-border/25 flex items-center justify-center">
-            <span className="text-xl font-black text-muted-foreground/50 tracking-wider">{initials}</span>
+          <div className="w-20 h-24 rounded-[18px] shrink-0 bg-muted/30 border border-border/20 flex items-center justify-center">
+            <span className="text-2xl font-extrabold text-muted-foreground/60">{initials}</span>
           </div>
         )}
         <div className="min-w-0 space-y-1.5 flex-1">
-          <p className="text-[11px] font-black text-primary uppercase tracking-widest leading-none">{student.registerNumber}</p>
-          <h2 className="text-[17px] font-extrabold text-foreground leading-tight">{student.name}</h2>
-          <p className="text-[12px] text-muted-foreground/55 leading-none">{student.program}</p>
-          {student.gender && (
-            <span className="inline-block text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest border border-border/25 rounded-md px-2 py-0.5 mt-0.5">{student.gender}</span>
-          )}
+          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+            <span className="text-xs font-bold text-primary uppercase tracking-wide leading-none">{student.registerNumber}</span>
+            {student.gender && (
+              <>
+                <span>&bull;</span>
+                <span className="uppercase">{student.gender}</span>
+              </>
+            )}
+          </div>
+          <h2 className="text-lg font-bold text-foreground leading-snug">{student.name}</h2>
+          <p className="text-xs text-muted-foreground/60 leading-none">{student.program}</p>
         </div>
       </div>
 
       {/* Student Info Card */}
-      <div className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl p-5 shadow-sm">
-        <p className="text-[9px] font-black text-muted-foreground/35 uppercase tracking-widest leading-none mb-4">Student Information</p>
+      <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md space-y-1">
+        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-3">Student Information</p>
         <InfoRow icon={User} label="Register No." value={student.registerNumber} />
         <InfoRow icon={User} label="Application No." value={student.applicationNumber} />
         <InfoRow icon={Layers} label="Program" value={student.program} />
@@ -147,23 +152,23 @@ export default function StudentProfilePage() {
 
       {/* Proctor Card */}
       {proctor && (
-        <div className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl p-5 shadow-sm space-y-4">
-          <p className="text-[9px] font-black text-muted-foreground/35 uppercase tracking-widest leading-none">Proctor</p>
+        <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md space-y-4">
+          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">Proctor</p>
           <div className="flex items-center gap-4">
             {proctor.photoUrl ? (
-              <div className="w-12 h-14 shrink-0 overflow-hidden rounded-xl border border-border/20 bg-muted/20">
-                <img src={getSrcFromPhoto(proctor.photoUrl)} alt={proctor.name} className="w-full h-full object-contain" />
+              <div className="w-14 h-16 shrink-0 overflow-hidden rounded-[16px] border border-border/30 bg-muted/20 p-0.5">
+                <img src={getSrcFromPhoto(proctor.photoUrl)} alt={proctor.name} className="w-full h-full object-contain rounded-[12px]" />
               </div>
             ) : (
-              <div className="w-12 h-14 rounded-xl shrink-0 bg-muted/40 border border-border/25 flex items-center justify-center">
-                <span className="text-sm font-black text-muted-foreground/50">
+              <div className="w-14 h-16 rounded-[16px] shrink-0 bg-muted/30 border border-border/20 flex items-center justify-center">
+                <span className="text-base font-bold text-muted-foreground/60">
                   {proctor.name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "?"}
                 </span>
               </div>
             )}
             <div className="min-w-0 space-y-1">
-              <p className="text-[15px] font-extrabold text-foreground leading-snug">{proctor.name}</p>
-              <p className="text-[11px] text-muted-foreground/55 leading-none">{proctor.designation}</p>
+              <p className="text-base font-bold text-foreground leading-snug">{proctor.name}</p>
+              <p className="text-xs text-muted-foreground/60 leading-none">{proctor.designation}</p>
               <p className="text-[11px] text-muted-foreground/40 leading-none">{proctor.school}</p>
             </div>
           </div>
@@ -178,8 +183,8 @@ export default function StudentProfilePage() {
 
       {/* Hostel Card */}
       {hostel && (
-        <div className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl p-5 shadow-sm">
-          <p className="text-[9px] font-black text-muted-foreground/35 uppercase tracking-widest leading-none mb-4">Hostel</p>
+        <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md space-y-1">
+          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-3">Hostel</p>
           <InfoRow icon={Home} label="Block" value={hostel.blockName} />
           <InfoRow icon={MapPin} label="Room" value={hostel.roomNumber} />
           <InfoRow icon={Layers} label="Bed Type" value={hostel.bedType} />

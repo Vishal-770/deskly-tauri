@@ -23,18 +23,18 @@ function getSrcFromPhoto(photo: string): string {
 }
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
 }
 
 function HodDeanSkeleton() {
   return (
-    <div className="w-full flex flex-col gap-5 px-2 py-4">
-      <div className="flex items-center gap-2.5">
-        <Sk className="w-5 h-5 rounded-md shrink-0" />
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira">
+      <div className="flex items-center gap-2">
+        <Sk className="w-6 h-6 rounded-md shrink-0" />
         <Sk className="h-7 w-36" />
       </div>
       {[...Array(3)].map((_, i) => (
-        <Sk key={i} className="h-40 w-full rounded-2xl" />
+        <Sk key={i} className="h-44 w-full rounded-[24px]" />
       ))}
     </div>
   );
@@ -43,12 +43,12 @@ function HodDeanSkeleton() {
 function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
   if (!value) return null;
   return (
-    <div className="flex items-center justify-between gap-4 py-3 border-b border-border/20 last:border-0">
-      <div className="flex items-center gap-2.5 shrink-0">
-        <Icon className="w-3.5 h-3.5 text-muted-foreground/35 shrink-0" />
-        <span className="text-[10px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none">{label}</span>
+    <div className="flex items-center justify-between gap-4 py-3 border-b border-border/15 last:border-0">
+      <div className="flex items-center gap-3 shrink-0">
+        <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+        <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide leading-none">{label}</span>
       </div>
-      <span className="text-[13px] font-semibold text-foreground text-right truncate max-w-[55%]">{value}</span>
+      <span className="text-sm font-semibold text-foreground text-right truncate max-w-[60%]">{value}</span>
     </div>
   );
 }
@@ -103,26 +103,26 @@ export default function HodDeanDetailsPage() {
   if (!details) return null;
 
   return shell(
-    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={fetchDetails} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
       {/* Header */}
-      <header className="flex items-center gap-2.5">
-        <Building2 className="w-5 h-5 text-primary shrink-0" />
+      <header className="flex items-center gap-2">
+        <Building2 className="w-6 h-6 text-primary shrink-0" />
         <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">HOD & Dean</h1>
       </header>
 
       {details.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/60 backdrop-blur-md border border-border/25 rounded-2xl">
-          <Building className="w-8 h-8 text-muted-foreground/20" />
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
+          <Building className="w-8 h-8 text-muted-foreground/30" />
           <p className="text-sm font-semibold text-foreground">No details found</p>
           <p className="text-xs text-muted-foreground">Please try reloading later.</p>
         </div>
@@ -135,34 +135,38 @@ export default function HodDeanDetailsPage() {
               : "?";
 
             return (
-              <div key={idx} className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl p-5 space-y-4 shadow-sm">
+              <div key={idx} className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md space-y-4">
                 {/* Role badge */}
-                <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest leading-none">
-                  {item.role || "Faculty"}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-primary uppercase tracking-wide leading-none">
+                    {item.role || "Faculty"}
+                  </span>
+                </div>
 
                 {/* Photo + identity */}
                 <div className="flex items-center gap-4">
                   {photoSrc ? (
-                    <img
-                      src={photoSrc}
-                      alt={item.name}
-                      className="w-14 h-18 rounded-xl shrink-0 object-contain border border-border/20"
-                    />
+                    <div className="w-14 h-18 rounded-[16px] shrink-0 overflow-hidden border border-border/30 bg-muted/20 p-0.5">
+                      <img
+                        src={photoSrc}
+                        alt={item.name}
+                        className="w-full h-full object-contain rounded-[12px]"
+                      />
+                    </div>
                   ) : (
-                    <div className="w-14 h-16 rounded-xl shrink-0 bg-muted/40 border border-border/25 flex items-center justify-center">
-                      <span className="text-base font-black text-muted-foreground/50 tracking-wider">{initials}</span>
+                    <div className="w-14 h-16 rounded-[16px] shrink-0 bg-muted/30 border border-border/20 flex items-center justify-center">
+                      <span className="text-base font-bold text-muted-foreground/60">{initials}</span>
                     </div>
                   )}
 
-                  <div className="min-w-0 flex-1 space-y-1.5">
-                    <h2 className="text-[17px] font-extrabold text-foreground leading-snug">{item.name}</h2>
-                    <p className="text-[12px] text-muted-foreground/55 leading-none">{item.school}</p>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <h2 className="text-base font-bold text-foreground leading-snug">{item.name}</h2>
+                    <p className="text-xs text-muted-foreground/60 leading-none">{item.school}</p>
                   </div>
                 </div>
 
                 {/* Info rows */}
-                <div className="pt-1">
+                <div className="pt-1 space-y-1">
                   <InfoRow icon={MapPin} label="Cabin" value={item.cabin} />
                   <InfoRow icon={Phone} label="Intercom" value={item.intercom} />
                   <InfoRow icon={Mail} label="Email" value={item.email} />

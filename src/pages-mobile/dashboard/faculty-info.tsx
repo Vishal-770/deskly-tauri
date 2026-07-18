@@ -93,60 +93,62 @@ function FacultyDetailDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="pb-8 font-saira max-h-[92vh]">
-        <div className="overflow-y-auto no-scrollbar px-5 space-y-6 pt-5">
+        <div className="overflow-y-auto no-scrollbar px-6 space-y-6 pt-6">
 
           {/* Header */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                <span className="text-sm font-black text-primary">{initials}</span>
+              <div className="w-12 h-12 rounded-[16px] bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                <span className="text-base font-bold text-primary">{initials}</span>
               </div>
               <div className="flex-1 min-w-0 space-y-1">
-                <span className="text-[10px] font-black text-primary uppercase tracking-widest leading-none">Faculty Profile</span>
-                <h2 className="text-[17px] font-extrabold text-foreground leading-snug tracking-tight">{faculty.name}</h2>
+                <span className="text-xs font-semibold text-primary uppercase tracking-wide">Faculty Profile</span>
+                <h2 className="text-xl font-bold text-foreground leading-snug tracking-tight">{faculty.name}</h2>
               </div>
             </div>
             <button
               onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-xl bg-muted/50 border border-border/25 flex items-center justify-center text-muted-foreground cursor-pointer shrink-0"
+              className="p-2 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-all border-none cursor-pointer shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Email row */}
-          <div className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl px-4 py-4 flex items-center justify-between gap-3 shadow-sm">
+          {/* Email card */}
+          <div className="p-4 bg-card/80 border border-border/40 rounded-[20px] shadow-sm backdrop-blur-md flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <Mail className="w-4 h-4 text-muted-foreground/35 shrink-0" />
+              <Mail className="w-4 h-4 text-muted-foreground/40 shrink-0" />
               <div className="min-w-0">
-                <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest block leading-none">Email Address</span>
-                <span className="text-[13px] font-semibold text-foreground truncate block mt-1">{email}</span>
+                <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider block">Email Address</span>
+                <span className="text-sm font-semibold text-foreground truncate block mt-0.5 font-mono">{email}</span>
               </div>
             </div>
             <button
               onClick={handleCopy}
-              className={`px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all shrink-0 border cursor-pointer
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 border cursor-pointer
                 ${copied
                   ? "bg-primary/10 border-primary/20 text-primary"
-                  : "bg-muted/40 border-border/25 text-muted-foreground"
+                  : "bg-muted border-border/40 text-muted-foreground hover:bg-muted/60"
                 }`}
             >
               {copied ? "Copied!" : "Copy"}
             </button>
           </div>
 
-          {/* Details card */}
-          <div className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl p-4 shadow-sm">
-            <p className="text-[9px] font-black text-muted-foreground/35 uppercase tracking-widest leading-none mb-3">Details</p>
-            {details.map(({ icon: Icon, label, value }) => (
-              <div key={label} className="flex items-center justify-between gap-4 py-3 border-b border-border/20 last:border-0">
-                <div className="flex items-center gap-2.5 shrink-0">
-                  <Icon className="w-3.5 h-3.5 text-muted-foreground/35 shrink-0" />
-                  <span className="text-[10px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none">{label}</span>
+          {/* Details list */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">Details</p>
+            <div className="divide-y divide-border/15 border-t border-b border-border/15">
+              {details.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-center justify-between gap-4 py-3.5">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide leading-none">{label}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground text-right truncate max-w-[60%]">{value || "—"}</span>
                 </div>
-                <span className="text-[13px] font-semibold text-foreground text-right truncate max-w-[55%]">{value || "—"}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
         </div>
@@ -158,19 +160,19 @@ function FacultyDetailDrawer({
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
 }
 
 function FacultySkeleton() {
   return (
-    <div className="w-full flex flex-col gap-5 px-2 py-4">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira">
       <Sk className="h-7 w-40" />
-      <Sk className="h-11 w-full rounded-2xl" />
+      <Sk className="h-10 w-full rounded-xl" />
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-        {[...Array(5)].map((_, i) => <Sk key={i} className="h-8 w-20 rounded-xl shrink-0" />)}
+        {[...Array(5)].map((_, i) => <Sk key={i} className="h-8 w-20 rounded-full shrink-0" />)}
       </div>
       <div className="space-y-3">
-        {[...Array(5)].map((_, i) => <Sk key={i} className="h-[72px] w-full rounded-2xl" />)}
+        {[...Array(5)].map((_, i) => <Sk key={i} className="h-[76px] w-full rounded-[24px]" />)}
       </div>
     </div>
   );
@@ -236,29 +238,29 @@ export default function FacultyInfoPage() {
   if (authLoading) return shell(<FacultySkeleton />);
 
   return shell(
-    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Header */}
-      <header className="flex items-center gap-2.5">
-        <Users className="w-5 h-5 text-primary shrink-0" />
+      <header className="flex items-center gap-2">
+        <Users className="w-6 h-6 text-primary shrink-0" />
         <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">Faculty</h1>
       </header>
 
       {/* Search bar */}
       <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 pointer-events-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search faculty by name, ID, cabin..."
-          className="w-full h-11 pl-10 pr-10 bg-card/70 backdrop-blur-sm border border-border/30 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground/35 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
+          placeholder="Search name, ID, cabin, building..."
+          className="w-full h-10 pl-9 pr-9 bg-muted/20 border-border/10 rounded-xl text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 transition-colors"
         />
         {query && (
           <button
             onClick={() => setQuery("")}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 cursor-pointer border-0 bg-transparent"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground cursor-pointer border-0 bg-transparent"
           >
             <X className="w-4 h-4" />
           </button>
@@ -267,20 +269,20 @@ export default function FacultyInfoPage() {
 
       {/* School filter chips */}
       {schools.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5 -mx-2 px-2">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
           {schools.map((school) => {
             const active = activeSchool === school;
             return (
               <button
                 key={school}
                 onClick={() => setActiveSchool(school)}
-                className={`px-4 py-2 rounded-xl text-[11px] font-black transition-colors cursor-pointer border shrink-0
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-colors cursor-pointer border shrink-0
                   ${active
-                    ? "bg-primary border-primary text-primary-foreground shadow-sm"
-                    : "bg-card/70 backdrop-blur-sm border-border/30 text-muted-foreground"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/10"
                   }`}
               >
-                {school === "All" ? "All" : school}
+                {school === "All" ? "All Faculty" : school}
               </button>
             );
           })}
@@ -289,13 +291,13 @@ export default function FacultyInfoPage() {
 
       {/* Faculty list */}
       {filteredList.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/60 backdrop-blur-md border border-border/25 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
           <Users className="w-8 h-8 text-muted-foreground/20" />
-          <p className="text-sm font-semibold text-foreground leading-none">No faculty found</p>
+          <p className="text-sm font-semibold text-foreground leading-none">No faculty members found</p>
           <p className="text-xs text-muted-foreground">Try modifying your search or filter.</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {visibleFaculty.map((faculty, i) => {
             const initials = getInitials(faculty.name);
             const hasLocation =
@@ -306,26 +308,33 @@ export default function FacultyInfoPage() {
               <div
                 key={`${faculty.empId}-${i}`}
                 onClick={() => setSelectedFaculty(faculty)}
-                className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl px-4 py-4 flex items-center gap-3.5 shadow-sm cursor-pointer active:opacity-80 transition-opacity"
+                className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
               >
-                {/* Avatar */}
-                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                  <span className="text-[12px] font-black text-primary leading-none">{initials}</span>
-                </div>
+                <div className="flex-1 min-w-0 flex items-center gap-3.5">
+                  {/* Avatar */}
+                  <div className="w-11 h-11 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-sm shrink-0">
+                    {initials}
+                  </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <p className="text-[13px] font-bold text-foreground leading-none truncate">{faculty.name}</p>
-                  <p className="text-[11px] text-muted-foreground/55 leading-none truncate">{faculty.designation}</p>
-                  {hasLocation && (
-                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground/40 leading-none">
-                      <MapPin className="w-3 h-3 shrink-0" />
-                      <span className="truncate">
-                        {faculty.cabin && faculty.cabin !== "Not Available" ? faculty.cabin : ""}
-                        {faculty.building && faculty.building !== "Not Available" ? `, ${faculty.building}` : ""}
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                      <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
+                        {faculty.schoolAbbr || "VIT"}
                       </span>
+                      {hasLocation && (
+                        <>
+                          <span>&bull;</span>
+                          <span className="truncate">
+                            {faculty.cabin && faculty.cabin !== "Not Available" ? faculty.cabin : ""}
+                            {faculty.building && faculty.building !== "Not Available" ? `, ${faculty.building}` : ""}
+                          </span>
+                        </>
+                      )}
                     </div>
-                  )}
+                    <p className="text-sm font-bold text-foreground leading-snug truncate">{faculty.name}</p>
+                    <p className="text-[10px] text-muted-foreground/50 font-mono leading-none truncate">{faculty.designation}</p>
+                  </div>
                 </div>
 
                 <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
@@ -337,12 +346,14 @@ export default function FacultyInfoPage() {
 
       {/* Load more */}
       {filteredList.length > visibleCount && (
-        <button
-          onClick={() => setVisibleCount((prev) => prev + 20)}
-          className="w-full py-3 rounded-2xl border border-border/30 bg-card/60 backdrop-blur-sm text-[12px] font-black uppercase tracking-widest text-muted-foreground cursor-pointer transition-colors"
-        >
-          Load More Faculty
-        </button>
+        <div className="flex justify-center pt-2">
+          <button
+            onClick={() => setVisibleCount((prev) => prev + 20)}
+            className="px-6 py-2.5 rounded-xl border border-border/20 bg-muted/10 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors duration-150 cursor-pointer"
+          >
+            Load More Faculty
+          </button>
+        </div>
       )}
 
       {/* Drawer */}

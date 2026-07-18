@@ -11,17 +11,17 @@ import { Shirt, Calendar as CalendarIcon, CalendarPlus } from "lucide-react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
 }
 
 function LaundrySkeleton() {
   return (
-    <div className="w-full flex flex-col gap-5 px-2 py-4">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira">
       <Sk className="h-7 w-40" />
-      <Sk className="h-14 w-full rounded-2xl" />
+      <Sk className="h-14 w-full rounded-[24px]" />
       <Sk className="h-5 w-40" />
       <div className="space-y-3">
-        {[...Array(6)].map((_, i) => <Sk key={i} className="h-20 w-full rounded-2xl" />)}
+        {[...Array(6)].map((_, i) => <Sk key={i} className="h-20 w-full rounded-[24px]" />)}
       </div>
     </div>
   );
@@ -127,26 +127,26 @@ export default function LaundryPage() {
   );
 
   return shell(
-    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={() => fetchSchedule(selectedBlock)} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
       {/* Header */}
-      <header className="flex items-center gap-2.5">
-        <Shirt className="w-5 h-5 text-primary shrink-0" />
+      <header className="flex items-center gap-2">
+        <Shirt className="w-6 h-6 text-primary shrink-0" />
         <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">Laundry</h1>
       </header>
 
       {/* Block selector card */}
-      <div className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl px-5 py-3.5 flex items-center justify-between shadow-sm">
-        <span className="text-[12px] font-bold text-muted-foreground/60 uppercase tracking-wider">Hostel Block</span>
+      <div className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between">
+        <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wide">Hostel Block</span>
         <DrawerSelect
           value={selectedBlock}
           onValueChange={(val) => {
@@ -162,12 +162,12 @@ export default function LaundryPage() {
       {/* Month label */}
       <div className="flex items-center gap-2 px-1">
         <CalendarIcon className="w-4 h-4 text-primary shrink-0" />
-        <h2 className="text-[12px] font-black text-foreground uppercase tracking-widest leading-none">{activeMonthStr} Schedule</h2>
+        <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">{activeMonthStr} Schedule</h2>
       </div>
 
       {/* Schedule cards */}
       {sortedLaundryData.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/60 backdrop-blur-md border border-border/25 rounded-2xl">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
           <Shirt className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No schedule available</p>
           <p className="text-xs text-muted-foreground">Select a block or check back later.</p>
@@ -188,28 +188,31 @@ export default function LaundryPage() {
             return (
               <div
                 key={`${item.date}-${idx}`}
-                className={`bg-card/70 backdrop-blur-md border rounded-2xl px-4 py-4 flex items-center gap-4 shadow-sm transition-colors duration-150
-                  ${isToday ? "border-primary/30 bg-primary/5" : "border-border/30"}`}
+                className={`p-4.5 bg-card/80 border rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4 transition-all duration-150
+                  ${isToday ? "border-primary/50 bg-primary/5" : "border-border/40"}`}
               >
                 {/* Date badge */}
-                <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0 border
-                  ${isToday ? "bg-primary text-primary-foreground border-primary" : "bg-muted/40 border-border/25 text-muted-foreground"}`}
+                <div className={`w-12 h-12 rounded-[16px] flex flex-col items-center justify-center shrink-0 border
+                  ${isToday ? "bg-primary text-primary-foreground border-primary font-black" : "bg-muted/30 border-border/20 text-muted-foreground"}`}
                 >
-                  <span className="text-[16px] font-black leading-none">{item.date}</span>
-                  <span className="text-[8px] font-black uppercase leading-none mt-0.5">{details.abbr}</span>
+                  <span className="text-[17px] font-extrabold leading-none">{item.date}</span>
+                  <span className="text-[8px] font-bold uppercase leading-none mt-0.5">{details.abbr}</span>
                 </div>
 
                 {/* Day info */}
                 <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[13px] font-bold text-foreground leading-none">{details.name}</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                    <span className="text-sm font-bold text-foreground leading-none">{details.name}</span>
                     {isToday && (
-                      <span className="text-[8px] font-black uppercase bg-primary text-primary-foreground px-1.5 py-0.5 rounded leading-none">Today</span>
+                      <>
+                        <span>&bull;</span>
+                        <span className="text-[9px] font-black uppercase text-primary tracking-wide">Today</span>
+                      </>
                     )}
                   </div>
-                  <p className="text-[11px] text-muted-foreground/50 leading-none">
+                  <p className="text-xs text-muted-foreground/60 leading-none">
                     {hasWashing
-                      ? (roomNum.toLowerCase().includes("all") ? "All Rooms" : roomNum.replace(/\s*-\s*/g, "-"))
+                      ? (roomNum.toLowerCase().includes("all") ? "All Rooms" : `Allocated Rooms: ${roomNum.replace(/\s*-\s*/g, "-")}`)
                       : "No washing slots"}
                   </p>
                 </div>
@@ -222,7 +225,7 @@ export default function LaundryPage() {
                       const url = getLaundryGCalLink(item.date, roomNum);
                       try { await openUrl(url); } catch (err) { console.error("Failed to open calendar link:", err); }
                     }}
-                    className="shrink-0 w-9 h-9 rounded-xl border border-border/25 bg-muted/30 text-muted-foreground flex items-center justify-center cursor-pointer transition-colors"
+                    className="shrink-0 p-2 rounded-xl border border-border/20 bg-muted/20 text-muted-foreground hover:text-primary hover:bg-muted/40 transition-colors cursor-pointer flex items-center justify-center"
                     title="Add to Google Calendar"
                   >
                     <CalendarPlus className="w-4 h-4" />
