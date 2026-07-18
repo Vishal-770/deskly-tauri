@@ -16,12 +16,9 @@ export type Path =
   | `/dashboard/curriculum`
   | `/dashboard/curriculum/:categoryId`
   | `/dashboard/exams`
-  | `/dashboard/faculty-info`
   | `/dashboard/grades`
   | `/dashboard/hod-dean`
-  | `/dashboard/laundry`
   | `/dashboard/marks`
-  | `/dashboard/mess`
   | `/dashboard/payment-receipts`
   | `/dashboard/profile`
   | `/dashboard/settings`
