@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getMarks, StudentMarkEntry } from "@/lib/features";
 import marksImg from "@/assets/marks.png";
-import { ErrorDisplay } from "@/components/error-display";
 import { Target, BookOpen } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
+import { ErrorDisplay } from "@/components/error-display";
 import { isNetworkError } from "@/lib/utils";
 
 function Sk({ className = "" }: { className?: string }) {
@@ -48,11 +49,29 @@ function MarksSkeleton() {
 export default function MarksPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
+  const location = useLocation();
 
   const [data, setData] = useState<StudentMarkEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCourseCode, setSelectedCourseCode] = useState<string>("");
+
+  useEffect(() => {
+    if (data.length > 0) {
+      if (location.state?.courseCode) {
+        const match = data.find(
+          (c) => c.courseCode.toLowerCase() === location.state.courseCode.toLowerCase()
+        );
+        if (match) {
+          setSelectedCourseCode(match.courseCode);
+          return;
+        }
+      }
+      if (!selectedCourseCode) {
+        setSelectedCourseCode(data[0].courseCode);
+      }
+    }
+  }, [data, location.state]);
 
   useEffect(() => {
     const cached = localStorage.getItem("deskly::cache::marks");
@@ -62,7 +81,6 @@ export default function MarksPage() {
         if (parsed && parsed.length > 0) {
           setData(parsed);
           setLoading(false);
-          setSelectedCourseCode(parsed[0].courseCode);
         }
       } catch (e) {
         console.error("Failed to parse cached marks", e);

@@ -193,6 +193,7 @@ pub fn run() {
             timetable::timetable_get_weekly,
             profile::profile_get_student_profile,
             grades::grades_get_history,
+            grades::grades_get_student_grade_view,
             feedback::feedback_get_status,
         ])
         .run(tauri::generate_context!())

@@ -89,3 +89,45 @@ pub struct GradesResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CourseCreditsBreakdown {
+    pub l: f64,
+    pub p: f64,
+    pub j: f64,
+    pub c: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SemesterGradeEntry {
+    pub sl_no: i32,
+    pub course_code: String,
+    pub course_title: String,
+    pub course_type: String,
+    pub credits: CourseCreditsBreakdown,
+    pub grading_type: String,
+    pub grand_total: Option<f64>,
+    pub grade: String,
+    pub course_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SemesterGradeViewData {
+    pub semester_sub_id: String,
+    pub gpa: Option<f64>,
+    pub grades: Vec<SemesterGradeEntry>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SemesterGradeViewResponse {
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<SemesterGradeViewData>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+

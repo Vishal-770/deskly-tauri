@@ -1,6 +1,7 @@
 use super::types::{
-    CGPADetails, CourseGrade, CurriculumCategory, CurriculumProgress, CurriculumSummary,
-    GradeDistribution, StudentHistoryData, StudentProfile,
+    CGPADetails, CourseCreditsBreakdown, CourseGrade, CurriculumCategory, CurriculumProgress,
+    CurriculumSummary, GradeDistribution, SemesterGradeEntry, SemesterGradeViewData,
+    StudentHistoryData, StudentProfile,
 };
 use scraper::{Html, Selector};
 
@@ -193,4 +194,87 @@ pub fn parse_student_history(html: &str) -> Result<StudentHistoryData, String> {
         },
         cgpa: cgpa_details,
     })
+}
+
+pub fn parse_semester_grade_view(semester_sub_id: &str, html: &str) -> SemesterGradeViewData {
+    let document = Html::parse_document(html);
+    let row_selector = Selector::parse("tr").unwrap();
+    let td_selector = Selector::parse("td").unwrap();
+
+    let mut grades = Vec::new();
+    let mut gpa = None;
+
+    for row in document.select(&row_selector) {
+        let text = row.text().collect::<String>();
+
+        // Check for GPA row (e.g., "GPA : 9.08")
+        if text.contains("GPA :") || text.contains("GPA:") {
+            if let Some(pos) = text.find("GPA") {
+                let after_gpa = &text[pos + 3..];
+                let clean_gpa = after_gpa.trim_matches(|c: char| c == ':' || c == ' ');
+                if let Ok(parsed_gpa) = clean_gpa.split_whitespace().next().unwrap_or("").parse::<f64>() {
+                    gpa = Some(parsed_gpa);
+                }
+            }
+        }
+
+        let cols: Vec<_> = row.select(&td_selector).collect();
+        if cols.len() >= 11 {
+            let sl_no_str = clean_text(&cols[0].text().collect::<String>());
+            let sl_no = match sl_no_str.parse::<i32>() {
+                Ok(num) => num,
+                Err(_) => continue, // Skip header or invalid rows
+            };
+
+            let course_code = clean_text(&cols[1].text().collect::<String>());
+            let course_title = clean_text(&cols[2].text().collect::<String>());
+            let course_type = clean_text(&cols[3].text().collect::<String>());
+
+            let l = parse_f64(&cols[4].text().collect::<String>());
+            let p = parse_f64(&cols[5].text().collect::<String>());
+            let j = parse_f64(&cols[6].text().collect::<String>());
+            let c = parse_f64(&cols[7].text().collect::<String>());
+
+            let grading_type = clean_text(&cols[8].text().collect::<String>());
+
+            let total_str = clean_text(&cols[9].text().collect::<String>());
+            let grand_total = total_str.parse::<f64>().ok();
+
+            let grade = clean_text(&cols[10].text().collect::<String>());
+
+            // Extract course_id from button onclick if present
+            let mut course_id = None;
+            if cols.len() >= 12 {
+                let col_html = cols[11].html();
+                if let Some(start_idx) = col_html.find("getGradeViewDetails(") {
+                    let rest = &col_html[start_idx + "getGradeViewDetails(".len()..];
+                    let cleaned = rest.replace("&#39;", "'").replace("&quot;", "\"");
+                    if let Some(arg_start) = cleaned.find('\'') {
+                        let arg_rest = &cleaned[arg_start + 1..];
+                        if let Some(arg_end) = arg_rest.find('\'') {
+                            course_id = Some(arg_rest[..arg_end].to_string());
+                        }
+                    }
+                }
+            }
+
+            grades.push(SemesterGradeEntry {
+                sl_no,
+                course_code,
+                course_title,
+                course_type,
+                credits: CourseCreditsBreakdown { l, p, j, c },
+                grading_type,
+                grand_total,
+                grade,
+                course_id,
+            });
+        }
+    }
+
+    SemesterGradeViewData {
+        semester_sub_id: semester_sub_id.to_string(),
+        gpa,
+        grades,
+    }
 }

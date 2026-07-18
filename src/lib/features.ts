@@ -514,3 +514,42 @@ export async function getHodDeanDetails(): Promise<ApiResult<HodDeanDetail[]>> {
     };
   }
 }
+
+export type SemesterGradeEntry = {
+  slNo: number;
+  courseCode: string;
+  courseTitle: string;
+  courseType: string;
+  credits: {
+    l: number;
+    p: number;
+    j: number;
+    c: number;
+  };
+  gradingType: string;
+  grandTotal?: number;
+  grade: string;
+  courseId?: string;
+};
+
+export type SemesterGradeViewData = {
+  semesterSubId: string;
+  gpa?: number;
+  grades: SemesterGradeEntry[];
+};
+
+export async function getStudentGradeView(
+  semesterSubId?: string
+): Promise<ApiResult<SemesterGradeViewData>> {
+  try {
+    return await invoke<ApiResult<SemesterGradeViewData>>("grades_get_student_grade_view", {
+      semesterSubId: semesterSubId || null,
+    });
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
