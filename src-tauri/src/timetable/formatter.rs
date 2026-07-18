@@ -63,20 +63,20 @@ const LAB_TIMES: [TimeRange; 12] = [
         end: "09:40 AM",
     }, // 1
     TimeRange {
-        start: "09:45 AM",
-        end: "10:35 AM",
+        start: "09:50 AM",
+        end: "10:40 AM",
     }, // 2
     TimeRange {
-        start: "11:00 AM",
-        end: "11:50 AM",
+        start: "10:40 AM",
+        end: "11:30 AM",
     }, // 3
     TimeRange {
-        start: "11:50 AM",
-        end: "12:40 PM",
+        start: "11:40 AM",
+        end: "12:30 PM",
     }, // 4
     TimeRange {
-        start: "12:40 PM",
-        end: "01:30 PM",
+        start: "12:30 PM",
+        end: "01:20 PM",
     }, // 5
     TimeRange {
         start: "02:00 PM",
