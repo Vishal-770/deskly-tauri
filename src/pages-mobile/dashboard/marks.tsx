@@ -226,9 +226,9 @@ export default function MarksPage() {
                 <button
                   key={course.courseCode}
                   onClick={() => setSelectedCourseCode(course.courseCode)}
-                  className={`px-4 py-2 rounded-[16px] text-xs font-bold uppercase tracking-wider cursor-pointer border transition-all duration-200 shrink-0
+                  className={`px-5 py-3 rounded-[20px] text-xs font-extrabold uppercase tracking-wider cursor-pointer border transition-all duration-200 shrink-0
                     ${isActive
-                      ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary border-primary text-primary-foreground shadow-md scale-[1.02]"
                       : "bg-card/80 border-border/40 text-muted-foreground hover:bg-muted/10 backdrop-blur-md"
                     }`}
                 >

@@ -389,6 +389,12 @@ export default function GradesPage() {
     return semGradeData.grades.reduce((acc, curr) => acc + curr.credits.c, 0);
   }, [semGradeData]);
 
+  const activeSemesterName = useMemo(() => {
+    if (!semGradeData) return "";
+    const match = semesters.find((s) => s.id === selectedSemId);
+    return match ? match.name : "";
+  }, [semGradeData, semesters, selectedSemId]);
+
   const showOffline =
     !semGradeData &&
     !historyData &&
@@ -465,19 +471,18 @@ export default function GradesPage() {
       {/* ── TAB 1: SEMESTER GRADE VIEW ────────────────────────────────────────── */}
       {activeTab === "semester" && (
         <>
-          {/* Semester Selector */}
-          {semesters.length > 0 && (
-            <div className="relative z-10">
-              <DrawerSelect
-                value={selectedSemId}
-                onValueChange={(val) => {
-                  setSelectedSemId(val);
-                  loadSemesterGrade(val);
-                }}
-                title="Select Semester"
-                triggerClassName="w-full h-10"
-                options={semesters.map((s) => ({ value: s.id, label: s.name }))}
-              />
+          {/* Current Semester Label Card */}
+          {activeSemesterName && (
+            <div className="relative z-10 bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4 rounded-[20px] shadow-sm backdrop-blur-md flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">Active Semester</span>
+                  <span className="text-sm font-bold text-foreground leading-none">{activeSemesterName}</span>
+                </div>
+              </div>
             </div>
           )}
 

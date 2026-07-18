@@ -190,11 +190,9 @@ function AttendanceSkeleton() {
 function AttendanceRow({
   item,
   onSelect,
-  idx,
 }: {
   item: AttendanceRecord;
   onSelect: () => void;
-  idx: number;
 }) {
   const pct = item.attendancePercentage;
   const displayType = formatCourseType(item.courseType);
@@ -205,10 +203,6 @@ function AttendanceRow({
       className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer"
     >
       <div className="flex-1 min-w-0 flex items-center gap-4">
-        <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
-          {item.slNo ?? idx + 1}
-        </span>
-
         <ListCircularProgress percentage={pct} size={48} />
 
         <div className="flex-1 min-w-0 space-y-1">
@@ -566,7 +560,6 @@ export default function AttendancePage() {
               <AttendanceRow
                 key={`${item.classId}-${idx}`}
                 item={item}
-                idx={idx}
                 onSelect={() => setSelected(item)}
               />
             ))}
