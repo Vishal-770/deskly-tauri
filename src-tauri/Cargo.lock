@@ -887,7 +887,7 @@ dependencies = [
 
 [[package]]
 name = "deskly-tauri"
-version = "3.0.8"
+version = "3.0.10"
 dependencies = [
  "aes-gcm",
  "base64 0.22.1",

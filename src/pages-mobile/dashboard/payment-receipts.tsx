@@ -1,16 +1,25 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { getPaymentReceipts, Receipt } from "@/lib/features";
+import { getPaymentReceipts, Receipt, downloadPaymentReceipt } from "@/lib/features";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
+import paymentImg from "@/assets/payment.png";
+import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { Separator } from "@/components/ui/separator";
 import {
   FileText,
-  ChevronDown,
   CreditCard,
   User,
   Receipt as ReceiptIcon,
+  Download,
+  X,
+  ChevronRight,
+  Calendar,
+  Hash,
+  MapPin,
+  Building,
 } from "lucide-react";
 
 // ─── Currency Formatter Helper ────────────────────────────────────────────────
@@ -66,6 +75,130 @@ function PaymentReceiptsSkeleton() {
   );
 }
 
+// ─── Receipt Drawer Component ──────────────────────────────────────────────────
+
+function ReceiptDrawer({
+  item,
+  open,
+  onOpenChange,
+}: {
+  item: Receipt | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  if (!item) return null;
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    setDownloadError(null);
+    try {
+      const res = await downloadPaymentReceipt(item.receiptNumber, item.applNo);
+      if (!res.success) {
+        setDownloadError(res.error ?? "Failed to download receipt.");
+      }
+    } catch (err) {
+      setDownloadError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const details = [
+    { icon: Hash,        label: "Receipt ID",       value: item.receiptId || "—" },
+    { icon: FileText,    label: "Receipt Number",   value: item.receiptNumber },
+    { icon: Calendar,    label: "Payment Date",     value: item.date },
+    { icon: MapPin,      label: "Campus Code",      value: item.campusCode },
+    { icon: Building,    label: "Application No.",  value: item.applNo || "—" },
+    { icon: User,        label: "Registration ID",  value: item.regNo || "—" },
+  ];
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className="pb-8 font-saira max-h-[92vh]">
+        <div className="overflow-y-auto no-scrollbar px-6 space-y-6 pt-6">
+          
+          {/* Header Row */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div className="flex-1 min-w-0 space-y-1">
+                <span className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none block">
+                  Receipt Details
+                </span>
+                <h2 className="text-xl font-bold text-foreground leading-snug tracking-tight truncate">
+                  Receipt #{item.receiptNumber}
+                </h2>
+              </div>
+            </div>
+            
+            {/* Close Button */}
+            <button
+              onClick={() => onOpenChange(false)}
+              className="p-2 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground active:opacity-75 transition-all border-none cursor-pointer shrink-0"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <Separator className="bg-border/15" />
+
+          {/* Amount Paid block */}
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
+              Amount Paid
+            </p>
+            <p className="text-3xl font-black text-foreground leading-none tabular-nums">
+              {formatINR(item.amount)}
+            </p>
+          </div>
+
+          {/* Detailed Specifications */}
+          <div className="space-y-3 pt-1">
+            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
+              Receipt Info
+            </p>
+
+            <div className="divide-y divide-border/15 border-t border-b border-border/15">
+              {details.map(({ icon: Icon, label, value }) => (
+                <div key={label} className="flex items-center justify-between gap-4 py-3.5">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide leading-none">{label}</span>
+                  </div>
+                  <span className="text-sm font-semibold text-foreground text-right truncate max-w-[60%]">{value || "—"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Download button */}
+          <div className="space-y-3 pt-1">
+            <button
+              onClick={handleDownload}
+              disabled={downloading}
+              className="w-full h-12 rounded-[20px] bg-primary text-primary-foreground flex items-center justify-center gap-2.5 text-sm font-extrabold hover:opacity-90 active:opacity-80 transition-all cursor-pointer border-none shadow-sm disabled:opacity-50"
+            >
+              <Download className="w-4 h-4" />
+              <span>{downloading ? "Downloading PDF..." : "Download Receipt PDF"}</span>
+            </button>
+            {downloadError && (
+              <p className="text-xs text-destructive text-center font-semibold mt-1">
+                {downloadError}
+              </p>
+            )}
+          </div>
+
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function PaymentReceiptsPage() {
@@ -74,7 +207,7 @@ export default function PaymentReceiptsPage() {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
 
   // Load receipts data
   useEffect(() => {
@@ -171,6 +304,19 @@ export default function PaymentReceiptsPage() {
     <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
+      {/* Illustration image absolute header */}
+      <div className="absolute -top-4 right-0 w-[200px] h-[160px] pointer-events-none select-none z-0">
+        <img
+          src={paymentImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 30% 40%, black 30%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, black 30%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.2) 80%, transparent 95%)"
+          }}
+          alt="Payment Illustration"
+        />
+      </div>
+
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
         <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
@@ -189,7 +335,7 @@ export default function PaymentReceiptsPage() {
 
       {/* ── Registration Details Card ────────────────────────────────────────── */}
       {studentMeta && (
-        <div className="relative z-10 bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-5 rounded-[28px] shadow-sm backdrop-blur-md space-y-3">
+        <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 p-5 rounded-[24px] shadow-sm space-y-3">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-primary shrink-0" />
             <h2 className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">Registration Info</h2>
@@ -213,7 +359,7 @@ export default function PaymentReceiptsPage() {
       )}
 
       {/* ── Overview Stats Card ──────────────────────────────────────────────── */}
-      <div className="relative z-10 bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-5 rounded-[28px] shadow-sm backdrop-blur-md flex items-center justify-between text-center">
+      <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 p-5 rounded-[24px] shadow-sm flex items-center justify-between text-center">
         <div className="flex-1 min-w-0">
           <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest block leading-none mb-2">Receipts</span>
           <span className="text-xl font-black text-foreground leading-none">{stats.count}</span>
@@ -238,7 +384,7 @@ export default function PaymentReceiptsPage() {
         </div>
 
         {filteredReceipts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/85 border border-border/15 rounded-[28px] shadow-sm backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/70 backdrop-blur-md border border-border/30 rounded-[24px] shadow-sm">
             <FileText className="w-8 h-8 text-muted-foreground/20" />
             <p className="text-sm font-semibold text-foreground leading-none">No receipts found</p>
             <p className="text-xs text-muted-foreground">No payment records are available.</p>
@@ -246,70 +392,47 @@ export default function PaymentReceiptsPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {filteredReceipts.map((receipt) => {
-              const isExpanded = expandedId === receipt.receiptNumber;
               return (
                 <div
                   key={receipt.receiptNumber}
-                  className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4.5 rounded-[24px] shadow-sm backdrop-blur-md space-y-3 transition-all duration-200"
+                  onClick={() => setSelectedReceipt(receipt)}
+                  className="bg-card/70 backdrop-blur-md border border-border/30 p-4.5 rounded-[24px] shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all duration-150 cursor-pointer"
                 >
-                  {/* Collapsible Header */}
-                  <div
-                    onClick={() => setExpandedId(isExpanded ? null : receipt.receiptNumber)}
-                    className="flex items-center justify-between gap-4 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-extrabold text-foreground leading-none truncate">
-                          Receipt #{receipt.receiptNumber}
-                        </h3>
-                        <p className="text-[10px] text-muted-foreground/60 font-semibold mt-1.5 leading-none">
-                          {receipt.date}
-                        </p>
-                      </div>
+                  <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                    <div className="w-10 h-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                      <FileText className="w-5 h-5" />
                     </div>
-                    
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span className="text-sm font-black text-foreground tabular-nums">
-                        {formatINR(receipt.amount)}
-                      </span>
-                      <ChevronDown
-                        className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-200 shrink-0 ${
-                          isExpanded ? "rotate-180 text-foreground" : ""
-                        }`}
-                      />
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-sm font-extrabold text-foreground leading-none truncate">
+                        Receipt #{receipt.receiptNumber}
+                      </h3>
+                      <p className="text-[10px] text-muted-foreground/60 font-semibold mt-1.5 leading-none">
+                        {receipt.date}
+                      </p>
                     </div>
                   </div>
-
-                  {/* Collapsible Details */}
-                  {isExpanded && (
-                    <div className="pt-3 border-t border-border/15 grid grid-cols-2 gap-y-3.5 gap-x-6 text-[10px] font-semibold text-muted-foreground/60 animate-fadeIn">
-                      <div>
-                        <span className="text-[9px] text-muted-foreground/45 uppercase tracking-widest block leading-none mb-1">Receipt ID</span>
-                        <span className="font-mono text-foreground block leading-none">{receipt.receiptId || "—"}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-muted-foreground/45 uppercase tracking-widest block leading-none mb-1">Campus Code</span>
-                        <span className="text-foreground block leading-none">{receipt.campusCode}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-muted-foreground/45 uppercase tracking-widest block leading-none mb-1">Application No.</span>
-                        <span className="text-foreground block leading-none">{receipt.applNo || "—"}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] text-muted-foreground/45 uppercase tracking-widest block leading-none mb-1">Registration ID</span>
-                        <span className="text-foreground block leading-none">{receipt.regNo || "—"}</span>
-                      </div>
-                    </div>
-                  )}
+                  
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    <span className="text-sm font-black text-foreground tabular-nums">
+                      {formatINR(receipt.amount)}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </section>
+
+      {/* Receipt Details Drawer */}
+      {selectedReceipt && (
+        <ReceiptDrawer
+          open={!!selectedReceipt}
+          onOpenChange={(open) => !open && setSelectedReceipt(null)}
+          item={selectedReceipt}
+        />
+      )}
     </div>
   );
 }
