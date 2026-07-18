@@ -2,20 +2,10 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getHodDeanDetails, HodDeanDetail } from "@/lib/features";
 import { isNetworkError } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
-
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import {
-  Mail,
-  MapPin,
-  Phone,
-  Building2,
-  Building
-} from "lucide-react";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { Mail, MapPin, Phone, Building2, Building } from "lucide-react";
 
 function getSrcFromPhoto(photo: string): string {
   if (!photo) return "";
@@ -32,64 +22,36 @@ function getSrcFromPhoto(photo: string): string {
   return trimmed;
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-3.5">
-      <div className="flex items-center gap-3 shrink-0">
-        <Icon className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-        <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">
-          {label}
-        </span>
-      </div>
-      <span className="text-sm font-medium text-foreground text-right truncate max-w-[60%]">
-        {value || "—"}
-      </span>
-    </div>
-  );
-}
-
-// ─── Loader Skeleton Layout ───────────────────────────────────────────────────
-
 function Sk({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function HodDeanSkeleton() {
   return (
-    <div className="w-full space-y-8 px-2 py-4 animate-pulse">
+    <div className="w-full flex flex-col gap-5 px-2 py-4">
       <div className="flex items-center gap-2.5">
-        <Sk className="w-6 h-6 rounded-md shrink-0" />
+        <Sk className="w-5 h-5 rounded-md shrink-0" />
         <Sk className="h-7 w-36" />
       </div>
       {[...Array(3)].map((_, i) => (
-        <div key={i} className="space-y-4">
-          {i > 0 && <div className="h-px bg-border/20" />}
-          <div className="flex items-center gap-4">
-            <Sk className="w-16 h-20 rounded-xl shrink-0" />
-            <div className="space-y-2 flex-1 min-w-0">
-              <Sk className="h-3 w-12" />
-              <Sk className="h-5 w-36" />
-              <Sk className="h-3 w-48" />
-            </div>
-          </div>
-          <div className="divide-y divide-border/10 border-t border-b border-border/10">
-            {[...Array(3)].map((_, j) => (
-              <div key={j} className="flex items-center justify-between py-3.5">
-                <div className="flex items-center gap-3">
-                  <Sk className="w-4 h-4 rounded" />
-                  <Sk className="h-2.5 w-16" />
-                </div>
-                <Sk className="h-3 w-32" />
-              </div>
-            ))}
-          </div>
-        </div>
+        <Sk key={i} className="h-40 w-full rounded-2xl" />
       ))}
     </div>
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
+  if (!value) return null;
+  return (
+    <div className="flex items-center justify-between gap-4 py-3 border-b border-border/20 last:border-0">
+      <div className="flex items-center gap-2.5 shrink-0">
+        <Icon className="w-3.5 h-3.5 text-muted-foreground/35 shrink-0" />
+        <span className="text-[10px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none">{label}</span>
+      </div>
+      <span className="text-[13px] font-semibold text-foreground text-right truncate max-w-[55%]">{value}</span>
+    </div>
+  );
+}
 
 export default function HodDeanDetailsPage() {
   const { loading: authLoading } = useAuth();
@@ -130,9 +92,7 @@ export default function HodDeanDetailsPage() {
     }
   }
 
-  useEffect(() => {
-    fetchDetails();
-  }, []);
+  useEffect(() => { fetchDetails(); }, []);
 
   const shell = (children: React.ReactNode) => <>{children}</>;
   const showOffline = !details && (isOnline === false || isNetworkError(error, isOnline));
@@ -143,7 +103,7 @@ export default function HodDeanDetailsPage() {
   if (!details) return null;
 
   return shell(
-    <div className="w-full space-y-8 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* Error banner */}
@@ -154,21 +114,20 @@ export default function HodDeanDetailsPage() {
         </div>
       )}
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/* Header */}
       <header className="flex items-center gap-2.5">
-        <Building2 className="w-6 h-6 text-primary shrink-0" />
-        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">HOD &amp; Dean</h1>
+        <Building2 className="w-5 h-5 text-primary shrink-0" />
+        <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">HOD & Dean</h1>
       </header>
 
-      {/* ── Details List ───────────────────────────────────────────────────── */}
       {details.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/60 backdrop-blur-md border border-border/25 rounded-2xl">
           <Building className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground">No details found</p>
-          <p className="text-xs text-muted-foreground">Please try reloading the page later.</p>
+          <p className="text-xs text-muted-foreground">Please try reloading later.</p>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-4">
           {details.map((item, idx) => {
             const photoSrc = item.photo ? getSrcFromPhoto(item.photo) : "";
             const initials = item.name
@@ -176,13 +135,11 @@ export default function HodDeanDetailsPage() {
               : "?";
 
             return (
-              <section key={idx} className="space-y-4">
-                {idx > 0 && <Separator className="bg-border/20" />}
-
-                {/* Role label */}
-                <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-widest leading-none">
+              <div key={idx} className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl p-5 space-y-4 shadow-sm">
+                {/* Role badge */}
+                <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest leading-none">
                   {item.role || "Faculty"}
-                </p>
+                </span>
 
                 {/* Photo + identity */}
                 <div className="flex items-center gap-4">
@@ -190,27 +147,27 @@ export default function HodDeanDetailsPage() {
                     <img
                       src={photoSrc}
                       alt={item.name}
-                      className="w-16 h-20 rounded-xl shrink-0 object-contain"
+                      className="w-14 h-18 rounded-xl shrink-0 object-contain border border-border/20"
                     />
                   ) : (
-                    <div className="w-16 h-20 rounded-xl shrink-0 bg-muted/30 flex items-center justify-center">
-                      <span className="text-base font-bold text-muted-foreground tracking-wider">{initials}</span>
+                    <div className="w-14 h-16 rounded-xl shrink-0 bg-muted/40 border border-border/25 flex items-center justify-center">
+                      <span className="text-base font-black text-muted-foreground/50 tracking-wider">{initials}</span>
                     </div>
                   )}
 
                   <div className="min-w-0 flex-1 space-y-1.5">
-                    <h2 className="text-lg font-bold text-foreground leading-snug">{item.name}</h2>
-                    <p className="text-xs text-muted-foreground/60 leading-none">{item.school}</p>
+                    <h2 className="text-[17px] font-extrabold text-foreground leading-snug">{item.name}</h2>
+                    <p className="text-[12px] text-muted-foreground/55 leading-none">{item.school}</p>
                   </div>
                 </div>
 
                 {/* Info rows */}
-                <div className="divide-y divide-border/10 border-t border-b border-border/10">
-                  <InfoRow icon={MapPin} label="Cabin Room" value={item.cabin} />
-                  {item.intercom && <InfoRow icon={Phone} label="Intercom" value={item.intercom} />}
+                <div className="pt-1">
+                  <InfoRow icon={MapPin} label="Cabin" value={item.cabin} />
+                  <InfoRow icon={Phone} label="Intercom" value={item.intercom} />
                   <InfoRow icon={Mail} label="Email" value={item.email} />
                 </div>
-              </section>
+              </div>
             );
           })}
         </div>

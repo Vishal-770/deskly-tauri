@@ -23,6 +23,7 @@ import {
   Search,
   X,
 } from "lucide-react";
+import curriculumImg from "@/assets/curriculum.png";
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -171,18 +172,32 @@ export default function CategoryCoursesPage() {
   if (error && courses.length === 0) return shell(<div className="flex h-full items-center justify-center"><ErrorDisplay message={error} onRetry={load} /></div>);
 
   return shell(
-    <div className="w-full space-y-5 px-2 py-4 font-saira">
+    <div className="w-full space-y-5 px-2 py-4 font-saira relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Illustration image absolute header */}
+      <div className="absolute -top-4 right-0 w-[200px] h-[160px] pointer-events-none select-none z-0">
+        <img
+          src={curriculumImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+          }}
+          alt="Curriculum Illustration"
+        />
+      </div>
+
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="space-y-0.5">
+      <header className="relative z-10 space-y-0.5">
         <div className="flex items-center gap-2">
           <p className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">{categoryId}</p>
         </div>
@@ -195,7 +210,7 @@ export default function CategoryCoursesPage() {
       </header>
 
       {/* ── Search ─────────────────────────────────────────────────────────── */}
-      <div className="relative">
+      <div className="relative z-10">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 pointer-events-none" />
         <input
           type="text"
@@ -217,28 +232,33 @@ export default function CategoryCoursesPage() {
 
       {/* ── Course List ─────────────────────────────────────────────────────── */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center">
+        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
           <BookOpen className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground">No courses found</p>
           <p className="text-xs text-muted-foreground">Try a different search term or code</p>
         </div>
       ) : (
-        <div className="divide-y divide-border/10 border-t border-b border-border/10">
+        <div className="relative z-10 flex flex-col gap-3">
           {filtered.map((course) => {
             const isDownloading = downloading[course.code];
             const result = downloadResult[course.code];
 
             return (
-              <div key={course.code} className="py-4 flex items-start justify-between gap-4">
+              <div
+                key={course.code}
+                className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-start justify-between gap-4 backdrop-blur-md"
+              >
                 {/* Left: Code + Title + result */}
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">
-                    {course.code}
-                  </p>
-                  <p className="text-sm font-semibold text-foreground leading-snug">{course.title}</p>
-                  <p className="text-xs text-muted-foreground/50 leading-none">
-                    {course.courseType} &bull; {course.credits} credits
-                  </p>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">
+                      {course.code}
+                    </p>
+                    <p className="text-sm font-bold text-foreground leading-snug">{course.title}</p>
+                    <p className="text-xs text-muted-foreground/50 leading-none">
+                      {course.courseType} &bull; {course.credits} credits
+                    </p>
+                  </div>
 
                   {/* Download result inline */}
                   {result && (

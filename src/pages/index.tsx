@@ -17,7 +17,7 @@ import loginImg from "@/assets/login_image.png";
 
 export default function MobileHome() {
   const navigate = useNavigate();
-  const { authState, loading, error, login } = useAuth();
+  const { authState, loading, error, login, initialized } = useAuth();
   const [regNo, setRegNo] = useState("");
   const [password, setPassword] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -54,7 +54,6 @@ export default function MobileHome() {
 
     try {
       await login(regNo, password);
-      navigate("/dashboard");
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : String(err);
       const lowerErr = errMsg.toLowerCase();
@@ -75,7 +74,7 @@ export default function MobileHome() {
     }
   };
 
-  if (authState === null && loading) {
+  if (!initialized && loading) {
     return (
       <main className="h-full w-full flex flex-col justify-center items-center bg-background text-foreground antialiased p-7">
         <div className="w-[72px] h-[72px] rounded-full bg-muted/30 flex items-center justify-center animate-pulse mb-12">

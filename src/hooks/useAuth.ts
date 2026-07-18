@@ -23,6 +23,8 @@ export type UseAuthReturn = {
   hasTokens: boolean;
   /** Shorthand — true when authState.loggedIn is true */
   isLoggedIn: boolean;
+  /** Whether the initial session check on boot has completed */
+  initialized: boolean;
   /** Login with registration number and password */
   login: (regNo: string, password: string) => Promise<void>;
   /** Logout — clears ALL auth data (state + tokens + disk) */
@@ -37,141 +39,167 @@ export type UseAuthReturn = {
   clearTokens: () => Promise<void>;
 };
 
+interface AuthStoreState {
+  authState: AuthState | null;
+  loading: boolean;
+  error: string | null;
+  hasTokens: boolean;
+  initialized: boolean;
+}
+
+// Module-level global state shared across all hook instances
+let storeState: AuthStoreState = {
+  authState: null,
+  loading: true,
+  error: null,
+  hasTokens: false,
+  initialized: false,
+};
+
+const listeners = new Set<(state: AuthStoreState) => void>();
+
+function updateStore(updates: Partial<AuthStoreState>) {
+  storeState = { ...storeState, ...updates };
+  listeners.forEach((listener) => listener(storeState));
+}
+
+// Keep track of the active refresh promise to avoid duplicate concurrent calls to the backend
+let refreshPromise: Promise<void> | null = null;
+
 /**
  * Standalone hook for all auth operations.
  *
- * Can be used with or without the `<AuthProvider>` context —
- * it talks directly to the Tauri backend via invoke.
+ * State is synchronized globally across all instances of this hook.
+ * Talks directly to the Tauri backend via invoke.
  */
 export function useAuth(): UseAuthReturn {
-  const [authState, setAuthState] = useState<AuthState | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hasTokens, setHasTokens] = useState(false);
+  const [state, setState] = useState<AuthStoreState>(storeState);
 
-  const isLoggedIn = authState?.loggedIn ?? false;
-
-  // ---------- internal helpers ----------
-
-  const handleError = useCallback((err: unknown): string => {
-    const msg = err instanceof Error ? err.message : String(err);
-    setError(msg);
-    return msg;
+  useEffect(() => {
+    listeners.add(setState);
+    return () => {
+      listeners.delete(setState);
+    };
   }, []);
 
-  /** Probe the backend for token existence and update `hasTokens`. */
-  const syncTokenStatus = useCallback(async () => {
-    try {
-      const tokens = await authGetTokens();
-      setHasTokens(tokens !== null);
-    } catch {
-      setHasTokens(false);
-    }
-  }, []);
+  const isLoggedIn = state.authState?.loggedIn ?? false;
 
   // ---------- public API ----------
 
   const refresh = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const restored = await authRestoreSession();
-      if (restored) {
-        setAuthState(restored);
-      } else {
-        setAuthState(await authGetState());
+    if (refreshPromise) return refreshPromise;
+
+    refreshPromise = (async () => {
+      updateStore({ loading: true, error: null });
+      try {
+        const restored = await authRestoreSession();
+        if (restored) {
+          updateStore({ authState: restored });
+        } else {
+          updateStore({ authState: await authGetState() });
+        }
+        
+        // Sync token existence
+        const tokens = await authGetTokens();
+        updateStore({ hasTokens: tokens !== null });
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        updateStore({ error: msg, authState: null });
+      } finally {
+        updateStore({ loading: false, initialized: true });
+        refreshPromise = null;
       }
-      await syncTokenStatus();
-    } catch (err) {
-      handleError(err);
-      setAuthState(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [handleError, syncTokenStatus]);
+    })();
+
+    return refreshPromise;
+  }, []);
 
   const login = useCallback(
     async (regNo: string, password: string) => {
-      setLoading(true);
-      setError(null);
+      updateStore({ loading: true, error: null });
       try {
         const response = await authLogin(regNo, password);
-        setAuthState(response.state);
-        setHasTokens(true);
+        updateStore({ authState: response.state, hasTokens: true });
       } catch (err) {
-        handleError(err);
+        const msg = err instanceof Error ? err.message : String(err);
+        updateStore({ error: msg });
         throw err;
       } finally {
-        setLoading(false);
+        updateStore({ loading: false, initialized: true });
       }
     },
-    [handleError],
+    [],
   );
 
   const logout = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+    updateStore({ loading: true, error: null });
     try {
       await authLogout();
       await authClearSemester();
-      setAuthState(null);
-      setHasTokens(false);
+      updateStore({ authState: null, hasTokens: false });
       localStorage.clear();
     } catch (err) {
-      handleError(err);
+      const msg = err instanceof Error ? err.message : String(err);
+      updateStore({ error: msg });
       throw err;
     } finally {
-      setLoading(false);
+      updateStore({ loading: false, initialized: true });
     }
-  }, [handleError]);
+  }, []);
 
   const fetchTokens = useCallback(async (): Promise<AuthTokens | null> => {
     try {
       const tokens = await authGetTokens();
-      setHasTokens(tokens !== null);
+      updateStore({ hasTokens: tokens !== null });
       return tokens;
     } catch (err) {
-      handleError(err);
+      const msg = err instanceof Error ? err.message : String(err);
+      updateStore({ error: msg });
       return null;
     }
-  }, [handleError]);
+  }, []);
 
   const setTokens = useCallback(
     async (tokens: AuthTokens) => {
       try {
         await authSetTokens(tokens);
-        setHasTokens(true);
+        updateStore({ hasTokens: true });
       } catch (err) {
-        handleError(err);
+        const msg = err instanceof Error ? err.message : String(err);
+        updateStore({ error: msg });
         throw err;
       }
     },
-    [handleError],
+    [],
   );
 
   const clearTokens = useCallback(async () => {
     try {
       await authClearTokens();
-      setHasTokens(false);
+      updateStore({ hasTokens: false });
     } catch (err) {
-      handleError(err);
+      const msg = err instanceof Error ? err.message : String(err);
+      updateStore({ error: msg });
       throw err;
     }
-  }, [handleError]);
+  }, []);
 
   // ---------- bootstrap ----------
 
   useEffect(() => {
-    void refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Only refresh on mount if we haven't checked/established initial session state
+    if (storeState.authState === null && storeState.loading) {
+      void refresh();
+    }
+  }, [refresh]);
 
   return {
-    authState,
-    loading,
-    error,
-    hasTokens,
+    authState: state.authState,
+    loading: state.loading,
+    error: state.error,
+    hasTokens: state.hasTokens,
     isLoggedIn,
+    initialized: state.initialized,
     login,
     logout,
     refresh,

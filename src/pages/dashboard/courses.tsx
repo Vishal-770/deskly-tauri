@@ -9,20 +9,17 @@ import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
+import courseImg from "@/assets/course.png";
 import {
   Layers,
   Monitor,
-  Beaker,
-  Globe,
-  Users,
   FileText,
   User,
   MapPin,
-  Hash,
   LayoutGrid,
-  GraduationCap,
   School,
   ChevronRight,
+  X,
 } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -40,33 +37,33 @@ function CourseDetailDrawer({
 
   const displayType = item.courseType.toLowerCase().includes("lab") ? "Lab Only" : "Theory Only";
 
-  const details = [
-    { icon: Hash,          label: "Course Code",  value: item.code },
-    { icon: LayoutGrid,    label: "Slot",         value: item.slot || "—" },
-    { icon: GraduationCap, label: "Course Type",  value: item.courseType },
-    { icon: Monitor,       label: "Credits",      value: `${item.credits?.total ?? 0} Credits` },
-    { icon: User,          label: "Faculty",      value: item.faculty?.name ?? "—" },
-    { icon: School,        label: "School",       value: item.faculty?.school ?? "—" },
-    { icon: MapPin,        label: "Venue / Room", value: item.venue || "—" },
-  ];
-
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="pb-8 font-saira max-h-[92vh]">
-        <div className="overflow-y-auto no-scrollbar px-6 space-y-7 pt-5">
+      <DrawerContent className="pb-[calc(1.5rem+env(safe-area-inset-bottom))] font-saira max-h-[92vh] bg-background border-t border-border/10 rounded-t-[32px] flex flex-col">
+        <div className="overflow-y-auto no-scrollbar px-6 space-y-6 pt-6 flex-1">
           
           {/* Header Row */}
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex items-center gap-2 leading-none">
-                <span className="text-sm font-medium tracking-wide text-primary uppercase">
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
                   {item.code}
                 </span>
-                <span className="text-[10px] font-medium text-muted-foreground/60">
-                  ({displayType})
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-muted text-muted-foreground tracking-wider">
+                  {displayType}
                 </span>
+                {item.category && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-accent/15 text-accent-foreground tracking-wider border border-accent/10">
+                    {item.category}
+                  </span>
+                )}
+                {item.status && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 tracking-wider">
+                    {item.status}
+                  </span>
+                )}
               </div>
-              <h2 className="text-xl font-semibold text-foreground leading-snug tracking-tight">
+              <h2 className="text-xl font-extrabold text-foreground leading-snug tracking-tight">
                 {item.title}
               </h2>
             </div>
@@ -74,37 +71,143 @@ function CourseDetailDrawer({
             {/* Close Button */}
             <button
               onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0"
+              className="p-2 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground active:opacity-75 transition-all border-none cursor-pointer shrink-0"
             >
-              <span className="text-lg leading-none font-sans">×</span>
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <Separator className="bg-border/25" />
+          <Separator className="bg-border/10" />
 
-          {/* Course Details List */}
-          <div className="space-y-3 pt-1">
-            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
-              Course Details
-            </p>
+          {/* 1. Core Scheduling Information Box (2x2 Grid) */}
+          <div className="grid grid-cols-2 gap-y-5 gap-x-4 py-1">
+            {/* Slot */}
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                Class Slot
+              </span>
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <LayoutGrid className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground">{item.slot || "—"}</span>
+              </div>
+            </div>
 
-            <div className="divide-y divide-border/10">
-              {details.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-center gap-4 py-3">
-                  {/* Left Column: Icon Box */}
-                  <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4 text-primary shrink-0" />
-                  </div>
-                  
-                  {/* Right Column: Text contents */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
-                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
-                  </div>
+            {/* Venue */}
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                Classroom Venue
+              </span>
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground truncate">{item.venue || "—"}</span>
+              </div>
+            </div>
+
+            {/* Class ID */}
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                Class ID
+              </span>
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground truncate">{item.classId || "—"}</span>
+              </div>
+            </div>
+
+            {/* Class Group */}
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                Group
+              </span>
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <Monitor className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground">{item.classGroup || "—"}</span>
+              </div>
+            </div>
+          </div>
+
+          <Separator className="bg-border/10" />
+
+          {/* 2. Credit Breakdown Widget */}
+          <div className="space-y-3">
+            <h3 className="text-[10px] font-bold tracking-widest text-muted-foreground/50 uppercase leading-none pl-1">
+              Credit Breakdown
+            </h3>
+            <div className="grid grid-cols-4 divide-x divide-border/10 text-center py-2 bg-muted/10 rounded-2xl border border-border/5">
+              {[
+                { label: "Lecture (L)", val: item.credits?.lecture ?? 0 },
+                { label: "Tutorial (T)", val: item.credits?.tutorial ?? 0 },
+                { label: "Practical (P)", val: item.credits?.practical ?? 0 },
+                { label: "Project (J)", val: item.credits?.project ?? 0 },
+              ].map(({ label, val }) => (
+                <div key={label} className="space-y-1">
+                  <p className="text-[18px] font-black text-foreground">{val}</p>
+                  <p className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-wider leading-none">
+                    {label.split(" ")[0]}
+                  </p>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* 3. Registration Details */}
+          {(item.registrationOption || item.registrationDate) && (
+            <>
+              <Separator className="bg-border/10" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                    Registration Option
+                  </span>
+                  <span className="text-sm font-semibold text-foreground block pt-0.5">{item.registrationOption || "—"}</span>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                    Registration Date
+                  </span>
+                  <span className="text-sm font-semibold text-foreground block pt-0.5">{item.registrationDate || "—"}</span>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* 4. Faculty Details */}
+          {(item.faculty?.name || item.faculty?.school) && (
+            <>
+              <Separator className="bg-border/10" />
+              <div className="space-y-3">
+                <h3 className="text-[10px] font-bold tracking-widest text-muted-foreground/50 uppercase leading-none pl-1">
+                  Faculty Instructor
+                </h3>
+                
+                <div className="flex items-center gap-4 py-1">
+                  <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 text-primary border border-primary/10">
+                    <User className="w-5.5 h-5.5" />
+                  </div>
+                  
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <h4 className="text-sm font-bold text-foreground truncate leading-none">
+                      {item.faculty?.name || "—"}
+                    </h4>
+                    {item.faculty?.school && (
+                      <div className="flex items-center gap-1.5 leading-none">
+                        <School className="w-3.5 h-3.5 text-muted-foreground/45 shrink-0" />
+                        <span className="text-xs text-muted-foreground/75 truncate">{item.faculty.school}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
 
         </div>
       </DrawerContent>
@@ -269,19 +372,32 @@ export default function CoursesPage() {
   }
 
   return shell(
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Illustration image absolute header */}
+      <div className="absolute -top-4 right-0 w-[200px] h-[160px] pointer-events-none select-none z-0">
+        <img
+          src={courseImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+          }}
+          alt="Courses Illustration"
+        />
+      </div>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start gap-2">
+      <header className="relative z-10 flex items-start gap-2">
         <Layers className="w-6 h-6 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1 min-w-0">
           <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
@@ -290,30 +406,26 @@ export default function CoursesPage() {
         </div>
       </header>
 
-      <Separator className="bg-border/25" />
-
       {/* ── Stats block ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between py-1 text-center">
+      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-md flex items-center justify-between text-center backdrop-blur-md">
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Total</p>
-          <p className="text-2xl font-bold text-foreground leading-none">{courseStats.total}</p>
+          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Total</p>
+          <p className="text-2xl font-black text-foreground leading-none">{courseStats.total}</p>
         </div>
-        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0 mx-2" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Credits</p>
-          <p className="text-2xl font-bold text-foreground leading-none">{courseStats.totalCredits}</p>
+          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Credits</p>
+          <p className="text-2xl font-black text-foreground leading-none">{courseStats.totalCredits}</p>
         </div>
-        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Labs</p>
-          <p className="text-2xl font-bold text-foreground leading-none">{courseStats.lab.count}</p>
+          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Labs</p>
+          <p className="text-2xl font-black text-foreground leading-none">{courseStats.lab.count}</p>
         </div>
       </div>
 
-      <Separator className="bg-border/25" />
-
       {/* ── Filters ─────────────────────────────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="relative z-10 space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <DrawerSelect
             value={selectedTypeFilter}
@@ -339,19 +451,19 @@ export default function CoursesPage() {
       </div>
 
       {/* ── Section label ────────────────────────────────────────────────────── */}
-      <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
+      <h2 className="relative z-10 text-base font-semibold text-foreground tracking-tight leading-none uppercase">
         Registered Courses
       </h2>
 
       {/* ── Course List ──────────────────────────────────────────────────────── */}
       {filteredCourses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No courses found</p>
           <p className="text-xs text-muted-foreground">Try modifying the type or category filters.</p>
         </div>
       ) : (
-        <div className="divide-y divide-border/10 border-t border-b border-border/10">
+        <div className="relative z-10 flex flex-col gap-3">
           {filteredCourses.map((item, idx) => {
             return (
               <div
@@ -360,7 +472,7 @@ export default function CoursesPage() {
                   setSelectedCourse(item);
                   setDrawerOpen(true);
                 }}
-                className="py-4 flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer"
+                className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
               >
                 <div className="flex-1 min-w-0 space-y-3">
                   {/* Top row: index, code, type, slot, credits as plain text items */}
@@ -384,7 +496,7 @@ export default function CoursesPage() {
                   </div>
 
                   {/* Title */}
-                  <p className="text-sm font-medium text-foreground leading-snug">
+                  <p className="text-sm font-bold text-foreground leading-snug">
                     {item.title}
                   </p>
 
@@ -392,13 +504,13 @@ export default function CoursesPage() {
                   <div className="flex items-center gap-4 flex-wrap">
                     {item.faculty?.name && (
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <User className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                        <User className="w-3.5 h-3.5 text-muted-foreground/45 shrink-0" />
                         <span className="text-xs text-muted-foreground/75 truncate">{item.faculty.name}</span>
                       </div>
                     )}
                     {item.venue && (
                       <div className="flex items-center gap-1.5 shrink-0">
-                        <MapPin className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground/45 shrink-0" />
                         <span className="text-xs text-muted-foreground/75">{item.venue}</span>
                       </div>
                     )}
@@ -415,31 +527,63 @@ export default function CoursesPage() {
 
       {/* ── Footer Summary ───────────────────────────────────────────────────── */}
       {courses.length > 0 && (
-        <div className="space-y-4 pt-4 border-t border-border/10">
-          <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">
-            Credit Summary
+        <section className="relative z-10 space-y-4 pt-2">
+          <h3 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
+            Credit Distribution
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { icon: Monitor, label: "Theory", count: courseStats.theory.count, credits: courseStats.theory.credits },
-              { icon: Beaker, label: "Lab", count: courseStats.lab.count, credits: courseStats.lab.credits },
-              { icon: Globe, label: "Online", count: courseStats.online.count, credits: courseStats.online.credits },
-              { icon: Users, label: "Soft Skill", count: courseStats.softSkill.count, credits: courseStats.softSkill.credits },
-            ].map(({ icon: Icon, label, count, credits }) => (
-              <div key={label} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-primary shrink-0" />
+          <div className="bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-md backdrop-blur-md space-y-5">
+            {/* Segmented Progress Track */}
+            <div className="h-3 w-full bg-muted/20 rounded-full overflow-hidden flex border border-border/5">
+              {courseStats.theory.credits > 0 && (
+                <div 
+                  style={{ width: `${courseStats.totalCredits > 0 ? (courseStats.theory.credits / courseStats.totalCredits) * 100 : 0}%` }} 
+                  className="h-full bg-primary transition-all duration-500" 
+                />
+              )}
+              {courseStats.lab.credits > 0 && (
+                <div 
+                  style={{ width: `${courseStats.totalCredits > 0 ? (courseStats.lab.credits / courseStats.totalCredits) * 100 : 0}%` }} 
+                  className="h-full bg-primary/70 transition-all duration-500" 
+                />
+              )}
+              {courseStats.online.credits > 0 && (
+                <div 
+                  style={{ width: `${courseStats.totalCredits > 0 ? (courseStats.online.credits / courseStats.totalCredits) * 100 : 0}%` }} 
+                  className="h-full bg-primary/40 transition-all duration-500" 
+                />
+              )}
+              {courseStats.softSkill.credits > 0 && (
+                <div 
+                  style={{ width: `${courseStats.totalCredits > 0 ? (courseStats.softSkill.credits / courseStats.totalCredits) * 100 : 0}%` }} 
+                  className="h-full bg-primary/20 transition-all duration-500" 
+                />
+              )}
+            </div>
+
+            {/* Legend / Metrics Grid */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4 pt-1">
+              {[
+                { label: "Theory", count: courseStats.theory.count, credits: courseStats.theory.credits, pct: courseStats.totalCredits > 0 ? Math.round((courseStats.theory.credits / courseStats.totalCredits) * 100) : 0, colorClass: "bg-primary" },
+                { label: "Lab", count: courseStats.lab.count, credits: courseStats.lab.credits, pct: courseStats.totalCredits > 0 ? Math.round((courseStats.lab.credits / courseStats.totalCredits) * 100) : 0, colorClass: "bg-primary/70" },
+                { label: "Online", count: courseStats.online.count, credits: courseStats.online.credits, pct: courseStats.totalCredits > 0 ? Math.round((courseStats.online.credits / courseStats.totalCredits) * 100) : 0, colorClass: "bg-primary/40" },
+                { label: "Soft Skill", count: courseStats.softSkill.count, credits: courseStats.softSkill.credits, pct: courseStats.totalCredits > 0 ? Math.round((courseStats.softSkill.credits / courseStats.totalCredits) * 100) : 0, colorClass: "bg-primary/20" },
+              ].map(({ label, count, credits, pct, colorClass }) => (
+                <div key={label} className="flex items-center gap-2.5 min-w-0">
+                  <div className={`w-2 h-2 rounded-full ${colorClass} shrink-0`} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-1 leading-none mb-1">
+                      <span className="text-xs font-bold text-foreground truncate">{label}</span>
+                      <span className="text-[9px] font-black text-muted-foreground/60 shrink-0">{pct}%</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground/45 leading-none">
+                      {count} {count === 1 ? "course" : "courses"} &bull; {credits} Cr
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 leading-none mb-1">{label}</p>
-                  <p className="text-sm font-semibold text-foreground leading-none">
-                    {count} <span className="text-[10px] font-normal text-muted-foreground/50 ml-0.5">({credits} Cr)</span>
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
       )}
 
       <CourseDetailDrawer

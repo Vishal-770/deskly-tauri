@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getMarks, StudentMarkEntry } from "@/lib/features";
-import { Separator } from "@/components/ui/separator";
+
+import marksImg from "@/assets/marks.png";
 
 import { ErrorDisplay } from "@/components/error-display";
 import { Target, BookOpen } from "lucide-react";
@@ -131,50 +132,96 @@ export default function MarksPage() {
   }
 
   return shell(
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Illustration — absolute top right */}
+      <div className="absolute -top-4 right-0 w-[210px] h-[170px] pointer-events-none select-none z-0">
+        <img
+          src={marksImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+          }}
+          alt="Marks Illustration"
+        />
+      </div>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
-          <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
-            Retry
-          </button>
+          <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
       )}
 
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start gap-2">
-        <Target className="w-6 h-6 text-primary shrink-0 mt-0.5" />
-        <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
-            My Marks
-          </h1>
-        </div>
+      {/* Header */}
+      <header className="relative z-10 flex items-center gap-2.5">
+        <Target className="w-5 h-5 text-primary shrink-0" />
+        <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">My Marks</h1>
       </header>
 
-      {/* ── Course Tabs (horizontal scrollable) ──────────────────────────────── */}
       {filteredCourses.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/60 backdrop-blur-md border border-border/30 rounded-2xl">
           <Target className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No courses found</p>
           <p className="text-xs text-muted-foreground">Marks data is unavailable for this semester.</p>
         </div>
       ) : (
-        <div className="space-y-5">
-          {/* Scrollable chip tabs */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2">
+        <>
+          {/* ── Stats Card (glassmorphic) ──────────────────────────────────────── */}
+          {activeCourse && (
+            <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl p-5 space-y-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                {/* Course Info */}
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] font-black text-primary uppercase tracking-widest leading-none">{activeCourse.courseCode}</span>
+                    <span className="text-muted-foreground/30 text-xs">·</span>
+                    <span className="text-[11px] font-semibold text-muted-foreground/60 font-mono tracking-wide">{activeCourse.slot}</span>
+                    <span className="text-muted-foreground/30 text-xs">·</span>
+                    <span className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-wide">{activeCourse.courseType}</span>
+                  </div>
+                  <h2 className="text-[17px] font-extrabold text-foreground leading-tight">{activeCourse.courseTitle}</h2>
+                  <p className="text-[12px] text-muted-foreground/55 leading-none font-medium">{activeCourse.faculty}</p>
+                </div>
+
+                {/* Total Score Box */}
+                {activeCourse.assessments.length > 0 && (
+                  <div className="shrink-0 bg-card/80 backdrop-blur-sm border border-border/25 rounded-xl px-4 py-3 flex flex-col items-center gap-1 shadow-sm">
+                    <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest leading-none">Total</span>
+                    <div className="flex items-baseline gap-0.5 leading-none">
+                      <span className="text-[28px] font-black text-foreground tabular-nums leading-none">
+                        {activeCourse.assessments.reduce((s, a) => s + a.weightageMark, 0).toFixed(1)}
+                      </span>
+                      <span className="text-sm font-bold text-muted-foreground/35 leading-none mb-0.5">/100</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Mode badge */}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest border border-border/25 rounded-lg px-2.5 py-1">
+                  {activeCourse.courseMode}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* ── Course Tabs ──────────────────────────────────────────────────────── */}
+          <div className="relative z-10 flex gap-2 overflow-x-auto no-scrollbar -mx-2 px-2 pb-0.5">
             {filteredCourses.map((course) => {
               const isActive = activeCourse?.courseCode === course.courseCode;
               return (
                 <button
                   key={course.courseCode}
                   onClick={() => setSelectedCourseCode(course.courseCode)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer border transition-all duration-150 shrink-0
+                  className={`px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider cursor-pointer border transition-colors duration-200 shrink-0
                     ${isActive
-                      ? "bg-primary border-primary text-primary-foreground shadow shadow-primary/10"
-                      : "bg-muted/25 border-border/10 text-muted-foreground hover:bg-muted/35"
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm"
+                      : "bg-card/70 backdrop-blur-sm border-border/30 text-muted-foreground"
                     }`}
                 >
                   {course.courseCode}
@@ -183,90 +230,60 @@ export default function MarksPage() {
             })}
           </div>
 
-          {/* Active Course Content */}
+          {/* ── Assessment Cards ─────────────────────────────────────────────────── */}
           {activeCourse && (
-            <div className="space-y-4">
-              {/* Active Course Details Header */}
-              <div className="flex items-start justify-between gap-4 py-2">
-                <div className="space-y-1.5 min-w-0">
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
-                    <span className="text-sm font-semibold text-primary uppercase tracking-wide leading-none">
-                      {activeCourse.courseCode}
-                    </span>
-                    <span>&bull;</span>
-                    <span className="font-mono">{activeCourse.slot}</span>
-                    <span>&bull;</span>
-                    <span className="uppercase">{activeCourse.courseType}</span>
-                  </div>
-                  <h2 className="text-base font-semibold text-foreground leading-snug">
-                    {activeCourse.courseTitle}
-                  </h2>
-                  <p className="text-xs text-muted-foreground/60 leading-none">
-                    {activeCourse.faculty} · {activeCourse.courseMode}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  {activeCourse.assessments.length > 0 ? (
-                    <>
-                      <span className="text-2xl font-bold text-foreground leading-none">
-                        {activeCourse.assessments.reduce((s, a) => s + a.weightageMark, 0).toFixed(2)}
-                      </span>
-                      <span className="text-xs text-muted-foreground/50 font-medium ml-1">/ 100</span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-muted-foreground/50 font-medium">No marks</span>
-                  )}
-                </div>
-              </div>
-
-              <Separator className="bg-border/25" />
-
-              {/* Assessments list */}
+            <div className="relative z-10 space-y-3">
               {activeCourse.assessments.length > 0 ? (
-                <div className="divide-y divide-border/10 border-t border-b border-border/10">
-                  {/* Table header */}
-                  <div className="flex items-center gap-3 py-2.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 w-5 shrink-0">#</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 flex-1">Assessment</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 w-20 text-center">Score</span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/40 w-16 text-center">Wtd.</span>
-                  </div>
-                  {activeCourse.assessments.map((ass, index) => {
-                    return (
-                      <div key={`${ass.slNo}-${index}`} className="flex items-center gap-3 py-3">
-                        <span className="text-xs text-muted-foreground/30 tabular-nums w-5 shrink-0">
-                          {ass.slNo ?? index + 1}
-                        </span>
-                        <span className="flex-1 text-sm font-medium text-foreground leading-snug min-w-0 truncate">
-                          {ass.markTitle}
-                        </span>
-                        <div className="w-20 text-center shrink-0">
-                          <span className="text-sm font-semibold text-foreground tabular-nums">
-                            {ass.scoredMark}
-                          </span>
-                          <span className="text-xs text-muted-foreground/30 mx-0.5">/</span>
-                          <span className="text-xs text-muted-foreground/60">{ass.maxMark}</span>
-                        </div>
-                        <div className="w-16 text-center shrink-0">
-                          <span className="text-sm font-semibold text-primary tabular-nums">
-                            {ass.weightageMark}
-                          </span>
-                          <span className="text-xs text-muted-foreground/30 mx-0.5">/</span>
-                          <span className="text-xs text-muted-foreground/60">{ass.weightagePercent}</span>
-                        </div>
+                activeCourse.assessments.map((ass, index) => (
+                  <div
+                    key={`${ass.slNo}-${index}`}
+                    className="bg-card/70 backdrop-blur-md border border-border/30 rounded-2xl px-4 py-4 flex items-center gap-3 shadow-sm"
+                  >
+                    {/* Index badge */}
+                    <div className="shrink-0 w-8 h-8 rounded-xl bg-muted/50 border border-border/25 flex items-center justify-center">
+                      <span className="text-[11px] font-black text-muted-foreground/45 tabular-nums">
+                        {String(ass.slNo ?? index + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+
+                    {/* Assessment title */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-bold text-foreground leading-snug line-clamp-2">{ass.markTitle}</p>
+                    </div>
+
+                    {/* Score column */}
+                    <div className="shrink-0 flex flex-col items-end gap-0.5 min-w-[52px]">
+                      <span className="text-[9px] font-black text-muted-foreground/35 uppercase tracking-widest leading-none">Score</span>
+                      <div className="flex items-baseline gap-px leading-none">
+                        <span className="text-[18px] font-black text-foreground tabular-nums leading-none">{ass.scoredMark}</span>
+                        <span className="text-[10px] text-muted-foreground/30 leading-none mb-px">/</span>
+                        <span className="text-[11px] font-semibold text-muted-foreground/45 tabular-nums leading-none">{ass.maxMark}</span>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+
+                    {/* Vertical divider */}
+                    <div className="w-px h-9 bg-border/25 shrink-0" />
+
+                    {/* Weighted column */}
+                    <div className="shrink-0 flex flex-col items-end gap-0.5 min-w-[48px]">
+                      <span className="text-[9px] font-black text-muted-foreground/35 uppercase tracking-widest leading-none">Wtd.</span>
+                      <div className="flex items-baseline gap-px leading-none">
+                        <span className="text-[18px] font-black text-primary tabular-nums leading-none">{ass.weightageMark}</span>
+                        <span className="text-[10px] text-muted-foreground/30 leading-none mb-px">/</span>
+                        <span className="text-[11px] font-semibold text-muted-foreground/45 tabular-nums leading-none">{ass.weightagePercent}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
-                  <BookOpen className="w-8 h-8 text-muted-foreground/20" />
-                  <p className="text-xs font-medium text-muted-foreground">No assessments graded yet</p>
+                <div className="flex flex-col items-center justify-center py-14 gap-3 text-center bg-card/60 backdrop-blur-md border border-border/25 rounded-2xl">
+                  <BookOpen className="w-9 h-9 text-muted-foreground/20" />
+                  <p className="text-sm font-semibold text-muted-foreground">No assessments graded yet</p>
                 </div>
               )}
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );

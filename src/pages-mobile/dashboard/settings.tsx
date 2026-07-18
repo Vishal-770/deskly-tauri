@@ -4,15 +4,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSemester } from "@/hooks/useSemester";
 import { useCredentialStatus } from "@/hooks/useCredentialStatus";
 import { authGetTokens } from "@/lib/tauri-auth";
-import { getStudentProfile, ProfileData } from "@/lib/features";
 import { useTheme } from "@/components/theme-provider";
 import {
   User,
   LogOut,
-  GraduationCap,
-  Mail,
-  Phone,
-  Calendar,
   KeyRound,
   Cookie,
   RefreshCw,
@@ -25,6 +20,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { DrawerSelect } from "@/components/ui/drawer-select";
+import { Drawer, DrawerContent, DrawerClose } from "@/components/ui/drawer";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 
 // ─── Skeleton Helper ──────────────────────────────────────────────────────────
@@ -39,28 +35,6 @@ function SettingsSkeleton() {
       {/* Header */}
       <div className="space-y-1">
         <Sk className="h-7 w-32" />
-      </div>
-
-      {/* Profile info skeleton */}
-      <div className="flex items-center gap-4 py-4 border-t border-b border-border/10">
-        <Sk className="w-12 h-12 rounded-full shrink-0" />
-        <div className="space-y-1.5 flex-1">
-          <Sk className="h-4 w-36" />
-          <Sk className="h-3 w-24" />
-        </div>
-      </div>
-
-      {/* Details list skeleton */}
-      <div className="divide-y divide-border/10 border-t border-b border-border/10">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="py-3.5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Sk className="w-4 h-4 rounded shrink-0" />
-              <Sk className="h-3.5 w-20" />
-            </div>
-            <Sk className="h-4 w-32" />
-          </div>
-        ))}
       </div>
 
       {/* Preferences list skeleton */}
@@ -83,9 +57,8 @@ function SettingsSkeleton() {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function MobileSettings() {
-  const { logout, loading: authLoading } = useAuth();
+  const { authState, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [profile, setProfile] = useState<ProfileData | null>(null);
   const { currentSemester, semesters, loading: semesterLoading, error: semesterError, setSemester } = useSemester();
   const { theme, setTheme } = useTheme();
 
@@ -97,6 +70,9 @@ export default function MobileSettings() {
   // Session token (cookie) status
   const [hasCookies, setHasCookies] = useState<boolean | null>(null);
   const [cookiesLoading, setCookiesLoading] = useState(true);
+
+  // Logout confirmation drawer state
+  const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
 
   async function loadTokenStatus() {
     setCookiesLoading(true);
@@ -111,17 +87,6 @@ export default function MobileSettings() {
   }
 
   useEffect(() => {
-    async function loadProfile() {
-      try {
-        const res = await getStudentProfile();
-        if (res.success && res.data) {
-          setProfile(res.data);
-        }
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-      }
-    }
-    loadProfile();
     loadTokenStatus();
   }, []);
 
@@ -163,7 +128,7 @@ export default function MobileSettings() {
     },
   ];
 
-  if (authLoading || !profile) {
+  if (authLoading) {
     return <SettingsSkeleton />;
   }
 
@@ -187,58 +152,13 @@ export default function MobileSettings() {
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-bold text-foreground truncate">
-              {profile?.student?.name ?? "Student"}
+              Student
             </h2>
             <p className="text-xs text-primary uppercase tracking-wide font-semibold mt-0.5">
-              {profile?.student?.registerNumber ?? "—"}
+              {authState?.userId ?? "—"}
             </p>
           </div>
         </div>
-
-        {/* Student Details Info List */}
-        {profile?.student && (
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2">
-              <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
-                Student Details
-              </h2>
-            </div>
-
-            <div className="divide-y divide-border/10 border-t border-b border-border/10">
-              <div className="flex items-center justify-between gap-4 py-3.5">
-                <div className="flex items-center gap-3 shrink-0">
-                  <GraduationCap className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-                  <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">Program</span>
-                </div>
-                <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">{profile.student.program}</span>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 py-3.5">
-                <div className="flex items-center gap-3 shrink-0">
-                  <Mail className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-                  <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">Email</span>
-                </div>
-                <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">{profile.student.vitEmail ?? "—"}</span>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 py-3.5">
-                <div className="flex items-center gap-3 shrink-0">
-                  <Phone className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-                  <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">Phone</span>
-                </div>
-                <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">{profile.student.mobile ?? "—"}</span>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 py-3.5">
-                <div className="flex items-center gap-3 shrink-0">
-                  <Calendar className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-                  <span className="text-xs font-medium text-muted-foreground/50 uppercase tracking-wide leading-none">Date of Birth</span>
-                </div>
-                <span className="text-sm font-medium text-foreground text-right truncate max-w-[65%]">{profile.student.dob ?? "—"}</span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── Preferences ─────────────────────────────────────────────────────── */}
@@ -386,23 +306,53 @@ export default function MobileSettings() {
       {/* Logout Action */}
       <div className="pt-2">
         <button
-          onClick={async () => {
-            try {
-              await logout();
-            } catch (e) {
-              console.error("Logout error:", e);
-            } finally {
-              // Hard replace to root — forces full app remount and
-              // reinitialises all auth hook instances so redirect triggers
-              navigate("/");
-            }
-          }}
+          onClick={() => setIsLogoutConfirmOpen(true)}
           className="w-full h-11 flex justify-center items-center gap-2 bg-destructive/10 hover:bg-destructive/15 text-destructive border border-destructive/20 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           Sign Out
         </button>
       </div>
+
+      {/* Sign Out Confirmation Drawer */}
+      <Drawer open={isLogoutConfirmOpen} onOpenChange={setIsLogoutConfirmOpen} showSwipeHandle>
+        <DrawerContent className="p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] bg-background border-t border-border/10 rounded-t-[32px] flex flex-col font-saira max-h-[85vh]">
+          {/* Header */}
+          <div className="flex items-start gap-4 pt-2 pb-6 shrink-0 border-b border-border/5">
+            <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center text-destructive border border-destructive/20 shrink-0">
+              <LogOut className="w-5 h-5" />
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <h3 className="text-base font-bold text-foreground tracking-tight leading-none">Sign Out</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Are you sure you want to sign out? Your cached student data will be cleared from this device.
+              </p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col gap-3 pt-5 shrink-0">
+            <button
+              onClick={async () => {
+                setIsLogoutConfirmOpen(false);
+                try {
+                  await logout();
+                } catch (e) {
+                  console.error("Logout error:", e);
+                } finally {
+                  navigate("/");
+                }
+              }}
+              className="w-full h-11 flex justify-center items-center bg-destructive text-destructive-foreground text-sm font-semibold rounded-2xl active:opacity-90 transition-opacity cursor-pointer border-0"
+            >
+              Sign Out
+            </button>
+            <DrawerClose className="w-full h-11 flex justify-center items-center bg-muted text-muted-foreground text-sm font-semibold rounded-2xl cursor-pointer border-0 hover:bg-muted/80 focus:outline-none transition-colors">
+              Cancel
+            </DrawerClose>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

@@ -10,15 +10,15 @@ import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import gradeHistoryImg from "@/assets/grade-history.png";
 import {
   GraduationCap,
   Search,
   FileText,
-  Hash,
   Monitor,
   CalendarDays,
-  Award,
   ChevronRight,
+  X,
 } from "lucide-react";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -33,31 +33,26 @@ function GradeDetailDrawer({
 }) {
   if (!item) return null;
 
-  const details = [
-    { icon: Hash,          label: "Course Code",  value: item.courseCode },
-    { icon: GraduationCap, label: "Course Type",  value: item.courseType },
-    { icon: Monitor,       label: "Credits",      value: `${item.credits} Credits` },
-    { icon: CalendarDays,  label: "Exam Session", value: item.examMonth || "—" },
-    { icon: Award,         label: "Grade Earned", value: item.grade },
-  ];
-
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="pb-8 font-saira max-h-[92vh]">
-        <div className="overflow-y-auto no-scrollbar px-6 space-y-7 pt-5">
+      <DrawerContent className="pb-[calc(1.5rem+env(safe-area-inset-bottom))] font-saira max-h-[92vh] bg-background border-t border-border/10 rounded-t-[32px] flex flex-col">
+        <div className="overflow-y-auto no-scrollbar px-6 space-y-6 pt-6 flex-1">
           
           {/* Header Row */}
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex items-center gap-2 leading-none">
-                <span className="text-sm font-medium tracking-wide text-primary uppercase">
+            <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
                   {item.courseCode}
                 </span>
-                <span className="text-[10px] font-medium text-muted-foreground/60">
-                  (Grade {item.grade})
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-muted text-muted-foreground tracking-wider">
+                  {item.courseType.trim()}
+                </span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
+                  Grade {item.grade.trim().toUpperCase()}
                 </span>
               </div>
-              <h2 className="text-xl font-semibold text-foreground leading-snug tracking-tight">
+              <h2 className="text-xl font-extrabold text-foreground leading-snug tracking-tight">
                 {item.courseTitle}
               </h2>
             </div>
@@ -65,35 +60,66 @@ function GradeDetailDrawer({
             {/* Close Button */}
             <button
               onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0"
+              className="p-2 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground active:opacity-75 transition-all border-none cursor-pointer shrink-0"
             >
-              <span className="text-lg leading-none font-sans">×</span>
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <Separator className="bg-border/25" />
+          <Separator className="bg-border/10" />
 
-          {/* Grade Details List */}
-          <div className="space-y-3 pt-1">
-            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
-              Grade Details
-            </p>
-
-            <div className="divide-y divide-border/10">
-              {details.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-center gap-4 py-3">
-                  {/* Left Column: Icon Box */}
-                  <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4 text-primary shrink-0" />
-                  </div>
-                  
-                  {/* Right Column: Text contents */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
-                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
-                  </div>
+          {/* 1. Grade Details Grid (2x2) */}
+          <div className="grid grid-cols-2 gap-y-5 gap-x-4 py-1">
+            {/* Credits */}
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                Credits
+              </span>
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <Monitor className="w-4 h-4" />
                 </div>
-              ))}
+                <span className="text-sm font-semibold text-foreground">{item.credits} Credits</span>
+              </div>
+            </div>
+
+            {/* Exam Session */}
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                Exam Session
+              </span>
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <CalendarDays className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground truncate">{item.examMonth || "—"}</span>
+              </div>
+            </div>
+
+            {/* Result Declared */}
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                Result Declared
+              </span>
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <CalendarDays className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground truncate">{item.resultDeclared || "—"}</span>
+              </div>
+            </div>
+
+            {/* Course Distribution */}
+            <div className="space-y-1">
+              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                Distribution
+              </span>
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-semibold text-foreground truncate">{item.courseDistribution || "—"}</span>
+              </div>
             </div>
           </div>
 
@@ -103,13 +129,7 @@ function GradeDetailDrawer({
   );
 }
 
-function gradeTextColor(grade: string) {
-  const g = grade.trim().toUpperCase();
-  if (g === "S" || g === "A") return "text-emerald-500";
-  if (g === "B" || g === "C" || g === "D" || g === "P") return "text-primary";
-  if (g === "E" || g === "F") return "text-destructive";
-  return "text-muted-foreground";
-}
+
 
 function Sk({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
@@ -249,12 +269,25 @@ export default function GradesPage() {
   }
 
   return shell(
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Illustration image absolute header */}
+      <div className="absolute -top-4 right-0 w-[200px] h-[160px] pointer-events-none select-none z-0">
+        <img
+          src={gradeHistoryImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+          }}
+          alt="Grade History Illustration"
+        />
+      </div>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
             Retry
@@ -263,7 +296,7 @@ export default function GradesPage() {
       )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start justify-between gap-4">
+      <header className="relative z-10 flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
             <GraduationCap className="w-6 h-6 text-primary shrink-0" />
@@ -274,30 +307,26 @@ export default function GradesPage() {
         </div>
       </header>
 
-      <Separator className="bg-border/25" />
-
       {/* ── Stats block ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between py-1 text-center">
+      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-md flex items-center justify-between text-center backdrop-blur-md">
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Subjects</p>
-          <p className="text-2xl font-bold text-foreground leading-none">{totalSubjects}</p>
+          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Subjects</p>
+          <p className="text-2xl font-black text-foreground leading-none">{totalSubjects}</p>
         </div>
-        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0 mx-2" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">Credits</p>
-          <p className="text-2xl font-bold text-foreground leading-none">{totalCredits}</p>
+          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Credits</p>
+          <p className="text-2xl font-black text-foreground leading-none">{totalCredits}</p>
         </div>
-        <Separator orientation="vertical" className="h-8 bg-border/25 shrink-0" />
+        <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider leading-none mb-2">CGPA</p>
-          <p className="text-2xl font-bold text-foreground leading-none">{cgpaVal}</p>
+          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">CGPA</p>
+          <p className="text-2xl font-black text-foreground leading-none">{cgpaVal}</p>
         </div>
       </div>
 
-      <Separator className="bg-border/25" />
-
       {/* ── Search & Filter ──────────────────────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="relative z-10 space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50 pointer-events-none" />
           <Input
@@ -321,7 +350,7 @@ export default function GradesPage() {
       </div>
 
       {/* ── Section Label ────────────────────────────────────────────────────── */}
-      <div className="space-y-1">
+      <div className="relative z-10 space-y-1">
         <h2 className="text-base font-semibold text-foreground tracking-tight leading-none uppercase">
           Grade History
         </h2>
@@ -332,13 +361,13 @@ export default function GradesPage() {
 
       {/* ── Grades List ──────────────────────────────────────────────────────── */}
       {filteredGrades.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No grades found</p>
           <p className="text-xs text-muted-foreground">Try modifying your search or filter.</p>
         </div>
       ) : (
-        <div className="divide-y divide-border/10 border-t border-b border-border/10">
+        <div className="relative z-10 flex flex-col gap-3">
           {filteredGrades.map((item, idx) => (
             <div
               key={`${item.courseCode}-${idx}`}
@@ -346,7 +375,7 @@ export default function GradesPage() {
                 setSelectedGrade(item);
                 setDrawerOpen(true);
               }}
-              className="flex items-center justify-between gap-4 py-4 hover:bg-muted/5 active:opacity-75 transition-all cursor-pointer"
+              className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
             >
               <div className="flex-1 min-w-0 flex items-center gap-4">
                 {/* Serial */}
@@ -365,7 +394,7 @@ export default function GradesPage() {
                     <span>&bull;</span>
                     <span>{item.credits} Credits</span>
                   </div>
-                  <p className="text-sm font-medium text-foreground leading-snug truncate">
+                  <p className="text-sm font-bold text-foreground leading-snug truncate">
                     {item.courseTitle}
                   </p>
                   <p className="text-[10px] text-muted-foreground/50 font-mono leading-none pt-0.5">
@@ -374,7 +403,7 @@ export default function GradesPage() {
                 </div>
 
                 {/* Grade text (large letter grade) */}
-                <span className={`text-xl font-bold tracking-tight shrink-0 w-8 text-center leading-none ${gradeTextColor(item.grade)}`}>
+                <span className="text-xl font-black tracking-tight shrink-0 w-8 text-center leading-none text-foreground">
                   {item.grade.trim().toUpperCase()}
                 </span>
               </div>
@@ -388,32 +417,42 @@ export default function GradesPage() {
 
       {/* ── Grade Distribution Footer ─────────────────────────────────────────── */}
       {data?.cgpa?.gradeDistribution && (
-        <div className="space-y-4 pt-4 border-t border-border/10">
-          <div className="flex items-center gap-1.5">
-            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 leading-none">
-              Grade Distribution
-            </h3>
+        <section className="relative z-10 space-y-4 pt-2">
+          <h3 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
+            Grade Distribution
+          </h3>
+          <div className="bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-md backdrop-blur-md">
+            <div className="grid grid-cols-3 gap-3">
+              {["S", "A", "B", "C", "D", "E", "F", "P", "N"].map((label) => {
+                const count = gradeCounts[label] ?? 0;
+                const pct = totalSubjects > 0 ? (count / totalSubjects) * 100 : 0;
+                return (
+                  <div key={label} className="bg-muted/15 border border-border/5 rounded-2xl p-3 flex flex-col justify-between gap-2.5 relative overflow-hidden">
+                    {/* Background proportion indicator */}
+                    <div 
+                      className="absolute bottom-0 left-0 h-0.5 bg-primary/30 transition-all duration-500" 
+                      style={{ width: `${pct}%` }} 
+                    />
+                    
+                    <div className="flex items-center justify-between leading-none">
+                      <span className="text-[10px] font-black uppercase text-muted-foreground/45 tracking-wider">
+                        Grade {label}
+                      </span>
+                      <span className="text-[9px] font-bold text-muted-foreground/30">
+                        {Math.round(pct)}%
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-baseline gap-0.5 leading-none">
+                      <span className="text-xl font-black text-foreground">{count}</span>
+                      <span className="text-[9px] font-semibold text-muted-foreground/45 ml-0.5">{count === 1 ? "course" : "courses"}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { label: "S", textColor: "text-emerald-500" },
-              { label: "A", textColor: "text-emerald-500" },
-              { label: "B", textColor: "text-primary" },
-              { label: "C", textColor: "text-primary" },
-              { label: "D", textColor: "text-primary" },
-              { label: "E", textColor: "text-destructive" },
-              { label: "F", textColor: "text-destructive" },
-              { label: "P", textColor: "text-primary" },
-              { label: "N", textColor: "text-muted-foreground" },
-            ].map(({ label, textColor }) => (
-              <div key={label} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/20 border border-border/5 rounded-md text-xs font-semibold leading-none">
-                <span className={textColor}>{label}</span>
-                <span className="text-muted-foreground/25 font-normal">&bull;</span>
-                <span className="text-foreground">{gradeCounts[label] ?? 0}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        </section>
       )}
 
       <GradeDetailDrawer

@@ -14,12 +14,12 @@ import {
   CalendarRange,
   ChevronRight,
   Hash,
-  GraduationCap,
-  Layers,
   LayoutGrid,
   Award,
+  X,
 } from "lucide-react";
 import { generateExamGroupIcs } from "@/lib/calendar-export-utils";
+import examsImg from "@/assets/exams.png";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -288,12 +288,25 @@ export default function ExamSchedulePage() {
   }
 
   return shell(
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Illustration image absolute header */}
+      <div className="absolute -top-4 right-0 w-[200px] h-[160px] pointer-events-none select-none z-0">
+        <img
+          src={examsImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+          }}
+          alt="Exams Illustration"
+        />
+      </div>
 
       {/* Error banner */}
       {error && !isNotReleased && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
             Retry
@@ -302,7 +315,7 @@ export default function ExamSchedulePage() {
       )}
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start justify-between gap-4 shrink-0">
+      <header className="relative z-10 flex items-start justify-between gap-4 shrink-0">
         <div className="flex items-start gap-2 min-w-0">
           <div className="w-6 h-6 text-primary shrink-0 mt-0.5 flex items-center justify-center">
             {/* Calendar grid icon */}
@@ -329,7 +342,7 @@ export default function ExamSchedulePage() {
 
       {/* ── Exam Type Tabs ────────────────────────────────────────────────────── */}
       {groups.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
+        <div className="relative z-10 flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-2 px-2 shrink-0">
           {tabsList.map((tab) => {
             const active = selectedTab === tab.id;
             return (
@@ -351,7 +364,7 @@ export default function ExamSchedulePage() {
 
       {/* ── Content View ────────────────────────────────────────────────────── */}
       {isNotReleased ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
           <CalendarRange className="w-8 h-8 text-muted-foreground/20" />
           <div>
             <h2 className="text-sm font-semibold text-foreground">Exams Not Uploaded</h2>
@@ -361,7 +374,7 @@ export default function ExamSchedulePage() {
           </div>
         </div>
       ) : activeSchedules.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <div>
             <p className="text-sm font-bold text-foreground">No exam schedules loaded</p>
@@ -369,9 +382,9 @@ export default function ExamSchedulePage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 relative z-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 leading-none uppercase">
+            <h2 className="text-sm font-bold text-foreground flex items-center gap-2 leading-none uppercase tracking-wider">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
                 <rect width="18" height="18" x="3" y="4" rx="2" />
                 <path d="M3 10h18" />
@@ -383,13 +396,13 @@ export default function ExamSchedulePage() {
             </h2>
           </div>
 
-          <div className="divide-y divide-border/10 border-t border-b border-border/10">
+          <div className="flex flex-col gap-3">
             {listItems.map((item, idx) => {
               if (item.type === "gap") {
                 return (
-                  <div key={`gap-${idx}`} className="flex justify-center py-2.5 bg-muted/5 select-none">
-                    <span className="bg-primary/10 text-primary text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
+                  <div key={`gap-${idx}`} className="flex justify-center py-1 select-none">
+                    <span className="bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1 border border-primary/10">
+                      <Clock className="w-3.5 h-3.5" />
                       <span>{item.days} {item.days === 1 ? "Day" : "Days"} Gap</span>
                     </span>
                   </div>
@@ -405,7 +418,7 @@ export default function ExamSchedulePage() {
                 <div
                   key={`${exam.courseCode}-${idx}`}
                   onClick={() => setSelectedExam(exam)}
-                  className="p-4 flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
+                  className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-center justify-between gap-4 backdrop-blur-md cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
                 >
                   {/* Date bubble */}
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -457,58 +470,62 @@ export default function ExamSchedulePage() {
           if (!open) setSelectedExam(null);
         }}
       >
-        <DrawerContent className="pb-8 font-saira max-h-[92vh]">
-          <div className="overflow-y-auto no-scrollbar px-6 space-y-7 pt-5">
+        <DrawerContent className="pb-[calc(1.5rem+env(safe-area-inset-bottom))] font-saira max-h-[92vh] bg-background border-t border-border/10 rounded-t-[32px] flex flex-col">
+          <div className="overflow-y-auto no-scrollbar px-6 space-y-6 pt-6 flex-1">
+            
             {/* Drawer Header */}
             <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 leading-none">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary leading-none">
-                    Exam Details ({selectedExam?.examType})
+              <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
+                    {selectedExam?.courseCode}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-muted text-muted-foreground tracking-wider">
+                    {selectedExam?.courseType.trim()}
+                  </span>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
+                    {selectedExam?.examType}
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-foreground leading-snug tracking-tight">
+                <h3 className="text-xl font-extrabold text-foreground leading-snug tracking-tight">
                   {selectedExam?.courseTitle}
                 </h3>
-                <p className="text-xs text-muted-foreground/60">
-                  {selectedExam ? `${selectedExam.courseCode} • ${selectedExam.examDate}` : ""}
-                </p>
               </div>
+              
+              {/* Close Button */}
               <button
                 onClick={() => setSelectedExam(null)}
-                className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0 font-sans"
+                className="p-2 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground active:opacity-75 transition-all border-none cursor-pointer shrink-0"
               >
-                <span className="text-lg leading-none">×</span>
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <Separator className="bg-border/25" />
+            <Separator className="bg-border/10" />
 
             {/* Drawer Body details */}
             {selectedExam && (() => {
               const detailsList = [
-                { icon: Hash,          label: "Course Code",    value: selectedExam.courseCode },
-                { icon: GraduationCap, label: "Course Type",    value: selectedExam.courseType },
-                { icon: Layers,        label: "Class ID",       value: selectedExam.classId },
-                { icon: LayoutGrid,    label: "Slot & Session", value: `${selectedExam.slot} (${selectedExam.examSession})` },
+                { icon: Hash,          label: "Class ID",       value: selectedExam.classId },
+                { icon: LayoutGrid,    label: "Slot",           value: selectedExam.slot },
                 { icon: Award,         label: "Seat Number",    value: `Seat ${selectedExam.seatNo}` },
                 { icon: Clock,         label: "Exam Timing",    value: `${selectedExam.examTime} (Reporting: ${selectedExam.reportingTime})` },
                 { icon: MapPin,        label: "Venue / Room",   value: selectedExam.seatLocation !== "-" ? `${selectedExam.venue} (Location: ${selectedExam.seatLocation})` : selectedExam.venue },
               ];
               return (
                 <div className="space-y-6">
-                  <div className="divide-y divide-border/10">
+                  {/* 1. Details Grid */}
+                  <div className="grid grid-cols-2 gap-y-5 gap-x-4 py-1">
                     {detailsList.map(({ icon: Icon, label, value }) => (
-                      <div key={label} className="flex items-center gap-4 py-3">
-                        {/* Left Column: Icon Box */}
-                        <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
-                          <Icon className="w-4 h-4 text-primary shrink-0" />
-                        </div>
-                        
-                        {/* Right Column: Text contents */}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
-                          <p className="text-sm font-medium text-foreground truncate">{value}</p>
+                      <div key={label} className="space-y-1 col-span-2 sm:col-span-1">
+                        <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                          {label}
+                        </span>
+                        <div className="flex items-center gap-2 pt-0.5">
+                          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <span className="text-sm font-semibold text-foreground truncate">{value}</span>
                         </div>
                       </div>
                     ))}
@@ -528,7 +545,7 @@ export default function ExamSchedulePage() {
                         console.error("Failed to save calendar file", e);
                       }
                     }}
-                    className="w-full py-3.5 bg-primary hover:opacity-90 active:opacity-75 transition-all text-primary-foreground font-bold text-sm rounded-2xl flex items-center justify-center gap-2 border-0 cursor-pointer"
+                    className="w-full py-3.5 bg-primary hover:opacity-90 active:opacity-75 transition-all text-primary-foreground font-black text-sm rounded-2xl flex items-center justify-center gap-2 border-0 cursor-pointer"
                   >
                     <CalendarRange className="w-4 h-4 shrink-0" />
                     <span>Add to Calendar</span>
