@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { getPaymentReceipts, Receipt, downloadPaymentReceipt } from "@/lib/features";
+import { getPaymentReceipts, Receipt } from "@/lib/features";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
@@ -13,7 +13,6 @@ import {
   CreditCard,
   User,
   Receipt as ReceiptIcon,
-  Download,
   X,
   ChevronRight,
   Calendar,
@@ -86,25 +85,7 @@ function ReceiptDrawer({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
-
   if (!item) return null;
-
-  const handleDownload = async () => {
-    setDownloading(true);
-    setDownloadError(null);
-    try {
-      const res = await downloadPaymentReceipt(item.receiptNumber, item.applNo);
-      if (!res.success) {
-        setDownloadError(res.error ?? "Failed to download receipt.");
-      }
-    } catch (err) {
-      setDownloadError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   const details = [
     { icon: Hash,        label: "Receipt ID",       value: item.receiptId || "—" },
@@ -174,23 +155,6 @@ function ReceiptDrawer({
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Download button */}
-          <div className="space-y-3 pt-1">
-            <button
-              onClick={handleDownload}
-              disabled={downloading}
-              className="w-full h-12 rounded-[20px] bg-primary text-primary-foreground flex items-center justify-center gap-2.5 text-sm font-extrabold hover:opacity-90 active:opacity-80 transition-all cursor-pointer border-none shadow-sm disabled:opacity-50"
-            >
-              <Download className="w-4 h-4" />
-              <span>{downloading ? "Downloading PDF..." : "Download Receipt PDF"}</span>
-            </button>
-            {downloadError && (
-              <p className="text-xs text-destructive text-center font-semibold mt-1">
-                {downloadError}
-              </p>
-            )}
           </div>
 
         </div>
@@ -359,20 +323,28 @@ export default function PaymentReceiptsPage() {
       )}
 
       {/* ── Overview Stats Card ──────────────────────────────────────────────── */}
-      <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 p-5 rounded-[24px] shadow-sm flex items-center justify-between text-center">
-        <div className="flex-1 min-w-0">
-          <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest block leading-none mb-2">Receipts</span>
-          <span className="text-xl font-black text-foreground leading-none">{stats.count}</span>
+      <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 p-5 rounded-[24px] shadow-sm space-y-4">
+        {/* Row 1: Receipts and Latest Date */}
+        <div className="flex items-center justify-between text-center">
+          <div className="flex-1 min-w-0">
+            <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest block leading-none mb-2">Receipts</span>
+            <span className="text-xl font-black text-foreground leading-none">{stats.count}</span>
+          </div>
+          <div className="w-px h-8 bg-border/20 shrink-0 mx-4" />
+          <div className="flex-1 min-w-0">
+            <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest block leading-none mb-2">Latest Date</span>
+            <span className="text-xs font-black text-foreground leading-none block pt-1 truncate">{stats.latestDate}</span>
+          </div>
         </div>
-        <div className="w-px h-8 bg-border/20 shrink-0 mx-2" />
-        <div className="flex-1 min-w-0">
-          <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest block leading-none mb-2">Total Paid</span>
-          <span className="text-xl font-black text-foreground leading-none truncate block px-1">{formatINR(stats.totalPaid)}</span>
-        </div>
-        <div className="w-px h-8 bg-border/20 shrink-0 mx-2" />
-        <div className="flex-1 min-w-0">
-          <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest block leading-none mb-2">Latest Date</span>
-          <span className="text-xs font-black text-foreground leading-none block pt-1 truncate">{stats.latestDate}</span>
+
+        <Separator className="bg-border/15" />
+
+        {/* Row 2: Total Amount Paid */}
+        <div className="text-center">
+          <span className="text-[9px] text-muted-foreground/50 uppercase tracking-widest block leading-none mb-2">Total Amount Paid</span>
+          <span className="text-2xl font-black text-foreground leading-none tracking-tight block">
+            {formatINR(stats.totalPaid)}
+          </span>
         </div>
       </div>
 
