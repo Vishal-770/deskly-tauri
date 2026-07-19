@@ -10,7 +10,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { isNetworkError } from "@/lib/utils";
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 function MarksSkeleton() {
@@ -21,14 +21,14 @@ function MarksSkeleton() {
         <Sk className="h-3 w-52" />
       </div>
       <div className="relative">
-        <Sk className="h-10 w-full rounded-xl" />
+        <Sk className="h-10 w-full rounded-md" />
       </div>
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {[...Array(4)].map((_, i) => (
-          <Sk key={i} className="h-14 w-28 rounded-xl shrink-0" />
+          <Sk key={i} className="h-14 w-28 rounded-md shrink-0" />
         ))}
       </div>
-      <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md space-y-4">
+      <div className="p-5 bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md space-y-4">
         <div className="space-y-2">
           <Sk className="h-5 w-32" />
           <Sk className="h-4 w-48" />
@@ -159,7 +159,7 @@ export default function MarksPage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
@@ -172,7 +172,7 @@ export default function MarksPage() {
       </header>
 
       {filteredCourses.length === 0 ? (
-        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
+        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md">
           <Target className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No courses found</p>
           <p className="text-xs text-muted-foreground">Marks data is unavailable for this semester.</p>
@@ -181,7 +181,7 @@ export default function MarksPage() {
         <>
           {/* ── Stats Card ──────────────────────────────────────────────────────── */}
           {activeCourse && (
-            <div className="relative z-10 p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md space-y-4">
+            <div className="relative z-10 p-5 bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md space-y-4">
               <div className="flex items-start justify-between gap-3">
                 {/* Course Info */}
                 <div className="min-w-0 flex-1 space-y-1.5">
@@ -227,7 +227,7 @@ export default function MarksPage() {
                 <button
                   key={course.courseCode}
                   onClick={() => setSelectedCourseCode(course.courseCode)}
-                  className={`px-5 py-3 rounded-2xl text-xs font-extrabold uppercase tracking-wider cursor-pointer border transition-all duration-200 shrink-0
+                  className={`px-5 py-3 rounded-md text-xs font-extrabold uppercase tracking-wider cursor-pointer border transition-all duration-200 shrink-0
                     ${isActive
                       ? "bg-primary border-primary text-primary-foreground shadow-md scale-[1.02]"
                       : "bg-card/80 border-border/40 text-muted-foreground hover:bg-muted/10 backdrop-blur-md"
@@ -267,7 +267,7 @@ export default function MarksPage() {
                           [cardKey]: !prev[cardKey],
                         }));
                       }}
-                      className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-85 hover:bg-muted/5 transition-all cursor-pointer select-none"
+                      className="p-4 bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-85 hover:bg-muted/5 transition-all cursor-pointer select-none"
                     >
                       {/* Index badge */}
                       <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
@@ -305,7 +305,7 @@ export default function MarksPage() {
                   );
                 })
               ) : (
-                <div className="flex flex-col items-center justify-center py-14 gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
+                <div className="flex flex-col items-center justify-center py-14 gap-3 text-center bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md">
                   <BookOpen className="w-8 h-8 text-muted-foreground/20" />
                   <p className="text-sm font-semibold text-muted-foreground">No assessments graded yet</p>
                 </div>

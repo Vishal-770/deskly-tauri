@@ -54,7 +54,7 @@ function CourseRow({ item, index }: { item: TimetableCourse; index: number }) {
   const catStyle = getCategoryStyle(item.category);
 
   return (
-    <div className="group py-4 px-3 -mx-3 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/10 transition-colors duration-150">
+    <div className="group py-4 px-3 -mx-3 rounded-md flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/10 transition-colors duration-150">
       
       {/* Left: Code, Badges & Title */}
       <div className="flex-1 min-w-0 pr-4 space-y-2.5">
@@ -163,9 +163,9 @@ function CoursesSkeleton() {
       <div className="flex flex-col gap-3 pb-4 border-b border-border/20 pt-4">
         <div className="animate-pulse rounded bg-muted/60 h-5 w-44" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="animate-pulse rounded-xl bg-muted/60 h-8" />
-          <div className="animate-pulse rounded-xl bg-muted/60 h-8" />
-          <div className="animate-pulse rounded-xl bg-muted/60 h-8" />
+          <div className="animate-pulse rounded-md bg-muted/60 h-8" />
+          <div className="animate-pulse rounded-md bg-muted/60 h-8" />
+          <div className="animate-pulse rounded-md bg-muted/60 h-8" />
         </div>
       </div>
       <div className="divide-y divide-border/5 animate-pulse">
@@ -367,7 +367,7 @@ export default function CoursesPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             disabled={isLoading}
-            className="w-full h-10 pl-10 pr-10 rounded-xl border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all disabled:opacity-50 text-foreground"
+            className="w-full h-10 pl-10 pr-10 rounded-md border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all disabled:opacity-50 text-foreground"
           />
           {searchQuery && (
             <button
@@ -380,10 +380,10 @@ export default function CoursesPage() {
         </div>
 
         <Select value={selectedTypeFilter} onValueChange={setSelectedTypeFilter}>
-          <SelectTrigger className="w-full h-10 rounded-xl bg-muted/10 border-border/20 text-xs">
+          <SelectTrigger className="w-full h-10 rounded-md bg-muted/10 border-border/20 text-xs">
             <SelectValue placeholder="All Course Types" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/30 bg-card">
+          <SelectContent className="rounded-md border-border/30 bg-card">
             <SelectItem value="ALL">All Course Types</SelectItem>
             {filterOptions.types.map((type) => (
               <SelectItem key={type} value={type}>{type}</SelectItem>
@@ -392,10 +392,10 @@ export default function CoursesPage() {
         </Select>
 
         <Select value={selectedCategoryFilter} onValueChange={setSelectedCategoryFilter}>
-          <SelectTrigger className="w-full h-10 rounded-xl bg-muted/10 border-border/20 text-xs">
+          <SelectTrigger className="w-full h-10 rounded-md bg-muted/10 border-border/20 text-xs">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/30 bg-card">
+          <SelectContent className="rounded-md border-border/30 bg-card">
             <SelectItem value="ALL">All Categories</SelectItem>
             {filterOptions.categories.map((cat) => (
               <SelectItem key={cat} value={cat}>{cat}</SelectItem>
@@ -433,10 +433,10 @@ export default function CoursesPage() {
 
       {/* ── Footer Summary ──────────────────────────────────────────────────── */}
       {courses.length > 0 && (
-        <footer className="p-5 rounded-2xl bg-muted/10 border border-border/10 mt-6">
+        <footer className="p-5 rounded-lg bg-muted/10 border border-border/10 mt-6">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
+              <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">
                 <FileText className="w-4 h-4" />
               </div>
               <div>
@@ -444,7 +444,7 @@ export default function CoursesPage() {
                 <p className="text-xs text-muted-foreground font-semibold">Credit breakdown</p>
               </div>
             </div>
-            <div className="bg-primary/10 border border-primary/20 text-primary px-3 py-1.5 rounded-xl flex items-center gap-1.5 shrink-0">
+            <div className="bg-primary/10 border border-primary/20 text-primary px-3 py-1.5 rounded-md flex items-center gap-1.5 shrink-0">
               <span className="text-xs font-black uppercase tracking-wider leading-none">Total</span>
               <span className="text-base font-black leading-none">{courseStats.totalCredits}</span>
               <span className="text-xs font-semibold leading-none opacity-70">Cr</span>

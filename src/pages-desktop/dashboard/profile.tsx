@@ -37,11 +37,11 @@ function renderPhoto(photoUrl: string, name: string, maxWClass = "max-w-[12rem]"
   const src = photoUrl ? getSrcFromPhoto(photoUrl) : "";
   if (src) {
     return (
-      <div className={`relative ${maxWClass} shrink-0 overflow-hidden rounded-3xl border border-border/20 bg-muted/10 flex items-center justify-center p-1`}>
+      <div className={`relative ${maxWClass} shrink-0 overflow-hidden rounded-xl border border-border/20 bg-muted/10 flex items-center justify-center p-1`}>
         <img
           src={src}
           alt={name}
-          className={`w-full h-auto ${maxHClass} object-contain rounded-2xl`}
+          className={`w-full h-auto ${maxHClass} object-contain rounded-lg`}
         />
       </div>
     );
@@ -58,7 +58,7 @@ function renderPhoto(photoUrl: string, name: string, maxWClass = "max-w-[12rem]"
     : "?";
 
   return (
-    <div className="w-40 h-48 rounded-3xl shrink-0 overflow-hidden bg-primary/10 flex items-center justify-center text-primary border border-border/20">
+    <div className="w-40 h-48 rounded-xl shrink-0 overflow-hidden bg-primary/10 flex items-center justify-center text-primary border border-border/20">
       <span className="text-xl font-bold tracking-wider">{initials}</span>
     </div>
   );
@@ -100,7 +100,7 @@ function ProfileSkeleton() {
       <div className="space-y-6">
         <Sk className="h-5 w-36 rounded-full" />
         <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start w-full">
-          <Sk className="w-52 h-72 rounded-3xl shrink-0" />
+          <Sk className="w-52 h-72 rounded-xl shrink-0" />
           <div className="flex-1 w-full space-y-6">
             <div className="border-b border-border/10 pb-4 space-y-2">
               <Sk className="h-2.5 w-16 rounded-full" />
@@ -134,7 +134,7 @@ function ProfileSkeleton() {
       <div className="space-y-6 pt-4 border-t border-border/10">
         <Sk className="h-5 w-36 rounded-full" />
         <div className="flex flex-col xl:flex-row gap-8 xl:gap-12 items-start w-full">
-          <Sk className="w-44 h-60 rounded-3xl shrink-0" />
+          <Sk className="w-44 h-60 rounded-xl shrink-0" />
           <div className="flex-1 w-full space-y-6">
             <div className="border-b border-border/10 pb-4 space-y-2">
               <Sk className="h-2.5 w-16 rounded-full" />

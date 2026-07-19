@@ -54,7 +54,7 @@ function FacultySkeleton() {
       </div>
       
       {/* Search Input Skeleton */}
-      <Sk className="h-10 w-full rounded-xl animate-pulse" />
+      <Sk className="h-10 w-full rounded-md animate-pulse" />
 
       {/* School Filter Chips Skeleton */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
@@ -68,7 +68,7 @@ function FacultySkeleton() {
         {[...Array(6)].map((_, i) => (
           <div key={i} className="space-y-4 pb-6 border-b border-border/10">
             <div className="flex items-center gap-3">
-              <Sk className="w-11 h-11 rounded-xl shrink-0 animate-pulse" />
+              <Sk className="w-11 h-11 rounded-md shrink-0 animate-pulse" />
               <div className="space-y-2 flex-1 min-w-0">
                 <Sk className="h-4.5 w-3/4 animate-pulse" />
                 <Sk className="h-3.5 w-1/2 animate-pulse" />
@@ -196,7 +196,7 @@ export default function FacultyInfoPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search faculty by name, ID, cabin, building..."
-              className="w-full h-10 pl-9 pr-10 rounded-xl border border-border/15 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/20 transition-all duration-150"
+              className="w-full h-10 pl-9 pr-10 rounded-md border border-border/15 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/20 transition-all duration-150"
             />
             {query && (
               <button
@@ -256,7 +256,7 @@ export default function FacultyInfoPage() {
                     <div className="space-y-3">
                       {/* Avatar + Primary Info */}
                       <div className="flex items-start gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-muted/50 text-muted-foreground border border-border/10 flex items-center justify-center font-bold text-sm shrink-0">
+                        <div className="w-11 h-11 rounded-md bg-muted/50 text-muted-foreground border border-border/10 flex items-center justify-center font-bold text-sm shrink-0">
                           {initials}
                         </div>
                         <div className="min-w-0">
@@ -304,7 +304,7 @@ export default function FacultyInfoPage() {
             <div className="flex justify-center pt-8">
               <button
                 onClick={() => setVisibleCount((prev) => prev + 30)}
-                className="px-6 py-2.5 rounded-xl border border-border/10 bg-muted/5 text-xs font-extrabold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/10 hover:border-border/20 transition-all duration-150 cursor-pointer"
+                className="px-6 py-2.5 rounded-md border border-border/10 bg-muted/5 text-xs font-extrabold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/10 hover:border-border/20 transition-all duration-150 cursor-pointer"
               >
                 Load More Faculty
               </button>

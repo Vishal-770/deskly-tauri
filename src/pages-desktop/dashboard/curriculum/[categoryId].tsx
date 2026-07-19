@@ -26,10 +26,10 @@ function CoursesDetailSkeleton() {
   return (
     <div className="w-full space-y-6">
       <div className="flex items-center gap-3 pb-6 border-b border-border/40">
-        <div className="animate-pulse rounded-lg bg-muted/65 h-8 w-8" />
+        <div className="animate-pulse rounded-md bg-muted/65 h-8 w-8" />
         <div className="space-y-2">
-          <div className="animate-pulse rounded-lg bg-muted/65 h-6 w-32" />
-          <div className="animate-pulse rounded-lg bg-muted/65 h-3.5 w-48" />
+          <div className="animate-pulse rounded-md bg-muted/65 h-6 w-32" />
+          <div className="animate-pulse rounded-md bg-muted/65 h-3.5 w-48" />
         </div>
       </div>
       <div className="divide-y divide-border/5 animate-pulse">
@@ -39,15 +39,15 @@ function CoursesDetailSkeleton() {
             className="py-4 px-3 -mx-3 flex flex-col md:flex-row md:items-center justify-between gap-4"
           >
             <div className="flex-1 space-y-2 pr-4">
-              <div className="rounded-lg bg-muted/65 h-3.5 w-20" />
-              <div className="rounded-lg bg-muted/65 h-4 w-2/3" />
+              <div className="rounded-md bg-muted/65 h-3.5 w-20" />
+              <div className="rounded-md bg-muted/65 h-4 w-2/3" />
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between md:justify-end gap-4 md:gap-6 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="rounded bg-muted/65 h-4 w-12" />
                 <div className="rounded bg-muted/65 h-4 w-8" />
               </div>
-              <div className="rounded-xl bg-muted/65 h-8 w-24" />
+              <div className="rounded-md bg-muted/65 h-8 w-24" />
             </div>
           </div>
         ))}
@@ -221,7 +221,7 @@ export default function CategoryCoursesPage() {
           onChange={(e) => setQuery(e.target.value)}
           disabled={isLoading}
           placeholder="Search course title or code…"
-          className="w-full h-10 pl-10 pr-10 rounded-xl border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all disabled:opacity-50"
+          className="w-full h-10 pl-10 pr-10 rounded-md border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all disabled:opacity-50"
         />
         {query && (
           <button
@@ -262,7 +262,7 @@ export default function CategoryCoursesPage() {
               return (
                 <div
                   key={course.code}
-                  className="group py-4 px-3 -mx-3 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/10 transition-colors duration-150"
+                  className="group py-4 px-3 -mx-3 rounded-md flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/10 transition-colors duration-150"
                 >
                   {/* Left section: Code + Title */}
                   <div className="flex-1 min-w-0 pr-4">
@@ -321,7 +321,7 @@ export default function CategoryCoursesPage() {
                         size="sm"
                         disabled={isDownloading}
                         onClick={() => handleDownloadSyllabus(course.code)}
-                        className="w-full sm:w-auto rounded-lg text-xs"
+                        className="w-full sm:w-auto rounded-md text-xs"
                       >
                         <Download className="size-3.5" />
                         {isDownloading ? "Downloading..." : "Syllabus"}

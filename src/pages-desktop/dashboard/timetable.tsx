@@ -73,7 +73,7 @@ function todayIdx(): number { const d = new Date().getDay(); return d === 0 ? 6 
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 function CardSkeleton() {
   return (
@@ -94,7 +94,7 @@ function CardSkeleton() {
           <Sk className="h-4 w-48" />
           <Sk className="h-3 w-36" />
         </div>
-        <Sk className="h-9 w-14 shrink-0 rounded-xl" />
+        <Sk className="h-9 w-14 shrink-0 rounded-md" />
       </div>
     </div>
   );
@@ -324,10 +324,10 @@ export default function TimetablePage() {
     <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       <div className="flex justify-between pb-6 border-b border-border/40 shrink-0">
         <div className="space-y-2"><Sk className="h-7 w-36" /><Sk className="h-3 w-52" /></div>
-        <Sk className="h-8 w-44 rounded-lg" />
+        <Sk className="h-8 w-44 rounded-md" />
       </div>
       <div className="shrink-0">
-        <Sk className="h-14 w-full rounded-xl" />
+        <Sk className="h-14 w-full rounded-md" />
       </div>
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-8 items-start min-h-0 flex-1 xl:overflow-hidden">
         <div className="xl:h-full xl:overflow-y-auto no-scrollbar pb-6 pr-2 space-y-2 w-full">
@@ -356,7 +356,7 @@ export default function TimetablePage() {
   return shell(
     <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       {error && (
-        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-md gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
             <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
@@ -378,7 +378,7 @@ export default function TimetablePage() {
         </div>
         <div className="flex items-center gap-2">
           <CalendarExportPopover schedule={schedule} weekStartDate={weekStart} />
-          <div className="flex items-center gap-2 border border-border/50 bg-muted/40 rounded-lg px-3 py-1.5 text-sm text-muted-foreground font-medium">
+          <div className="flex items-center gap-2 border border-border/50 bg-muted/40 rounded-md px-3 py-1.5 text-sm text-muted-foreground font-medium">
             <Calendar className="w-4 h-4 text-primary shrink-0" />
             <span>{weekLabel}</span>
             <div className="flex items-center gap-0.5 ml-1.5 pl-1.5 border-l border-border/50">
@@ -400,7 +400,7 @@ export default function TimetablePage() {
             const count = schedule[DAY_KEYS[i]]?.length || 0;
             return (
               <button key={d.full} onClick={() => setSelectedDay(i)}
-                className={`relative flex flex-col items-center gap-1.5 py-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                className={`relative flex flex-col items-center gap-1.5 py-2 rounded-md cursor-pointer transition-colors duration-200 ${
                   active ? "text-primary font-semibold animate-[pulse_0.15s_ease-out_1]" : "text-muted-foreground hover:text-foreground"
                 }`}>
                 <span className={`text-xs font-semibold uppercase tracking-wider ${active ? "opacity-90" : "opacity-55"}`}>{d.name}</span>
@@ -466,7 +466,7 @@ export default function TimetablePage() {
 
                     return (
                       <div key={`${item.courseCode}-${item.slot}-${idx}`}
-                        className={`relative flex flex-col md:flex-row md:items-center gap-4 md:gap-6 py-4 px-3 md:px-4 rounded-xl transition-all duration-200 border border-transparent ${
+                        className={`relative flex flex-col md:flex-row md:items-center gap-4 md:gap-6 py-4 px-3 md:px-4 rounded-md transition-all duration-200 border border-transparent ${
                           isNow ? "bg-primary/[0.03] border-primary/15 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]" : "hover:bg-muted/20"
                         }`}>
 
@@ -613,7 +613,7 @@ export default function TimetablePage() {
                 <div className="space-y-3">
                   <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Today</p>
                   <div className="flex items-center gap-3 py-1">
-                    <div className="p-2 rounded-lg bg-muted shrink-0"><Calendar className="w-4 h-4 text-muted-foreground/60" /></div>
+                    <div className="p-2 rounded-md bg-muted shrink-0"><Calendar className="w-4 h-4 text-muted-foreground/60" /></div>
                     <div>
                       <p className="text-base font-semibold text-foreground">All done for today</p>
                       <p className="text-sm text-muted-foreground mt-0.5">No more classes scheduled.</p>

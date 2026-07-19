@@ -376,7 +376,7 @@ export default function PaymentReceiptsPage() {
       {/* ── Table / Cards Container ───────────────────────────────────────── */}
       <div className="w-full">
         {filteredReceipts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center border border-dashed border-border/60 rounded-3xl bg-accent/5">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center border border-dashed border-border/60 rounded-xl bg-accent/5">
             <ReceiptIcon className="w-10 h-10 text-muted-foreground/25" />
             <p className="text-sm font-bold text-foreground">No receipts found</p>
             <p className="text-xs text-muted-foreground">
@@ -386,7 +386,7 @@ export default function PaymentReceiptsPage() {
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto rounded-3xl">
+            <div className="hidden md:block overflow-x-auto rounded-xl">
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="bg-accent/15 border-b border-border/30 text-xs font-black uppercase tracking-wider text-muted-foreground/80">

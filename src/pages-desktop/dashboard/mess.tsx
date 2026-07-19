@@ -78,7 +78,7 @@ const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satur
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/60 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/60 ${className}`} />;
 }
 
 function MessSkeleton() {
@@ -94,14 +94,14 @@ function MessSkeleton() {
       <div className="flex justify-between items-center pb-4 border-b border-border/10">
         <Sk className="h-4 w-40" />
         <div className="flex gap-3">
-          <Sk className="h-8 w-24 rounded-xl" />
-          <Sk className="h-8 w-32 rounded-xl" />
+          <Sk className="h-8 w-24 rounded-md" />
+          <Sk className="h-8 w-32 rounded-md" />
         </div>
       </div>
 
       {/* Day tabs */}
       <div className="flex gap-2 pb-3 border-b border-border/5">
-        {WEEKDAYS.map((d) => <Sk key={d} className="h-9 w-16 rounded-xl" />)}
+        {WEEKDAYS.map((d) => <Sk key={d} className="h-9 w-16 rounded-md" />)}
       </div>
 
       {/* Meal grid */}
@@ -110,7 +110,7 @@ function MessSkeleton() {
           <div key={m} className="space-y-4 py-4 border-b border-border/10">
             <div className="flex items-center justify-between border-b border-border/5 pb-3">
               <div className="flex items-center gap-2">
-                <Sk className="w-9 h-9 rounded-xl" />
+                <Sk className="w-9 h-9 rounded-md" />
                 <Sk className="h-5 w-24" />
               </div>
               <Sk className="h-4 w-36" />
@@ -272,12 +272,12 @@ export default function MessMenuPage() {
       {/* ── Toolbar ────────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border/10">
         {/* Day / Week toggle */}
-        <div className="flex items-center rounded-xl bg-muted/20 border border-border/10 p-0.5 self-start">
+        <div className="flex items-center rounded-md bg-muted/20 border border-border/10 p-0.5 self-start">
           {(["day", "week"] as const).map((mode) => (
             <button
               key={mode}
               onClick={() => setViewMode(mode)}
-              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 focus:outline-none
+              className={`px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-1.5 focus:outline-none
                 ${viewMode === mode
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
@@ -292,12 +292,12 @@ export default function MessMenuPage() {
 
         {/* Mess type selector */}
         <Select value={selectedMess} onValueChange={(val) => setSelectedMess(val as MessType)}>
-          <SelectTrigger className="w-full sm:w-[155px] h-9 rounded-xl bg-muted/20 hover:bg-muted/30 border-border/20 text-xs sm:text-sm focus:ring-1 focus:ring-primary/30">
+          <SelectTrigger className="w-full sm:w-[155px] h-9 rounded-md bg-muted/20 hover:bg-muted/30 border-border/20 text-xs sm:text-sm focus:ring-1 focus:ring-primary/30">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/20 bg-popover/95 backdrop-blur-md">
+          <SelectContent className="rounded-md border-border/20 bg-popover/95 backdrop-blur-md">
             {MESS_OPTIONS.map((m) => (
-              <SelectItem key={m} value={m} className="rounded-lg text-xs sm:text-sm">
+              <SelectItem key={m} value={m} className="rounded-md text-xs sm:text-sm">
                 {formatMessTypeLabel(m)}
               </SelectItem>
             ))}
@@ -317,7 +317,7 @@ export default function MessMenuPage() {
                   <button
                     key={day}
                     onClick={() => setActiveDay(day)}
-                    className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 border shrink-0 cursor-pointer focus:outline-none
+                    className={`px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold rounded-md transition-all flex items-center gap-1.5 border shrink-0 cursor-pointer focus:outline-none
                       ${isSelected
                         ? "bg-primary/10 text-primary border-primary/15"
                         : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/10"
@@ -341,7 +341,7 @@ export default function MessMenuPage() {
             {viewMode === "day" && activeDayMenu && (
               <div
                 key={activeDay}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-px border border-border/10 rounded-2xl overflow-hidden bg-border/10"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-px border border-border/10 rounded-lg overflow-hidden bg-border/10"
               >
                 {MEALS.map((meal) => {
                   const meta = MEAL_META[meal];
@@ -355,7 +355,7 @@ export default function MessMenuPage() {
                       {/* Meal Header */}
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${meta.accent} border flex items-center justify-center shrink-0`}>
+                          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-md bg-gradient-to-br ${meta.accent} border flex items-center justify-center shrink-0`}>
                             {meta.icon("w-4.5 h-4.5 sm:w-5 sm:h-5")}
                           </div>
                           <div>
@@ -403,7 +403,7 @@ export default function MessMenuPage() {
             {/* ── VIEW 2: Full Week Table ────────────────────────────────────── */}
             {viewMode === "week" && menuData && (
               <div
-                className="w-full overflow-x-auto no-scrollbar rounded-2xl border border-border/10"
+                className="w-full overflow-x-auto no-scrollbar rounded-lg border border-border/10"
               >
                 <table className="w-full text-left border-collapse min-w-[660px]">
                   <thead>

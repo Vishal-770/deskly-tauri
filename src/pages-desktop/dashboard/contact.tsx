@@ -46,8 +46,8 @@ function ContactSkeleton() {
             
             {/* Buttons skeleton */}
             <div className="flex items-center gap-2 md:w-20 justify-end">
-              <Sk className="h-8 w-8 rounded-lg" />
-              <Sk className="h-8 w-8 rounded-lg" />
+              <Sk className="h-8 w-8 rounded-md" />
+              <Sk className="h-8 w-8 rounded-md" />
             </div>
           </div>
         </div>
@@ -73,7 +73,7 @@ function ContactRow({ contact }: { contact: ContactDetail }) {
   };
 
   return (
-    <div className="group py-4 px-3 -mx-3 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/10 transition-colors duration-150">
+    <div className="group py-4 px-3 -mx-3 rounded-md flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-muted/10 transition-colors duration-150">
       {/* Left section: Name + Description */}
       <div className="flex-1 min-w-0 pr-4">
         <h3 className="text-sm sm:text-base font-semibold text-foreground tracking-tight">
@@ -99,7 +99,7 @@ function ContactRow({ contact }: { contact: ContactDetail }) {
           <button
             onClick={handleCopy}
             title="Copy email address"
-            className="p-2 rounded-lg border border-border/10 text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:border-border/30 transition-all duration-150 flex items-center justify-center cursor-pointer"
+            className="p-2 rounded-md border border-border/10 text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:border-border/30 transition-all duration-150 flex items-center justify-center cursor-pointer"
           >
             {copied ? (
               <Check className="w-4 h-4 text-primary" />
@@ -118,7 +118,7 @@ function ContactRow({ contact }: { contact: ContactDetail }) {
               }
             }}
             title="Compose in browser Gmail"
-            className="p-2 rounded-lg border border-border/10 text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:border-border/30 transition-all duration-150 flex items-center justify-center cursor-pointer bg-transparent"
+            className="p-2 rounded-md border border-border/10 text-muted-foreground hover:text-foreground hover:bg-accent/50 hover:border-border/30 transition-all duration-150 flex items-center justify-center cursor-pointer bg-transparent"
           >
             <GmailIcon className="w-4 h-4" />
           </button>
@@ -228,7 +228,7 @@ export default function ContactPage() {
           onChange={(e) => setQuery(e.target.value)}
           disabled={isLoading}
           placeholder="Search department, email…"
-          className="w-full h-10 pl-10 pr-10 rounded-xl border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all disabled:opacity-50"
+          className="w-full h-10 pl-10 pr-10 rounded-md border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all disabled:opacity-50"
         />
         {query && (
           <button

@@ -84,8 +84,8 @@ export default function MobileHome() {
           <div className="h-4 bg-muted/30 rounded animate-pulse w-3/4 mx-auto" />
           <div className="h-3 bg-muted/20 rounded animate-pulse w-1/2 mx-auto" />
           <div className="space-y-4 pt-8">
-            <div className="h-10 bg-muted/20 rounded-lg animate-pulse" />
-            <div className="h-10 bg-muted/20 rounded-lg animate-pulse" />
+            <div className="h-10 bg-muted/20 rounded-md animate-pulse" />
+            <div className="h-10 bg-muted/20 rounded-md animate-pulse" />
           </div>
         </div>
       </main>
@@ -178,12 +178,12 @@ export default function MobileHome() {
 
           {/* Error / Offline Status */}
           {isOffline ? (
-            <div className="flex items-start gap-2 text-destructive text-sm font-medium leading-relaxed -mt-2 bg-destructive/5 border border-destructive/10 p-3 rounded-lg">
+            <div className="flex items-start gap-2 text-destructive text-sm font-medium leading-relaxed -mt-2 bg-destructive/5 border border-destructive/10 p-3 rounded-md">
               <AlertCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-destructive" />
               <span>You are currently offline. Please check your internet connection.</span>
             </div>
           ) : (submitError || error) ? (
-            <div className="flex items-start gap-2 text-destructive text-sm font-medium leading-relaxed -mt-2 bg-destructive/5 border border-destructive/10 p-3 rounded-lg">
+            <div className="flex items-start gap-2 text-destructive text-sm font-medium leading-relaxed -mt-2 bg-destructive/5 border border-destructive/10 p-3 rounded-md">
               <AlertCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-destructive" />
               <span>{submitError ?? error}</span>
             </div>
@@ -193,7 +193,7 @@ export default function MobileHome() {
           <button
             type="submit"
             disabled={loading || isOffline}
-            className="w-full h-[54px] flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold rounded-xl transition-opacity duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:opacity-85"
+            className="w-full h-[54px] flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold rounded-md transition-opacity duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:opacity-85"
           >
             {loading ? (
               <>

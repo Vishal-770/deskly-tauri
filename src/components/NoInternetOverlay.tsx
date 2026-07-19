@@ -36,7 +36,7 @@ export function NoInternetOverlay({ isOnline }: { isOnline: boolean }) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className="bg-secondary/30 p-8 rounded-3xl border border-border/40"
+              className="bg-secondary/30 p-8 rounded-xl border border-border/40"
             >
               <WifiOff className="w-12 h-12 text-primary/70" strokeWidth={1} />
             </motion.div>
@@ -57,7 +57,7 @@ export function NoInternetOverlay({ isOnline }: { isOnline: boolean }) {
                 onClick={handleCheckConnection}
                 disabled={isChecking}
                 variant="outline"
-                className="w-full max-w-[240px] h-12 rounded-2xl text-sm font-medium border-border hover:bg-secondary/80 transition-all duration-300"
+                className="w-full max-w-[240px] h-12 rounded-lg text-sm font-medium border-border hover:bg-secondary/80 transition-all duration-300"
               >
                 <RefreshCcw className={`mr-2 h-4 w-4 ${isChecking ? 'animate-spin' : ''}`} />
                 {isChecking ? 'Retrying...' : 'Retry Connection'}

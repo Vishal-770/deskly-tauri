@@ -87,7 +87,7 @@ function CourseDetailDrawer({
                 Class Slot
               </span>
               <div className="flex items-center gap-2 pt-0.5">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                   <LayoutGrid className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-semibold text-foreground">{item.slot || "—"}</span>
@@ -100,7 +100,7 @@ function CourseDetailDrawer({
                 Classroom Venue
               </span>
               <div className="flex items-center gap-2 pt-0.5">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-semibold text-foreground truncate">{item.venue || "—"}</span>
@@ -113,7 +113,7 @@ function CourseDetailDrawer({
                 Class ID
               </span>
               <div className="flex items-center gap-2 pt-0.5">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                   <FileText className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-semibold text-foreground truncate">{item.classId || "—"}</span>
@@ -126,7 +126,7 @@ function CourseDetailDrawer({
                 Group
               </span>
               <div className="flex items-center gap-2 pt-0.5">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                   <Monitor className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-semibold text-foreground">{item.classGroup || "—"}</span>
@@ -141,7 +141,7 @@ function CourseDetailDrawer({
             <h3 className="text-xs font-bold tracking-widest text-muted-foreground/50 uppercase leading-none pl-1">
               Credit Breakdown
             </h3>
-            <div className="grid grid-cols-4 divide-x divide-border/10 text-center py-2 bg-muted/10 rounded-2xl border border-border/5">
+            <div className="grid grid-cols-4 divide-x divide-border/10 text-center py-2 bg-muted/10 rounded-md border border-border/5">
               {[
                 { label: "Lecture (L)", val: item.credits?.lecture ?? 0 },
                 { label: "Tutorial (T)", val: item.credits?.tutorial ?? 0 },
@@ -189,7 +189,7 @@ function CourseDetailDrawer({
                 </h3>
                 
                 <div className="flex items-center gap-4 py-1">
-                  <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 text-primary border border-primary/10">
+                  <div className="w-11 h-11 rounded-md bg-primary/10 flex items-center justify-center shrink-0 text-primary border border-primary/10">
                     <User className="w-5.5 h-5.5" />
                   </div>
                   
@@ -216,7 +216,7 @@ function CourseDetailDrawer({
 }
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 function CoursesSkeleton() {
@@ -226,7 +226,7 @@ function CoursesSkeleton() {
         <Sk className="h-7 w-44" />
         <Sk className="h-3 w-56" />
       </div>
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-md overflow-hidden">
         <div className="grid grid-cols-3 divide-x divide-border/10">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="p-4 space-y-2">
@@ -237,20 +237,20 @@ function CoursesSkeleton() {
         </div>
       </div>
       <div className="space-y-3">
-        <Sk className="h-10 w-full rounded-xl" />
+        <Sk className="h-10 w-full rounded-md" />
         <div className="grid grid-cols-2 gap-3">
-          <Sk className="h-10 rounded-xl" />
-          <Sk className="h-10 rounded-xl" />
+          <Sk className="h-10 rounded-md" />
+          <Sk className="h-10 rounded-md" />
         </div>
       </div>
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-md overflow-hidden divide-y divide-border/10">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="flex items-center gap-4 p-4">
             <div className="flex-1 space-y-2">
               <Sk className="h-3 w-24" />
               <Sk className="h-4 w-48" />
             </div>
-            <Sk className="h-6 w-10 rounded-lg" />
+            <Sk className="h-6 w-10 rounded-md" />
           </div>
         ))}
       </div>
@@ -390,7 +390,7 @@ export default function CoursesPage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
@@ -407,7 +407,7 @@ export default function CoursesPage() {
       </header>
 
       {/* ── Stats block ──────────────────────────────────────────────────────── */}
-      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-3xl shadow-md flex items-center justify-between text-center backdrop-blur-md">
+      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-lg shadow-md flex items-center justify-between text-center backdrop-blur-md">
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Total</p>
           <p className="text-2xl font-black text-foreground leading-none">{courseStats.total}</p>
@@ -457,7 +457,7 @@ export default function CoursesPage() {
 
       {/* ── Course List ──────────────────────────────────────────────────────── */}
       {filteredCourses.length === 0 ? (
-        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-md">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No courses found</p>
           <p className="text-xs text-muted-foreground">Try modifying the type or category filters.</p>
@@ -472,7 +472,7 @@ export default function CoursesPage() {
                   setSelectedCourse(item);
                   setDrawerOpen(true);
                 }}
-                className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
+                className="p-4 bg-card/80 border border-border/40 rounded-lg shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
               >
                 <div className="flex-1 min-w-0 space-y-3">
                   {/* Top row: index, code, type, slot, credits as plain text items */}
@@ -531,7 +531,7 @@ export default function CoursesPage() {
           <h3 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
             Credit Distribution
           </h3>
-          <div className="bg-card/80 border border-border/40 p-5 rounded-3xl shadow-md backdrop-blur-md space-y-5">
+          <div className="bg-card/80 border border-border/40 p-5 rounded-lg shadow-md backdrop-blur-md space-y-5">
             {/* Segmented Progress Track */}
             <div className="h-3 w-full bg-muted/20 rounded-full overflow-hidden flex border border-border/5">
               {courseStats.theory.credits > 0 && (

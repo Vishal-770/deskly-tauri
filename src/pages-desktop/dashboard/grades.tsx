@@ -65,7 +65,7 @@ function formatDistribution(dist: string) {
 
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 // ─── Loader Skeleton Layout ───────────────────────────────────────────────────
@@ -83,7 +83,7 @@ function GradesSkeleton() {
       {/* Cards skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-2xl p-5 min-h-[104px]">
+          <div key={i} className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-lg p-5 min-h-[104px]">
             <div className="flex items-center justify-between w-full">
               <Sk className="h-3 w-16" />
               <Sk className="h-4 w-4 rounded-md" />
@@ -101,8 +101,8 @@ function GradesSkeleton() {
           <Sk className="h-3 w-64" />
         </div>
         <div className="flex gap-3">
-          <Sk className="h-9 w-48 rounded-xl" />
-          <Sk className="h-9 w-32 rounded-xl" />
+          <Sk className="h-9 w-48 rounded-md" />
+          <Sk className="h-9 w-32 rounded-md" />
         </div>
       </div>
 
@@ -254,7 +254,7 @@ export default function GradesPage() {
   return shell(
     <div className="w-full lg:h-[calc(100vh-5rem)] lg:flex lg:flex-col lg:overflow-hidden space-y-6">
       {error && (
-        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-md gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
             <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
@@ -283,7 +283,7 @@ export default function GradesPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
         
         {/* Total Subjects */}
-        <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
+        <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-lg p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
           <div className="flex items-center justify-between w-full">
             <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Total Subjects</span>
             <BookOpen className="w-5 h-5 text-primary shrink-0" />
@@ -295,7 +295,7 @@ export default function GradesPage() {
         </div>
 
         {/* Total Credits */}
-        <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
+        <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-lg p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
           <div className="flex items-center justify-between w-full">
             <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Total Credits</span>
             <Bookmark className="w-5 h-5 text-primary shrink-0" />
@@ -307,7 +307,7 @@ export default function GradesPage() {
         </div>
 
         {/* CGPA */}
-        <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
+        <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-lg p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
           <div className="flex items-center justify-between w-full">
             <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">SGPA (Current)</span>
             <Award className="w-5 h-5 text-primary shrink-0" />
@@ -336,19 +336,19 @@ export default function GradesPage() {
               placeholder="Search code or title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 w-full h-9 bg-muted/40 hover:bg-muted/60 focus:bg-background border-border/40 rounded-xl text-xs focus-visible:ring-1 focus-visible:ring-primary/30"
+              className="pl-9 pr-3 w-full h-9 bg-muted/40 hover:bg-muted/60 focus:bg-background border-border/40 rounded-md text-xs focus-visible:ring-1 focus-visible:ring-primary/30"
             />
           </div>
           
           {/* Grade Filter Select */}
           <Select value={selectedGradeFilter} onValueChange={setSelectedGradeFilter}>
-            <SelectTrigger className="w-full sm:w-[130px] h-9 rounded-xl bg-muted/40 hover:bg-muted/60 border-border/40 text-xs focus:ring-1 focus:ring-primary/30">
+            <SelectTrigger className="w-full sm:w-[130px] h-9 rounded-md bg-muted/40 hover:bg-muted/60 border-border/40 text-xs focus:ring-1 focus:ring-primary/30">
               <SelectValue placeholder="All Grades" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-border/40 bg-popover/95 backdrop-blur-md">
-              <SelectItem value="ALL" className="rounded-lg">All Grades</SelectItem>
+            <SelectContent className="rounded-md border-border/40 bg-popover/95 backdrop-blur-md">
+              <SelectItem value="ALL" className="rounded-md">All Grades</SelectItem>
               {["S", "A", "B", "C", "D", "E", "F", "P", "N"].map((g) => (
-                <SelectItem key={g} value={g} className="rounded-lg">
+                <SelectItem key={g} value={g} className="rounded-md">
                   Grade {g}
                 </SelectItem>
               ))}
@@ -410,7 +410,7 @@ export default function GradesPage() {
         <footer className="space-y-6 pt-6 border-t border-border/20 shrink-0">
           
           {/* Grades Summary Breakdown */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-5 rounded-2xl bg-muted/20 border border-border/10">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-5 rounded-lg bg-muted/20 border border-border/10">
             <div className="space-y-1">
               <h3 className="text-xs font-black uppercase tracking-wider text-foreground flex items-center gap-1.5">
                 <HelpCircle className="w-3.5 h-3.5 text-primary" /> Grades Summary
@@ -430,7 +430,7 @@ export default function GradesPage() {
                 { label: "P", count: gradeCounts.P, color: "bg-chart-1/5 text-chart-1 border border-chart-1/10" },
                 { label: "N", count: gradeCounts.N, color: "bg-muted text-muted-foreground border border-border/20" },
               ].map(({ label, count, color }) => (
-                <div key={label} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-black leading-none ${color}`}>
+                <div key={label} className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-black leading-none ${color}`}>
                   <span>{label}</span>
                   <span className="opacity-30 font-normal">|</span>
                   <span>{count}</span>

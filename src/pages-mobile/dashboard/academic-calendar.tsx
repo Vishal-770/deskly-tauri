@@ -60,8 +60,8 @@ function AcademicCalendarSkeleton() {
         <Sk className="h-7 w-48" />
       </div>
       <div className="flex justify-between items-center gap-4">
-        <Sk className="h-10 w-48 rounded-xl" />
-        <Sk className="h-10 w-10 rounded-xl" />
+        <Sk className="h-10 w-48 rounded-md" />
+        <Sk className="h-10 w-10 rounded-md" />
       </div>
       <div className="space-y-3">
         <Sk className="h-5 w-40" />
@@ -314,7 +314,7 @@ export default function AcademicCalendarPage() {
                 return (
                   <div
                     key={idx}
-                    className="min-h-[58px] bg-muted/5 opacity-10 rounded-xl pointer-events-none"
+                    className="min-h-[58px] bg-muted/5 opacity-10 rounded-md pointer-events-none"
                   />
                 );
               }
@@ -323,7 +323,7 @@ export default function AcademicCalendarPage() {
                 <div
                   key={idx}
                   onClick={() => setSelectedCell(cell)}
-                  className={`min-h-[58px] p-1.5 flex flex-col justify-between rounded-xl relative overflow-hidden group border transition-all duration-150 cursor-pointer
+                  className={`min-h-[58px] p-1.5 flex flex-col justify-between rounded-md relative overflow-hidden group border transition-all duration-150 cursor-pointer
                     ${isToday 
                       ? "bg-primary/10 border-primary/30 text-primary font-bold" 
                       : isSelected
@@ -392,7 +392,7 @@ export default function AcademicCalendarPage() {
             {/* Event Content list */}
             {selectedCell && (
               selectedCell.content.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center gap-2 text-muted-foreground bg-muted/5 rounded-2xl border border-border/10">
+                <div className="flex flex-col items-center justify-center py-16 text-center gap-2 text-muted-foreground bg-muted/5 rounded-lg border border-border/10">
                   <Info className="w-8 h-8 text-muted-foreground/20" />
                   <p className="text-xs font-semibold">No events scheduled for this day</p>
                 </div>
@@ -408,7 +408,7 @@ export default function AcademicCalendarPage() {
                     return (
                       <div
                         key={idx}
-                        className="p-4 rounded-2xl border border-border/10 bg-muted/5 space-y-2"
+                        className="p-4 rounded-lg border border-border/10 bg-muted/5 space-y-2"
                       >
                         <span
                           className={`inline-block px-2 py-0.5 border rounded text-xs font-extrabold uppercase tracking-wider leading-none ${badgeStyle}`}

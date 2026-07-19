@@ -154,7 +154,7 @@ const SECTIONS: Section[] = [
             <ChevronRight className="w-3.5 h-3.5 transition-transform group-open:rotate-90" />
             View full license text
           </summary>
-          <pre className="mt-3 font-mono text-[9.5px] leading-relaxed bg-muted/10 border border-border/10 rounded-xl p-4 whitespace-pre-wrap text-muted-foreground/60 overflow-x-auto">
+          <pre className="mt-3 font-mono text-[9.5px] leading-relaxed bg-muted/10 border border-border/10 rounded-md p-4 whitespace-pre-wrap text-muted-foreground/60 overflow-x-auto">
 {`MIT License
 
 Copyright (c) 2026 Deskly Authors

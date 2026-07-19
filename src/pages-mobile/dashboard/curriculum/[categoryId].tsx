@@ -28,7 +28,7 @@ import curriculumImg from "@/assets/curriculum.png";
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 function CoursesDetailSkeleton() {
@@ -39,7 +39,7 @@ function CoursesDetailSkeleton() {
         <Sk className="w-6 h-6 rounded-md shrink-0" />
         <Sk className="h-7 w-36" />
       </div>
-      <Sk className="h-10 w-full rounded-xl" />
+      <Sk className="h-10 w-full rounded-md" />
       <div className="divide-y divide-border/10 border-t border-b border-border/10 animate-pulse">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="py-4 flex items-start justify-between gap-4">
@@ -49,7 +49,7 @@ function CoursesDetailSkeleton() {
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <Sk className="h-3 w-16" />
-              <Sk className="h-8 w-24 rounded-lg" />
+              <Sk className="h-8 w-24 rounded-md" />
             </div>
           </div>
         ))}
@@ -190,7 +190,7 @@ export default function CategoryCoursesPage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
@@ -218,7 +218,7 @@ export default function CategoryCoursesPage() {
           onChange={(e) => setQuery(e.target.value)}
           disabled={isLoading}
           placeholder="Search course title or code…"
-          className="w-full h-10 pl-10 pr-10 rounded-xl border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/35 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all disabled:opacity-50"
+          className="w-full h-10 pl-10 pr-10 rounded-md border border-border/20 bg-muted/10 text-sm placeholder:text-muted-foreground/35 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary/30 transition-all disabled:opacity-50"
         />
         {query && (
           <button
@@ -232,7 +232,7 @@ export default function CategoryCoursesPage() {
 
       {/* ── Course List ─────────────────────────────────────────────────────── */}
       {filtered.length === 0 ? (
-        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-lg">
           <BookOpen className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground">No courses found</p>
           <p className="text-xs text-muted-foreground">Try a different search term or code</p>
@@ -246,7 +246,7 @@ export default function CategoryCoursesPage() {
             return (
               <div
                 key={course.code}
-                className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm flex items-start justify-between gap-4 backdrop-blur-md"
+                className="p-4 bg-card/80 border border-border/40 rounded-xl shadow-sm flex items-start justify-between gap-4 backdrop-blur-md"
               >
                 {/* Left: Code + Title + result */}
                 <div className="min-w-0 flex-1 space-y-2">
@@ -285,7 +285,7 @@ export default function CategoryCoursesPage() {
                     size="sm"
                     disabled={isDownloading}
                     onClick={() => handleDownloadSyllabus(course.code)}
-                    className="rounded-lg text-xs h-8"
+                    className="rounded-md text-xs h-8"
                   >
                     <Download className="size-3.5" />
                     {isDownloading ? "…" : "Syllabus"}

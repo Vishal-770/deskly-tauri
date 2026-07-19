@@ -37,14 +37,14 @@ function LaundrySkeleton() {
       {/* Options skeleton */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/10">
         <Sk className="h-4 w-48" />
-        <Sk className="h-8 w-28 rounded-xl ml-auto sm:ml-0" />
+        <Sk className="h-8 w-28 rounded-md ml-auto sm:ml-0" />
       </div>
       
       {/* Month title skeleton */}
       <Sk className="h-6 w-36 animate-pulse" />
       
       {/* Calendar grid skeleton */}
-      <div className="grid grid-cols-7 border-t border-l border-border/10 rounded-2xl overflow-hidden bg-background">
+      <div className="grid grid-cols-7 border-t border-l border-border/10 rounded-lg overflow-hidden bg-background">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div key={day} className="py-2 text-center border-b border-r border-border/10 bg-muted/5">
             <span className="text-xs font-semibold tracking-wider text-muted-foreground/60 uppercase animate-pulse">
@@ -230,10 +230,10 @@ export default function LaundryPage() {
             localStorage.setItem("deskly::settings::hostelBlock", val);
           }}
         >
-          <SelectTrigger className="w-[110px] h-8 rounded-xl bg-muted/10 border-border/20 text-xs">
+          <SelectTrigger className="w-[110px] h-8 rounded-md bg-muted/10 border-border/20 text-xs">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/20 bg-card">
+          <SelectContent className="rounded-md border-border/20 bg-card">
             {LAUNDRY_BLOCKS.map((b) => (
               <SelectItem key={b} value={b} className="text-xs">
                 Block {b}
@@ -323,7 +323,7 @@ export default function LaundryPage() {
                         console.error("Failed to open calendar link:", err);
                       }
                     }}
-                    className="absolute top-1 right-1 p-0.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer"
+                    className="absolute top-1 right-1 p-0.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer"
                     title="Add to Google Calendar"
                   >
                     <CalendarPlus className="w-3.5 h-3.5" />

@@ -102,14 +102,14 @@ function getCourseTypeColor(type: string): string {
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 function DetailSkeleton() {
   return (
     <div className="w-full space-y-5">
       <div className="flex items-center gap-3 pb-4 border-b border-border/20">
-        <Sk className="w-8 h-8 rounded-xl" />
+        <Sk className="w-8 h-8 rounded-md" />
         <div className="space-y-2 flex-1">
           <Sk className="h-5 w-48" />
           <Sk className="h-3 w-64" />
@@ -139,7 +139,7 @@ function DetailSkeleton() {
       </div>
       <div className="space-y-1.5 pt-2">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="flex items-center gap-3 sm:gap-4 px-4 py-3 rounded-xl border border-transparent">
+          <div key={i} className="flex items-center gap-3 sm:gap-4 px-4 py-3 rounded-md border border-transparent">
             <Sk className="h-3 w-5" />
             <Sk className="h-3.5 w-24" />
             <Sk className="h-4 w-14 rounded-md" />
@@ -405,7 +405,7 @@ export default function AttendanceDetailPage() {
             {details.map((row, i) => (
               <div
                 key={`${row.serialNo}-${i}`}
-                className="flex items-center gap-3 sm:gap-4 px-4 py-3 rounded-xl hover:bg-muted/10 transition-colors duration-150 border border-transparent hover:border-border/20"
+                className="flex items-center gap-3 sm:gap-4 px-4 py-3 rounded-md hover:bg-muted/10 transition-colors duration-150 border border-transparent hover:border-border/20"
               >
                 {/* Serial */}
                 <span className="text-xs font-bold text-muted-foreground/35 tabular-nums w-5 shrink-0 text-right">

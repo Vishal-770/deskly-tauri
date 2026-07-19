@@ -61,14 +61,14 @@ function AcademicCalendarSkeleton() {
     <div className="w-full space-y-6">
       {/* Selector skeleton */}
       <div className="flex justify-between items-center gap-4 border-b border-border/20 pb-4">
-        <Sk className="h-10 w-48 rounded-xl" />
+        <Sk className="h-10 w-48 rounded-md" />
         <Sk className="h-6 w-32 rounded-full" />
       </div>
 
       {/* Calendar grid skeleton */}
       <div className="w-full space-y-4">
         <Sk className="h-6 w-40 rounded-full" />
-        <div className="grid grid-cols-7 border border-border/10 rounded-2xl overflow-hidden bg-background">
+        <div className="grid grid-cols-7 border border-border/10 rounded-lg overflow-hidden bg-background">
           {[...Array(7)].map((_, i) => (
             <div key={i} className="py-3 border-b border-r border-border/10 flex justify-center">
               <Sk className="h-3.5 w-12 rounded-full" />
@@ -288,7 +288,7 @@ export default function AcademicCalendarPage() {
                 if (opt) setSelectedOption(opt);
               }}
             >
-              <SelectTrigger className="w-48 h-9 border border-border/20 bg-muted/10 text-xs sm:text-sm font-semibold rounded-lg focus:outline-none">
+              <SelectTrigger className="w-48 h-9 border border-border/20 bg-muted/10 text-xs sm:text-sm font-semibold rounded-md focus:outline-none">
                 <SelectValue placeholder="Select Month" />
               </SelectTrigger>
               <SelectContent className="border border-border/10 bg-popover text-popover-foreground">
@@ -303,7 +303,7 @@ export default function AcademicCalendarPage() {
             <button
               onClick={() => fetchView(selectedOption.dateValue)}
               title="Refresh calendar view"
-              className="p-2 h-9 w-9 rounded-lg border border-border/10 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors flex items-center justify-center cursor-pointer"
+              className="p-2 h-9 w-9 rounded-md border border-border/10 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors flex items-center justify-center cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -319,7 +319,7 @@ export default function AcademicCalendarPage() {
             {schedule?.month}
           </h2>
 
-          <div className="grid grid-cols-7 border-t border-l border-border/10 rounded-2xl overflow-hidden bg-background shadow-sm shadow-border/5">
+          <div className="grid grid-cols-7 border-t border-l border-border/10 rounded-lg overflow-hidden bg-background shadow-sm shadow-border/5">
             {/* Weekday Names */}
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
               <div key={day} className="py-3 text-center border-b border-r border-border/10 bg-muted/5">
@@ -442,7 +442,7 @@ export default function AcademicCalendarPage() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 10 }}
                   transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="relative w-full max-w-md bg-card border border-border/10 rounded-2xl shadow-xl p-6 overflow-hidden z-10"
+                  className="relative w-full max-w-md bg-card border border-border/10 rounded-lg shadow-xl p-6 overflow-hidden z-10"
                 >
                   <button
                     onClick={() => setSelectedCell(null)}
@@ -479,7 +479,7 @@ export default function AcademicCalendarPage() {
                           return (
                             <div
                               key={idx}
-                              className="p-3 rounded-xl border border-border/10 bg-muted/5 space-y-1.5"
+                              className="p-3 rounded-md border border-border/10 bg-muted/5 space-y-1.5"
                             >
                               <span
                                 className={`inline-block px-2 py-0.5 border rounded text-xs font-extrabold uppercase tracking-wider leading-none ${badgeStyle}`}

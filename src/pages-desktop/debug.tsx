@@ -604,12 +604,12 @@ export default function DashboardPage() {
             {/* Session Info */}
             {isLoggedIn && authState && (
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-xs">
-                <div className="flex items-center gap-2 text-muted-foreground font-semibold bg-accent/15 border border-border/30 px-3 py-1.5 rounded-xl">
+                <div className="flex items-center gap-2 text-muted-foreground font-semibold bg-accent/15 border border-border/30 px-3 py-1.5 rounded-md">
                   <User className="w-3.5 h-3.5 text-primary" />
                   <span>{authState.userId}</span>
                 </div>
                 {activeSemester && (
-                  <div className="flex items-center gap-2 text-muted-foreground font-semibold bg-accent/15 border border-border/30 px-3 py-1.5 rounded-xl max-w-[200px] sm:max-w-none truncate">
+                  <div className="flex items-center gap-2 text-muted-foreground font-semibold bg-accent/15 border border-border/30 px-3 py-1.5 rounded-md max-w-[200px] sm:max-w-none truncate">
                     <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span className="truncate">{activeSemester.name}</span>
                   </div>
@@ -622,7 +622,7 @@ export default function DashboardPage() {
               {isLoggedIn && (
                 <button
                   onClick={() => navigate("/dashboard/timetable")}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
                 >
                   <Calendar className="w-3.5 h-3.5" />
                   <span>View Timetable</span>
@@ -654,7 +654,7 @@ export default function DashboardPage() {
                     });
                   }
                 }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
               >
                 <Activity className="w-3.5 h-3.5 text-primary" />
                 <span>Test Backend</span>
@@ -668,7 +668,7 @@ export default function DashboardPage() {
               {isLoggedIn && (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-destructive/20 hover:border-destructive/40 bg-destructive/5 hover:bg-destructive/10 text-destructive text-xs font-bold transition-all duration-200 cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-destructive/20 hover:border-destructive/40 bg-destructive/5 hover:bg-destructive/10 text-destructive text-xs font-bold transition-all duration-200 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sign Out</span>
@@ -691,7 +691,7 @@ export default function DashboardPage() {
                 <input
                   type="text"
                   placeholder="Search 37 commands..."
-                  className="h-11 w-full rounded-2xl border border-border/50 bg-accent/10 pl-10 pr-4 text-sm font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200"
+                  className="h-11 w-full rounded-lg border border-border/50 bg-accent/10 pl-10 pr-4 text-sm font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -706,7 +706,7 @@ export default function DashboardPage() {
                     <button
                       key={cat.name}
                       onClick={() => setSelectedCategory(cat.name)}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 ${
                         isActive
                           ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
                           : "bg-accent/15 border border-border/30 hover:bg-accent/35 text-muted-foreground"
@@ -721,7 +721,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Commands List Card (Glassmorphic, Rounded-2xl) */}
-            <div className="rounded-2xl border border-border/40 bg-accent/5 overflow-hidden">
+            <div className="rounded-lg border border-border/40 bg-accent/5 overflow-hidden">
               <div className="p-4 border-b border-border/40 bg-accent/10 flex justify-between items-center">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Available Commands ({filteredCommands.length})
@@ -773,7 +773,7 @@ export default function DashboardPage() {
           <section className="lg:col-span-7 space-y-6">
             
             {/* Command Config / Input Form Card */}
-            <div className="rounded-2xl border border-border/40 bg-accent/5 p-6 space-y-6">
+            <div className="rounded-lg border border-border/40 bg-accent/5 p-6 space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-xs uppercase tracking-widest font-bold text-primary">
@@ -809,12 +809,12 @@ export default function DashboardPage() {
                             value={paramValues[p.name] || ""}
                             onValueChange={(val) => setParamValues({ ...paramValues, [p.name]: val })}
                           >
-                            <SelectTrigger className="h-10 w-full rounded-xl border border-border/50 bg-accent/10 px-3 text-sm focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200">
+                            <SelectTrigger className="h-10 w-full rounded-md border border-border/50 bg-accent/10 px-3 text-sm focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200">
                               <SelectValue placeholder={p.placeholder || "Select an option..."} />
                             </SelectTrigger>
-                            <SelectContent className="rounded-xl border-border/50 bg-card">
+                            <SelectContent className="rounded-md border-border/50 bg-card">
                               {p.options?.map((opt) => (
-                                <SelectItem key={opt} value={opt} className="rounded-lg">
+                                <SelectItem key={opt} value={opt} className="rounded-md">
                                   {opt}
                                 </SelectItem>
                               ))}
@@ -824,7 +824,7 @@ export default function DashboardPage() {
                           <input
                             type={p.type}
                             placeholder={p.placeholder}
-                            className="h-10 w-full rounded-xl border border-border/50 bg-accent/10 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200 placeholder:text-muted-foreground/50"
+                            className="h-10 w-full rounded-md border border-border/50 bg-accent/10 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200 placeholder:text-muted-foreground/50"
                             value={paramValues[p.name] || ""}
                             onChange={(e) => setParamValues({ ...paramValues, [p.name]: e.target.value })}
                           />
@@ -834,7 +834,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl bg-accent/10 border border-border/30 p-4 text-center text-xs text-muted-foreground">
+                <div className="rounded-md bg-accent/10 border border-border/30 p-4 text-center text-xs text-muted-foreground">
                   This command takes no arguments.
                 </div>
               )}
@@ -844,7 +844,7 @@ export default function DashboardPage() {
                 <button
                   onClick={handleInvoke}
                   disabled={loading}
-                  className="flex items-center gap-2 h-11 px-5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-150 disabled:opacity-60 shadow-lg shadow-primary/20 cursor-pointer"
+                  className="flex items-center gap-2 h-11 px-5 rounded-md bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 active:scale-[0.98] transition-all duration-150 disabled:opacity-60 shadow-lg shadow-primary/20 cursor-pointer"
                 >
                   <Play className="w-4 h-4 fill-current" />
                   <span>Invoke Command</span>
@@ -852,7 +852,7 @@ export default function DashboardPage() {
                 {selectedCommand.params && selectedCommand.params.length > 0 && (
                   <button
                     onClick={resetParams}
-                    className="flex items-center gap-2 h-11 px-4 rounded-xl bg-accent/20 hover:bg-accent/40 border border-border/40 font-semibold text-sm transition-all duration-150 cursor-pointer text-foreground"
+                    className="flex items-center gap-2 h-11 px-4 rounded-md bg-accent/20 hover:bg-accent/40 border border-border/40 font-semibold text-sm transition-all duration-150 cursor-pointer text-foreground"
                   >
                     <RotateCcw className="w-4 h-4" />
                     <span>Reset Fields</span>
@@ -862,7 +862,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Response Viewer Panel */}
-            <div className="rounded-2xl border border-border/40 bg-accent/5 p-6 space-y-4">
+            <div className="rounded-lg border border-border/40 bg-accent/5 p-6 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/40 pb-4">
                 <div className="space-y-1">
                   <h3 className="text-base font-bold">Response Inspector</h3>
@@ -892,7 +892,7 @@ export default function DashboardPage() {
                   {lastResponse.payload && (
                     <button
                       onClick={copyToClipboard}
-                      className="p-2 rounded-xl bg-accent/20 hover:bg-accent/40 border border-border/40 text-muted-foreground hover:text-foreground transition-all duration-150 cursor-pointer"
+                      className="p-2 rounded-md bg-accent/20 hover:bg-accent/40 border border-border/40 text-muted-foreground hover:text-foreground transition-all duration-150 cursor-pointer"
                       title="Copy response payload"
                     >
                       {copied ? <Check className="w-4 h-4 text-chart-2" /> : <Copy className="w-4 h-4" />}
@@ -903,7 +903,7 @@ export default function DashboardPage() {
 
               {/* Code viewer screen */}
               <div className="relative">
-                <pre className="font-mono text-xs overflow-auto max-h-[360px] p-4 rounded-xl border border-border/30 bg-accent/15 leading-relaxed whitespace-pre-wrap break-words text-foreground/90 select-text no-scrollbar">
+                <pre className="font-mono text-xs overflow-auto max-h-[360px] p-4 rounded-md border border-border/30 bg-accent/15 leading-relaxed whitespace-pre-wrap break-words text-foreground/90 select-text no-scrollbar">
                   {prettyJson}
                 </pre>
               </div>

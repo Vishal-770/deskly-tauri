@@ -13,18 +13,18 @@ function CategoriesSkeleton() {
     <div className="w-full space-y-6">
       <div className="flex justify-between pb-6 border-b border-border/40">
         <div className="space-y-2">
-          <div className="animate-pulse rounded-lg bg-muted/65 h-7 w-44" />
-          <div className="animate-pulse rounded-lg bg-muted/65 h-3 w-52" />
+          <div className="animate-pulse rounded-md bg-muted/65 h-7 w-44" />
+          <div className="animate-pulse rounded-md bg-muted/65 h-3 w-52" />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[...Array(12)].map((_, i) => (
           <div
             key={i}
-            className="bg-card/40 border border-border/30 rounded-2xl p-5 min-h-[90px] space-y-3"
+            className="bg-card/40 border border-border/30 rounded-lg p-5 min-h-[90px] space-y-3"
           >
-            <div className="animate-pulse rounded-lg bg-muted/65 h-3.5 w-16" />
-            <div className="animate-pulse rounded-lg bg-muted/65 h-5 w-2/3" />
+            <div className="animate-pulse rounded-md bg-muted/65 h-3.5 w-16" />
+            <div className="animate-pulse rounded-md bg-muted/65 h-5 w-2/3" />
           </div>
         ))}
       </div>
@@ -121,7 +121,7 @@ export default function CurriculumIndexPage() {
           <button
             key={category.code}
             onClick={() => navigate(`/dashboard/curriculum/${category.code}` as any)}
-            className="group flex items-center justify-between text-left bg-card/30 hover:bg-card/60 border border-border/25 hover:border-border/50 rounded-2xl p-5 transition-all duration-200 cursor-pointer"
+            className="group flex items-center justify-between text-left bg-card/30 hover:bg-card/60 border border-border/25 hover:border-border/50 rounded-lg p-5 transition-all duration-200 cursor-pointer"
           >
             <div className="space-y-2 min-w-0 pr-4">
               <span className="text-xs font-black font-mono tracking-widest text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-md leading-none">

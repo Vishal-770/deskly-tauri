@@ -60,14 +60,14 @@ export default function LegalPage() {
           <div className="flex items-center gap-4 min-w-0">
             <button
               onClick={() => navigate(-1)}
-              className="p-3 rounded-2xl bg-muted/20 border border-border/15 hover:bg-muted text-muted-foreground hover:text-foreground hover:border-border/30 transition-all duration-150 cursor-pointer shrink-0"
+              className="p-3 rounded-lg bg-muted/20 border border-border/15 hover:bg-muted text-muted-foreground hover:text-foreground hover:border-border/30 transition-all duration-150 cursor-pointer shrink-0"
               aria-label="Go Back"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-black uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-lg">
+                <span className="text-xs font-black uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-md">
                   Legal Documents
                 </span>
                 <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground/60">
@@ -91,7 +91,7 @@ export default function LegalPage() {
               <button
                 key={sec.id}
                 onClick={() => scrollToSection(sec.id)}
-                className={`px-4 py-1.5 border text-xs font-semibold rounded-xl transition-all shrink-0 cursor-pointer ${
+                className={`px-4 py-1.5 border text-xs font-semibold rounded-md transition-all shrink-0 cursor-pointer ${
                   isActive
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-muted/10 border-border/20 text-muted-foreground hover:bg-muted/20 hover:text-foreground"
@@ -108,7 +108,7 @@ export default function LegalPage() {
           
           {/* Table of Contents Sidebar */}
           <aside className="hidden lg:block lg:col-span-3 sticky top-6 space-y-4">
-            <div className="p-5 bg-card/25 border border-border/15 rounded-3xl space-y-4">
+            <div className="p-5 bg-card/25 border border-border/15 rounded-xl space-y-4">
               <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/50 px-1">
                 Document Sections
               </p>
@@ -121,7 +121,7 @@ export default function LegalPage() {
                     <button
                       key={sec.id}
                       onClick={() => scrollToSection(sec.id)}
-                      className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                         isActive
                           ? "bg-primary/10 text-primary border border-primary/20"
                           : "text-muted-foreground border border-transparent hover:text-foreground hover:bg-accent/40"
@@ -145,7 +145,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-2xl bg-destructive/10 text-destructive shrink-0">
+                <div className="p-2 rounded-lg bg-destructive/10 text-destructive shrink-0">
                   <ShieldAlert className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -168,7 +168,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-2xl bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
                   <Scale className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -191,7 +191,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-5 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-2xl bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
                   <Lock className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -204,7 +204,7 @@ export default function LegalPage() {
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 bg-muted/10 border border-border/10 rounded-2xl space-y-1.5">
+                <div className="p-5 bg-muted/10 border border-border/10 rounded-lg space-y-1.5">
                   <h3 className="text-xs font-black uppercase tracking-wider text-foreground">
                     What Data is Stored?
                   </h3>
@@ -213,7 +213,7 @@ export default function LegalPage() {
                   </p>
                 </div>
 
-                <div className="p-5 bg-muted/10 border border-border/10 rounded-2xl space-y-1.5">
+                <div className="p-5 bg-muted/10 border border-border/10 rounded-lg space-y-1.5">
                   <h3 className="text-xs font-black uppercase tracking-wider text-foreground">
                     Where is it Stored?
                   </h3>
@@ -234,7 +234,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-2xl bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
                   <Database className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -252,7 +252,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-2xl bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -262,7 +262,7 @@ export default function LegalPage() {
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Deskly is released as open-source software under the terms of the MIT License:
               </p>
-              <pre className="font-mono text-xs bg-muted/10 border border-border/10 rounded-2xl p-5 leading-normal whitespace-pre-wrap text-muted-foreground/85 overflow-x-auto">
+              <pre className="font-mono text-xs bg-muted/10 border border-border/10 rounded-lg p-5 leading-normal whitespace-pre-wrap text-muted-foreground/85 overflow-x-auto">
 {`MIT License
 
 Copyright (c) 2026 Deskly Authors

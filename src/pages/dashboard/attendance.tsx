@@ -161,7 +161,7 @@ function AttendanceHint({ attended, total, courseType }: { attended: number; tot
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 function AttendanceSkeleton() {
@@ -175,11 +175,11 @@ function AttendanceSkeleton() {
           </div>
         </div>
       </div>
-      <Sk className="h-28 w-full rounded-3xl" />
+      <Sk className="h-28 w-full rounded-lg" />
       <div className="space-y-3 pt-2">
         <Sk className="h-5 w-36" />
         {[...Array(5)].map((_, i) => (
-          <Sk key={i} className="h-20 w-full rounded-3xl" />
+          <Sk key={i} className="h-20 w-full rounded-lg" />
         ))}
       </div>
     </div>
@@ -200,7 +200,7 @@ function AttendanceRow({
   return (
     <div
       onClick={onSelect}
-      className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer"
+      className="p-4 bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer"
     >
       <div className="flex-1 min-w-0 flex items-center gap-4">
         <ListCircularProgress percentage={pct} size={48} />
@@ -330,7 +330,7 @@ function AttendanceDrawer({
             {/* View Full Details button */}
             <button
               onClick={onViewDetail}
-              className="w-full flex items-center justify-between mt-3 px-4 py-3 rounded-2xl bg-card/80 border border-border/40 text-xs font-bold text-foreground hover:bg-muted/10 active:opacity-85 transition-all cursor-pointer backdrop-blur-md shadow-sm"
+              className="w-full flex items-center justify-between mt-3 px-4 py-3 rounded-md bg-card/80 border border-border/40 text-xs font-bold text-foreground hover:bg-muted/10 active:opacity-85 transition-all cursor-pointer backdrop-blur-md shadow-sm"
             >
               <span>View Detailed Session Log</span>
               <ArrowRight className="w-4 h-4 text-primary" />
@@ -470,7 +470,7 @@ export default function AttendancePage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
             Retry
@@ -489,7 +489,7 @@ export default function AttendancePage() {
       </header>
 
       {/* Stats Card */}
-      <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center">
+      <div className="p-5 bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md flex items-center">
         <div className="flex-1 flex items-center gap-4 min-w-0">
           <StatCircularProgress percentage={stats.overallPercentage} icon={TrendingUp} size={56} />
           <div className="min-w-0 space-y-0.5">
@@ -541,7 +541,7 @@ export default function AttendancePage() {
         </div>
 
         {filteredAttendance.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md">
             <UserCheck className="w-8 h-8 text-muted-foreground/20" />
             <p className="text-sm font-semibold text-foreground leading-none">No records found</p>
             <p className="text-xs text-muted-foreground">Check filter settings or reload.</p>
@@ -561,7 +561,7 @@ export default function AttendancePage() {
 
       {/* Motivation Section */}
       <div className="pt-1">
-        <div className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
+        <div className="p-4 bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               <Trophy className="w-5 h-5" />

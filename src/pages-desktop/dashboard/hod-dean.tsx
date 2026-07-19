@@ -32,11 +32,11 @@ function renderPhoto(photoUrl: string, name: string) {
   const src = photoUrl ? getSrcFromPhoto(photoUrl) : "";
   if (src) {
     return (
-      <div className="relative w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 shrink-0 overflow-hidden rounded-2xl border border-border/10 bg-muted/5 flex items-center justify-center p-0.5 shadow-sm">
+      <div className="relative w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 shrink-0 overflow-hidden rounded-lg border border-border/10 bg-muted/5 flex items-center justify-center p-0.5 shadow-sm">
         <img
           src={src}
           alt={name}
-          className="w-full h-full object-cover rounded-xl"
+          className="w-full h-full object-cover rounded-md"
         />
       </div>
     );
@@ -52,7 +52,7 @@ function renderPhoto(photoUrl: string, name: string) {
     : "?";
 
   return (
-    <div className="relative w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 shrink-0 overflow-hidden rounded-2xl bg-primary/5 border border-border/10 flex items-center justify-center text-primary/80 shadow-sm">
+    <div className="relative w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 shrink-0 overflow-hidden rounded-lg bg-primary/5 border border-border/10 flex items-center justify-center text-primary/80 shadow-sm">
       <span className="text-lg sm:text-xl font-black tracking-wider">{initials}</span>
     </div>
   );
@@ -100,7 +100,7 @@ function HodDeanSkeleton() {
         {[...Array(2)].map((_, idx) => (
           <div key={idx} className="py-6 sm:py-8 w-full">
             <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-center sm:items-start w-full">
-              <Sk className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 rounded-2xl shrink-0" />
+              <Sk className="w-24 h-32 sm:w-32 sm:h-40 md:w-36 md:h-44 rounded-lg shrink-0" />
               <div className="flex-1 w-full space-y-5">
                 <div className="border-b border-border/10 pb-4 flex flex-col sm:flex-row gap-3 items-center sm:items-baseline">
                   <Sk className="h-4 w-16 rounded-full" />
@@ -219,7 +219,7 @@ export default function HodDeanDetailsPage() {
                 <p className="text-xs text-muted-foreground mt-1">Ensure you are logged in or try reloading the page.</p>
                 <button
                   onClick={() => window.location.reload()}
-                  className="mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/95 transition-all cursor-pointer"
+                  className="mt-4 px-4 py-2 rounded-md bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/95 transition-all cursor-pointer"
                 >
                   Reload Page
                 </button>

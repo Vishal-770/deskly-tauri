@@ -46,7 +46,7 @@ export function DrawerSelect({
         disabled={disabled}
         onClick={() => !disabled && setOpen(true)}
         className={cn(
-          "inline-flex items-center justify-between gap-1.5 rounded-xl border border-border/10 bg-muted/20 px-3 text-xs font-medium text-foreground transition-colors cursor-pointer select-none",
+          "inline-flex items-center justify-between gap-1.5 rounded-md border border-border/10 bg-muted/20 px-3 text-xs font-medium text-foreground transition-colors cursor-pointer select-none",
           "disabled:opacity-50 disabled:cursor-not-allowed",
           triggerClassName
         )}
@@ -81,7 +81,7 @@ export function DrawerSelect({
                     disabled={option.disabled}
                     onClick={() => handleSelect(option.value)}
                     className={cn(
-                      "w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left transition-colors cursor-pointer border-0",
+                      "w-full flex items-center justify-between gap-3 px-4 py-3 rounded-md text-sm font-medium text-left transition-colors cursor-pointer border-0",
                       isSelected
                         ? "bg-primary/10 text-primary"
                         : "text-foreground hover:bg-muted/20",

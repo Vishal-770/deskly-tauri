@@ -48,7 +48,7 @@ export default function SingleExamExportModal({
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="p-1.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer shrink-0"
+        className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer shrink-0"
         title="Export exam to Google Calendar"
       >
         <CalendarPlus className="w-4 h-4" />
@@ -73,7 +73,7 @@ export default function SingleExamExportModal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="relative w-full max-w-md max-h-[85vh] overflow-y-auto no-scrollbar rounded-2xl bg-card border border-border/40 shadow-2xl p-6 flex flex-col gap-5"
+              className="relative w-full max-w-md max-h-[85vh] overflow-y-auto no-scrollbar rounded-lg bg-card border border-border/40 shadow-2xl p-6 flex flex-col gap-5"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border/10 pb-3">
@@ -83,14 +83,14 @@ export default function SingleExamExportModal({
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors cursor-pointer"
+                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Exam Info Card */}
-              <div className="p-3 rounded-xl bg-muted/5 border border-border/10 space-y-1.5">
+              <div className="p-3 rounded-md bg-muted/5 border border-border/10 space-y-1.5">
                 <span className="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2 py-0.5 rounded-full">
                   {entry.courseCode} · Seat {entry.seatNo}
                 </span>
@@ -108,7 +108,7 @@ export default function SingleExamExportModal({
               </div>
 
               {/* Event Time Info */}
-              <div className="p-3 rounded-xl bg-muted/10 border border-border/5 space-y-2">
+              <div className="p-3 rounded-md bg-muted/10 border border-border/5 space-y-2">
                 <div className="flex items-center gap-1.5 text-muted-foreground font-semibold text-xs">
                   <Info className="w-3.5 h-3.5 text-primary shrink-0" />
                   <span>Exam Date:</span>
@@ -128,7 +128,7 @@ export default function SingleExamExportModal({
                       console.error("Failed to open calendar link:", err);
                     }
                   }}
-                  className="w-full rounded-xl h-9 text-xs font-semibold gap-1.5 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95"
+                  className="w-full rounded-md h-9 text-xs font-semibold gap-1.5 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95"
                 >
                   <ExternalLink className="w-4 h-4" />
                   <span>Add to Google Calendar</span>

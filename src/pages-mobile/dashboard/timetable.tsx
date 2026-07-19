@@ -210,7 +210,7 @@ function TimetableSkeleton() {
       {/* Day chip strip: 7 columns */}
       <div className="grid grid-cols-7 gap-2">
         {[...Array(7)].map((_, i) => (
-          <Skeleton key={i} className="h-14 rounded-xl" />
+          <Skeleton key={i} className="h-14 rounded-md" />
         ))}
       </div>
 
@@ -348,7 +348,7 @@ function TimetableDrawer({
               {details.map(({ icon: Icon, label, value }) => (
                 <div key={label} className="flex items-center gap-4 py-3">
                   {/* Left Column: Icon Box */}
-                  <div className="w-8 h-8 rounded-lg bg-muted/20 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-md bg-muted/20 flex items-center justify-center shrink-0">
                     <Icon className="w-4 h-4 text-muted-foreground/75 shrink-0" />
                   </div>
                   
@@ -538,7 +538,7 @@ export default function TimetablePage() {
 
       {/* Sync Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-md gap-4 shrink-0">
           <p className="truncate">Sync failed: {error}</p>
           <button onClick={load} className="text-xs uppercase font-bold tracking-wider hover:underline shrink-0 border-none bg-transparent text-destructive">
             Retry
@@ -572,7 +572,7 @@ export default function TimetablePage() {
               <button
                 key={d.full}
                 onClick={() => setSelectedDay(i)}
-                className={`relative flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl transition-all duration-200 cursor-pointer border-none min-w-[72px] shrink-0 snap-center ${
+                className={`relative flex flex-col items-center gap-1.5 py-3 px-1 rounded-md transition-all duration-200 cursor-pointer border-none min-w-[72px] shrink-0 snap-center ${
                   active
                     ? "bg-primary/10 border-b-2 border-primary text-primary"
                     : "text-muted-foreground hover:text-foreground bg-transparent"
@@ -619,7 +619,7 @@ export default function TimetablePage() {
         {loading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-16 rounded-xl w-full" />
+              <Skeleton key={i} className="h-16 rounded-md w-full" />
             ))}
           </div>
         ) : daySchedule.length === 0 ? (
@@ -640,7 +640,7 @@ export default function TimetablePage() {
                 <button
                   key={`${item.courseCode}-${item.slot}-${idx}`}
                   onClick={() => setSelected(item)}
-                  className="w-full flex items-center gap-4 py-4 px-3 text-left border-none bg-transparent hover:bg-muted/5 active:bg-muted/15 rounded-xl transition-all cursor-pointer"
+                  className="w-full flex items-center gap-4 py-4 px-3 text-left border-none bg-transparent hover:bg-muted/5 active:bg-muted/15 rounded-md transition-all cursor-pointer"
                 >
                   {/* Left: Circular progress */}
                   {hasAttendance ? (

@@ -46,7 +46,7 @@ function SettingsSkeleton() {
               <Sk className="h-4 w-28" />
               <Sk className="h-3 w-48" />
             </div>
-            <Sk className="h-9 w-28 rounded-xl shrink-0" />
+            <Sk className="h-9 w-28 rounded-md shrink-0" />
           </div>
         </div>
       </div>
@@ -228,7 +228,7 @@ export default function MobileSettings() {
           <button
             onClick={handleRefreshKeyring}
             disabled={credLoading || cookiesLoading}
-            className="p-1.5 rounded-xl bg-muted/20 hover:bg-muted/30 border border-border/10 cursor-pointer disabled:opacity-40 transition-colors"
+            className="p-1.5 rounded-md bg-muted/20 hover:bg-muted/30 border border-border/10 cursor-pointer disabled:opacity-40 transition-colors"
             title="Refresh keyring status"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${(credLoading || cookiesLoading) ? "animate-spin" : ""}`} />
@@ -237,7 +237,7 @@ export default function MobileSettings() {
 
         {/* Keyring error banner */}
         {(credError || credStatus?.keyringError) && (
-          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/15 rounded-xl text-xs text-destructive font-semibold">
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/15 rounded-md text-xs text-destructive font-semibold">
             <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span>{credError ?? credStatus?.keyringError}</span>
           </div>
@@ -307,7 +307,7 @@ export default function MobileSettings() {
       <div className="pt-2">
         <button
           onClick={() => setIsLogoutConfirmOpen(true)}
-          className="w-full h-11 flex justify-center items-center gap-2 bg-destructive/10 hover:bg-destructive/15 text-destructive border border-destructive/20 text-sm font-semibold rounded-xl transition-colors cursor-pointer"
+          className="w-full h-11 flex justify-center items-center gap-2 bg-destructive/10 hover:bg-destructive/15 text-destructive border border-destructive/20 text-sm font-semibold rounded-md transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           Sign Out
@@ -343,11 +343,11 @@ export default function MobileSettings() {
                   navigate("/");
                 }
               }}
-              className="w-full h-11 flex justify-center items-center bg-destructive text-destructive-foreground text-sm font-semibold rounded-2xl active:opacity-90 transition-opacity cursor-pointer border-0"
+              className="w-full h-11 flex justify-center items-center bg-destructive text-destructive-foreground text-sm font-semibold rounded-lg active:opacity-90 transition-opacity cursor-pointer border-0"
             >
               Sign Out
             </button>
-            <DrawerClose className="w-full h-11 flex justify-center items-center bg-muted text-muted-foreground text-sm font-semibold rounded-2xl cursor-pointer border-0 hover:bg-muted/80 focus:outline-none transition-colors">
+            <DrawerClose className="w-full h-11 flex justify-center items-center bg-muted text-muted-foreground text-sm font-semibold rounded-lg cursor-pointer border-0 hover:bg-muted/80 focus:outline-none transition-colors">
               Cancel
             </DrawerClose>
           </div>

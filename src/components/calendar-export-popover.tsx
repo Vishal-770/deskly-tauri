@@ -65,7 +65,7 @@ export default function CalendarExportPopover({
       <Button
         variant="outline"
         onClick={() => setIsOpen(true)}
-        className={className || "rounded-xl h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20"}
+        className={className || "rounded-md h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20"}
       >
         {triggerText === "Export" ? (
           <Upload className="size-3.5 text-muted-foreground shrink-0" />
@@ -97,7 +97,7 @@ export default function CalendarExportPopover({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="relative w-full max-w-md max-h-[85vh] overflow-y-auto no-scrollbar rounded-2xl bg-card border border-border/40 shadow-2xl p-6 flex flex-col gap-6"
+              className="relative w-full max-w-md max-h-[85vh] overflow-y-auto no-scrollbar rounded-lg bg-card border border-border/40 shadow-2xl p-6 flex flex-col gap-6"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border/10 pb-4">
@@ -110,21 +110,21 @@ export default function CalendarExportPopover({
                     setIsOpen(false);
                     setShowCalendar(false);
                   }}
-                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors cursor-pointer"
+                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Recurrence End Date Selector */}
-              <div className="space-y-2 p-3 rounded-xl bg-muted/5 border border-border/10">
+              <div className="space-y-2 p-3 rounded-md bg-muted/5 border border-border/10">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   Repeat Schedule Weekly Until:
                 </label>
                 <div className="relative mt-1">
                   <button
                     onClick={() => setShowCalendar(!showCalendar)}
-                    className="w-full h-9 rounded-xl bg-background border border-border/20 px-3 text-xs text-foreground outline-none focus:border-primary/50 transition-colors flex items-center justify-between cursor-pointer"
+                    className="w-full h-9 rounded-md bg-background border border-border/20 px-3 text-xs text-foreground outline-none focus:border-primary/50 transition-colors flex items-center justify-between cursor-pointer"
                   >
                     <span>{format(parsedEndDate, "PPP")}</span>
                     <CalendarDays className="w-4 h-4 text-muted-foreground/60" />
@@ -169,14 +169,14 @@ export default function CalendarExportPopover({
 
                 <Button
                   onClick={handleDownloadIcs}
-                  className="w-full rounded-xl h-9 text-xs font-semibold gap-1.5 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95"
+                  className="w-full rounded-md h-9 text-xs font-semibold gap-1.5 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/95"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download .ics File</span>
                 </Button>
 
                 {/* Guidelines */}
-                <div className="p-3 rounded-xl bg-muted/10 border border-border/5 space-y-2.5">
+                <div className="p-3 rounded-md bg-muted/10 border border-border/5 space-y-2.5">
                   <div className="flex items-center gap-1.5 text-muted-foreground font-semibold text-xs">
                     <Info className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span>How to import the downloaded file:</span>

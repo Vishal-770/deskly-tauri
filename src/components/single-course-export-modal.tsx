@@ -63,7 +63,7 @@ export default function SingleCourseExportModal({
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="p-1.5 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer shrink-0"
+          className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer shrink-0"
           title="Export this course to your calendar"
         >
           <CalendarPlus className="w-4 h-4" />
@@ -105,7 +105,7 @@ export default function SingleCourseExportModal({
                     setIsOpen(false);
                     setShowCalendar(false);
                   }}
-                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors cursor-pointer border-none bg-transparent"
+                  className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/10 transition-colors cursor-pointer border-none bg-transparent"
                 >
                   <X className="w-4 h-4" />
                 </button>

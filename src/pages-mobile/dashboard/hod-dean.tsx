@@ -23,7 +23,7 @@ function getSrcFromPhoto(photo: string): string {
 }
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-2xl bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function HodDeanSkeleton() {
@@ -34,7 +34,7 @@ function HodDeanSkeleton() {
         <Sk className="h-7 w-36" />
       </div>
       {[...Array(3)].map((_, i) => (
-        <Sk key={i} className="h-44 w-full rounded-3xl" />
+        <Sk key={i} className="h-44 w-full rounded-xl" />
       ))}
     </div>
   );
@@ -108,7 +108,7 @@ export default function HodDeanDetailsPage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={fetchDetails} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
@@ -121,7 +121,7 @@ export default function HodDeanDetailsPage() {
       </header>
 
       {details.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md">
           <Building className="w-8 h-8 text-muted-foreground/30" />
           <p className="text-sm font-semibold text-foreground">No details found</p>
           <p className="text-xs text-muted-foreground">Please try reloading later.</p>
@@ -135,7 +135,7 @@ export default function HodDeanDetailsPage() {
               : "?";
 
             return (
-              <div key={idx} className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md space-y-4">
+              <div key={idx} className="p-5 bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md space-y-4">
                 {/* Role badge */}
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-primary uppercase tracking-wide leading-none">
@@ -146,15 +146,15 @@ export default function HodDeanDetailsPage() {
                 {/* Photo + identity */}
                 <div className="flex items-center gap-4">
                   {photoSrc ? (
-                    <div className="w-14 h-18 rounded-2xl shrink-0 overflow-hidden border border-border/30 bg-muted/20 p-0.5">
+                    <div className="w-14 h-18 rounded-lg shrink-0 overflow-hidden border border-border/30 bg-muted/20 p-0.5">
                       <img
                         src={photoSrc}
                         alt={item.name}
-                        className="w-full h-full object-contain rounded-xl"
+                        className="w-full h-full object-contain rounded-md"
                       />
                     </div>
                   ) : (
-                    <div className="w-14 h-16 rounded-2xl shrink-0 bg-muted/30 border border-border/20 flex items-center justify-center">
+                    <div className="w-14 h-16 rounded-lg shrink-0 bg-muted/30 border border-border/20 flex items-center justify-center">
                       <span className="text-base font-bold text-muted-foreground/60">{initials}</span>
                     </div>
                   )}

@@ -88,15 +88,15 @@ export default function Home() {
     return (
       <main className="h-full min-h-0 flex items-center justify-center bg-background text-foreground antialiased p-6">
         <div className="w-full max-w-[400px] flex flex-col gap-16 py-10 items-center sm:items-start">
-          <div className="w-12 h-12 bg-muted/30 rounded-xl animate-pulse" />
+          <div className="w-12 h-12 bg-muted/30 rounded-md animate-pulse" />
           <div className="w-full space-y-8">
             <div className="space-y-3">
               <div className="h-8 bg-muted/30 rounded animate-pulse w-1/2" />
               <div className="h-4 bg-muted/20 rounded animate-pulse w-3/4" />
             </div>
             <div className="space-y-6 pt-4">
-              <div className="h-12 bg-muted/20 rounded-lg animate-pulse" />
-              <div className="h-12 bg-muted/20 rounded-lg animate-pulse" />
+              <div className="h-12 bg-muted/20 rounded-md animate-pulse" />
+              <div className="h-12 bg-muted/20 rounded-md animate-pulse" />
             </div>
           </div>
         </div>
@@ -196,11 +196,11 @@ export default function Home() {
 
             {/* Error Message / Offline Status */}
             {isOffline ? (
-              <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-3 rounded-lg font-semibold leading-relaxed text-center">
+              <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-3 rounded-md font-semibold leading-relaxed text-center">
                 You are currently offline. Please check your internet connection.
               </p>
             ) : (submitError || error) ? (
-              <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-3 rounded-lg font-semibold leading-relaxed text-center">
+              <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-3 rounded-md font-semibold leading-relaxed text-center">
                 {submitError ?? error}
               </p>
             ) : null}
@@ -210,7 +210,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={loading || isOffline}
-                className="w-full h-12 flex justify-center items-center bg-primary hover:bg-primary/95 text-primary-foreground text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+                className="w-full h-12 flex justify-center items-center bg-primary hover:bg-primary/95 text-primary-foreground text-sm font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
               >
                 <span>{loading ? "Authenticating..." : "Sign In"}</span>
                 {!loading && (

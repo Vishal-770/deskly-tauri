@@ -112,7 +112,7 @@ function formatExamTypeLabel(type: string): string {
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 function ExamCardSkeleton() {
@@ -404,7 +404,7 @@ export default function ExamSchedulePage() {
   return shell(
     <div className="w-full xl:h-[calc(100vh-10rem)] xl:flex xl:flex-col xl:overflow-hidden space-y-6">
       {error && !isNotReleased && (
-        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-md gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
             <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
@@ -428,7 +428,7 @@ export default function ExamSchedulePage() {
           <Button
             variant="outline"
             onClick={handleDownloadGroupIcs}
-            className="rounded-xl h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20 shrink-0"
+            className="rounded-md h-8 text-xs font-semibold gap-1.5 cursor-pointer bg-muted/10 border-border/20 shrink-0"
           >
             <CalendarRange className="size-3.5 text-primary shrink-0" />
             <span>Export {formatExamTypeLabel(selectedTab)} Schedule</span>
@@ -528,7 +528,7 @@ export default function ExamSchedulePage() {
                   </div>
 
                   {/* Countdown Digits */}
-                  <div className="border border-border/20 rounded-xl p-4 space-y-2.5 text-center">
+                  <div className="border border-border/20 rounded-md p-4 space-y-2.5 text-center">
                     <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Starts in</span>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-1 pt-1">
                       {[
@@ -556,7 +556,7 @@ export default function ExamSchedulePage() {
                 <div className="space-y-3">
                   <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-border/10 pb-2">Next Exam</p>
                   <div className="flex items-center gap-3 py-1">
-                    <div className="p-2 rounded-lg bg-muted shrink-0">
+                    <div className="p-2 rounded-md bg-muted shrink-0">
                       <Calendar className="w-4 h-4 text-muted-foreground/60" />
                     </div>
                     <div>
@@ -590,7 +590,7 @@ export default function ExamSchedulePage() {
               </div>
 
               {/* Important note */}
-              <div className="p-4 rounded-xl bg-destructive/[0.03] border border-destructive/10 text-xs leading-relaxed text-destructive/80 space-y-2">
+              <div className="p-4 rounded-md bg-destructive/[0.03] border border-destructive/10 text-xs leading-relaxed text-destructive/80 space-y-2">
                 <div className="flex items-center gap-1.5 font-bold uppercase tracking-widest">
                   <AlertCircle className="w-4 h-4 shrink-0" /> Note
                 </div>
@@ -668,7 +668,7 @@ export default function ExamSchedulePage() {
 
                     return (
                       <div key={`${item.courseCode}-${idx}`} className="space-y-1">
-                        <div className="relative flex flex-col md:flex-row md:items-center gap-4 md:gap-6 py-5 px-3 md:px-4 rounded-xl border border-transparent hover:bg-muted/20 transition-all duration-200">
+                        <div className="relative flex flex-col md:flex-row md:items-center gap-4 md:gap-6 py-5 px-3 md:px-4 rounded-md border border-transparent hover:bg-muted/20 transition-all duration-200">
                           
                           {/* Date Bubble Column */}
                           <div className="w-[80px] shrink-0 flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-1.5">
@@ -720,7 +720,7 @@ export default function ExamSchedulePage() {
                             {/* Seat & Export details */}
                             <div className="shrink-0 flex items-center gap-3">
                               <SingleExamExportModal entry={item} />
-                              <div className="flex flex-col items-end md:items-end justify-center bg-muted/20 border border-border/10 rounded-xl px-4 py-2 min-w-[100px]">
+                              <div className="flex flex-col items-end md:items-end justify-center bg-muted/20 border border-border/10 rounded-md px-4 py-2 min-w-[100px]">
                                 <span className="text-lg font-black text-foreground leading-none">Seat {item.seatNo}</span>
                                 {item.seatLocation !== "-" && (
                                   <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-1.5">

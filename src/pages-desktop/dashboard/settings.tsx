@@ -243,10 +243,10 @@ export default function SettingsPage() {
                   onValueChange={handleSemesterChange}
                   disabled={semesters.length === 0}
                 >
-                  <SelectTrigger className="w-[160px] h-8 rounded-lg bg-muted/20 hover:bg-muted/30 border-border/20 text-xs focus:ring-1 focus:ring-primary/20">
+                  <SelectTrigger className="w-[160px] h-8 rounded-md bg-muted/20 hover:bg-muted/30 border-border/20 text-xs focus:ring-1 focus:ring-primary/20">
                     <SelectValue placeholder="Select Semester" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-lg border-border/20 bg-popover/95 backdrop-blur-md">
+                  <SelectContent className="rounded-md border-border/20 bg-popover/95 backdrop-blur-md">
                     {semesters.map((s) => (
                       <SelectItem key={s.id} value={s.id} className="rounded-md text-xs">
                         {s.name}
@@ -268,12 +268,12 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <Select value={hostelBlock} onValueChange={handleBlockChange}>
-                  <SelectTrigger className="w-[100px] h-8 rounded-lg bg-muted/20 hover:bg-muted/30 border-border/20 text-xs focus:ring-1 focus:ring-primary/20">
+                  <SelectTrigger className="w-[100px] h-8 rounded-md bg-muted/20 hover:bg-muted/30 border-border/20 text-xs focus:ring-1 focus:ring-primary/20">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="rounded-lg border-border/20 bg-popover/95 backdrop-blur-md">
+                  <SelectContent className="rounded-md border-border/20 bg-popover/95 backdrop-blur-md">
                     {LAUNDRY_BLOCKS.map((b) => (
-                      <SelectItem key={b} value={b} className="rounded-lg text-xs">
+                      <SelectItem key={b} value={b} className="rounded-md text-xs">
                         Block {b}
                       </SelectItem>
                     ))}
@@ -323,7 +323,7 @@ export default function SettingsPage() {
                             console.error("Failed to open download link:", err);
                           }
                         }}
-                        className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer border-0"
+                        className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-xs font-bold rounded-md flex items-center gap-1.5 transition-colors cursor-pointer border-0"
                       >
                         <ExternalLink className="w-3 h-3" />
                         Download
@@ -333,7 +333,7 @@ export default function SettingsPage() {
                         {(updateStatus === "idle" || updateStatus === "upToDate" || updateStatus === "error") && (
                           <button
                             onClick={handleUpdateCheck}
-                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-lg cursor-pointer transition-all"
+                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-md cursor-pointer transition-all"
                           >
                             Check
                           </button>
@@ -341,7 +341,7 @@ export default function SettingsPage() {
                         {updateStatus === "checking" && (
                           <button
                             disabled
-                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-lg flex items-center gap-1.5"
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-md flex items-center gap-1.5"
                           >
                             <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
                             Checking
@@ -350,7 +350,7 @@ export default function SettingsPage() {
                         {updateStatus === "available" && (
                           <button
                             onClick={handleInstallUpdate}
-                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-lg cursor-pointer transition-all animate-pulse"
+                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-md cursor-pointer transition-all animate-pulse"
                           >
                             Install
                           </button>
@@ -358,7 +358,7 @@ export default function SettingsPage() {
                         {updateStatus === "downloading" && (
                           <button
                             disabled
-                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-lg flex items-center gap-1.5"
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-md flex items-center gap-1.5"
                           >
                             <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
                             Downloading
@@ -367,7 +367,7 @@ export default function SettingsPage() {
                         {updateStatus === "finished" && (
                           <button
                             disabled
-                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-lg"
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-md"
                           >
                             Restarting
                           </button>
@@ -389,7 +389,7 @@ export default function SettingsPage() {
                 {/* Inline Details */}
                 {updateStatus === "available" && activeUpdate && activeUpdate.body && (
                   <div className="pl-7 pt-1">
-                    <div className="p-3 bg-muted/10 border border-border/10 rounded-xl text-xs text-muted-foreground max-h-24 overflow-y-auto no-scrollbar font-medium">
+                    <div className="p-3 bg-muted/10 border border-border/10 rounded-md text-xs text-muted-foreground max-h-24 overflow-y-auto no-scrollbar font-medium">
                       <p className="font-bold text-foreground/80 mb-1">Release Notes:</p>
                       <p className="whitespace-pre-wrap leading-relaxed">{activeUpdate.body}</p>
                     </div>
@@ -415,7 +415,7 @@ export default function SettingsPage() {
 
                 {updateStatus === "error" && updateError && (
                   <div className="pl-7 pt-1">
-                    <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-2 rounded-xl font-semibold leading-relaxed">
+                    <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-2 rounded-md font-semibold leading-relaxed">
                       {updateError}
                     </p>
                   </div>
@@ -435,7 +435,7 @@ export default function SettingsPage() {
                 </div>
                 <Link
                   to="/legal"
-                  className="px-3 py-1 bg-muted hover:bg-muted/80 text-foreground text-xs font-bold rounded-lg cursor-pointer border border-border/10 shrink-0"
+                  className="px-3 py-1 bg-muted hover:bg-muted/80 text-foreground text-xs font-bold rounded-md cursor-pointer border border-border/10 shrink-0"
                 >
                   View
                 </Link>
@@ -454,7 +454,7 @@ export default function SettingsPage() {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="px-3 py-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs font-bold rounded-lg cursor-pointer shrink-0"
+                  className="px-3 py-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs font-bold rounded-md cursor-pointer shrink-0"
                 >
                   Sign Out
                 </button>

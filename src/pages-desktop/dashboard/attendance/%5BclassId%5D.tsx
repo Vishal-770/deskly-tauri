@@ -58,7 +58,7 @@ function StatusBadge({ status }: { status: string }) {
 
   if (isPresent) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded-lg leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded-md leading-none">
         <CheckCircle2 className="w-3 h-3" />
         Present
       </span>
@@ -66,7 +66,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isAbsent) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive bg-destructive/5 border border-destructive/10 px-2 py-0.5 rounded-lg leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive bg-destructive/5 border border-destructive/10 px-2 py-0.5 rounded-md leading-none">
         <XCircle className="w-3 h-3" />
         Absent
       </span>
@@ -74,14 +74,14 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isOd) {
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-semibold text-sky-400 bg-sky-500/5 border border-sky-500/10 px-2 py-0.5 rounded-lg leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-sky-400 bg-sky-500/5 border border-sky-500/10 px-2 py-0.5 rounded-md leading-none">
         <span className="w-3.5 h-3.5 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-[7px] font-bold border border-sky-500/20 shrink-0">OD</span>
         {status}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground bg-muted/20 border border-border/10 px-2 py-0.5 rounded-lg leading-none">
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground bg-muted/20 border border-border/10 px-2 py-0.5 rounded-md leading-none">
       <Clock className="w-3 h-3" />
       {status}
     </span>
@@ -91,7 +91,7 @@ function StatusBadge({ status }: { status: string }) {
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 function DetailSkeleton() {
@@ -108,10 +108,10 @@ function DetailSkeleton() {
         </div>
         <Sk className="w-16 h-16 rounded-full shrink-0" />
       </div>
-      <Sk className="h-44 w-full rounded-2xl" />
+      <Sk className="h-44 w-full rounded-lg" />
       <div className="space-y-4 pt-2">
         <Sk className="h-8 w-28" />
-        <Sk className="h-32 w-full rounded-2xl" />
+        <Sk className="h-32 w-full rounded-lg" />
       </div>
     </div>
   );
@@ -265,7 +265,7 @@ export default function AttendanceDetailPage() {
       </div>
 
       {/* ── 2x2 Grid Stats Card ───────────────────────────────────────────────── */}
-      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl grid grid-cols-2 overflow-hidden relative">
+      <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-lg grid grid-cols-2 overflow-hidden relative">
         {/* Inner vertical separator line */}
         <div className="absolute top-0 bottom-0 left-1/2 w-px bg-border/10 -translate-x-1/2" />
         {/* Inner horizontal separator line */}
@@ -322,17 +322,17 @@ export default function AttendanceDetailPage() {
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <Sk key={i} className="h-14 w-full rounded-2xl" />
+              <Sk key={i} className="h-14 w-full rounded-lg" />
             ))}
           </div>
         ) : details.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-[#0e0e0f]/20 border border-border/10 rounded-2xl">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-[#0e0e0f]/20 border border-border/10 rounded-lg">
             <Calendar className="w-8 h-8 text-muted-foreground/20" />
             <p className="text-sm font-semibold text-foreground leading-none">No session logs available</p>
             <p className="text-xs text-muted-foreground">Detailed logs haven't been synchronized.</p>
           </div>
         ) : (
-          <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-2xl overflow-hidden divide-y divide-border/10">
+          <div className="bg-[#0e0e0f]/40 border border-border/10 rounded-lg overflow-hidden divide-y divide-border/10">
             {details.map((row, i) => (
               <div
                 key={`${row.serialNo}-${i}`}

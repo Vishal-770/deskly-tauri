@@ -93,7 +93,7 @@ function formatExamTypeLabel(type: string): string {
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 function ExamSkeleton() {
@@ -104,27 +104,27 @@ function ExamSkeleton() {
           <Sk className="h-7 w-32" />
           <Sk className="h-3.5 w-48" />
         </div>
-        <Sk className="h-8 w-20 rounded-xl" />
+        <Sk className="h-8 w-20 rounded-md" />
       </div>
       <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-        <Sk className="h-14 w-28 rounded-2xl shrink-0" />
-        <Sk className="h-14 w-28 rounded-2xl shrink-0" />
-        <Sk className="h-14 w-28 rounded-2xl shrink-0" />
+        <Sk className="h-14 w-28 rounded-md shrink-0" />
+        <Sk className="h-14 w-28 rounded-md shrink-0" />
+        <Sk className="h-14 w-28 rounded-md shrink-0" />
       </div>
       <div className="space-y-3">
         <Sk className="h-5 w-40" />
-        <div className="bg-muted/10 border border-border/10 rounded-2xl divide-y divide-border/10">
+        <div className="bg-muted/10 border border-border/10 rounded-md divide-y divide-border/10">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
-                <Sk className="w-11 h-11 rounded-xl shrink-0" />
+                <Sk className="w-11 h-11 rounded-md shrink-0" />
                 <div className="space-y-2 flex-1">
                   <Sk className="h-4 w-24" />
                   <Sk className="h-4 w-40" />
                   <Sk className="h-3.5 w-32" />
                 </div>
               </div>
-              <Sk className="w-8 h-8 rounded-lg shrink-0" />
+              <Sk className="w-8 h-8 rounded-md shrink-0" />
             </div>
           ))}
         </div>
@@ -306,7 +306,7 @@ export default function ExamSchedulePage() {
 
       {/* Error banner */}
       {error && !isNotReleased && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
             Retry
@@ -349,7 +349,7 @@ export default function ExamSchedulePage() {
               <button
                 key={tab.id}
                 onClick={() => setSelectedTab(tab.id)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer border transition-all duration-150 shrink-0
+                className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider cursor-pointer border transition-all duration-150 shrink-0
                   ${active
                     ? "bg-primary border-primary text-primary-foreground shadow shadow-primary/10"
                     : "bg-muted/25 border-border/10 text-muted-foreground hover:bg-muted/35"
@@ -364,7 +364,7 @@ export default function ExamSchedulePage() {
 
       {/* ── Content View ────────────────────────────────────────────────────── */}
       {isNotReleased ? (
-        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-md">
           <CalendarRange className="w-8 h-8 text-muted-foreground/20" />
           <div>
             <h2 className="text-sm font-semibold text-foreground">Exams Not Uploaded</h2>
@@ -374,7 +374,7 @@ export default function ExamSchedulePage() {
           </div>
         </div>
       ) : activeSchedules.length === 0 ? (
-        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-2xl">
+        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-md">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <div>
             <p className="text-sm font-bold text-foreground">No exam schedules loaded</p>
@@ -418,11 +418,11 @@ export default function ExamSchedulePage() {
                 <div
                   key={`${exam.courseCode}-${idx}`}
                   onClick={() => setSelectedExam(exam)}
-                  className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm flex items-center justify-between gap-4 backdrop-blur-md cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
+                  className="p-4 bg-card/80 border border-border/40 rounded-lg shadow-sm flex items-center justify-between gap-4 backdrop-blur-md cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
                 >
                   {/* Date bubble */}
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 border border-border/10 bg-muted/20 text-muted-foreground">
+                    <div className="w-11 h-11 rounded-md flex flex-col items-center justify-center shrink-0 border border-border/10 bg-muted/20 text-muted-foreground">
                       <span className="text-base font-bold leading-none">{dayNum}</span>
                       <span className="text-xs font-bold uppercase leading-none mt-1">{weekDayStr}</span>
                     </div>
@@ -451,7 +451,7 @@ export default function ExamSchedulePage() {
 
                   {/* Seat & Icon */}
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs font-bold px-2 py-1 rounded-lg border border-border/10 bg-muted/10 text-foreground/80 leading-none">
+                    <span className="text-xs font-bold px-2 py-1 rounded-md border border-border/10 bg-muted/10 text-foreground/80 leading-none">
                       Seat {exam.seatNo}
                     </span>
                     <ChevronRight className="w-4 h-4 text-muted-foreground/45" />
@@ -522,7 +522,7 @@ export default function ExamSchedulePage() {
                           {label}
                         </span>
                         <div className="flex items-center gap-2 pt-0.5">
-                          <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+                          <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0 text-primary">
                             <Icon className="w-4 h-4" />
                           </div>
                           <span className="text-sm font-semibold text-foreground truncate">{value}</span>
@@ -545,7 +545,7 @@ export default function ExamSchedulePage() {
                         console.error("Failed to save calendar file", e);
                       }
                     }}
-                    className="w-full py-3 bg-primary hover:opacity-90 active:opacity-75 transition-all text-primary-foreground font-black text-sm rounded-2xl flex items-center justify-center gap-2 border-0 cursor-pointer"
+                    className="w-full py-3 bg-primary hover:opacity-90 active:opacity-75 transition-all text-primary-foreground font-black text-sm rounded-md flex items-center justify-center gap-2 border-0 cursor-pointer"
                   >
                     <CalendarRange className="w-4 h-4 shrink-0" />
                     <span>Add to Calendar</span>

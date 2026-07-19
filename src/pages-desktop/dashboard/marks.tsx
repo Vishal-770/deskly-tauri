@@ -18,7 +18,7 @@ function getCourseTypeStyle(type: string): { label: string; className: string } 
 }
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
 }
 
 // ─── Skeleton Loader Layout ───────────────────────────────────────────────────
@@ -37,7 +37,7 @@ function MarksSkeleton() {
       {/* Search Bar Skeleton */}
       <div className="flex flex-col gap-3 pb-4 border-b border-border/20 pt-4">
         <Sk className="h-5 w-44" />
-        <Sk className="h-9 w-full rounded-xl" />
+        <Sk className="h-9 w-full rounded-md" />
       </div>
 
       {/* Tabs Skeleton */}
@@ -45,7 +45,7 @@ function MarksSkeleton() {
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
-            className="bg-card/40 border border-border/30 rounded-xl p-3 flex-1 min-w-[120px] sm:flex-initial sm:w-32 space-y-2"
+            className="bg-card/40 border border-border/30 rounded-md p-3 flex-1 min-w-[120px] sm:flex-initial sm:w-32 space-y-2"
           >
             <Sk className="h-3 w-16" />
             <Sk className="h-3.5 w-24" />
@@ -54,14 +54,14 @@ function MarksSkeleton() {
       </div>
 
       {/* Selected Course Card Skeleton */}
-      <div className="bg-card/40 border border-border/30 rounded-2xl p-6 space-y-6">
+      <div className="bg-card/40 border border-border/30 rounded-lg p-6 space-y-6">
         <div className="flex justify-between items-start">
           <div className="space-y-2 w-1/3">
             <Sk className="h-4 w-24" />
             <Sk className="h-5 w-full" />
             <Sk className="h-3 w-40" />
           </div>
-          <Sk className="h-8 w-24 rounded-lg" />
+          <Sk className="h-8 w-24 rounded-md" />
         </div>
         <div className="space-y-2 pt-6 border-t border-border/15">
           <Sk className="h-8 w-full" />
@@ -168,7 +168,7 @@ export default function MarksPage() {
   return shell(
     <div className="w-full space-y-6">
       {error && (
-        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-md gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
             <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
@@ -208,7 +208,7 @@ export default function MarksPage() {
             placeholder="Search course code or title..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-3 py-2 bg-muted/40 border border-border/30 rounded-xl text-xs outline-none focus:border-primary/50 text-foreground w-full transition-all"
+            className="pl-9 pr-3 py-2 bg-muted/40 border border-border/30 rounded-md text-xs outline-none focus:border-primary/50 text-foreground w-full transition-all"
           />
         </div>
       </div>
@@ -240,7 +240,7 @@ export default function MarksPage() {
                 <button
                   key={course.courseCode}
                   onClick={() => setSelectedCourseCode(course.courseCode)}
-                  className={`flex flex-col items-start gap-1 px-4 py-2.5 rounded-xl border text-xs cursor-pointer transition-all duration-150 whitespace-nowrap flex-1 min-w-[120px] sm:flex-initial
+                  className={`flex flex-col items-start gap-1 px-4 py-2.5 rounded-md border text-xs cursor-pointer transition-all duration-150 whitespace-nowrap flex-1 min-w-[120px] sm:flex-initial
                     ${
                       isActive
                         ? "bg-primary border-primary text-primary-foreground shadow-sm shadow-primary/20"
@@ -272,7 +272,7 @@ export default function MarksPage() {
 
           {/* Selected Course Marks Details Card */}
           {activeCourse && (
-            <div className="bg-card/30 border border-border/25 rounded-2xl p-6 hover:border-border/35 transition-colors flex flex-col gap-6">
+            <div className="bg-card/30 border border-border/25 rounded-lg p-6 hover:border-border/35 transition-colors flex flex-col gap-6">
               {/* Card Title Header */}
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="space-y-1">

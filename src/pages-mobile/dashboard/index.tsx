@@ -118,9 +118,9 @@ function DashboardSkeleton() {
           <Skeleton className="h-1.5 w-full" />
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <Skeleton className="h-24 rounded-2xl" />
-          <Skeleton className="h-24 rounded-2xl" />
-          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-lg" />
+          <Skeleton className="h-24 rounded-lg" />
+          <Skeleton className="h-24 rounded-lg" />
         </div>
       </div>
 
@@ -190,7 +190,7 @@ function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
       </div>
 
       {/* Hero Metrics Row */}
-      <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 border border-border/30 rounded-2xl">
+      <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 border border-border/30 rounded-lg">
         <div className="text-center space-y-0.5">
           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Latest</span>
           <span className="text-sm font-black text-foreground">{latestGpa.toFixed(2)}</span>
@@ -477,7 +477,7 @@ export default function MobileDashboardHome() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button
             onClick={loadData}
@@ -603,10 +603,10 @@ export default function MobileDashboardHome() {
               return (
                 <div
                   key={idx}
-                  className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4 rounded-3xl flex items-center justify-between shadow-sm"
+                  className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4 rounded-xl flex items-center justify-between shadow-sm"
                 >
                   <div className="flex items-center min-w-0">
-                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 mr-4 ${iconColor}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mr-4 ${iconColor}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 space-y-1">
