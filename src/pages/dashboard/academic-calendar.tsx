@@ -12,8 +12,9 @@ import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
-import { Calendar as CalendarIcon, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import calendarImg from "@/assets/calender.png";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -111,7 +112,7 @@ export default function AcademicCalendarPage() {
           setSelectedOption(parsed[0]);
         }
       } catch (e) {
-        console.error("Failed to parse cached academic calendar options", e);
+        console.error("Failed to parse academic calendar options cache", e);
       }
     }
   }, []);
@@ -255,112 +256,128 @@ export default function AcademicCalendarPage() {
   if (isLoading) return shell(<AcademicCalendarSkeleton />);
 
   return shell(
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full flex flex-col gap-6 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
-      {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 leading-none">
-          <CalendarIcon className="w-6 h-6 text-primary shrink-0" />
-          Calendar
-        </h1>
-
-        {!isLoading && options && selectedOption && (
-          <div className="flex items-center gap-2 shrink-0">
-            <DrawerSelect
-              value={selectedOption.dateValue}
-              onValueChange={(val) => {
-                const opt = options.find((o) => o.dateValue === val);
-                if (opt) setSelectedOption(opt);
-              }}
-              title="Select Month"
-              triggerClassName="h-9 w-[130px]"
-              options={options.map((o) => ({ value: o.dateValue, label: o.label }))}
-            />
-          </div>
-        )}
+      {/* Header */}
+      <header className="relative z-10 flex items-start justify-between gap-4 mt-2">
+        <div className="space-y-1.5 min-w-0 pt-1">
+          <h1 className="text-3xl font-extrabold text-foreground tracking-tight leading-tight">
+            Calendar
+          </h1>
+          <p className="text-xs text-muted-foreground/60 leading-normal">
+            View monthly academic schedule and events
+          </p>
+        </div>
       </header>
 
-      {/* ── Calendar View ────────────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-foreground flex items-center gap-2 leading-none uppercase">
-          {schedule?.month}
-        </h2>
+      {/* Illustration image absolute header */}
+      <div className="absolute -top-4 right-0 w-[180px] h-[140px] pointer-events-none select-none z-0">
+        <img
+          src={calendarImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          alt="Calendar Illustration"
+        />
+      </div>
 
-        <div className="border-t border-b border-border/10 py-3 overflow-hidden">
-          <div className="grid grid-cols-7 gap-1">
-            {/* Weekday Names */}
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-              <div key={day} className="py-2 text-center select-none">
-                <span className="text-xs font-bold tracking-wider text-muted-foreground/60 uppercase">
-                  {day}
-                </span>
-              </div>
-            ))}
+      {/* Month Selector Card */}
+      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-xl shadow-sm backdrop-blur-md flex items-center justify-between">
+        <div className="space-y-0.5">
+          <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest block">
+            Selected Month
+          </span>
+          <span className="text-base font-extrabold text-foreground leading-none uppercase">
+            {schedule?.month || "Loading..."}
+          </span>
+        </div>
+        {!isLoading && options && selectedOption && (
+          <DrawerSelect
+            value={selectedOption.dateValue}
+            onValueChange={(val) => {
+              const opt = options.find((o) => o.dateValue === val);
+              if (opt) setSelectedOption(opt);
+            }}
+            title="Select Month"
+            triggerClassName="h-9 w-[130px]"
+            options={options.map((o) => ({ value: o.dateValue, label: o.label }))}
+          />
+        )}
+      </div>
 
-            {/* Day Cells */}
-            {calendarCells.map((cell, idx) => {
-              const hasEvents = cell.content && cell.content.length > 0;
-              const isSelected = selectedCell && selectedCell.dayNumber === cell.dayNumber && cell.isCurrentMonth;
-              const isToday =
-                cell.isCurrentMonth &&
-                cell.dayNumber === new Date().getDate() &&
-                selectedOption?.label.toLowerCase().includes(
-                  new Date().toLocaleString("default", { month: "long" }).toLowerCase()
-                ) &&
-                selectedOption?.label.includes(new Date().getFullYear().toString());
+      {/* Calendar Grid Card */}
+      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-xl shadow-sm backdrop-blur-md">
+        <div className="grid grid-cols-7 gap-1">
+          {/* Weekday Names */}
+          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+            <div key={day} className="py-2 text-center select-none">
+              <span className="text-[10px] font-black tracking-widest text-muted-foreground/50 uppercase">
+                {day}
+              </span>
+            </div>
+          ))}
 
-              if (!cell.isCurrentMonth) {
-                return (
-                  <div
-                    key={idx}
-                    className="min-h-[58px] bg-muted/5 opacity-10 rounded-md pointer-events-none"
-                  />
-                );
-              }
+          {/* Day Cells */}
+          {calendarCells.map((cell, idx) => {
+            const hasEvents = cell.content && cell.content.length > 0;
+            const isSelected = selectedCell && selectedCell.dayNumber === cell.dayNumber && cell.isCurrentMonth;
+            const isToday =
+              cell.isCurrentMonth &&
+              cell.dayNumber === new Date().getDate() &&
+              selectedOption?.label.toLowerCase().includes(
+                new Date().toLocaleString("default", { month: "long" }).toLowerCase()
+              ) &&
+              selectedOption?.label.includes(new Date().getFullYear().toString());
 
+            if (!cell.isCurrentMonth) {
               return (
                 <div
                   key={idx}
-                  onClick={() => setSelectedCell(cell)}
-                  className={`min-h-[58px] p-1.5 flex flex-col justify-between rounded-md relative overflow-hidden group border transition-all duration-150 cursor-pointer
-                    ${isToday 
-                      ? "bg-primary/10 border-primary/30 text-primary font-bold" 
-                      : isSelected
-                        ? "bg-muted/20 border-primary/20 text-primary"
-                        : "bg-transparent border-transparent text-foreground/90 hover:bg-muted/5"
-                    }`}
-                >
-                  <span className={`text-xs font-bold leading-none w-4 h-4 rounded-full flex items-center justify-center
-                    ${isToday ? "bg-primary text-primary-foreground font-black" : ""}`}
-                  >
-                    {cell.dayNumber}
-                  </span>
-
-                  {/* Event indicator dots */}
-                  {hasEvents && (
-                    <div className="flex items-center gap-1 justify-center mt-auto">
-                      {cell.content.slice(0, 3).map((event, eventIdx) => (
-                        <span
-                          key={eventIdx}
-                          className={`w-1 h-1 rounded-full ${getEventDotClass(event)}`}
-                        />
-                      ))}
-                      {cell.content.length > 3 && (
-                        <span className="text-[7px] font-bold text-muted-foreground/60 leading-none">
-                          +
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
+                  className="min-h-[54px] bg-muted/5 opacity-5 rounded-lg pointer-events-none"
+                />
               );
-            })}
-          </div>
+            }
+
+            return (
+              <div
+                key={idx}
+                onClick={() => setSelectedCell(cell)}
+                className={`min-h-[54px] p-2 flex flex-col justify-between rounded-lg relative overflow-hidden group border transition-all duration-150 cursor-pointer
+                  ${isToday 
+                    ? "bg-primary/10 border-primary/30 text-primary font-bold animate-pulse-subtle" 
+                    : isSelected
+                      ? "bg-muted/30 border-primary/20 text-primary"
+                      : "bg-muted/10 border-border/10 text-foreground hover:bg-muted/15"
+                  }`}
+              >
+                <span className={`text-[11px] font-bold leading-none w-4 h-4 rounded-full flex items-center justify-center
+                  ${isToday ? "bg-primary text-primary-foreground font-black" : ""}`}
+                >
+                  {cell.dayNumber}
+                </span>
+
+                {/* Event indicator dots */}
+                {hasEvents && (
+                  <div className="flex items-center gap-1 justify-center mt-auto">
+                    {cell.content.slice(0, 3).map((event, eventIdx) => (
+                      <span
+                        key={eventIdx}
+                        className={`w-1 h-1 rounded-full ${getEventDotClass(event)}`}
+                      />
+                    ))}
+                    {cell.content.length > 3 && (
+                      <span className="text-[7px] font-bold text-muted-foreground/60 leading-none">
+                        +
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* ── Slide-up Bottom Drawer for Day Details ──────────────────────────── */}
+      {/* Slide-up Bottom Drawer for Day Details */}
       <Drawer
         open={selectedCell !== null}
         onOpenChange={(open) => {
@@ -392,7 +409,7 @@ export default function AcademicCalendarPage() {
             {/* Event Content list */}
             {selectedCell && (
               selectedCell.content.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center gap-2 text-muted-foreground bg-muted/5 rounded-md border border-border/10">
+                <div className="flex flex-col items-center justify-center py-16 text-center gap-2 text-muted-foreground bg-muted/5 rounded-lg border border-border/10">
                   <Info className="w-8 h-8 text-muted-foreground/20" />
                   <p className="text-xs font-semibold">No events scheduled for this day</p>
                 </div>
@@ -408,7 +425,7 @@ export default function AcademicCalendarPage() {
                     return (
                       <div
                         key={idx}
-                        className="p-4 rounded-md border border-border/10 bg-muted/5 space-y-2"
+                        className="p-4 rounded-lg border border-border/10 bg-muted/5 space-y-2"
                       >
                         <span
                           className={`inline-block px-2 py-0.5 border rounded text-xs font-extrabold uppercase tracking-wider leading-none ${badgeStyle}`}
