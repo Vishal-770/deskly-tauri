@@ -177,7 +177,7 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Hero Card */}
-      <div className="relative z-10 p-5 bg-card/60 border border-border/25 rounded-xl shadow-sm backdrop-blur-md flex items-center gap-5">
+      <div className="relative z-10 p-5 bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md flex items-center gap-5">
         {photoSrc ? (
           <div className="w-20 h-24 shrink-0 overflow-hidden rounded-xl border border-border/30 bg-muted/20 flex items-center justify-center p-0.5 relative">
             <img src={photoSrc} alt={student.name} className="w-full h-full object-cover rounded-lg" />
@@ -207,7 +207,7 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Student Info Card */}
-      <div className="relative z-10 p-5 bg-card/60 border border-border/25 rounded-xl shadow-sm backdrop-blur-md space-y-4">
+      <div className="relative z-10 p-5 bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md space-y-4">
         <div className="flex items-center justify-between border-b border-border/10 pb-2">
           <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
             Student Information
@@ -230,7 +230,7 @@ export default function StudentProfilePage() {
 
       {/* Proctor Card */}
       {proctor && (
-        <div className="relative z-10 p-5 bg-card/60 border border-border/25 rounded-xl shadow-sm backdrop-blur-md space-y-4">
+        <div className="relative z-10 p-5 bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md space-y-4">
           <div className="flex items-center justify-between border-b border-border/10 pb-2">
             <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
               Proctor
@@ -283,7 +283,7 @@ export default function StudentProfilePage() {
 
       {/* Hostel Card */}
       {hostel && (
-        <div className="relative z-10 p-5 bg-card/60 border border-border/25 rounded-xl shadow-sm backdrop-blur-md space-y-4">
+        <div className="relative z-10 p-5 bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md space-y-4">
           <div className="flex items-center justify-between border-b border-border/10 pb-2">
             <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
               Hostel
