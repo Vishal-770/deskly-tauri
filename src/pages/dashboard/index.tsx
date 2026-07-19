@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { invoke } from "@tauri-apps/api/core";
 import { getStudentProfile, getFeedbackStatus, getStudentGradeView, ProfileData } from "@/lib/features";
@@ -132,6 +132,14 @@ function DashboardSkeleton() {
 
 function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
   const [activePointIndex, setActivePointIndex] = useState<number | null>(points.length - 1);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      // Auto scroll to latest semester on mount/data change
+      scrollContainerRef.current.scrollLeft = scrollContainerRef.current.scrollWidth;
+    }
+  }, [points]);
 
   if (!points || points.length === 0) return null;
 
@@ -144,13 +152,15 @@ function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
   const maxGpa = 10;
   const range = maxGpa - minGpa || 1;
 
-  const width = 340;
-  const height = 130;
-  const paddingX = 28;
+  const pointSpacing = 65;
+  const paddingX = 35;
   const paddingY = 24;
+  
+  const width = Math.max(340, paddingX * 2 + (points.length - 1) * pointSpacing);
+  const height = 150;
 
   const chartWidth = width - paddingX * 2;
-  const chartHeight = height - paddingY * 2;
+  const chartHeight = height - paddingY * 2 - 15; // reserve space for bottom label
 
   const coords = points.map((pt, i) => {
     const x = paddingX + (i / Math.max(1, points.length - 1)) * chartWidth;
@@ -210,84 +220,92 @@ function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
         </div>
       )}
 
-      {/* Simple Clean SVG Line Graph */}
-      <div className="relative w-full pt-1 px-1">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto overflow-visible">
-          {/* Dashed Gridlines */}
-          {[10, 8, 6].filter((v) => v >= minGpa && v <= maxGpa).map((val) => {
-            const y = paddingY + chartHeight - ((val - minGpa) / range) * chartHeight;
-            return (
-              <g key={val}>
-                <line
-                  x1={paddingX - 10}
-                  y1={y}
-                  x2={width - paddingX + 10}
-                  y2={y}
-                  stroke="var(--border)"
-                  strokeOpacity="0.4"
-                  strokeDasharray="3 3"
-                  strokeWidth="1"
-                />
-                <text x={paddingX - 14} y={y + 3} textAnchor="end" className="text-xs font-semibold fill-muted-foreground">
-                  {val}.0
-                </text>
-              </g>
-            );
-          })}
+      {/* Horizontally Scrollable SVG Graph */}
+      <div ref={scrollContainerRef} className="relative w-full pt-1 px-1 overflow-x-auto no-scrollbar scroll-smooth">
+        <div style={{ width: `${width}px` }} className="h-[150px]">
+          <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} className="w-full h-full overflow-visible">
+            {/* Dashed Gridlines */}
+            {[10, 8, 6].filter((v) => v >= minGpa && v <= maxGpa).map((val) => {
+              const y = paddingY + chartHeight - ((val - minGpa) / range) * chartHeight;
+              return (
+                <g key={val}>
+                  <line
+                    x1={paddingX - 15}
+                    y1={y}
+                    x2={width - paddingX + 15}
+                    y2={y}
+                    stroke="var(--border)"
+                    strokeOpacity="0.4"
+                    strokeDasharray="3 3"
+                    strokeWidth="1"
+                  />
+                  <text x={paddingX - 18} y={y + 3} textAnchor="end" className="text-[10px] font-semibold fill-muted-foreground">
+                    {val}.0
+                  </text>
+                </g>
+              );
+            })}
 
-          {/* Clean Line Path (No gradient fill underneath) */}
-          <path
-            d={smoothLinePath}
-            fill="none"
-            stroke="var(--primary)"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+            {/* Clean Line Path (No gradient fill underneath) */}
+            <path
+              d={smoothLinePath}
+              fill="none"
+              stroke="var(--primary)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
 
-          {/* Point Nodes */}
-          {coords.map((c, i) => {
-            const isSelected = activeIdx === i;
-            return (
-              <g key={c.pt.id} onClick={() => setActivePointIndex(i)} className="cursor-pointer">
-                {isSelected && (
+            {/* Point Nodes */}
+            {coords.map((c, i) => {
+              const isSelected = activeIdx === i;
+              return (
+                <g key={c.pt.id} onClick={() => setActivePointIndex(i)} className="cursor-pointer">
+                  {isSelected && (
+                    <circle
+                      cx={c.x}
+                      cy={c.y}
+                      r="8"
+                      fill="var(--primary)"
+                      fillOpacity="0.15"
+                    />
+                  )}
                   <circle
                     cx={c.x}
                     cy={c.y}
-                    r="8"
-                    fill="var(--primary)"
-                    fillOpacity="0.15"
+                    r={isSelected ? "4.5" : "3"}
+                    fill={isSelected ? "var(--background)" : "var(--primary)"}
+                    stroke="var(--primary)"
+                    strokeWidth={isSelected ? "2.5" : "0"}
+                    className="transition-all duration-150"
                   />
-                )}
-                <circle
-                  cx={c.x}
-                  cy={c.y}
-                  r={isSelected ? "4.5" : "3"}
-                  fill={isSelected ? "var(--background)" : "var(--primary)"}
-                  stroke="var(--primary)"
-                  strokeWidth={isSelected ? "2.5" : "0"}
-                  className="transition-all duration-150"
-                />
-                <text
-                  x={c.x}
-                  y={c.y - 9}
-                  textAnchor="middle"
-                  className={`text-xs font-bold transition-colors ${
-                    isSelected ? "fill-primary text-xs" : "fill-foreground/80"
-                  }`}
-                >
-                  {c.pt.gpa.toFixed(2)}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* Footer Timeline Labels */}
-      <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground pt-1 border-t border-border/20">
-        <span className="truncate max-w-[130px]">{points[0]?.name}</span>
-        <span className="truncate max-w-[130px] text-right">{points[points.length - 1]?.name}</span>
+                  <text
+                    x={c.x}
+                    y={c.y - 9}
+                    textAnchor="middle"
+                    className={`text-xs font-bold transition-colors ${
+                      isSelected ? "fill-primary text-xs" : "fill-foreground/80"
+                    }`}
+                  >
+                    {c.pt.gpa.toFixed(2)}
+                  </text>
+                  
+                  {/* Inline Semester Label under each point */}
+                  <text
+                    x={c.x}
+                    y={height - 8}
+                    textAnchor="middle"
+                    className={`text-[8.5px] font-extrabold tracking-tight transition-colors ${
+                      isSelected ? "fill-primary font-black" : "fill-muted-foreground/45"
+                    }`}
+                  >
+                    {c.pt.name.replace("Semester", "").replace("20", "").trim()}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
       </div>
     </div>
   );
