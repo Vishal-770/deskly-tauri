@@ -39,13 +39,13 @@ function GradesSkeleton() {
   return (
     <div className="w-full space-y-6 px-2 py-4 font-saira">
       <Sk className="h-11 w-full rounded-2xl" />
-      <Sk className="h-28 w-full rounded-[24px]" />
+      <Sk className="h-28 w-full rounded-3xl" />
       <div className="space-y-3">
         <Sk className="h-10 w-full rounded-xl" />
       </div>
       <div className="space-y-3 pt-2">
         {[...Array(6)].map((_, i) => (
-          <Sk key={i} className="h-20 w-full rounded-[24px]" />
+          <Sk key={i} className="h-20 w-full rounded-3xl" />
         ))}
       </div>
     </div>
@@ -73,13 +73,13 @@ function HistoryGradeDrawer({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
                   {item.courseCode}
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-muted text-muted-foreground tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-extrabold uppercase bg-muted text-muted-foreground tracking-wider">
                   {item.courseType.trim()}
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
                   Grade {item.grade.trim().toUpperCase()}
                 </span>
               </div>
@@ -100,7 +100,7 @@ function HistoryGradeDrawer({
 
           <div className="grid grid-cols-2 gap-y-5 gap-x-4 py-1">
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">
+              <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">
                 Credits
               </span>
               <div className="flex items-center gap-2 pt-0.5">
@@ -112,7 +112,7 @@ function HistoryGradeDrawer({
             </div>
 
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">
+              <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">
                 Exam Session
               </span>
               <div className="flex items-center gap-2 pt-0.5">
@@ -124,7 +124,7 @@ function HistoryGradeDrawer({
             </div>
 
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">
+              <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">
                 Result Declared
               </span>
               <div className="flex items-center gap-2 pt-0.5">
@@ -136,7 +136,7 @@ function HistoryGradeDrawer({
             </div>
 
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">
+              <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">
                 Distribution
               </span>
               <div className="flex items-center gap-2 pt-0.5">
@@ -153,7 +153,7 @@ function HistoryGradeDrawer({
               onOpenChange(false);
               navigate("/dashboard/marks", { state: { courseCode: item.courseCode } });
             }}
-            className="w-full flex items-center justify-between mt-2 px-4 py-3 rounded-[16px] bg-card/80 border border-border/40 text-xs font-bold text-foreground hover:bg-muted/10 active:opacity-85 transition-all cursor-pointer backdrop-blur-md shadow-sm"
+            className="w-full flex items-center justify-between mt-2 px-4 py-3 rounded-2xl bg-card/80 border border-border/40 text-xs font-bold text-foreground hover:bg-muted/10 active:opacity-85 transition-all cursor-pointer backdrop-blur-md shadow-sm"
           >
             <span>View Assessment Marks</span>
             <ArrowRight className="w-4 h-4 text-primary" />
@@ -182,13 +182,13 @@ function SemesterGradeDrawer({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
                   {item.courseCode}
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-muted text-muted-foreground tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-extrabold uppercase bg-muted text-muted-foreground tracking-wider">
                   {item.courseType}
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-extrabold uppercase bg-primary/10 text-primary border border-primary/20 tracking-wider">
                   Grade {item.grade}
                 </span>
               </div>
@@ -209,24 +209,24 @@ function SemesterGradeDrawer({
 
           {/* Credits Breakdown L-P-J-C */}
           <div className="space-y-2">
-            <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest block">
+            <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest block">
               Credit Breakdown
             </span>
             <div className="grid grid-cols-4 gap-2">
               <div className="p-3 bg-muted/15 border border-border/15 rounded-2xl text-center space-y-1">
-                <span className="text-[9px] font-bold text-muted-foreground/50 uppercase">Lecture (L)</span>
+                <span className="text-xs font-bold text-muted-foreground/50 uppercase">Lecture (L)</span>
                 <p className="text-base font-black text-foreground">{item.credits.l}</p>
               </div>
               <div className="p-3 bg-muted/15 border border-border/15 rounded-2xl text-center space-y-1">
-                <span className="text-[9px] font-bold text-muted-foreground/50 uppercase">Practical (P)</span>
+                <span className="text-xs font-bold text-muted-foreground/50 uppercase">Practical (P)</span>
                 <p className="text-base font-black text-foreground">{item.credits.p}</p>
               </div>
               <div className="p-3 bg-muted/15 border border-border/15 rounded-2xl text-center space-y-1">
-                <span className="text-[9px] font-bold text-muted-foreground/50 uppercase">Project (J)</span>
+                <span className="text-xs font-bold text-muted-foreground/50 uppercase">Project (J)</span>
                 <p className="text-base font-black text-foreground">{item.credits.j}</p>
               </div>
               <div className="p-3 bg-primary/10 border border-primary/20 rounded-2xl text-center space-y-1">
-                <span className="text-[9px] font-bold text-primary uppercase">Total (C)</span>
+                <span className="text-xs font-bold text-primary uppercase">Total (C)</span>
                 <p className="text-base font-black text-primary">{item.credits.c}</p>
               </div>
             </div>
@@ -234,15 +234,15 @@ function SemesterGradeDrawer({
 
           {/* Grading Type & Grand Total */}
           <div className="divide-y divide-border/15 border-t border-b border-border/15">
-            <div className="flex items-center justify-between py-3.5">
+            <div className="flex items-center justify-between py-3">
               <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide">Grading Type</span>
               <span className="text-sm font-bold text-foreground">{item.gradingType || "—"}</span>
             </div>
-            <div className="flex items-center justify-between py-3.5">
+            <div className="flex items-center justify-between py-3">
               <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide">Grand Total Marks</span>
               <span className="text-sm font-bold text-foreground">{item.grandTotal !== undefined && item.grandTotal !== null ? item.grandTotal : "—"}</span>
             </div>
-            <div className="flex items-center justify-between py-3.5">
+            <div className="flex items-center justify-between py-3">
               <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide">Final Grade</span>
               <span className="text-base font-black text-primary">{item.grade}</span>
             </div>
@@ -415,17 +415,17 @@ export default function GradesPage() {
       <header className="relative z-10 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="w-6 h-6 text-primary shrink-0" />
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
+          <h1 className="text-2xl font-medium tracking-tight text-foreground leading-none truncate">
             My Grades
           </h1>
         </div>
       </header>
 
       {/* Tab Selector */}
-      <div className="relative z-10 p-1 bg-card/80 border border-border/40 rounded-[20px] shadow-sm backdrop-blur-md flex items-center">
+      <div className="relative z-10 p-1 bg-card/80 border border-border/40 rounded-2xl shadow-sm backdrop-blur-md flex items-center">
         <button
           onClick={() => setActiveTab("semester")}
-          className={`flex-1 py-2.5 px-3 rounded-[16px] text-xs font-bold transition-all border-none cursor-pointer text-center ${
+          className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold transition-all border-none cursor-pointer text-center ${
             activeTab === "semester"
               ? "bg-primary text-primary-foreground shadow-sm"
               : "bg-transparent text-muted-foreground hover:text-foreground"
@@ -435,7 +435,7 @@ export default function GradesPage() {
         </button>
         <button
           onClick={() => setActiveTab("history")}
-          className={`flex-1 py-2.5 px-3 rounded-[16px] text-xs font-bold transition-all border-none cursor-pointer text-center ${
+          className={`flex-1 py-2.5 px-3 rounded-2xl text-xs font-bold transition-all border-none cursor-pointer text-center ${
             activeTab === "history"
               ? "bg-primary text-primary-foreground shadow-sm"
               : "bg-transparent text-muted-foreground hover:text-foreground"
@@ -450,13 +450,13 @@ export default function GradesPage() {
         <>
           {/* Current Semester Label Card */}
           {activeSemesterName && (
-            <div className="relative z-10 bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4 rounded-[20px] shadow-sm backdrop-blur-md flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
+            <div className="relative z-10 bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4 rounded-2xl shadow-sm backdrop-blur-md flex items-center justify-between">
+              <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                   <Award className="w-4 h-4" />
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">Active Semester</span>
+                  <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">Active Semester</span>
                   <span className="text-sm font-bold text-foreground leading-none">{activeSemesterName}</span>
                 </div>
               </div>
@@ -465,7 +465,7 @@ export default function GradesPage() {
 
           {/* Error Banner */}
           {semError && !isNetworkError(semError, isOnline) && (
-            <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
+            <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
               <p className="text-xs font-semibold truncate">Sync failed — {semError}</p>
               <button onClick={() => loadSemesterGrade()} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
                 Retry
@@ -474,21 +474,21 @@ export default function GradesPage() {
           )}
 
           {/* Stats Card */}
-          <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-sm flex items-center justify-between text-center backdrop-blur-md">
+          <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-3xl shadow-sm flex items-center justify-between text-center backdrop-blur-md">
             <div className="flex-1 min-w-0">
-              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">GPA</p>
+              <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">GPA</p>
               <p className="text-2xl font-black text-foreground leading-none">
                 {semGradeData?.gpa !== undefined && semGradeData?.gpa !== null ? semGradeData.gpa : "—"}
               </p>
             </div>
             <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0 mx-2" />
             <div className="flex-1 min-w-0">
-              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Courses</p>
+              <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Courses</p>
               <p className="text-2xl font-black text-foreground leading-none">{semGradeData?.grades?.length ?? 0}</p>
             </div>
             <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0 mx-2" />
             <div className="flex-1 min-w-0">
-              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Credits</p>
+              <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Credits</p>
               <p className="text-2xl font-black text-foreground leading-none">{totalSemCredits}</p>
             </div>
           </div>
@@ -502,14 +502,14 @@ export default function GradesPage() {
                 placeholder="Search course..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 bg-card/80 border-border/40 rounded-[16px] text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-primary/30"
+                className="pl-9 h-10 bg-card/80 border-border/40 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-primary/30"
               />
             </div>
           </div>
 
           {/* Course List */}
           {!semGradeData || filteredSemesterGrades.length === 0 ? (
-            <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
+            <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
               <Award className="w-8 h-8 text-muted-foreground/20" />
               <p className="text-sm font-semibold text-foreground leading-none">No grade records found</p>
               <p className="text-xs text-muted-foreground">Results for this semester may not be published yet.</p>
@@ -520,7 +520,7 @@ export default function GradesPage() {
                 <div
                   key={`${item.courseCode}-${idx}`}
                   onClick={() => setSelectedSemGrade(item)}
-                  className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
+                  className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
                 >
                   <div className="flex-1 min-w-0 flex items-center gap-4">
                     <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
@@ -528,7 +528,7 @@ export default function GradesPage() {
                     </span>
 
                     <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium flex-wrap">
                         <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
                           {item.courseCode}
                         </span>
@@ -541,7 +541,7 @@ export default function GradesPage() {
                         {item.courseTitle}
                       </p>
                       {item.grandTotal !== undefined && item.grandTotal !== null && (
-                        <p className="text-[10px] text-muted-foreground/50 font-mono leading-none pt-0.5">
+                        <p className="text-xs text-muted-foreground/50 font-mono leading-none pt-0.5">
                           Total Marks: {item.grandTotal}
                         </p>
                       )}
@@ -565,7 +565,7 @@ export default function GradesPage() {
         <>
           {/* Error Banner */}
           {historyError && !isNetworkError(historyError, isOnline) && (
-            <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
+            <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
               <p className="text-xs font-semibold truncate">Sync failed — {historyError}</p>
               <button onClick={loadHistory} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
                 Retry
@@ -576,17 +576,17 @@ export default function GradesPage() {
           {/* Stats Card */}
           <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-none shadow-sm flex items-center justify-between text-center backdrop-blur-md">
             <div className="flex-1 min-w-0">
-              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Subjects</p>
+              <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Subjects</p>
               <p className="text-2xl font-black text-foreground leading-none">{totalSubjects}</p>
             </div>
             <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0 mx-2" />
             <div className="flex-1 min-w-0">
-              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Credits</p>
+              <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Credits</p>
               <p className="text-2xl font-black text-foreground leading-none">{totalCredits}</p>
             </div>
             <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0 mx-2" />
             <div className="flex-1 min-w-0">
-              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">CGPA</p>
+              <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">CGPA</p>
               <p className="text-2xl font-black text-foreground leading-none">{cgpaVal}</p>
             </div>
           </div>
@@ -600,7 +600,7 @@ export default function GradesPage() {
                 placeholder="Search code or title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 bg-card/80 border-border/40 rounded-[16px] text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-primary/30"
+                className="pl-9 h-10 bg-card/80 border-border/40 rounded-2xl text-sm text-foreground placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-primary/30"
               />
             </div>
             <DrawerSelect
@@ -617,7 +617,7 @@ export default function GradesPage() {
 
           {/* Course List */}
           {filteredHistoryGrades.length === 0 ? (
-            <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
+            <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
               <FileText className="w-8 h-8 text-muted-foreground/20" />
               <p className="text-sm font-semibold text-foreground leading-none">No grades found</p>
               <p className="text-xs text-muted-foreground">Try modifying your search or filter.</p>
@@ -628,7 +628,7 @@ export default function GradesPage() {
                 <div
                   key={`${item.courseCode}-${idx}`}
                   onClick={() => setSelectedHistoryGrade(item)}
-                  className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
+                  className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
                 >
                   <div className="flex-1 min-w-0 flex items-center gap-4">
                     <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
@@ -636,7 +636,7 @@ export default function GradesPage() {
                     </span>
 
                     <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium flex-wrap">
                         <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
                           {item.courseCode}
                         </span>
@@ -648,7 +648,7 @@ export default function GradesPage() {
                       <p className="text-sm font-bold text-foreground leading-snug truncate">
                         {item.courseTitle}
                       </p>
-                      <p className="text-[10px] text-muted-foreground/50 font-mono leading-none pt-0.5">
+                      <p className="text-xs text-muted-foreground/50 font-mono leading-none pt-0.5">
                         Exam Session: {item.examMonth}
                       </p>
                     </div>
@@ -670,28 +670,28 @@ export default function GradesPage() {
               <h3 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
                 Grade Distribution
               </h3>
-              <div className="bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-sm backdrop-blur-md">
+              <div className="bg-card/80 border border-border/40 p-5 rounded-3xl shadow-sm backdrop-blur-md">
                 <div className="grid grid-cols-3 gap-3">
                   {["S", "A", "B", "C", "D", "E", "F", "P", "N"].map((label) => {
                     const count = gradeCounts[label] ?? 0;
                     const pct = totalSubjects > 0 ? (count / totalSubjects) * 100 : 0;
                     return (
-                      <div key={label} className="bg-muted/15 border border-border/15 rounded-none p-3 flex flex-col justify-between gap-2.5 relative overflow-hidden">
+                      <div key={label} className="bg-muted/15 border border-border/15 rounded-none p-3 flex flex-col justify-between gap-2 relative overflow-hidden">
                         <div 
                           className="absolute bottom-0 left-0 h-0.5 bg-primary/30 transition-all duration-500" 
                           style={{ width: `${pct}%` }} 
                         />
                         <div className="flex items-center justify-between leading-none">
-                          <span className="text-[10px] font-black uppercase text-muted-foreground/45 tracking-wider">
+                          <span className="text-xs font-black uppercase text-muted-foreground/45 tracking-wider">
                             Grade {label}
                           </span>
-                          <span className="text-[9px] font-bold text-muted-foreground/30">
+                          <span className="text-xs font-bold text-muted-foreground/30">
                             {Math.round(pct)}%
                           </span>
                         </div>
                         <div className="flex items-baseline gap-0.5 leading-none">
                           <span className="text-xl font-black text-foreground">{count}</span>
-                          <span className="text-[9px] font-semibold text-muted-foreground/45 ml-0.5">{count === 1 ? "course" : "courses"}</span>
+                          <span className="text-xs font-semibold text-muted-foreground/45 ml-0.5">{count === 1 ? "course" : "courses"}</span>
                         </div>
                       </div>
                     );

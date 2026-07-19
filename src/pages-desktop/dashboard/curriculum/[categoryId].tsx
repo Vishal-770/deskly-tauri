@@ -277,7 +277,7 @@ export default function CategoryCoursesPage() {
 
                     {/* Download Inline Notice */}
                     {result && (
-                      <div className="mt-2.5 flex items-center gap-1.5 text-[10px] leading-tight">
+                      <div className="mt-2.5 flex items-center gap-1.5 text-xs leading-tight">
                         {result.success ? (
                           <>
                             <CheckCircle2 className="w-3.5 h-3.5 text-chart-2 shrink-0" />
@@ -303,7 +303,7 @@ export default function CategoryCoursesPage() {
                     <div className="flex items-center gap-2 md:w-32 truncate">
                       <Badge
                         variant="outline"
-                        className={`text-[10px] font-medium rounded-md border inline-flex items-center justify-center ${getCourseTypeStyle(
+                        className={`text-xs font-medium rounded-md border inline-flex items-center justify-center ${getCourseTypeStyle(
                           course.courseType
                         )}`}
                       >

@@ -20,7 +20,7 @@ function CategoriesSkeleton() {
   return (
     <div className="w-full space-y-6 px-2 py-4 font-saira">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         <Sk className="w-6 h-6 rounded-md shrink-0" />
         <Sk className="h-7 w-44" />
       </div>
@@ -122,9 +122,9 @@ export default function CurriculumIndexPage() {
       )}
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="relative z-10 flex items-center gap-2.5">
+      <header className="relative z-10 flex items-center gap-2">
         <ScrollText className="w-6 h-6 text-primary shrink-0" />
-        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">Curriculum</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground leading-none">Curriculum</h1>
       </header>
 
       {/* ── Category List ──────────────────────────────────────────────────── */}
@@ -133,10 +133,10 @@ export default function CurriculumIndexPage() {
           <button
             key={category.code}
             onClick={() => navigate(`/dashboard/curriculum/${category.code}` as any)}
-            className="w-full flex items-center justify-between gap-4 p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md text-left cursor-pointer hover:bg-muted/5 active:opacity-70 transition-all"
+            className="w-full flex items-center justify-between gap-4 p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md text-left cursor-pointer hover:bg-muted/5 active:opacity-70 transition-all"
           >
             <div className="min-w-0 space-y-1">
-              <p className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">
+              <p className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
                 {category.code}
               </p>
               <p className="text-sm font-bold text-foreground leading-snug truncate">{category.name}</p>

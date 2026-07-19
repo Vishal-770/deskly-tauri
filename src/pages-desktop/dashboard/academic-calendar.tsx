@@ -271,7 +271,7 @@ export default function AcademicCalendarPage() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="pb-4 border-b border-border/20 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
             <CalendarIcon className="w-6 h-6 text-primary shrink-0" />
             Academic Calendar
           </h1>
@@ -323,7 +323,7 @@ export default function AcademicCalendarPage() {
             {/* Weekday Names */}
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
               <div key={day} className="py-3 text-center border-b border-r border-border/10 bg-muted/5">
-                <span className="text-[10px] sm:text-xs font-black tracking-widest text-muted-foreground/60 uppercase">
+                <span className="text-xs sm:text-xs font-black tracking-widest text-muted-foreground/60 uppercase">
                   {day}
                 </span>
               </div>
@@ -349,14 +349,14 @@ export default function AcademicCalendarPage() {
                       setSelectedCell(cell);
                     }
                   }}
-                  className={`min-h-[65px] sm:min-h-[110px] md:min-h-[135px] lg:min-h-[145px] p-1.5 sm:p-2.5 flex flex-col justify-between border-b border-r border-border/10 cursor-pointer select-none transition-colors duration-150 relative group
+                  className={`min-h-[65px] sm:min-h-[110px] md:min-h-[135px] lg:min-h-[145px] p-1.5 sm:p-2 flex flex-col justify-between border-b border-r border-border/10 cursor-pointer select-none transition-colors duration-150 relative group
                     ${cell.isCurrentMonth ? "bg-transparent hover:bg-muted/5" : "bg-muted/5 opacity-15 cursor-default pointer-events-none"}
                     ${isSelected ? "bg-primary/5 font-semibold" : ""}
                   `}
                 >
                   <div className="flex items-center justify-between w-full">
                     <span
-                      className={`text-[10px] sm:text-xs md:text-sm font-semibold rounded-full flex items-center justify-center transition-all
+                      className={`text-xs sm:text-xs md:text-sm font-semibold rounded-full flex items-center justify-center transition-all
                         ${
                           isToday
                             ? "bg-primary text-primary-foreground font-extrabold w-4.5 h-4.5 sm:w-6 sm:h-6 shadow-sm shadow-primary/20"
@@ -387,7 +387,7 @@ export default function AcademicCalendarPage() {
                           return (
                             <div
                               key={eventIdx}
-                              className={`px-1.5 py-0.5 border rounded text-[9px] font-semibold leading-tight truncate ${badgeStyle}`}
+                              className={`px-1.5 py-0.5 border rounded text-xs font-semibold leading-tight truncate ${badgeStyle}`}
                               title={event}
                             >
                               {event}
@@ -395,7 +395,7 @@ export default function AcademicCalendarPage() {
                           );
                         })}
                         {cell.content.length > 3 && (
-                          <span className="text-[8px] font-bold text-muted-foreground/60 pl-1">
+                          <span className="text-xs font-bold text-muted-foreground/60 pl-1">
                             +{cell.content.length - 3} more
                           </span>
                         )}
@@ -453,7 +453,7 @@ export default function AcademicCalendarPage() {
                   
                   <div className="space-y-4">
                     <div className="space-y-1 pr-6 border-b border-border/10 pb-3">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                      <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/60">
                         Day Schedule Details
                       </p>
                       <h3 className="text-base sm:text-lg font-bold text-foreground">
@@ -479,10 +479,10 @@ export default function AcademicCalendarPage() {
                           return (
                             <div
                               key={idx}
-                              className="p-3.5 rounded-xl border border-border/10 bg-muted/5 space-y-1.5"
+                              className="p-3 rounded-xl border border-border/10 bg-muted/5 space-y-1.5"
                             >
                               <span
-                                className={`inline-block px-2 py-0.5 border rounded text-[9px] font-extrabold uppercase tracking-wider leading-none ${badgeStyle}`}
+                                className={`inline-block px-2 py-0.5 border rounded text-xs font-extrabold uppercase tracking-wider leading-none ${badgeStyle}`}
                               >
                                 {type}
                               </span>

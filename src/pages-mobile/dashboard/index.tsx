@@ -174,23 +174,23 @@ function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
             GPA History
           </h3>
         </div>
-        <span className="text-[10px] font-semibold text-muted-foreground bg-muted/40 border border-border/30 rounded-full px-2.5 py-0.5">
+        <span className="text-xs font-semibold text-muted-foreground bg-muted/40 border border-border/30 rounded-full px-2 py-0.5">
           {points.length} Semesters
         </span>
       </div>
 
       {/* Hero Metrics Row */}
-      <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 border border-border/30 rounded-[16px]">
+      <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 border border-border/30 rounded-2xl">
         <div className="text-center space-y-0.5">
-          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Latest</span>
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Latest</span>
           <span className="text-sm font-black text-foreground">{latestGpa.toFixed(2)}</span>
         </div>
         <div className="text-center space-y-0.5 border-x border-border/30">
-          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Peak</span>
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Peak</span>
           <span className="text-sm font-black text-primary">{highestGpa.toFixed(2)}</span>
         </div>
         <div className="text-center space-y-0.5">
-          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider block">Average</span>
+          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Average</span>
           <span className="text-sm font-black text-foreground">{avgGpa.toFixed(2)}</span>
         </div>
       </div>
@@ -228,7 +228,7 @@ function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
                   strokeDasharray="3 3"
                   strokeWidth="1"
                 />
-                <text x={paddingX - 14} y={y + 3} textAnchor="end" className="text-[8px] font-semibold fill-muted-foreground">
+                <text x={paddingX - 14} y={y + 3} textAnchor="end" className="text-xs font-semibold fill-muted-foreground">
                   {val}.0
                 </text>
               </g>
@@ -272,7 +272,7 @@ function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
                   x={c.x}
                   y={c.y - 9}
                   textAnchor="middle"
-                  className={`text-[9px] font-bold transition-colors ${
+                  className={`text-xs font-bold transition-colors ${
                     isSelected ? "fill-primary text-xs" : "fill-foreground/80"
                   }`}
                 >
@@ -285,7 +285,7 @@ function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
       </div>
 
       {/* Footer Timeline Labels */}
-      <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground pt-1 border-t border-border/20">
+      <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground pt-1 border-t border-border/20">
         <span className="truncate max-w-[130px]">{points[0]?.name}</span>
         <span className="truncate max-w-[130px] text-right">{points[points.length - 1]?.name}</span>
       </div>
@@ -473,7 +473,7 @@ export default function MobileDashboardHome() {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="relative z-10 flex items-start justify-between gap-4">
         <div className="space-y-1.5 min-w-0 pt-2">
-          <p className="text-[15px] font-medium text-muted-foreground/60 leading-none">
+          <p className="text-sm font-medium text-muted-foreground/60 leading-none">
             {getGreeting()}
           </p>
           <h1 className="text-3xl font-extrabold text-foreground tracking-tight leading-tight truncate">
@@ -488,7 +488,7 @@ export default function MobileDashboardHome() {
         <section className="relative z-10 space-y-6">
           <div className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-6 rounded-[30px] shadow-sm space-y-6">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold tracking-wider text-muted-foreground/50 uppercase leading-none">
+              <span className="text-xs font-bold tracking-wider text-muted-foreground/50 uppercase leading-none">
                 Cumulative GPA
               </span>
             </div>
@@ -527,7 +527,7 @@ export default function MobileDashboardHome() {
               </div>
               <div className="text-center space-y-0.5">
                 <p className="text-lg font-extrabold text-foreground leading-tight">{cgpaData.earnedCredits}</p>
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wide">Earned</p>
+                <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wide">Earned</p>
               </div>
             </div>
 
@@ -538,7 +538,7 @@ export default function MobileDashboardHome() {
               </div>
               <div className="text-center space-y-0.5">
                 <p className="text-lg font-extrabold text-foreground leading-tight">{cgpaData.totalCreditsRequired}</p>
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wide">Required</p>
+                <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wide">Required</p>
               </div>
             </div>
 
@@ -549,7 +549,7 @@ export default function MobileDashboardHome() {
               </div>
               <div className="text-center space-y-0.5">
                 <p className="text-lg font-extrabold text-foreground leading-tight">{cgpaData.nonGradedCore}</p>
-                <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wide">Non-Graded</p>
+                <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-wide">Non-Graded</p>
               </div>
             </div>
           </div>
@@ -585,18 +585,18 @@ export default function MobileDashboardHome() {
               return (
                 <div
                   key={idx}
-                  className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4.5 rounded-[24px] flex items-center justify-between shadow-sm"
+                  className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4 rounded-3xl flex items-center justify-between shadow-sm"
                 >
                   <div className="flex items-center min-w-0">
                     <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 mr-4 ${iconColor}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 space-y-1">
-                      <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground/45 leading-none truncate">
+                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/45 leading-none truncate">
                         {item.type}
                       </p>
                       <h3 className="text-[13.5px] font-bold text-foreground leading-none">{label}</h3>
-                      <div className="flex items-center gap-2 text-[11px] text-muted-foreground font-semibold leading-none pt-0.5">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground font-semibold leading-none pt-0.5">
                         <span>Mid:</span>
                         <span className={mid.isGiven ? "text-primary" : "text-destructive font-extrabold"}>
                           {mid.isGiven ? "Given" : "Pending"}

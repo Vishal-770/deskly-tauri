@@ -64,7 +64,7 @@ export function DrawerSelect({
             {/* Drawer handle & title */}
             {title && (
               <div className="px-5 pt-4 pb-3 border-b border-border/10 shrink-0">
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 leading-none">
+                <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 leading-none">
                   {title}
                 </p>
               </div>
@@ -81,7 +81,7 @@ export function DrawerSelect({
                     disabled={option.disabled}
                     onClick={() => handleSelect(option.value)}
                     className={cn(
-                      "w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-xl text-sm font-medium text-left transition-colors cursor-pointer border-0",
+                      "w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left transition-colors cursor-pointer border-0",
                       isSelected
                         ? "bg-primary/10 text-primary"
                         : "text-foreground hover:bg-muted/20",

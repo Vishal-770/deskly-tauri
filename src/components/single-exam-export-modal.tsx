@@ -90,12 +90,12 @@ export default function SingleExamExportModal({
               </div>
 
               {/* Exam Info Card */}
-              <div className="p-3.5 rounded-xl bg-muted/5 border border-border/10 space-y-1.5">
-                <span className="text-[10px] font-bold text-primary tracking-wider uppercase bg-primary/10 px-2.5 py-0.5 rounded-full">
+              <div className="p-3 rounded-xl bg-muted/5 border border-border/10 space-y-1.5">
+                <span className="text-xs font-bold text-primary tracking-wider uppercase bg-primary/10 px-2 py-0.5 rounded-full">
                   {entry.courseCode} · Seat {entry.seatNo}
                 </span>
                 <h4 className="text-sm font-bold text-foreground mt-1">{entry.courseTitle}</h4>
-                <div className="flex flex-col gap-1 mt-2 text-[11px] text-muted-foreground">
+                <div className="flex flex-col gap-1 mt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
                     <span>{entry.examTime} (Reporting: {entry.reportingTime})</span>

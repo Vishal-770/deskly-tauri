@@ -175,7 +175,7 @@ export default function MarksPage() {
           </div>
           <button 
             onClick={load}
-            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+            className="text-xs uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
           >
             Retry
           </button>
@@ -202,7 +202,7 @@ export default function MarksPage() {
           </p>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-2 w-4 h-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search course code or title..."
@@ -251,7 +251,7 @@ export default function MarksPage() {
                   <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider">
                     <span>{course.courseCode}</span>
                     <span
-                      className={`text-[9px] px-1 py-0.2 rounded font-mono
+                      className={`text-xs px-1 py-0.2 rounded font-mono
                         ${
                           isActive
                             ? "bg-primary-foreground/25 text-primary-foreground"
@@ -262,7 +262,7 @@ export default function MarksPage() {
                       {course.slot}
                     </span>
                   </div>
-                  <div className="text-[10px] font-bold opacity-80 leading-none mt-0.5">
+                  <div className="text-xs font-bold opacity-80 leading-none mt-0.5">
                     {hasAssessments ? `${courseTotalWeighted.toFixed(1)} / 100` : "No marks"}
                   </div>
                 </button>
@@ -280,7 +280,7 @@ export default function MarksPage() {
                     <span className="text-sm font-extrabold tracking-widest text-primary uppercase leading-none">
                       {activeCourse.courseCode}
                     </span>
-                    <span className="font-mono text-[10px] font-black text-muted-foreground/60 bg-muted/60 px-1.5 py-0.5 rounded-md leading-none">
+                    <span className="font-mono text-xs font-black text-muted-foreground/60 bg-muted/60 px-1.5 py-0.5 rounded-md leading-none">
                       {activeCourse.slot}
                     </span>
                     <span
@@ -317,7 +317,7 @@ export default function MarksPage() {
                                 / 100
                               </span>
                             </div>
-                            <div className="text-[10px] text-muted-foreground/50 font-bold mt-1">
+                            <div className="text-xs text-muted-foreground/50 font-bold mt-1">
                               Graded weightage: {totalWeight.toFixed(1)}%
                             </div>
                           </>
@@ -337,7 +337,7 @@ export default function MarksPage() {
                 <div className="overflow-x-auto no-scrollbar">
                   <table className="w-full border-collapse text-left text-xs sm:text-sm">
                     <thead>
-                      <tr className="border-b border-border/15 text-[10px] font-black uppercase tracking-wider text-muted-foreground/50">
+                      <tr className="border-b border-border/15 text-xs font-black uppercase tracking-wider text-muted-foreground/50">
                         <th className="py-2.5 px-2 w-10">#</th>
                         <th className="py-2.5 px-2 min-w-[120px]">Assessment Title</th>
                         <th className="py-2.5 px-2 text-center w-40">Normal Marks</th>
@@ -361,7 +361,7 @@ export default function MarksPage() {
                               {ass.scoredMark}{" "}
                               <span className="text-muted-foreground/30 font-normal">/</span>{" "}
                               {ass.maxMark}
-                              <span className="text-[10px] font-bold text-muted-foreground/50 block sm:inline sm:ml-2 bg-muted/20 px-1.5 py-0.5 rounded leading-none">
+                              <span className="text-xs font-bold text-muted-foreground/50 block sm:inline sm:ml-2 bg-muted/20 px-1.5 py-0.5 rounded leading-none">
                                 {normalPercent.toFixed(1)}%
                               </span>
                             </td>

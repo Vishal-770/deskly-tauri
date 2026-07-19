@@ -45,7 +45,7 @@ function StatusBadge({ status }: { status: string }) {
 
   if (isPresent) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 leading-none">
+      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 leading-none">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
         Present
       </span>
@@ -53,7 +53,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isAbsent) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-destructive bg-destructive/10 border border-destructive/20 leading-none">
+      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-destructive bg-destructive/10 border border-destructive/20 leading-none">
         <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
         Absent
       </span>
@@ -61,14 +61,14 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isOd) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-primary bg-primary/10 border border-primary/20 leading-none">
+      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-primary bg-primary/10 border border-primary/20 leading-none">
         <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
         {status}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-muted-foreground bg-muted/20 border border-border/20 leading-none">
+    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-muted-foreground bg-muted/20 border border-border/20 leading-none">
       <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 shrink-0" />
       {status}
     </span>
@@ -84,7 +84,7 @@ function Sk({ className = "" }: { className?: string }) {
 function DetailSkeleton() {
   return (
     <div className="w-full space-y-6 px-2 py-4 font-saira">
-      <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
+      <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
         <div className="space-y-2 flex-1">
           <Sk className="h-4 w-20" />
           <Sk className="h-6 w-48" />
@@ -92,11 +92,11 @@ function DetailSkeleton() {
         </div>
         <Sk className="w-16 h-16 rounded-full shrink-0" />
       </div>
-      <Sk className="h-28 w-full rounded-[24px]" />
+      <Sk className="h-28 w-full rounded-3xl" />
       <div className="space-y-3 pt-2">
         <Sk className="h-5 w-28" />
         {[...Array(4)].map((_, i) => (
-          <Sk key={i} className="h-16 w-full rounded-[24px]" />
+          <Sk key={i} className="h-16 w-full rounded-3xl" />
         ))}
       </div>
     </div>
@@ -188,9 +188,9 @@ export default function AttendanceDetailPage() {
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
       {/* ── Course Hero Card ─────────────────────────────────────────────────── */}
-      <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
+      <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
         <div className="space-y-1.5 min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium flex-wrap">
             <span className="text-xs font-bold text-primary uppercase tracking-wide leading-none">{record.courseCode}</span>
             <span>&bull;</span>
             <span className="uppercase">{displayType}</span>
@@ -208,37 +208,37 @@ export default function AttendanceDetailPage() {
         {/* Circular progress */}
         <div className="shrink-0 flex flex-col items-center gap-1">
           <BigCircularProgress percentage={record.attendancePercentage} />
-          <span className="text-[9px] text-muted-foreground/50 font-bold uppercase tracking-widest leading-none">
+          <span className="text-xs text-muted-foreground/50 font-bold uppercase tracking-widest leading-none">
             Status
           </span>
         </div>
       </div>
 
       {/* ── 4-Column Stats Card ────────────────────────────────────────────── */}
-      <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between text-center">
+      <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between text-center">
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">
             {isLab ? "Total Labs" : "Total Classes"}
           </p>
           <p className="text-2xl font-black text-foreground leading-none">{totalClasses}</p>
         </div>
         <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0 mx-1" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">
             Present
           </p>
           <p className="text-2xl font-black text-emerald-500 leading-none">{attendedClasses}</p>
         </div>
         <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">
             OD
           </p>
           <p className="text-2xl font-black text-foreground leading-none">{odSlots}</p>
         </div>
         <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">
             Absent
           </p>
           <p className="text-2xl font-black text-destructive leading-none">{absentClasses}</p>
@@ -259,11 +259,11 @@ export default function AttendanceDetailPage() {
         {loading ? (
           <div className="space-y-3">
             {[...Array(4)].map((_, i) => (
-              <Sk key={i} className="h-16 w-full rounded-[24px]" />
+              <Sk key={i} className="h-16 w-full rounded-3xl" />
             ))}
           </div>
         ) : details.length === 0 ? (
-          <div className="p-8 flex flex-col items-center justify-center gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
+          <div className="p-8 flex flex-col items-center justify-center gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
             <Calendar className="w-8 h-8 text-muted-foreground/20" />
             <p className="text-sm font-semibold text-foreground leading-none">No session logs available</p>
             <p className="text-xs text-muted-foreground">Detailed logs haven't been synchronized.</p>
@@ -273,7 +273,7 @@ export default function AttendanceDetailPage() {
             {details.map((row, i) => (
               <div
                 key={`${row.serialNo}-${i}`}
-                className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4"
+                className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4"
               >
                 {/* Left: Serial Number */}
                 <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
@@ -282,7 +282,7 @@ export default function AttendanceDetailPage() {
 
                 {/* Middle: Date, Time & Slot */}
                 <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium">
                     <span className="text-xs font-semibold text-primary font-mono leading-none">
                       {row.slot || record.slot}
                     </span>

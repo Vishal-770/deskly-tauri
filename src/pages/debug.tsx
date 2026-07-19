@@ -622,7 +622,7 @@ export default function DashboardPage() {
               {isLoggedIn && (
                 <button
                   onClick={() => navigate("/dashboard/timetable")}
-                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
                 >
                   <Calendar className="w-3.5 h-3.5" />
                   <span>View Timetable</span>
@@ -654,7 +654,7 @@ export default function DashboardPage() {
                     });
                   }
                 }}
-                className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-primary/20 hover:border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-all duration-200 cursor-pointer"
               >
                 <Activity className="w-3.5 h-3.5 text-primary" />
                 <span>Test Backend</span>
@@ -668,7 +668,7 @@ export default function DashboardPage() {
               {isLoggedIn && (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-destructive/20 hover:border-destructive/40 bg-destructive/5 hover:bg-destructive/10 text-destructive text-xs font-bold transition-all duration-200 cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-destructive/20 hover:border-destructive/40 bg-destructive/5 hover:bg-destructive/10 text-destructive text-xs font-bold transition-all duration-200 cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Sign Out</span>
@@ -735,7 +735,7 @@ export default function DashboardPage() {
                       <button
                         key={cmd.name}
                         onClick={() => selectCommand(cmd)}
-                        className={`w-full text-left p-3.5 transition-all duration-200 flex items-start justify-between gap-4 group ${
+                        className={`w-full text-left p-3 transition-all duration-200 flex items-start justify-between gap-4 group ${
                           isSelected
                             ? "bg-accent/30 border-l-2 border-primary pl-3"
                             : "hover:bg-accent/15 border-l-2 border-transparent"
@@ -750,7 +750,7 @@ export default function DashboardPage() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-accent/20 text-muted-foreground uppercase tracking-wider scale-90">
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-accent/20 text-muted-foreground uppercase tracking-wider scale-90">
                             {cmd.category.split(" ")[0]}
                           </span>
                           <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
@@ -800,8 +800,8 @@ export default function DashboardPage() {
                     {selectedCommand.params.map((p) => (
                       <div key={p.name} className="space-y-1.5">
                         <label className="text-xs font-bold text-muted-foreground flex items-center justify-between">
-                          <span>{p.label} {p.optional && <span className="font-normal text-[10px] text-muted-foreground/60">(Optional)</span>}</span>
-                          <span className="font-mono text-[10px] text-muted-foreground/60">{p.name}</span>
+                          <span>{p.label} {p.optional && <span className="font-normal text-xs text-muted-foreground/60">(Optional)</span>}</span>
+                          <span className="font-mono text-xs text-muted-foreground/60">{p.name}</span>
                         </label>
                         
                         {p.type === "select" ? (
@@ -877,10 +877,10 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   {lastResponse.status !== "idle" && (
                     <>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-accent/20 border border-border/40 text-muted-foreground">
+                      <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-accent/20 border border-border/40 text-muted-foreground">
                         {lastResponse.duration} ms
                       </span>
-                      <span className={`text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full ${
+                      <span className={`text-xs uppercase tracking-wider font-extrabold px-2 py-1 rounded-full ${
                         lastResponse.status === "success"
                           ? "bg-chart-2/10 border border-chart-2/30 text-chart-2"
                           : "bg-destructive/10 border border-destructive/30 text-destructive"

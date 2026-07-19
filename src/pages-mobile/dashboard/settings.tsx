@@ -139,7 +139,7 @@ export default function MobileSettings() {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start gap-2">
         <Settings className="w-6 h-6 text-primary shrink-0 mt-0.5" />
-        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground leading-none">
           Settings
         </h1>
       </header>
@@ -174,7 +174,7 @@ export default function MobileSettings() {
           <div className="flex items-center justify-between gap-3 py-4">
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-semibold text-foreground">Visual Theme</h3>
-              <p className="text-[11px] text-muted-foreground/50 mt-1 leading-relaxed">
+              <p className="text-xs text-muted-foreground/50 mt-1 leading-relaxed">
                 Switch between light, dark, and system themes.
               </p>
             </div>
@@ -196,11 +196,11 @@ export default function MobileSettings() {
           <div className="flex items-center justify-between gap-3 py-4">
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-semibold text-foreground">Active Semester</h3>
-              <p className="text-[11px] text-muted-foreground/50 mt-1 leading-relaxed">
+              <p className="text-xs text-muted-foreground/50 mt-1 leading-relaxed">
                 Select the default semester used across dashboard listings.
               </p>
               {semesterError && (
-                <p className="text-[10px] text-destructive mt-1 font-semibold">{semesterError}</p>
+                <p className="text-xs text-destructive mt-1 font-semibold">{semesterError}</p>
               )}
             </div>
 
@@ -237,7 +237,7 @@ export default function MobileSettings() {
 
         {/* Keyring error banner */}
         {(credError || credStatus?.keyringError) && (
-          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/15 rounded-xl text-[11px] text-destructive font-semibold">
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/15 rounded-xl text-xs text-destructive font-semibold">
             <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span>{credError ?? credStatus?.keyringError}</span>
           </div>
@@ -245,11 +245,11 @@ export default function MobileSettings() {
 
         <div className="divide-y divide-border/10 border-t border-b border-border/10">
           {credItems.map((item) => (
-            <div key={item.label} className="flex items-center justify-between gap-3 py-3.5">
+            <div key={item.label} className="flex items-center justify-between gap-3 py-3">
               <div className="flex items-center gap-3 min-w-0">
                 {item.icon}
                 <div className="min-w-0">
-                  <p className="text-[9px] text-muted-foreground/50 uppercase tracking-wider leading-none">
+                  <p className="text-xs text-muted-foreground/50 uppercase tracking-wider leading-none">
                     {item.label}
                   </p>
                   {item.loading ? (
@@ -269,7 +269,7 @@ export default function MobileSettings() {
                 <Sk className="h-5 w-14 rounded-full shrink-0" />
               ) : (
                 <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black shrink-0 ${
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-black shrink-0 ${
                     item.stored
                       ? "bg-primary/10 text-primary border border-primary/20"
                       : "bg-destructive/10 text-destructive border border-destructive/15"
@@ -283,7 +283,7 @@ export default function MobileSettings() {
           ))}
         </div>
 
-        <p className="text-[10px] text-muted-foreground/50 leading-relaxed px-1 font-medium">
+        <p className="text-xs text-muted-foreground/50 leading-relaxed px-1 font-medium">
           Credentials are stored securely in your device's native keyring. Session cookies are held in memory and refreshed automatically.
         </p>
       </div>
@@ -291,13 +291,13 @@ export default function MobileSettings() {
       {/* Legal Link */}
       <Link
         to="/legal"
-        className="flex items-center justify-between py-3.5 px-1 text-muted-foreground hover:text-foreground transition-colors border-t border-border/10"
+        className="flex items-center justify-between py-3 px-1 text-muted-foreground hover:text-foreground transition-colors border-t border-border/10"
       >
         <div className="flex items-center gap-3">
           <Scale className="w-4 h-4 shrink-0" />
           <div>
             <p className="text-sm font-medium text-foreground">Legal &amp; Privacy</p>
-            <p className="text-[11px] text-muted-foreground/60 mt-0.5">View disclaimers and data policies</p>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">View disclaimers and data policies</p>
           </div>
         </div>
         <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground/40" />

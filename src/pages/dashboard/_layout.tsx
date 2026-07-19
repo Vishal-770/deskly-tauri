@@ -100,7 +100,7 @@ export default function MobileDashboardLayout() {
         )}
 
         {!isOnline && (
-          <div className="flex items-center gap-1 text-[10px] font-bold text-amber-500/80 uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/10">
+          <div className="flex items-center gap-1 text-xs font-bold text-amber-500/80 uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/10">
             <WifiOff className="w-3 h-3" />
             <span>Offline</span>
           </div>
@@ -129,7 +129,7 @@ export default function MobileDashboardLayout() {
               }`}
             >
               <Icon className="w-5 h-5" />
-              <span className="text-[10px] tracking-wide">{item.label}</span>
+              <span className="text-xs tracking-wide">{item.label}</span>
             </Link>
           );
         })}
@@ -144,7 +144,7 @@ export default function MobileDashboardLayout() {
           }`}
         >
           <Menu className="w-5 h-5" />
-          <span className="text-[10px] tracking-wide">More</span>
+          <span className="text-xs tracking-wide">More</span>
         </button>
       </nav>
 
@@ -167,7 +167,7 @@ export default function MobileDashboardLayout() {
 
           {/* Grid of features */}
           <div className="flex-1 overflow-y-auto no-scrollbar pt-2">
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-3 gap-2">
               {moreGridItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -189,7 +189,7 @@ export default function MobileDashboardLayout() {
                     }`}>
                       <Icon className="w-5 h-5" />
                     </div>
-                    <span className={`text-[10.5px] text-center font-medium tracking-tight mt-2 leading-none w-full truncate ${
+                    <span className={`text-xs text-center font-medium tracking-tight mt-2 leading-none w-full truncate ${
                       isActive ? "text-primary font-semibold" : "text-muted-foreground group-hover:text-foreground"
                     }`}>
                       {item.label}

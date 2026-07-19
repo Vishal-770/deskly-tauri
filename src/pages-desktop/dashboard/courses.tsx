@@ -66,20 +66,20 @@ function CourseRow({ item, index }: { item: TimetableCourse; index: number }) {
             {item.code}
           </span>
           {item.slot && (
-            <span className="font-mono text-[10px] font-medium text-muted-foreground/75 bg-muted px-1.5 py-0.5 rounded leading-none">
+            <span className="font-mono text-xs font-medium text-muted-foreground/75 bg-muted px-1.5 py-0.5 rounded leading-none">
               Slot: {item.slot}
             </span>
           )}
           <Badge
             variant="outline"
-            className={`text-[10px] font-medium rounded-md border inline-flex items-center justify-center ${typeStyle.className} bg-current/5 border-current/25`}
+            className={`text-xs font-medium rounded-md border inline-flex items-center justify-center ${typeStyle.className} bg-current/5 border-current/25`}
           >
             {typeStyle.label}
           </Badge>
           {item.category && (
             <Badge
               variant="outline"
-              className="text-[10px] font-medium border border-border/40 text-muted-foreground bg-muted/5 rounded-md inline-flex items-center justify-center truncate max-w-[180px]"
+              className="text-xs font-medium border border-border/40 text-muted-foreground bg-muted/5 rounded-md inline-flex items-center justify-center truncate max-w-[180px]"
               title={catStyle.label}
             >
               {catStyle.label}
@@ -104,7 +104,7 @@ function CourseRow({ item, index }: { item: TimetableCourse; index: number }) {
               </span>
             </div>
             {item.faculty.school && (
-              <p className="text-[11px] text-muted-foreground/50 font-medium uppercase tracking-wider pl-5.5">
+              <p className="text-xs text-muted-foreground/50 font-medium uppercase tracking-wider pl-5.5">
                 {item.faculty.school}
               </p>
             )}
@@ -132,7 +132,7 @@ function CourseRow({ item, index }: { item: TimetableCourse; index: number }) {
           </span>
           <span className="text-xs text-muted-foreground/60 font-medium ml-1">Credits</span>
         </div>
-        <span className="font-mono text-[10px] text-muted-foreground/45 leading-none tabular-nums">
+        <span className="font-mono text-xs text-muted-foreground/45 leading-none tabular-nums">
           L·T·P·J: {item.credits?.lecture ?? 0}·{item.credits?.tutorial ?? 0}·{item.credits?.practical ?? 0}·{item.credits?.project ?? 0}
         </span>
       </div>
@@ -348,10 +348,10 @@ export default function CoursesPage() {
           { label: "Soft Skill", value: courseStats.softSkill.count, sub: `${courseStats.softSkill.credits} Cr` },
         ].map((stat) => (
           <div key={stat.label} className="flex-1 min-w-[100px] border-r border-border/10 last:border-r-0 px-2 first:pl-0">
-            <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">{stat.label}</span>
+            <span className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none block">{stat.label}</span>
             <div className="mt-2.5 flex items-baseline gap-1">
               <span className="text-xl font-semibold text-foreground leading-none">{stat.value}</span>
-              {stat.sub && <span className="text-[10px] text-muted-foreground/60 font-medium leading-none">{stat.sub}</span>}
+              {stat.sub && <span className="text-xs text-muted-foreground/60 font-medium leading-none">{stat.sub}</span>}
             </div>
           </div>
         ))}
@@ -435,19 +435,19 @@ export default function CoursesPage() {
       {courses.length > 0 && (
         <footer className="p-5 rounded-2xl bg-muted/10 border border-border/10 mt-6">
           <div className="flex items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
                 <FileText className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-xs font-black uppercase tracking-wider text-foreground">Summary</h3>
-                <p className="text-[10px] text-muted-foreground font-semibold">Credit breakdown</p>
+                <p className="text-xs text-muted-foreground font-semibold">Credit breakdown</p>
               </div>
             </div>
             <div className="bg-primary/10 border border-primary/20 text-primary px-3 py-1.5 rounded-xl flex items-center gap-1.5 shrink-0">
-              <span className="text-[10px] font-black uppercase tracking-wider leading-none">Total</span>
+              <span className="text-xs font-black uppercase tracking-wider leading-none">Total</span>
               <span className="text-base font-black leading-none">{courseStats.totalCredits}</span>
-              <span className="text-[10px] font-semibold leading-none opacity-70">Cr</span>
+              <span className="text-xs font-semibold leading-none opacity-70">Cr</span>
             </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -460,10 +460,10 @@ export default function CoursesPage() {
               <div key={row.label} className="flex items-center gap-2 min-w-0">
                 <span className="shrink-0">{row.icon}</span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/55 truncate">{row.label}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/55 truncate">{row.label}</p>
                   <p className="text-sm font-black text-foreground leading-none">
                     {row.count}
-                    <span className="text-[10px] font-semibold text-muted-foreground ml-1">({row.credits} Cr)</span>
+                    <span className="text-xs font-semibold text-muted-foreground ml-1">({row.credits} Cr)</span>
                   </p>
                 </div>
               </div>

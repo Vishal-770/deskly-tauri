@@ -66,7 +66,7 @@ function renderPhoto(photoUrl: string, name: string, maxWClass = "max-w-[12rem]"
 
 function renderDetailField(icon: React.ReactNode, label: string, value: string | null | undefined, className = "") {
   return (
-    <div className={`flex items-center justify-between gap-4 py-3.5 border-b border-border/10 group hover:border-primary/25 transition-colors min-w-0 ${className}`}>
+    <div className={`flex items-center justify-between gap-4 py-3 border-b border-border/10 group hover:border-primary/25 transition-colors min-w-0 ${className}`}>
       <div className="flex items-center gap-3 min-w-0">
         <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center text-muted-foreground/70 group-hover:bg-primary/10 group-hover:text-primary transition-all shrink-0">
           {icon}
@@ -108,7 +108,7 @@ function ProfileSkeleton() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 w-full">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10">
+                <div key={i} className="flex items-center justify-between py-3 border-b border-border/10">
                   <div className="flex items-center gap-3">
                     <Sk className="w-8 h-8 rounded-full shrink-0" />
                     <Sk className="h-3 w-20 rounded-full" />
@@ -117,7 +117,7 @@ function ProfileSkeleton() {
                 </div>
               ))}
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10 md:col-span-2">
+                <div key={i} className="flex items-center justify-between py-3 border-b border-border/10 md:col-span-2">
                   <div className="flex items-center gap-3">
                     <Sk className="w-8 h-8 rounded-full shrink-0" />
                     <Sk className="h-3 w-24 rounded-full" />
@@ -142,7 +142,7 @@ function ProfileSkeleton() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 w-full">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10">
+                <div key={i} className="flex items-center justify-between py-3 border-b border-border/10">
                   <div className="flex items-center gap-3">
                     <Sk className="w-8 h-8 rounded-full shrink-0" />
                     <Sk className="h-3 w-20 rounded-full" />
@@ -150,7 +150,7 @@ function ProfileSkeleton() {
                   <Sk className="h-4 w-32 rounded-full" />
                 </div>
               ))}
-              <div className="flex items-center justify-between py-3.5 border-b border-border/10 md:col-span-2">
+              <div className="flex items-center justify-between py-3 border-b border-border/10 md:col-span-2">
                 <div className="flex items-center gap-3">
                   <Sk className="w-8 h-8 rounded-full shrink-0" />
                   <Sk className="h-3 w-24 rounded-full" />
@@ -167,7 +167,7 @@ function ProfileSkeleton() {
         <Sk className="h-5 w-36 rounded-full" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2 w-full">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between py-3.5 border-b border-border/10">
+            <div key={i} className="flex items-center justify-between py-3 border-b border-border/10">
               <div className="flex items-center gap-3">
                 <Sk className="w-8 h-8 rounded-full shrink-0" />
                 <Sk className="h-3 w-24 rounded-full" />
@@ -278,7 +278,7 @@ export default function StudentProfilePage() {
           {/* Details block */}
           <div className="flex-1 w-full space-y-6">
             <div className="border-b border-border/10 pb-4">
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Full Name</p>
+              <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Full Name</p>
               <h2 className="text-2xl font-black tracking-tight text-foreground">{student.name}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 w-full">
@@ -308,7 +308,7 @@ export default function StudentProfilePage() {
             {/* Details block */}
             <div className="flex-1 w-full space-y-6">
               <div className="border-b border-border/10 pb-4">
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Proctor Name</p>
+                <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Proctor Name</p>
                 <h2 className="text-xl font-black tracking-tight text-foreground">{proctor.name}</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 w-full">

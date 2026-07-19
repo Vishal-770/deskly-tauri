@@ -226,7 +226,7 @@ const DashboardSidebar = () => {
         <div className="w-full flex justify-center mb-4 shrink-0">
           <button
             onClick={() => setSearchOpen((s) => !s)}
-            className="w-full px-3.5 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200"
+            className="w-full px-3 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200"
           >
             <Search className="w-5 h-5 shrink-0" />
             <span
@@ -253,7 +253,7 @@ const DashboardSidebar = () => {
               <Link
                 key={item.href}
                 to={item.href}
-                className={`w-full px-3.5 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200 shrink-0 ${
+                className={`w-full px-3 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200 shrink-0 ${
                   active
                     ? "bg-primary/10 text-primary font-bold"
                     : "text-muted-foreground/80 hover:text-foreground"
@@ -278,7 +278,7 @@ const DashboardSidebar = () => {
         <div className="w-full flex justify-center mt-auto pt-4 border-t border-border/10 shrink-0">
           <button
             onClick={toggleSidebar}
-            className="w-full px-3.5 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200"
+            className="w-full px-3 py-3 flex items-center justify-start rounded-xl hover:bg-muted transition-all duration-200"
             title={isCollapsed ? "Pin Sidebar (Always Expand)" : "Unpin Sidebar (Collapse)"}
           >
             <div className="shrink-0 w-5 h-5 flex items-center justify-center">

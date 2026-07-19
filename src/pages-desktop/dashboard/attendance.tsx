@@ -112,7 +112,7 @@ function CircularProgress({ percentage, size = 48 }: { percentage: number; size?
           cy={size / 2}
         />
       </svg>
-      <span className="absolute text-[10px] font-black text-foreground leading-none">{percentage}%</span>
+      <span className="absolute text-xs font-black text-foreground leading-none">{percentage}%</span>
     </div>
   );
 }
@@ -136,20 +136,20 @@ function AttendanceHint({ attended, total }: { attended: number; total: number }
 
   if (need > 0) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-destructive bg-destructive/8 px-2 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-destructive bg-destructive/8 px-2 py-0.5 rounded-full">
         Attend {need} more
       </span>
     );
   }
   if (canSkip > 0) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-chart-2 bg-chart-2/8 px-2 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-chart-2 bg-chart-2/8 px-2 py-0.5 rounded-full">
         Can miss {canSkip}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
       On track
     </span>
   );
@@ -176,13 +176,13 @@ function AttendanceCard({ item, index }: { item: AttendanceRecord; index: number
         {/* Texts */}
         <div className="space-y-1.5 min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap min-w-0">
-            <span className="text-[10px] font-bold text-muted-foreground/45 tabular-nums shrink-0">
+            <span className="text-xs font-bold text-muted-foreground/45 tabular-nums shrink-0">
               {item.slNo ?? index + 1}
             </span>
             <span className="text-sm md:text-base font-extrabold tracking-widest text-primary uppercase leading-none shrink-0">
               {item.courseCode}
             </span>
-            <span className="font-mono text-[10px] font-black text-muted-foreground/60 bg-muted/70 px-1.5 py-0.5 rounded-md leading-none shrink-0">
+            <span className="font-mono text-xs font-black text-muted-foreground/60 bg-muted/70 px-1.5 py-0.5 rounded-md leading-none shrink-0">
               {item.slot}
             </span>
             <span className={`text-xs font-semibold shrink-0 ${typeColor}`}>
@@ -199,7 +199,7 @@ function AttendanceCard({ item, index }: { item: AttendanceRecord; index: number
               <User className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
               <span>{item.faculty.name}</span>
               {item.faculty.school && (
-                <span className="text-[10px] md:text-xs text-muted-foreground/50 font-bold uppercase">
+                <span className="text-xs md:text-xs text-muted-foreground/50 font-bold uppercase">
                   · {item.faculty.school}
                 </span>
               )}
@@ -218,7 +218,7 @@ function AttendanceCard({ item, index }: { item: AttendanceRecord; index: number
           <span className="text-sm md:text-base font-bold text-muted-foreground tabular-nums leading-none">
             {item.totalClasses}
           </span>
-          <span className="text-[10px] md:text-xs text-muted-foreground/50 font-medium ml-1">classes</span>
+          <span className="text-xs md:text-xs text-muted-foreground/50 font-medium ml-1">classes</span>
         </div>
         
         <div className="w-28 flex justify-end">
@@ -332,7 +332,7 @@ export default function AttendancePage() {
           </div>
           <button 
             onClick={load}
-            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+            className="text-xs uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
           >
             Retry
           </button>
@@ -392,11 +392,11 @@ export default function AttendancePage() {
               {s.icon}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] md:text-xs font-bold text-muted-foreground/60 uppercase tracking-wider leading-none">
+              <p className="text-xs md:text-xs font-bold text-muted-foreground/60 uppercase tracking-wider leading-none">
                 {s.label}
               </p>
               <p className="text-lg md:text-2xl lg:text-3xl font-black text-foreground mt-1.5 leading-none">{s.value}</p>
-              <p className="text-[9px] md:text-xs text-muted-foreground/65 font-bold mt-1.5 leading-none truncate">{s.sub}</p>
+              <p className="text-xs md:text-xs text-muted-foreground/65 font-bold mt-1.5 leading-none truncate">{s.sub}</p>
             </div>
           </div>
         ))}

@@ -261,7 +261,7 @@ export default function GradesPage() {
           </div>
           <button 
             onClick={load}
-            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+            className="text-xs uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
           >
             Retry
           </button>
@@ -285,36 +285,36 @@ export default function GradesPage() {
         {/* Total Subjects */}
         <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
           <div className="flex items-center justify-between w-full">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Total Subjects</span>
+            <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Total Subjects</span>
             <BookOpen className="w-5 h-5 text-primary shrink-0" />
           </div>
           <div className="mt-4 flex items-baseline justify-between">
             <span className="text-2xl font-black text-foreground leading-none">{totalSubjects}</span>
-            <span className="text-[10px] font-bold text-muted-foreground/60 leading-none">Completed</span>
+            <span className="text-xs font-bold text-muted-foreground/60 leading-none">Completed</span>
           </div>
         </div>
 
         {/* Total Credits */}
         <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
           <div className="flex items-center justify-between w-full">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Total Credits</span>
+            <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Total Credits</span>
             <Bookmark className="w-5 h-5 text-primary shrink-0" />
           </div>
           <div className="mt-4 flex items-baseline justify-between">
             <span className="text-2xl font-black text-foreground leading-none">{totalCredits}</span>
-            <span className="text-[10px] font-bold text-muted-foreground/60 leading-none">Earned</span>
+            <span className="text-xs font-bold text-muted-foreground/60 leading-none">Earned</span>
           </div>
         </div>
 
         {/* CGPA */}
         <div className="flex flex-col justify-between bg-card/40 border border-border/30 rounded-2xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] hover:border-primary/10 transition-colors duration-200 min-h-[104px]">
           <div className="flex items-center justify-between w-full">
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">SGPA (Current)</span>
+            <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">SGPA (Current)</span>
             <Award className="w-5 h-5 text-primary shrink-0" />
           </div>
           <div className="mt-4 flex items-baseline justify-between">
             <span className="text-2xl font-black text-foreground leading-none">{cgpaVal}</span>
-            <span className="text-[10px] font-bold text-muted-foreground/60 leading-none">Cumulative</span>
+            <span className="text-xs font-bold text-muted-foreground/60 leading-none">Cumulative</span>
           </div>
         </div>
 
@@ -394,8 +394,8 @@ export default function GradesPage() {
                     <td className="py-4 px-3">{formatCourseType(item.courseType)}</td>
                     <td className="py-4 px-3 text-center font-bold text-foreground">{item.credits}</td>
                     <td className="py-4 px-3 text-center">{formatGrade(item.grade)}</td>
-                    <td className="py-4 px-3 text-[11px] font-bold">{item.examMonth}</td>
-                    <td className="py-4 px-3 text-[11px] font-bold">{item.resultDeclared || "-"}</td>
+                    <td className="py-4 px-3 text-xs font-bold">{item.examMonth}</td>
+                    <td className="py-4 px-3 text-xs font-bold">{item.resultDeclared || "-"}</td>
                     <td className="py-4 px-3">{formatDistribution(item.courseDistribution)}</td>
                   </tr>
                 ))}
@@ -415,10 +415,10 @@ export default function GradesPage() {
               <h3 className="text-xs font-black uppercase tracking-wider text-foreground flex items-center gap-1.5">
                 <HelpCircle className="w-3.5 h-3.5 text-primary" /> Grades Summary
               </h3>
-              <p className="text-[10px] text-muted-foreground font-semibold">Cumulative distribution count across all semesters</p>
+              <p className="text-xs text-muted-foreground font-semibold">Cumulative distribution count across all semesters</p>
             </div>
             
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-wrap gap-2">
               {[
                 { label: "S", count: gradeCounts.S, color: "bg-chart-2/10 text-chart-2 border border-chart-2/15" },
                 { label: "A", count: gradeCounts.A, color: "bg-chart-2/5 text-chart-2 border border-chart-2/10" },

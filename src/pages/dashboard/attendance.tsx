@@ -112,7 +112,7 @@ function ListCircularProgress({ percentage, size = 48 }: { percentage: number; s
           cy={size / 2}
         />
       </svg>
-      <span className="absolute text-[11px] font-extrabold text-foreground leading-none">{Math.round(percentage)}%</span>
+      <span className="absolute text-xs font-extrabold text-foreground leading-none">{Math.round(percentage)}%</span>
     </div>
   );
 }
@@ -175,11 +175,11 @@ function AttendanceSkeleton() {
           </div>
         </div>
       </div>
-      <Sk className="h-28 w-full rounded-[24px]" />
+      <Sk className="h-28 w-full rounded-3xl" />
       <div className="space-y-3 pt-2">
         <Sk className="h-5 w-36" />
         {[...Array(5)].map((_, i) => (
-          <Sk key={i} className="h-20 w-full rounded-[24px]" />
+          <Sk key={i} className="h-20 w-full rounded-3xl" />
         ))}
       </div>
     </div>
@@ -196,23 +196,20 @@ function AttendanceRow({
   onSelect: () => void;
 }) {
   const pct = item.attendancePercentage;
-  const displayType = formatCourseType(item.courseType);
 
   return (
     <div
       onClick={onSelect}
-      className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer"
+      className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer"
     >
       <div className="flex-1 min-w-0 flex items-center gap-4">
         <ListCircularProgress percentage={pct} size={48} />
 
         <div className="flex-1 min-w-0 space-y-1">
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-nowrap overflow-hidden">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium flex-nowrap overflow-hidden">
             <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none shrink-0">
               {item.courseCode}
             </span>
-            <span className="shrink-0">&bull;</span>
-            <span className="uppercase truncate max-w-[80px] leading-none block">{displayType}</span>
             <span className="shrink-0">&bull;</span>
             <span className="font-mono shrink-0 leading-none">{item.slot}</span>
           </div>
@@ -284,7 +281,7 @@ function AttendanceDrawer({
                   <span className="text-xs font-semibold text-primary uppercase tracking-wide">
                     {item.courseCode}
                   </span>
-                  <span className="text-[10px] font-medium text-muted-foreground/60">
+                  <span className="text-xs font-medium text-muted-foreground/60">
                     ({displayType})
                   </span>
                 </div>
@@ -302,10 +299,10 @@ function AttendanceDrawer({
               <X className="w-4 h-4" />
             </button>
           </div>
-
+ 
           {/* Attendance Status block */}
           <div className="space-y-3 pt-1">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
+            <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
               Attendance Status
             </p>
             
@@ -320,7 +317,7 @@ function AttendanceDrawer({
                 />
               </div>
             </div>
-
+ 
             <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground leading-none pt-0.5">
               <AttendanceHint attended={item.attendedClasses} total={item.totalClasses} courseType={item.courseType} />
               <span className="font-mono tabular-nums whitespace-nowrap shrink-0 text-right">
@@ -329,26 +326,26 @@ function AttendanceDrawer({
                 {item.courseType.toLowerCase().includes("lab") ? "labs" : "classes"} attended
               </span>
             </div>
-
+ 
             {/* View Full Details button */}
             <button
               onClick={onViewDetail}
-              className="w-full flex items-center justify-between mt-3 px-4 py-3 rounded-[16px] bg-card/80 border border-border/40 text-xs font-bold text-foreground hover:bg-muted/10 active:opacity-85 transition-all cursor-pointer backdrop-blur-md shadow-sm"
+              className="w-full flex items-center justify-between mt-3 px-4 py-3 rounded-2xl bg-card/80 border border-border/40 text-xs font-bold text-foreground hover:bg-muted/10 active:opacity-85 transition-all cursor-pointer backdrop-blur-md shadow-sm"
             >
               <span>View Detailed Session Log</span>
               <ArrowRight className="w-4 h-4 text-primary" />
             </button>
           </div>
-
+ 
           {/* Course Information Details */}
           <div className="space-y-3 pt-1">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
+            <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
               Course Information
             </p>
 
             <div className="divide-y divide-border/15 border-t border-b border-border/15">
               {details.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-center justify-between gap-4 py-3.5">
+                <div key={label} className="flex items-center justify-between gap-4 py-3">
                   <div className="flex items-center gap-3 shrink-0">
                     <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
                     <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide leading-none">{label}</span>
@@ -473,7 +470,7 @@ export default function AttendancePage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
             Retry
@@ -485,18 +482,18 @@ export default function AttendancePage() {
       <header className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <UserCheck className="w-6 h-6 text-primary shrink-0" />
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground leading-none truncate">
             My Attendance
           </h1>
         </div>
       </header>
 
       {/* Stats Card */}
-      <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center">
+      <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center">
         <div className="flex-1 flex items-center gap-4 min-w-0">
           <StatCircularProgress percentage={stats.overallPercentage} icon={TrendingUp} size={56} />
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
+            <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
               Average
             </p>
             <p className="text-2xl font-black text-foreground leading-none py-1">
@@ -510,7 +507,7 @@ export default function AttendancePage() {
         <div className="flex-1 flex items-center gap-4 min-w-0">
           <StatCircularProgress percentage={Math.round((stats.totalAttended / (stats.totalClasses || 1)) * 100)} icon={CalendarDays} size={56} />
           <div className="min-w-0 space-y-0.5 shrink-0">
-            <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
+            <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
               Attended
             </p>
             <p className="text-lg font-black text-foreground leading-none py-1 tabular-nums whitespace-nowrap">
@@ -544,7 +541,7 @@ export default function AttendancePage() {
         </div>
 
         {filteredAttendance.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
             <UserCheck className="w-8 h-8 text-muted-foreground/20" />
             <p className="text-sm font-semibold text-foreground leading-none">No records found</p>
             <p className="text-xs text-muted-foreground">Check filter settings or reload.</p>
@@ -564,8 +561,8 @@ export default function AttendancePage() {
 
       {/* Motivation Section */}
       <div className="pt-1">
-        <div className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
+        <div className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
               <Trophy className="w-5 h-5" />
             </div>

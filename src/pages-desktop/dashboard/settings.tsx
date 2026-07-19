@@ -208,18 +208,18 @@ export default function SettingsPage() {
         {/* Left Column: Preferences */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 border-b border-border/10 pb-2 mb-2">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/50 border-b border-border/10 pb-2 mb-2">
               Preferences
             </h2>
             <div className="divide-y divide-border/10">
               
               {/* Theme Settings Row */}
-              <div className="py-4.5 flex items-center justify-between gap-6">
+              <div className="py-4 flex items-center justify-between gap-6">
                 <div className="flex items-start gap-3">
                   <SunMoon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                   <div>
                     <h3 className="text-xs font-semibold text-foreground">Theme Mode</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                       Toggle between light and dark visual themes.
                     </p>
                   </div>
@@ -228,12 +228,12 @@ export default function SettingsPage() {
               </div>
 
               {/* Academic Settings Row */}
-              <div className="py-4.5 flex items-center justify-between gap-6">
+              <div className="py-4 flex items-center justify-between gap-6">
                 <div className="flex items-start gap-3">
                   <Calendar className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                   <div>
                     <h3 className="text-xs font-semibold text-foreground">Active Semester</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                       Select active semester for grades, timetable, and marks.
                     </p>
                   </div>
@@ -243,12 +243,12 @@ export default function SettingsPage() {
                   onValueChange={handleSemesterChange}
                   disabled={semesters.length === 0}
                 >
-                  <SelectTrigger className="w-[160px] h-8 rounded-lg bg-muted/20 hover:bg-muted/30 border-border/20 text-[11px] focus:ring-1 focus:ring-primary/20">
+                  <SelectTrigger className="w-[160px] h-8 rounded-lg bg-muted/20 hover:bg-muted/30 border-border/20 text-xs focus:ring-1 focus:ring-primary/20">
                     <SelectValue placeholder="Select Semester" />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg border-border/20 bg-popover/95 backdrop-blur-md">
                     {semesters.map((s) => (
-                      <SelectItem key={s.id} value={s.id} className="rounded-md text-[11px]">
+                      <SelectItem key={s.id} value={s.id} className="rounded-md text-xs">
                         {s.name}
                       </SelectItem>
                     ))}
@@ -257,23 +257,23 @@ export default function SettingsPage() {
               </div>
 
               {/* Hostel Block Selection Row */}
-              <div className="py-4.5 flex items-center justify-between gap-6">
+              <div className="py-4 flex items-center justify-between gap-6">
                 <div className="flex items-start gap-3">
                   <Building className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                   <div>
                     <h3 className="text-xs font-semibold text-foreground">Hostel Block</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                       Set hostel block for laundry calendar views.
                     </p>
                   </div>
                 </div>
                 <Select value={hostelBlock} onValueChange={handleBlockChange}>
-                  <SelectTrigger className="w-[100px] h-8 rounded-lg bg-muted/20 hover:bg-muted/30 border-border/20 text-[11px] focus:ring-1 focus:ring-primary/20">
+                  <SelectTrigger className="w-[100px] h-8 rounded-lg bg-muted/20 hover:bg-muted/30 border-border/20 text-xs focus:ring-1 focus:ring-primary/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-lg border-border/20 bg-popover/95 backdrop-blur-md">
                     {LAUNDRY_BLOCKS.map((b) => (
-                      <SelectItem key={b} value={b} className="rounded-lg text-[11px]">
+                      <SelectItem key={b} value={b} className="rounded-lg text-xs">
                         Block {b}
                       </SelectItem>
                     ))}
@@ -288,19 +288,19 @@ export default function SettingsPage() {
         {/* Right Column: Maintenance & Account */}
         <div className="space-y-6">
           <div>
-            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 border-b border-border/10 pb-2 mb-2">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/50 border-b border-border/10 pb-2 mb-2">
               System & Operations
             </h2>
             <div className="divide-y divide-border/10">
               
               {/* Software Update Row */}
-              <div className="py-4.5 space-y-3">
+              <div className="py-4 space-y-3">
                 <div className="flex items-center justify-between gap-6">
                   <div className="flex items-start gap-3">
                     <ArrowUpCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div>
                       <h3 className="text-xs font-semibold text-foreground">Software Update</h3>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                         {updateStatus === "idle" && `Current version: v${currentVersion}`}
                         {updateStatus === "checking" && "Checking for updates..."}
                         {updateStatus === "upToDate" && `System is up to date (v${currentVersion})`}
@@ -323,7 +323,7 @@ export default function SettingsPage() {
                             console.error("Failed to open download link:", err);
                           }
                         }}
-                        className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer border-0"
+                        className="px-3 py-1.5 bg-muted hover:bg-muted/80 text-foreground text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer border-0"
                       >
                         <ExternalLink className="w-3 h-3" />
                         Download
@@ -333,7 +333,7 @@ export default function SettingsPage() {
                         {(updateStatus === "idle" || updateStatus === "upToDate" || updateStatus === "error") && (
                           <button
                             onClick={handleUpdateCheck}
-                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-[11px] font-bold rounded-lg cursor-pointer transition-all"
+                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-lg cursor-pointer transition-all"
                           >
                             Check
                           </button>
@@ -341,7 +341,7 @@ export default function SettingsPage() {
                         {updateStatus === "checking" && (
                           <button
                             disabled
-                            className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5"
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-lg flex items-center gap-1.5"
                           >
                             <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
                             Checking
@@ -350,7 +350,7 @@ export default function SettingsPage() {
                         {updateStatus === "available" && (
                           <button
                             onClick={handleInstallUpdate}
-                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-[11px] font-bold rounded-lg cursor-pointer transition-all animate-pulse"
+                            className="px-3 py-1.5 bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-bold rounded-lg cursor-pointer transition-all animate-pulse"
                           >
                             Install
                           </button>
@@ -358,7 +358,7 @@ export default function SettingsPage() {
                         {updateStatus === "downloading" && (
                           <button
                             disabled
-                            className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg flex items-center gap-1.5"
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-lg flex items-center gap-1.5"
                           >
                             <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
                             Downloading
@@ -367,7 +367,7 @@ export default function SettingsPage() {
                         {updateStatus === "finished" && (
                           <button
                             disabled
-                            className="px-3 py-1.5 bg-muted text-muted-foreground text-[11px] font-bold rounded-lg"
+                            className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-lg"
                           >
                             Restarting
                           </button>
@@ -380,7 +380,7 @@ export default function SettingsPage() {
                 {/* Non-AppImage notice */}
                 {installFormat === "linux-manual" && (
                   <div className="pl-7 pt-1">
-                    <p className="text-[10px] text-muted-foreground/60 leading-relaxed">
+                    <p className="text-xs text-muted-foreground/60 leading-relaxed">
                       Auto-update is only supported for AppImage, Windows, and macOS installs. RPM/DEB users should download the new package manually from GitHub releases.
                     </p>
                   </div>
@@ -389,7 +389,7 @@ export default function SettingsPage() {
                 {/* Inline Details */}
                 {updateStatus === "available" && activeUpdate && activeUpdate.body && (
                   <div className="pl-7 pt-1">
-                    <div className="p-3 bg-muted/10 border border-border/10 rounded-xl text-[10px] text-muted-foreground max-h-24 overflow-y-auto no-scrollbar font-medium">
+                    <div className="p-3 bg-muted/10 border border-border/10 rounded-xl text-xs text-muted-foreground max-h-24 overflow-y-auto no-scrollbar font-medium">
                       <p className="font-bold text-foreground/80 mb-1">Release Notes:</p>
                       <p className="whitespace-pre-wrap leading-relaxed">{activeUpdate.body}</p>
                     </div>
@@ -404,7 +404,7 @@ export default function SettingsPage() {
                         style={{ width: `${downloadProgress.percent ?? 0}%` }}
                       />
                     </div>
-                    <div className="text-[10px] text-muted-foreground/60 font-semibold">
+                    <div className="text-xs text-muted-foreground/60 font-semibold">
                       {downloadProgress.total 
                         ? `${(downloadProgress.downloaded / (1024 * 1024)).toFixed(2)} MB / ${(downloadProgress.total / (1024 * 1024)).toFixed(2)} MB`
                         : `${(downloadProgress.downloaded / (1024 * 1024)).toFixed(2)} MB downloaded`
@@ -415,7 +415,7 @@ export default function SettingsPage() {
 
                 {updateStatus === "error" && updateError && (
                   <div className="pl-7 pt-1">
-                    <p className="text-[10px] text-destructive bg-destructive/5 border border-destructive/10 p-2 rounded-xl font-semibold leading-relaxed">
+                    <p className="text-xs text-destructive bg-destructive/5 border border-destructive/10 p-2 rounded-xl font-semibold leading-relaxed">
                       {updateError}
                     </p>
                   </div>
@@ -423,38 +423,38 @@ export default function SettingsPage() {
               </div>
 
               {/* Legal & Privacy Policy Row */}
-              <div className="py-4.5 flex items-center justify-between gap-6">
+              <div className="py-4 flex items-center justify-between gap-6">
                 <div className="flex items-start gap-3">
                   <Scale className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                   <div>
                     <h3 className="text-xs font-semibold text-foreground">Legal &amp; Privacy Policy</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                       View unofficial app disclaimers and data policies.
                     </p>
                   </div>
                 </div>
                 <Link
                   to="/legal"
-                  className="px-3 py-1 bg-muted hover:bg-muted/80 text-foreground text-[11px] font-bold rounded-lg cursor-pointer border border-border/10 shrink-0"
+                  className="px-3 py-1 bg-muted hover:bg-muted/80 text-foreground text-xs font-bold rounded-lg cursor-pointer border border-border/10 shrink-0"
                 >
                   View
                 </Link>
               </div>
 
               {/* Account Settings (Logout) Row */}
-              <div className="py-4.5 flex items-center justify-between gap-6">
+              <div className="py-4 flex items-center justify-between gap-6">
                 <div className="flex items-start gap-3">
                   <LogOut className="w-4 h-4 text-destructive mt-0.5 shrink-0" />
                   <div>
                     <h3 className="text-xs font-semibold text-destructive">Sign Out</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                       Logout and clear saved credentials from device.
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="px-3 py-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-[11px] font-bold rounded-lg cursor-pointer shrink-0"
+                  className="px-3 py-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs font-bold rounded-lg cursor-pointer shrink-0"
                 >
                   Sign Out
                 </button>

@@ -118,7 +118,7 @@ export default function MobileHome() {
             <h1 className="text-[28px] font-bold tracking-tight text-foreground leading-tight">
               Welcome Back
             </h1>
-            <p className="text-[13px] text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-[280px] mx-auto">
               Sign in to sync your student dashboard with your VTOP account.
             </p>
           </div>
@@ -139,7 +139,7 @@ export default function MobileHome() {
                 value={regNo}
                 onChange={(e) => setRegNo(e.target.value)}
                 disabled={loading || isOffline}
-                className="flex-1 bg-transparent border-none outline-none text-[15px] text-foreground placeholder:text-muted-foreground/35 font-normal disabled:opacity-50"
+                className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground/35 font-normal disabled:opacity-50"
                 placeholder="Username"
                 required
                 autoComplete="username"
@@ -156,7 +156,7 @@ export default function MobileHome() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={loading || isOffline}
-                className="flex-1 bg-transparent border-none outline-none text-[15px] text-foreground placeholder:text-muted-foreground/35 font-normal disabled:opacity-50"
+                className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground/35 font-normal disabled:opacity-50"
                 placeholder="Password"
                 required
                 autoComplete="current-password"
@@ -178,12 +178,12 @@ export default function MobileHome() {
 
           {/* Error / Offline Status */}
           {isOffline ? (
-            <div className="flex items-start gap-2 text-destructive text-[13px] font-medium leading-relaxed -mt-2 bg-destructive/5 border border-destructive/10 p-3 rounded-lg">
+            <div className="flex items-start gap-2 text-destructive text-sm font-medium leading-relaxed -mt-2 bg-destructive/5 border border-destructive/10 p-3 rounded-lg">
               <AlertCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-destructive" />
               <span>You are currently offline. Please check your internet connection.</span>
             </div>
           ) : (submitError || error) ? (
-            <div className="flex items-start gap-2 text-destructive text-[13px] font-medium leading-relaxed -mt-2 bg-destructive/5 border border-destructive/10 p-3 rounded-lg">
+            <div className="flex items-start gap-2 text-destructive text-sm font-medium leading-relaxed -mt-2 bg-destructive/5 border border-destructive/10 p-3 rounded-lg">
               <AlertCircle className="w-4.5 h-4.5 shrink-0 mt-0.5 text-destructive" />
               <span>{submitError ?? error}</span>
             </div>
@@ -193,7 +193,7 @@ export default function MobileHome() {
           <button
             type="submit"
             disabled={loading || isOffline}
-            className="w-full h-[54px] flex items-center justify-center gap-2 bg-primary text-primary-foreground text-[15px] font-semibold rounded-xl transition-opacity duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:opacity-85"
+            className="w-full h-[54px] flex items-center justify-center gap-2 bg-primary text-primary-foreground text-sm font-semibold rounded-xl transition-opacity duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:opacity-85"
           >
             {loading ? (
               <>
@@ -220,14 +220,14 @@ export default function MobileHome() {
               console.error("Failed to open support link:", err);
             }
           }}
-          className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer bg-transparent border-none focus:outline-none p-0"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-foreground transition-colors cursor-pointer bg-transparent border-none focus:outline-none p-0"
         >
           <Headphones className="w-3.5 h-3.5" />
           <span>Support</span>
         </button>
         <Link
           to="/legal"
-          className="flex items-center gap-1.5 text-[12px] text-muted-foreground/60 hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-foreground transition-colors"
         >
           <Scale className="w-3.5 h-3.5" />
           <span>Legal</span>

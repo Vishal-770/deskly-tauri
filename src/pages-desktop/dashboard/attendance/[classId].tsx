@@ -58,7 +58,7 @@ function StatusBadge({ status }: { status: string }) {
 
   if (isPresent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-chart-2 bg-chart-2/10 px-2.5 py-1 rounded-full leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-chart-2 bg-chart-2/10 px-2 py-1 rounded-full leading-none">
         <CheckCircle2 className="w-3 h-3" />
         Present
       </span>
@@ -66,7 +66,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isAbsent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-destructive bg-destructive/10 px-2.5 py-1 rounded-full leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-destructive bg-destructive/10 px-2 py-1 rounded-full leading-none">
         <XCircle className="w-3 h-3" />
         Absent
       </span>
@@ -74,14 +74,14 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isOd) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full leading-none">
         <span className="w-3.5 h-3.5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[7px] font-bold border border-primary/20 shrink-0">OD</span>
         {status}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full leading-none">
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground bg-muted/50 px-2 py-1 rounded-full leading-none">
       <Clock className="w-3 h-3" />
       {status}
     </span>
@@ -308,7 +308,7 @@ export default function AttendanceDetailPage() {
           {/* Big circular progress */}
           <div className="shrink-0 flex flex-col items-center gap-1">
             <BigCircularProgress percentage={record.attendancePercentage} />
-            <p className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wider">Attendance</p>
+            <p className="text-xs text-muted-foreground/60 font-semibold uppercase tracking-wider">Attendance</p>
           </div>
         </div>
       </header>
@@ -320,7 +320,7 @@ export default function AttendanceDetailPage() {
         <div className="flex flex-col gap-1.5 pl-2">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Total Slots</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Total Slots</span>
           </div>
           <span className="text-2xl font-bold text-foreground leading-none mt-1">{totalSlots}</span>
         </div>
@@ -329,7 +329,7 @@ export default function AttendanceDetailPage() {
         <div className="flex flex-col gap-1.5 pl-2 border-l border-border/10">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <CheckCircle2 className="w-3.5 h-3.5 text-chart-2 shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Present</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Present</span>
           </div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-bold text-foreground leading-none">{normalPresentSlots}</span>
@@ -340,7 +340,7 @@ export default function AttendanceDetailPage() {
         <div className="flex flex-col gap-1.5 pl-2 border-none sm:border-l sm:border-border/10">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <span className="w-3.5 h-3.5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[7px] font-bold shrink-0 border border-primary/20">OD</span>
-            <span className="text-[10px] font-bold uppercase tracking-wider">OD Slots</span>
+            <span className="text-xs font-bold uppercase tracking-wider">OD Slots</span>
           </div>
           <span className="text-2xl font-bold text-primary leading-none mt-1">{odSlots}</span>
         </div>
@@ -349,7 +349,7 @@ export default function AttendanceDetailPage() {
         <div className="flex flex-col gap-1.5 pl-2 border-l border-border/10">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <XCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Absent</span>
+            <span className="text-xs font-bold uppercase tracking-wider">Absent</span>
           </div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-bold text-foreground leading-none">{calculatedAbsentSlots}</span>
@@ -360,7 +360,7 @@ export default function AttendanceDetailPage() {
         <div className="flex flex-col gap-1.5 pl-2 border-none sm:border-l sm:border-border/10 col-span-2 sm:col-span-1 border-t border-border/10 pt-4 sm:border-t-0 sm:pt-0">
           <div className="flex items-center gap-1.5 text-muted-foreground">
             <BarChart3 className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span className="text-[10px] font-bold uppercase tracking-wider">
+            <span className="text-xs font-bold uppercase tracking-wider">
               {needSlots > 0 ? "Need to Attend" : "Can Miss"}
             </span>
           </div>
@@ -368,17 +368,17 @@ export default function AttendanceDetailPage() {
             {needSlots > 0 ? (
               <>
                 <span className="text-2xl font-bold text-destructive leading-none">{needSlots}</span>
-                <span className="text-[9px] text-muted-foreground/60 font-semibold">slots to reach 75%</span>
+                <span className="text-xs text-muted-foreground/60 font-semibold">slots to reach 75%</span>
               </>
             ) : canSkipSlots > 0 ? (
               <>
                 <span className="text-2xl font-bold text-chart-2 leading-none">{canSkipSlots}</span>
-                <span className="text-[9px] text-muted-foreground/60 font-semibold">slots safely</span>
+                <span className="text-xs text-muted-foreground/60 font-semibold">slots safely</span>
               </>
             ) : (
               <>
                 <span className="text-2xl font-bold text-foreground leading-none">0</span>
-                <span className="text-[9px] text-muted-foreground/60 font-semibold">On track at 75%</span>
+                <span className="text-xs text-muted-foreground/60 font-semibold">On track at 75%</span>
               </>
             )}
           </div>
@@ -408,7 +408,7 @@ export default function AttendanceDetailPage() {
                 className="flex items-center gap-3 sm:gap-4 px-4 py-3 rounded-xl hover:bg-muted/10 transition-colors duration-150 border border-transparent hover:border-border/20"
               >
                 {/* Serial */}
-                <span className="text-[11px] font-bold text-muted-foreground/35 tabular-nums w-5 shrink-0 text-right">
+                <span className="text-xs font-bold text-muted-foreground/35 tabular-nums w-5 shrink-0 text-right">
                   {row.serialNo ?? i + 1}
                 </span>
 
@@ -419,7 +419,7 @@ export default function AttendanceDetailPage() {
 
                 {/* Slot */}
                 <div className="shrink-0 w-14 sm:w-16">
-                  <span className="font-mono text-[10px] font-black text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded-md leading-none">
+                  <span className="font-mono text-xs font-black text-muted-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded-md leading-none">
                     {row.slot}
                   </span>
                 </div>

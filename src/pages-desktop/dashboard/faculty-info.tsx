@@ -67,7 +67,7 @@ function FacultySkeleton() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="space-y-4 pb-6 border-b border-border/10">
-            <div className="flex items-center gap-3.5">
+            <div className="flex items-center gap-3">
               <Sk className="w-11 h-11 rounded-xl shrink-0 animate-pulse" />
               <div className="space-y-2 flex-1 min-w-0">
                 <Sk className="h-4.5 w-3/4 animate-pulse" />
@@ -178,7 +178,7 @@ export default function FacultyInfoPage() {
           </p>
         </div>
         {!isLoading && filteredList.length > 0 && (
-          <span className="text-[10px] text-muted-foreground/60 font-black tracking-widest uppercase pb-0.5">
+          <span className="text-xs text-muted-foreground/60 font-black tracking-widest uppercase pb-0.5">
             Showing {Math.min(visibleCount, filteredList.length)} of {filteredList.length} Faculty
           </span>
         )}
@@ -215,7 +215,7 @@ export default function FacultyInfoPage() {
                 <button
                   key={school}
                   onClick={() => setActiveSchool(school)}
-                  className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer border shrink-0
+                  className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer border shrink-0
                     ${
                       activeSchool === school
                         ? "bg-primary text-primary-foreground border-primary"
@@ -255,7 +255,7 @@ export default function FacultyInfoPage() {
                   >
                     <div className="space-y-3">
                       {/* Avatar + Primary Info */}
-                      <div className="flex items-start gap-3.5">
+                      <div className="flex items-start gap-3">
                         <div className="w-11 h-11 rounded-xl bg-muted/50 text-muted-foreground border border-border/10 flex items-center justify-center font-bold text-sm shrink-0">
                           {initials}
                         </div>
@@ -269,7 +269,7 @@ export default function FacultyInfoPage() {
                               {faculty.designation}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1.5 mt-1 text-[10px] font-black uppercase tracking-wider text-primary">
+                          <div className="flex items-center gap-1.5 mt-1 text-xs font-black uppercase tracking-wider text-primary">
                             <GraduationCap className="w-3.5 h-3.5 shrink-0 text-primary/80" />
                             <span className="truncate leading-none">
                               {faculty.schoolAbbr} (ID: {faculty.empId})

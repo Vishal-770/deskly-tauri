@@ -114,10 +114,10 @@ export default function SingleCourseExportModal({
               {/* Course Info Card */}
               <div className="p-4 rounded-[var(--radius)] bg-muted/5 border border-border/10 space-y-2">
                 <div className="flex items-center gap-2 leading-none">
-                  <span className="text-[10px] font-semibold text-primary tracking-wider uppercase">
+                  <span className="text-xs font-semibold text-primary tracking-wider uppercase">
                     {entry.courseCode}
                   </span>
-                  <span className="text-[10px] text-muted-foreground/60">
+                  <span className="text-xs text-muted-foreground/60">
                     · Slot {entry.slot}
                   </span>
                 </div>
@@ -144,7 +144,7 @@ export default function SingleCourseExportModal({
 
                {/* Date Input using Radix Popover */}
               <div className="space-y-3 p-4 rounded-[var(--radius)] bg-muted/5 border border-border/10">
-                <label className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase block leading-none">
+                <label className="text-xs font-medium tracking-[0.18em] text-muted-foreground/60 uppercase block leading-none">
                   Repeat Schedule Weekly Until
                 </label>
                 <div className="relative mt-1">
@@ -183,7 +183,7 @@ export default function SingleCourseExportModal({
                     </Popover.Portal>
                   </Popover.Root>
                 </div>
-                <p className="text-[10px] text-muted-foreground/60 leading-normal">
+                <p className="text-xs text-muted-foreground/60 leading-normal">
                   This weekly class will repeat in your calendar until this chosen end date.
                 </p>
               </div>

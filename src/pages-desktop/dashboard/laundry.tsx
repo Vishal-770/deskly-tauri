@@ -47,7 +47,7 @@ function LaundrySkeleton() {
       <div className="grid grid-cols-7 border-t border-l border-border/10 rounded-2xl overflow-hidden bg-background">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div key={day} className="py-2 text-center border-b border-r border-border/10 bg-muted/5">
-            <span className="text-[10px] font-semibold tracking-wider text-muted-foreground/60 uppercase animate-pulse">
+            <span className="text-xs font-semibold tracking-wider text-muted-foreground/60 uppercase animate-pulse">
               {day}
             </span>
           </div>
@@ -267,7 +267,7 @@ export default function LaundryPage() {
                 ${idx !== 6 ? "border-r border-border/10" : ""}
               `}
             >
-              <span className="text-[10px] font-semibold tracking-wider text-muted-foreground/65 uppercase">
+              <span className="text-xs font-semibold tracking-wider text-muted-foreground/65 uppercase">
                 {day}
               </span>
             </div>
@@ -344,13 +344,13 @@ export default function LaundryPage() {
                 
                 <div className="mt-auto pt-1 flex flex-col items-center justify-center gap-0.5 min-w-0 w-full">
                   {laundryEntry?.roomNumber ? (
-                    <span className="text-[9px] sm:text-xs leading-none break-words tracking-tight font-medium text-foreground/80 truncate sm:whitespace-normal text-center w-full">
+                    <span className="text-xs sm:text-xs leading-none break-words tracking-tight font-medium text-foreground/80 truncate sm:whitespace-normal text-center w-full">
                       {laundryEntry.roomNumber.toLowerCase().includes("all") 
                         ? "All Rooms" 
                         : laundryEntry.roomNumber.replace(/\s*-\s*/g, "-")}
                     </span>
                   ) : (
-                    <span className="text-[9px] sm:text-xs text-muted-foreground/25 font-semibold text-center w-full">
+                    <span className="text-xs sm:text-xs text-muted-foreground/25 font-semibold text-center w-full">
                       —
                     </span>
                   )}

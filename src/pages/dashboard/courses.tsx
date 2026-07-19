@@ -46,19 +46,19 @@ function CourseDetailDrawer({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
                   {item.code}
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-muted text-muted-foreground tracking-wider">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black uppercase bg-muted text-muted-foreground tracking-wider">
                   {displayType}
                 </span>
                 {item.category && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-accent/15 text-accent-foreground tracking-wider border border-accent/10">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black uppercase bg-accent/15 text-accent-foreground tracking-wider border border-accent/10">
                     {item.category}
                   </span>
                 )}
                 {item.status && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 tracking-wider">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/10 tracking-wider">
                     {item.status}
                   </span>
                 )}
@@ -83,7 +83,7 @@ function CourseDetailDrawer({
           <div className="grid grid-cols-2 gap-y-5 gap-x-4 py-1">
             {/* Slot */}
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+              <span className="text-xs font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
                 Class Slot
               </span>
               <div className="flex items-center gap-2 pt-0.5">
@@ -96,7 +96,7 @@ function CourseDetailDrawer({
 
             {/* Venue */}
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+              <span className="text-xs font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
                 Classroom Venue
               </span>
               <div className="flex items-center gap-2 pt-0.5">
@@ -109,7 +109,7 @@ function CourseDetailDrawer({
 
             {/* Class ID */}
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+              <span className="text-xs font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
                 Class ID
               </span>
               <div className="flex items-center gap-2 pt-0.5">
@@ -122,7 +122,7 @@ function CourseDetailDrawer({
 
             {/* Class Group */}
             <div className="space-y-1">
-              <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+              <span className="text-xs font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
                 Group
               </span>
               <div className="flex items-center gap-2 pt-0.5">
@@ -138,7 +138,7 @@ function CourseDetailDrawer({
 
           {/* 2. Credit Breakdown Widget */}
           <div className="space-y-3">
-            <h3 className="text-[10px] font-bold tracking-widest text-muted-foreground/50 uppercase leading-none pl-1">
+            <h3 className="text-xs font-bold tracking-widest text-muted-foreground/50 uppercase leading-none pl-1">
               Credit Breakdown
             </h3>
             <div className="grid grid-cols-4 divide-x divide-border/10 text-center py-2 bg-muted/10 rounded-2xl border border-border/5">
@@ -149,8 +149,8 @@ function CourseDetailDrawer({
                 { label: "Project (J)", val: item.credits?.project ?? 0 },
               ].map(({ label, val }) => (
                 <div key={label} className="space-y-1">
-                  <p className="text-[18px] font-black text-foreground">{val}</p>
-                  <p className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-wider leading-none">
+                  <p className="text-lg font-black text-foreground">{val}</p>
+                  <p className="text-xs font-bold text-muted-foreground/45 uppercase tracking-wider leading-none">
                     {label.split(" ")[0]}
                   </p>
                 </div>
@@ -164,13 +164,13 @@ function CourseDetailDrawer({
               <Separator className="bg-border/10" />
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                  <span className="text-xs font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
                     Registration Option
                   </span>
                   <span className="text-sm font-semibold text-foreground block pt-0.5">{item.registrationOption || "—"}</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                  <span className="text-xs font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
                     Registration Date
                   </span>
                   <span className="text-sm font-semibold text-foreground block pt-0.5">{item.registrationDate || "—"}</span>
@@ -184,7 +184,7 @@ function CourseDetailDrawer({
             <>
               <Separator className="bg-border/10" />
               <div className="space-y-3">
-                <h3 className="text-[10px] font-bold tracking-widest text-muted-foreground/50 uppercase leading-none pl-1">
+                <h3 className="text-xs font-bold tracking-widest text-muted-foreground/50 uppercase leading-none pl-1">
                   Faculty Instructor
                 </h3>
                 
@@ -400,26 +400,26 @@ export default function CoursesPage() {
       <header className="relative z-10 flex items-start gap-2">
         <Layers className="w-6 h-6 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1 min-w-0">
-          <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
+          <h1 className="text-2xl font-medium tracking-tight text-foreground leading-none truncate">
             My Courses
           </h1>
         </div>
       </header>
 
       {/* ── Stats block ──────────────────────────────────────────────────────── */}
-      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-md flex items-center justify-between text-center backdrop-blur-md">
+      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-3xl shadow-md flex items-center justify-between text-center backdrop-blur-md">
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Total</p>
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Total</p>
           <p className="text-2xl font-black text-foreground leading-none">{courseStats.total}</p>
         </div>
         <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0 mx-2" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Credits</p>
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Credits</p>
           <p className="text-2xl font-black text-foreground leading-none">{courseStats.totalCredits}</p>
         </div>
         <Separator orientation="vertical" className="h-8 bg-border/15 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Labs</p>
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Labs</p>
           <p className="text-2xl font-black text-foreground leading-none">{courseStats.lab.count}</p>
         </div>
       </div>
@@ -472,11 +472,11 @@ export default function CoursesPage() {
                   setSelectedCourse(item);
                   setDrawerOpen(true);
                 }}
-                className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
+                className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
               >
                 <div className="flex-1 min-w-0 space-y-3">
                   {/* Top row: index, code, type, slot, credits as plain text items */}
-                  <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium flex-wrap">
                     <span className="font-semibold text-muted-foreground/30 tabular-nums w-4 shrink-0">
                       {idx + 1}
                     </span>
@@ -531,7 +531,7 @@ export default function CoursesPage() {
           <h3 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
             Credit Distribution
           </h3>
-          <div className="bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-md backdrop-blur-md space-y-5">
+          <div className="bg-card/80 border border-border/40 p-5 rounded-3xl shadow-md backdrop-blur-md space-y-5">
             {/* Segmented Progress Track */}
             <div className="h-3 w-full bg-muted/20 rounded-full overflow-hidden flex border border-border/5">
               {courseStats.theory.credits > 0 && (
@@ -568,14 +568,14 @@ export default function CoursesPage() {
                 { label: "Online", count: courseStats.online.count, credits: courseStats.online.credits, pct: courseStats.totalCredits > 0 ? Math.round((courseStats.online.credits / courseStats.totalCredits) * 100) : 0, colorClass: "bg-primary/40" },
                 { label: "Soft Skill", count: courseStats.softSkill.count, credits: courseStats.softSkill.credits, pct: courseStats.totalCredits > 0 ? Math.round((courseStats.softSkill.credits / courseStats.totalCredits) * 100) : 0, colorClass: "bg-primary/20" },
               ].map(({ label, count, credits, pct, colorClass }) => (
-                <div key={label} className="flex items-center gap-2.5 min-w-0">
+                <div key={label} className="flex items-center gap-2 min-w-0">
                   <div className={`w-2 h-2 rounded-full ${colorClass} shrink-0`} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-1 leading-none mb-1">
                       <span className="text-xs font-bold text-foreground truncate">{label}</span>
-                      <span className="text-[9px] font-black text-muted-foreground/60 shrink-0">{pct}%</span>
+                      <span className="text-xs font-black text-muted-foreground/60 shrink-0">{pct}%</span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground/45 leading-none">
+                    <p className="text-xs text-muted-foreground/45 leading-none">
                       {count} {count === 1 ? "course" : "courses"} &bull; {credits} Cr
                     </p>
                   </div>

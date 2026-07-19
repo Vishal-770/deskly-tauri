@@ -177,7 +177,7 @@ function ListCircularProgress({ percentage, size = 46 }: { percentage: number; s
           cy={size / 2}
         />
       </svg>
-      <span className="absolute text-[10px] font-semibold text-foreground leading-none">{Math.round(percentage)}%</span>
+      <span className="absolute text-xs font-semibold text-foreground leading-none">{Math.round(percentage)}%</span>
     </div>
   );
 }
@@ -290,7 +290,7 @@ function TimetableDrawer({
                 <span className="text-sm font-medium tracking-wide text-primary uppercase">
                   {item.courseCode}
                 </span>
-                <span className="text-[10px] font-medium text-muted-foreground/60">
+                <span className="text-xs font-medium text-muted-foreground/60">
                   ({displayType})
                 </span>
               </div>
@@ -311,7 +311,7 @@ function TimetableDrawer({
           {/* Attendance Status block */}
           {hasAtt && (
             <div className="space-y-3 pt-2">
-              <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+              <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
                 Attendance Status
               </p>
               
@@ -340,7 +340,7 @@ function TimetableDrawer({
 
           {/* Course Details List */}
           <div className="space-y-3 pt-1">
-            <p className="text-[10px] font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+            <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
               Class Schedule Details
             </p>
 
@@ -354,7 +354,7 @@ function TimetableDrawer({
                   
                   {/* Right Column: Text contents */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
+                    <p className="text-xs text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
                     <p className="text-sm font-medium text-foreground truncate">{value}</p>
                   </div>
                 </div>
@@ -540,7 +540,7 @@ export default function TimetablePage() {
       {error && !isNetworkError(error, isOnline) && (
         <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
           <p className="truncate">Sync failed: {error}</p>
-          <button onClick={load} className="text-[10px] uppercase font-bold tracking-wider hover:underline shrink-0 border-none bg-transparent text-destructive">
+          <button onClick={load} className="text-xs uppercase font-bold tracking-wider hover:underline shrink-0 border-none bg-transparent text-destructive">
             Retry
           </button>
         </div>
@@ -551,7 +551,7 @@ export default function TimetablePage() {
         <div className="space-y-0.5 min-w-0">
           <div className="flex items-center gap-2">
             <Calendar className="w-6 h-6 text-primary shrink-0" />
-            <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none truncate">
+            <h1 className="text-2xl font-medium tracking-tight text-foreground leading-none truncate">
               My Timetable
             </h1>
           </div>
@@ -578,11 +578,11 @@ export default function TimetablePage() {
                     : "text-muted-foreground hover:text-foreground bg-transparent"
                 }`}
               >
-                <span className={`text-[10px] font-semibold uppercase tracking-wider ${active ? "text-primary" : "opacity-55"}`}>
+                <span className={`text-xs font-semibold uppercase tracking-wider ${active ? "text-primary" : "opacity-55"}`}>
                   {d.name}
                 </span>
                 
-                <span className={`text-[18px] font-semibold leading-none ${active ? "text-foreground font-bold" : "text-muted-foreground"}`}>
+                <span className={`text-lg font-semibold leading-none ${active ? "text-foreground font-bold" : "text-muted-foreground"}`}>
                   {d.num}
                 </span>
               </button>
@@ -656,7 +656,7 @@ export default function TimetablePage() {
                       <span className="text-sm font-semibold tracking-wide text-foreground uppercase">
                         {item.courseCode}
                       </span>
-                      <span className="text-[10px] font-semibold text-muted-foreground/60 font-mono leading-none">
+                      <span className="text-xs font-semibold text-muted-foreground/60 font-mono leading-none">
                         ({item.slot})
                       </span>
                     </div>

@@ -31,7 +31,7 @@ function ContactSkeleton() {
       <Sk className="h-10 w-full rounded-xl" />
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
-          <Sk key={i} className="h-[76px] w-full rounded-[24px]" />
+          <Sk key={i} className="h-[76px] w-full rounded-3xl" />
         ))}
       </div>
     </div>
@@ -61,9 +61,9 @@ function ContactCard({ contact }: { contact: ContactDetail }) {
   };
 
   return (
-    <div className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
+    <div className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
       {/* Icon + Info */}
-      <div className="flex-1 min-w-0 flex items-center gap-3.5">
+      <div className="flex-1 min-w-0 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
           <Mail className="w-4 h-4" />
         </div>
@@ -73,7 +73,7 @@ function ContactCard({ contact }: { contact: ContactDetail }) {
           {contact.description && (
             <p className="text-xs text-muted-foreground/60 leading-none truncate">{contact.description}</p>
           )}
-          <p className="text-[10px] text-muted-foreground/50 font-mono leading-none truncate pt-0.5">{contact.email}</p>
+          <p className="text-xs text-muted-foreground/50 font-mono leading-none truncate pt-0.5">{contact.email}</p>
         </div>
       </div>
 
@@ -190,7 +190,7 @@ export default function ContactPage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={fetchContacts} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
@@ -199,7 +199,7 @@ export default function ContactPage() {
       {/* Header */}
       <header className="flex items-center gap-2">
         <Phone className="w-6 h-6 text-primary shrink-0" />
-        <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">Contacts</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-foreground leading-none">Contacts</h1>
       </header>
 
       {/* Search */}
@@ -224,7 +224,7 @@ export default function ContactPage() {
 
       {/* Contact Cards */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md">
           <Phone className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No contacts found</p>
           <p className="text-xs text-muted-foreground">Try a different search term.</p>

@@ -411,7 +411,7 @@ export default function ExamSchedulePage() {
           </div>
           <button 
             onClick={load}
-            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+            className="text-xs uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
           >
             Retry
           </button>
@@ -451,13 +451,13 @@ export default function ExamSchedulePage() {
               >
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-extrabold tracking-wider">{tab.label}</span>
-                  <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none ${
+                  <span className={`text-xs font-black px-1.5 py-0.5 rounded-full leading-none ${
                     active ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                   }`}>
                     {tab.count}
                   </span>
                 </div>
-                <span className="text-[10px] font-semibold mt-1 leading-none opacity-60">
+                <span className="text-xs font-semibold mt-1 leading-none opacity-60">
                   {tab.range}
                 </span>
 
@@ -477,7 +477,7 @@ export default function ExamSchedulePage() {
 
       {/* ── Main Split View ────────────────────────────────────────────────── */}
       {isNotReleased ? (
-        <div className="flex-1 flex flex-col items-center justify-center py-20 gap-3.5 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center py-20 gap-3 text-center">
           <div className="w-12 h-12 rounded-full bg-muted/30 flex items-center justify-center mx-auto mb-2 border border-border/10">
             <CalendarRange className="w-6 h-6 text-primary/70" />
           </div>
@@ -529,7 +529,7 @@ export default function ExamSchedulePage() {
 
                   {/* Countdown Digits */}
                   <div className="border border-border/20 rounded-xl p-4 space-y-2.5 text-center">
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Starts in</span>
+                    <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">Starts in</span>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-1 pt-1">
                       {[
                         { label: "Days", val: nextExamInfo.countdown.days },
@@ -541,7 +541,7 @@ export default function ExamSchedulePage() {
                           <span className="text-2xl font-black text-primary leading-none">
                             {String(val).padStart(2, "0")}
                           </span>
-                          <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground mt-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground mt-2">
                             {label}
                           </span>
                           {idx < 3 && (
@@ -578,13 +578,13 @@ export default function ExamSchedulePage() {
                     ].map(({ label, val }) => (
                       <div key={label} className="space-y-1.5 flex-1">
                         <p className="font-black text-foreground text-3xl leading-none">{val}</p>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground leading-none">{label}</p>
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground leading-none">{label}</p>
                       </div>
                     ))}
                   </div>
                   <div className="space-y-1.5 pt-1 border-t border-border/10">
                     <p className="font-black text-foreground text-3xl leading-none">{tabStats.span}</p>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground leading-none">Total Exam Span</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground leading-none">Total Exam Span</p>
                   </div>
                 </div>
               </div>
@@ -610,7 +610,7 @@ export default function ExamSchedulePage() {
               <p className="text-xs text-muted-foreground mt-0.5">All times are as per reporting time at the venue</p>
             </div>
             {!loading && (
-              <span className="text-xs font-semibold bg-muted text-muted-foreground px-2.5 py-1 rounded-full">
+              <span className="text-xs font-semibold bg-muted text-muted-foreground px-2 py-1 rounded-full">
                 {activeSchedules.length} {activeSchedules.length === 1 ? "exam" : "exams"}
               </span>
             )}
@@ -657,7 +657,7 @@ export default function ExamSchedulePage() {
                             {/* Line separator */}
                             <div className="absolute left-[131px] right-0 border-t border-dashed border-border/20 hidden md:block" />
                             {/* Pill */}
-                            <div className="relative z-10 bg-muted/65 text-muted-foreground text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                            <div className="relative z-10 bg-muted/65 text-muted-foreground text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                               <Info className="w-3.5 h-3.5 text-muted-foreground/75" />
                               <span>{gapDays} {gapDays === 1 ? "Day" : "Days"} Gap</span>
                             </div>
@@ -675,8 +675,8 @@ export default function ExamSchedulePage() {
                             <span className="text-3xl font-black text-foreground leading-none tracking-tighter">{dayNum}</span>
                             <span className="text-xs font-bold text-muted-foreground leading-none uppercase">{monthStr}</span>
                             <div className="flex items-center gap-1 md:flex-col md:items-end">
-                              <span className="text-[10px] font-extrabold text-muted-foreground/70 leading-none uppercase">{weekDayStr}</span>
-                              <span className="text-[9px] font-black text-muted-foreground/50 leading-none">{examDate.getFullYear()}</span>
+                              <span className="text-xs font-extrabold text-muted-foreground/70 leading-none uppercase">{weekDayStr}</span>
+                              <span className="text-xs font-black text-muted-foreground/50 leading-none">{examDate.getFullYear()}</span>
                             </div>
                           </div>
 
@@ -723,7 +723,7 @@ export default function ExamSchedulePage() {
                               <div className="flex flex-col items-end md:items-end justify-center bg-muted/20 border border-border/10 rounded-xl px-4 py-2 min-w-[100px]">
                                 <span className="text-lg font-black text-foreground leading-none">Seat {item.seatNo}</span>
                                 {item.seatLocation !== "-" && (
-                                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-1.5">
+                                  <span className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-1.5">
                                     {item.seatLocation}
                                   </span>
                                 )}

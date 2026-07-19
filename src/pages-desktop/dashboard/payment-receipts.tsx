@@ -303,15 +303,15 @@ export default function PaymentReceiptsPage() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-1 sm:gap-y-0.5">
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Reg. No.</p>
+                <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Reg. No.</p>
                 <p className="text-sm font-black text-foreground truncate">{studentMeta.regNo}</p>
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Application No.</p>
+                <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Application No.</p>
                 <p className="text-sm font-bold text-foreground truncate">{studentMeta.applNo}</p>
               </div>
               <div className="min-w-0 col-span-2 md:col-span-1">
-                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">Campus Code</p>
+                <p className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">Campus Code</p>
                 <p className="text-sm font-bold text-foreground/80">{studentMeta.campusCode}</p>
               </div>
             </div>
@@ -327,9 +327,9 @@ export default function PaymentReceiptsPage() {
             <ReceiptIcon className="w-5 h-5 text-primary" />
           </div>
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Receipts</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Receipts</p>
             <p className="text-lg font-black text-foreground leading-none">{stats.count}</p>
-            <p className="text-[9px] text-muted-foreground/60 font-semibold">Successfully Paid</p>
+            <p className="text-xs text-muted-foreground/60 font-semibold">Successfully Paid</p>
           </div>
         </div>
 
@@ -339,9 +339,9 @@ export default function PaymentReceiptsPage() {
             <CreditCard className="w-5 h-5 text-chart-2" />
           </div>
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total Amount Paid</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Total Amount Paid</p>
             <p className="text-lg font-black text-chart-2 leading-none">{formatINR(stats.totalPaid)}</p>
-            <p className="text-[9px] text-muted-foreground/60 font-semibold">All Time</p>
+            <p className="text-xs text-muted-foreground/60 font-semibold">All Time</p>
           </div>
         </div>
 
@@ -351,9 +351,9 @@ export default function PaymentReceiptsPage() {
             <Calendar className="w-5 h-5 text-chart-4" />
           </div>
           <div className="min-w-0 space-y-0.5">
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Latest Payment</p>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Latest Payment</p>
             <p className="text-lg font-black text-foreground leading-none truncate max-w-full">{stats.latestDate}</p>
-            <p className="text-[9px] text-muted-foreground/60 font-semibold">Most Recent</p>
+            <p className="text-xs text-muted-foreground/60 font-semibold">Most Recent</p>
           </div>
         </div>
       </div>
@@ -389,7 +389,7 @@ export default function PaymentReceiptsPage() {
             <div className="hidden md:block overflow-x-auto rounded-3xl">
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="bg-accent/15 border-b border-border/30 text-[10px] font-black uppercase tracking-wider text-muted-foreground/80">
+                  <tr className="bg-accent/15 border-b border-border/30 text-xs font-black uppercase tracking-wider text-muted-foreground/80">
                     <th className="py-3 px-4 w-12 text-center">Icon</th>
                     <th className="py-3 px-4">Receipt Number</th>
                     <th className="py-3 px-4">Date</th>
@@ -405,18 +405,18 @@ export default function PaymentReceiptsPage() {
                         key={receipt.receiptNumber}
                         className="hover:bg-accent/5 transition-colors duration-150"
                       >
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="py-3 px-4 text-center">
                           <div className="w-8 h-8 rounded-full bg-primary/5 flex items-center justify-center mx-auto text-primary">
                             <FileText className="w-4 h-4" />
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 font-bold text-foreground">{receipt.receiptNumber}</td>
-                        <td className="py-3.5 px-4 text-muted-foreground/80">{receipt.date}</td>
-                        <td className="py-3.5 px-4 font-extrabold text-chart-2">
+                        <td className="py-3 px-4 font-bold text-foreground">{receipt.receiptNumber}</td>
+                        <td className="py-3 px-4 text-muted-foreground/80">{receipt.date}</td>
+                        <td className="py-3 px-4 font-extrabold text-chart-2">
                           {formatINR(receipt.amount)}
                         </td>
-                        <td className="py-3.5 px-4 text-muted-foreground/80">{receipt.campusCode}</td>
-                        <td className="py-3.5 px-4 font-mono text-[11px] text-muted-foreground/70 shrink-0">
+                        <td className="py-3 px-4 text-muted-foreground/80">{receipt.campusCode}</td>
+                        <td className="py-3 px-4 font-mono text-xs text-muted-foreground/70 shrink-0">
                           {receipt.receiptId || "-"}
                         </td>
                       </tr>
@@ -443,7 +443,7 @@ export default function PaymentReceiptsPage() {
                           <p className="text-xs font-black text-foreground">
                             Receipt #{receipt.receiptNumber}
                           </p>
-                          <p className="text-[10px] text-muted-foreground">{receipt.date}</p>
+                          <p className="text-xs text-muted-foreground">{receipt.date}</p>
                         </div>
                       </div>
                       <span className="text-sm font-extrabold text-chart-2">
@@ -451,7 +451,7 @@ export default function PaymentReceiptsPage() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-[10px] pl-11">
+                    <div className="grid grid-cols-2 gap-2 text-xs pl-11">
                       <div>
                         <p className="text-muted-foreground/60 font-bold uppercase tracking-wider">Receipt ID</p>
                         <p className="font-mono text-foreground mt-0.5 truncate">{receipt.receiptId || "-"}</p>

@@ -138,7 +138,7 @@ export default function Home() {
               <div className="group space-y-3">
                 <label
                   htmlFor="reg-no"
-                  className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 ml-0.5"
+                  className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 ml-0.5"
                 >
                   Registration Number
                 </label>
@@ -163,7 +163,7 @@ export default function Home() {
               <div className="group space-y-3">
                 <label
                   htmlFor="password"
-                  className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/50 ml-0.5"
+                  className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground/50 ml-0.5"
                 >
                   Password
                 </label>

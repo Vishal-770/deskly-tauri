@@ -35,7 +35,7 @@ function CoursesDetailSkeleton() {
   return (
     <div className="w-full space-y-6 px-2 py-4 font-saira">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
         <Sk className="w-6 h-6 rounded-md shrink-0" />
         <Sk className="h-7 w-36" />
       </div>
@@ -199,9 +199,9 @@ export default function CategoryCoursesPage() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="relative z-10 space-y-0.5">
         <div className="flex items-center gap-2">
-          <p className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">{categoryId}</p>
+          <p className="text-xs font-bold text-primary uppercase tracking-widest leading-none">{categoryId}</p>
         </div>
-        <h1 className="text-[26px] font-semibold tracking-tight text-foreground leading-none">Course List</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground leading-none">Course List</h1>
         {!isLoading && courses.length > 0 && (
           <p className="text-xs text-muted-foreground/50 leading-none pt-0.5">
             {filtered.length === courses.length ? `${courses.length} courses` : `${filtered.length} of ${courses.length} courses`}
@@ -246,12 +246,12 @@ export default function CategoryCoursesPage() {
             return (
               <div
                 key={course.code}
-                className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-start justify-between gap-4 backdrop-blur-md"
+                className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm flex items-start justify-between gap-4 backdrop-blur-md"
               >
                 {/* Left: Code + Title + result */}
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest leading-none">
+                    <p className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
                       {course.code}
                     </p>
                     <p className="text-sm font-bold text-foreground leading-snug">{course.title}</p>
@@ -266,12 +266,12 @@ export default function CategoryCoursesPage() {
                       {result.success ? (
                         <>
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                          <span className="text-[10px] text-emerald-500 font-medium break-all leading-snug">{result.message}</span>
+                          <span className="text-xs text-emerald-500 font-medium break-all leading-snug">{result.message}</span>
                         </>
                       ) : (
                         <>
                           <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0 mt-0.5" />
-                          <span className="text-[10px] text-destructive font-medium break-all leading-snug">{result.message}</span>
+                          <span className="text-xs text-destructive font-medium break-all leading-snug">{result.message}</span>
                         </>
                       )}
                     </div>

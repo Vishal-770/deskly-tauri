@@ -109,7 +109,7 @@ function MessSkeleton() {
         {MEALS.map((m) => (
           <div key={m} className="space-y-4 py-4 border-b border-border/10">
             <div className="flex items-center justify-between border-b border-border/5 pb-3">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <Sk className="w-9 h-9 rounded-xl" />
                 <Sk className="h-5 w-24" />
               </div>
@@ -117,7 +117,7 @@ function MessSkeleton() {
             </div>
             <div className="space-y-2.5 pl-1">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="flex items-start gap-2.5">
+                <div key={i} className="flex items-start gap-2">
                   <Sk className="w-2 h-2 rounded-full shrink-0 mt-1.5" />
                   <Sk className={`h-4 ${i % 2 === 0 ? "w-40" : "w-56"}`} />
                 </div>
@@ -252,7 +252,7 @@ export default function MessMenuPage() {
       {/* ── Header ────────────────────────────────────────────────────────────── */}
       <header className="pb-4 border-b border-border/20 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
             <ChefHat className="w-6 h-6 text-primary shrink-0" />
             Mess Menu
           </h1>
@@ -327,7 +327,7 @@ export default function MessMenuPage() {
                     <span className="hidden sm:inline">{day.substring(0, 3)}</span>
                     <span className="sm:hidden">{day.substring(0, 2)}</span>
                     {isToday && (
-                      <span className="text-[8px] font-black uppercase bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md leading-none">
+                      <span className="text-xs font-black uppercase bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md leading-none">
                         Today
                       </span>
                     )}
@@ -362,13 +362,13 @@ export default function MessMenuPage() {
                             <h3 className="text-sm sm:text-base md:text-lg font-extrabold text-foreground leading-none">{meal}</h3>
                             <div className="flex items-center gap-1 mt-1">
                               <Clock className="w-3 h-3 text-muted-foreground/60 shrink-0" />
-                              <span className="text-[10px] sm:text-xs text-muted-foreground/70 font-semibold tracking-tight">
+                              <span className="text-xs sm:text-xs text-muted-foreground/70 font-semibold tracking-tight">
                                 {meta.timing}
                               </span>
                             </div>
                           </div>
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 pt-0.5">
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/30 pt-0.5">
                           {items.length} items
                         </span>
                       </div>
@@ -382,7 +382,7 @@ export default function MessMenuPage() {
                           items.map((item, i) => (
                             <li
                               key={i}
-                              className="text-xs sm:text-sm text-foreground/80 font-medium flex items-start gap-2.5 leading-relaxed"
+                              className="text-xs sm:text-sm text-foreground/80 font-medium flex items-start gap-2 leading-relaxed"
                             >
                               <span className="w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0 mt-1.5" />
                               {item}
@@ -408,11 +408,11 @@ export default function MessMenuPage() {
                 <table className="w-full text-left border-collapse min-w-[660px]">
                   <thead>
                     <tr className="border-b border-border/10 bg-muted/5">
-                      <th className="px-4 py-3.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest w-[90px]">
+                      <th className="px-4 py-3 text-xs font-black text-muted-foreground/50 uppercase tracking-widest w-[90px]">
                         Day
                       </th>
                       {MEALS.map((meal) => (
-                        <th key={meal} className="px-4 py-3.5 text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">
+                        <th key={meal} className="px-4 py-3 text-xs font-black text-muted-foreground/50 uppercase tracking-widest">
                           <div className="flex items-center gap-1.5">
                             {MEAL_META[meal].icon("w-3.5 h-3.5")}
                             {meal}
@@ -435,7 +435,7 @@ export default function MessMenuPage() {
                                 {row.day.substring(0, 3)}
                               </span>
                               {isToday && (
-                                <span className="text-[8px] font-black uppercase bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md leading-none w-fit">
+                                <span className="text-xs font-black uppercase bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md leading-none w-fit">
                                   Today
                                 </span>
                               )}
@@ -449,14 +449,14 @@ export default function MessMenuPage() {
                                 {items.length > 0 ? (
                                   <ul className="space-y-1">
                                     {items.map((item, i) => (
-                                      <li key={i} className="text-[10px] sm:text-xs text-foreground/75 font-medium flex items-start gap-1.5">
+                                      <li key={i} className="text-xs sm:text-xs text-foreground/75 font-medium flex items-start gap-1.5">
                                         <span className="w-1 h-1 rounded-full bg-muted-foreground/30 shrink-0 mt-1.5" />
                                         {item}
                                       </li>
                                     ))}
                                   </ul>
                                 ) : (
-                                  <span className="text-[10px] text-muted-foreground/30 italic">—</span>
+                                  <span className="text-xs text-muted-foreground/30 italic">—</span>
                                 )}
                               </td>
                             );

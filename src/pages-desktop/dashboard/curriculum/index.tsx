@@ -124,7 +124,7 @@ export default function CurriculumIndexPage() {
             className="group flex items-center justify-between text-left bg-card/30 hover:bg-card/60 border border-border/25 hover:border-border/50 rounded-2xl p-5 transition-all duration-200 cursor-pointer"
           >
             <div className="space-y-2 min-w-0 pr-4">
-              <span className="text-[10px] font-black font-mono tracking-widest text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-md leading-none">
+              <span className="text-xs font-black font-mono tracking-widest text-primary uppercase bg-primary/10 px-2 py-0.5 rounded-md leading-none">
                 {category.code}
               </span>
               <h3 className="text-sm font-bold text-foreground leading-snug truncate" title={category.name}>

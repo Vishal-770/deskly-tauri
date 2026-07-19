@@ -116,7 +116,7 @@ function ExamSkeleton() {
         <div className="bg-muted/10 border border-border/10 rounded-2xl divide-y divide-border/10">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="p-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3.5 flex-1">
+              <div className="flex items-center gap-3 flex-1">
                 <Sk className="w-11 h-11 rounded-xl shrink-0" />
                 <div className="space-y-2 flex-1">
                   <Sk className="h-4 w-24" />
@@ -333,7 +333,7 @@ export default function ExamSchedulePage() {
             </svg>
           </div>
           <div className="space-y-1 min-w-0">
-            <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">
+            <h1 className="text-2xl font-medium tracking-tight text-foreground leading-none">
               My Exams
             </h1>
           </div>
@@ -401,7 +401,7 @@ export default function ExamSchedulePage() {
               if (item.type === "gap") {
                 return (
                   <div key={`gap-${idx}`} className="flex justify-center py-1 select-none">
-                    <span className="bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1 border border-primary/10">
+                    <span className="bg-primary/10 text-primary text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1 border border-primary/10">
                       <Clock className="w-3.5 h-3.5" />
                       <span>{item.days} {item.days === 1 ? "Day" : "Days"} Gap</span>
                     </span>
@@ -418,21 +418,21 @@ export default function ExamSchedulePage() {
                 <div
                   key={`${exam.courseCode}-${idx}`}
                   onClick={() => setSelectedExam(exam)}
-                  className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm flex items-center justify-between gap-4 backdrop-blur-md cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
+                  className="p-4 bg-card/80 border border-border/40 rounded-3xl shadow-sm flex items-center justify-between gap-4 backdrop-blur-md cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
                 >
                   {/* Date bubble */}
-                  <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div className="w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 border border-border/10 bg-muted/20 text-muted-foreground">
                       <span className="text-base font-bold leading-none">{dayNum}</span>
-                      <span className="text-[8px] font-bold uppercase leading-none mt-1">{weekDayStr}</span>
+                      <span className="text-xs font-bold uppercase leading-none mt-1">{weekDayStr}</span>
                     </div>
 
                     <div className="min-w-0 space-y-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-[10px] font-black tracking-wider text-primary uppercase leading-none">
+                        <span className="text-xs font-black tracking-wider text-primary uppercase leading-none">
                           {exam.courseCode}
                         </span>
-                        <span className="text-[9px] font-bold text-muted-foreground/75 bg-muted/40 px-1.5 py-0.5 rounded leading-none">
+                        <span className="text-xs font-bold text-muted-foreground/75 bg-muted/40 px-1.5 py-0.5 rounded leading-none">
                           Slot: {exam.slot}
                         </span>
                       </div>
@@ -477,13 +477,13 @@ export default function ExamSchedulePage() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0 space-y-2">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
                     {selectedExam?.courseCode}
                   </span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-muted text-muted-foreground tracking-wider">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black uppercase bg-muted text-muted-foreground tracking-wider">
                     {selectedExam?.courseType.trim()}
                   </span>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-black uppercase bg-primary/10 text-primary border border-primary/10 tracking-wider">
                     {selectedExam?.examType}
                   </span>
                 </div>
@@ -518,7 +518,7 @@ export default function ExamSchedulePage() {
                   <div className="grid grid-cols-2 gap-y-5 gap-x-4 py-1">
                     {detailsList.map(({ icon: Icon, label, value }) => (
                       <div key={label} className="space-y-1 col-span-2 sm:col-span-1">
-                        <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
+                        <span className="text-xs font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block">
                           {label}
                         </span>
                         <div className="flex items-center gap-2 pt-0.5">
@@ -545,7 +545,7 @@ export default function ExamSchedulePage() {
                         console.error("Failed to save calendar file", e);
                       }
                     }}
-                    className="w-full py-3.5 bg-primary hover:opacity-90 active:opacity-75 transition-all text-primary-foreground font-black text-sm rounded-2xl flex items-center justify-center gap-2 border-0 cursor-pointer"
+                    className="w-full py-3 bg-primary hover:opacity-90 active:opacity-75 transition-all text-primary-foreground font-black text-sm rounded-2xl flex items-center justify-center gap-2 border-0 cursor-pointer"
                   >
                     <CalendarRange className="w-4 h-4 shrink-0" />
                     <span>Add to Calendar</span>

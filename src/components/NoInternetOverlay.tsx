@@ -66,7 +66,7 @@ export function NoInternetOverlay({ isOnline }: { isOnline: boolean }) {
 
             {/* Minimalist Branding */}
             <div className="pt-8 opacity-20 select-none">
-              <span className="text-[10px] font-bold tracking-[0.4em] uppercase">
+              <span className="text-xs font-bold tracking-[0.4em] uppercase">
                 Infrastructure Offline
               </span>
             </div>

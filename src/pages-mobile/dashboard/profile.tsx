@@ -27,9 +27,9 @@ function ProfileSkeleton() {
   return (
     <div className="w-full flex flex-col gap-5 px-2 py-4">
       <Sk className="h-7 w-32" />
-      <Sk className="h-36 w-full rounded-[24px]" />
-      <Sk className="h-60 w-full rounded-[24px]" />
-      <Sk className="h-44 w-full rounded-[24px]" />
+      <Sk className="h-36 w-full rounded-3xl" />
+      <Sk className="h-60 w-full rounded-3xl" />
+      <Sk className="h-44 w-full rounded-3xl" />
     </div>
   );
 }
@@ -100,7 +100,7 @@ export default function StudentProfilePage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-[20px]">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={fetchProfile} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
@@ -109,14 +109,14 @@ export default function StudentProfilePage() {
       {/* Header */}
       <header className="flex items-center gap-2">
         <User className="w-6 h-6 text-primary shrink-0" />
-        <h1 className="text-[26px] font-medium tracking-tight text-foreground leading-none">My Profile</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-foreground leading-none">My Profile</h1>
       </header>
 
       {/* Hero Card */}
-      <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center gap-4">
+      <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md flex items-center gap-4">
         {photoSrc ? (
           <div className="w-20 h-24 shrink-0 overflow-hidden rounded-[18px] border border-border/30 bg-muted/20 flex items-center justify-center p-0.5">
-            <img src={photoSrc} alt={student.name} className="w-full h-full object-contain rounded-[14px]" />
+            <img src={photoSrc} alt={student.name} className="w-full h-full object-contain rounded-xl" />
           </div>
         ) : (
           <div className="w-20 h-24 rounded-[18px] shrink-0 bg-muted/30 border border-border/20 flex items-center justify-center">
@@ -124,7 +124,7 @@ export default function StudentProfilePage() {
           </div>
         )}
         <div className="min-w-0 space-y-1.5 flex-1">
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium flex-wrap">
             <span className="text-xs font-bold text-primary uppercase tracking-wide leading-none">{student.registerNumber}</span>
             {student.gender && (
               <>
@@ -139,8 +139,8 @@ export default function StudentProfilePage() {
       </div>
 
       {/* Student Info Card */}
-      <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md space-y-1">
-        <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-3">Student Information</p>
+      <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md space-y-1">
+        <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-3">Student Information</p>
         <InfoRow icon={User} label="Register No." value={student.registerNumber} />
         <InfoRow icon={User} label="Application No." value={student.applicationNumber} />
         <InfoRow icon={Layers} label="Program" value={student.program} />
@@ -152,15 +152,15 @@ export default function StudentProfilePage() {
 
       {/* Proctor Card */}
       {proctor && (
-        <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md space-y-4">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">Proctor</p>
+        <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md space-y-4">
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">Proctor</p>
           <div className="flex items-center gap-4">
             {proctor.photoUrl ? (
-              <div className="w-14 h-16 shrink-0 overflow-hidden rounded-[16px] border border-border/30 bg-muted/20 p-0.5">
-                <img src={getSrcFromPhoto(proctor.photoUrl)} alt={proctor.name} className="w-full h-full object-contain rounded-[12px]" />
+              <div className="w-14 h-16 shrink-0 overflow-hidden rounded-2xl border border-border/30 bg-muted/20 p-0.5">
+                <img src={getSrcFromPhoto(proctor.photoUrl)} alt={proctor.name} className="w-full h-full object-contain rounded-xl" />
               </div>
             ) : (
-              <div className="w-14 h-16 rounded-[16px] shrink-0 bg-muted/30 border border-border/20 flex items-center justify-center">
+              <div className="w-14 h-16 rounded-2xl shrink-0 bg-muted/30 border border-border/20 flex items-center justify-center">
                 <span className="text-base font-bold text-muted-foreground/60">
                   {proctor.name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "?"}
                 </span>
@@ -169,7 +169,7 @@ export default function StudentProfilePage() {
             <div className="min-w-0 space-y-1">
               <p className="text-base font-bold text-foreground leading-snug">{proctor.name}</p>
               <p className="text-xs text-muted-foreground/60 leading-none">{proctor.designation}</p>
-              <p className="text-[11px] text-muted-foreground/40 leading-none">{proctor.school}</p>
+              <p className="text-xs text-muted-foreground/40 leading-none">{proctor.school}</p>
             </div>
           </div>
           <div>
@@ -183,8 +183,8 @@ export default function StudentProfilePage() {
 
       {/* Hostel Card */}
       {hostel && (
-        <div className="p-5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md space-y-1">
-          <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-3">Hostel</p>
+        <div className="p-5 bg-card/80 border border-border/40 rounded-3xl shadow-sm backdrop-blur-md space-y-1">
+          <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-3">Hostel</p>
           <InfoRow icon={Home} label="Block" value={hostel.blockName} />
           <InfoRow icon={MapPin} label="Room" value={hostel.roomNumber} />
           <InfoRow icon={Layers} label="Bed Type" value={hostel.bedType} />

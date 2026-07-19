@@ -204,7 +204,7 @@ export default function ContactPage() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="pb-4 border-b border-border/20 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
         <div className="space-y-1">
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2.5">
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
             <Phone className="w-6 h-6 text-primary shrink-0" />
             Contacts
           </h1>

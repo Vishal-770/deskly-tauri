@@ -58,7 +58,7 @@ function StatusBadge({ status }: { status: string }) {
 
   if (isPresent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded-lg leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded-lg leading-none">
         <CheckCircle2 className="w-3 h-3" />
         Present
       </span>
@@ -66,7 +66,7 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isAbsent) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-destructive bg-destructive/5 border border-destructive/10 px-2 py-0.5 rounded-lg leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive bg-destructive/5 border border-destructive/10 px-2 py-0.5 rounded-lg leading-none">
         <XCircle className="w-3 h-3" />
         Absent
       </span>
@@ -74,14 +74,14 @@ function StatusBadge({ status }: { status: string }) {
   }
   if (isOd) {
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sky-400 bg-sky-500/5 border border-sky-500/10 px-2 py-0.5 rounded-lg leading-none">
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-sky-400 bg-sky-500/5 border border-sky-500/10 px-2 py-0.5 rounded-lg leading-none">
         <span className="w-3.5 h-3.5 rounded-full bg-sky-500/10 text-sky-400 flex items-center justify-center text-[7px] font-bold border border-sky-500/20 shrink-0">OD</span>
         {status}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground bg-muted/20 border border-border/10 px-2 py-0.5 rounded-lg leading-none">
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground bg-muted/20 border border-border/10 px-2 py-0.5 rounded-lg leading-none">
       <Clock className="w-3 h-3" />
       {status}
     </span>
@@ -229,7 +229,7 @@ export default function AttendanceDetailPage() {
             <span className="text-sm font-semibold tracking-wide text-sky-500 uppercase leading-none">
               {record.courseCode}
             </span>
-            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded leading-none ${badgeStyle}`}>
+            <span className={`text-xs font-medium px-1.5 py-0.5 rounded leading-none ${badgeStyle}`}>
               {displayType}
             </span>
           </div>
@@ -258,7 +258,7 @@ export default function AttendanceDetailPage() {
         {/* Attendance circular progress */}
         <div className="shrink-0 flex flex-col items-center gap-1.5">
           <BigCircularProgress percentage={record.attendancePercentage} />
-          <p className="text-[9px] text-muted-foreground/60 font-semibold uppercase tracking-wider leading-none">
+          <p className="text-xs text-muted-foreground/60 font-semibold uppercase tracking-wider leading-none">
             Attendance
           </p>
         </div>
@@ -275,7 +275,7 @@ export default function AttendanceDetailPage() {
         <div className="p-4 flex flex-col gap-2">
           <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
             <Calendar className="w-4 h-4 text-blue-500 shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Total Classes</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Total Classes</span>
           </div>
           <span className="text-3xl font-semibold text-foreground leading-none">{totalClasses}</span>
         </div>
@@ -284,7 +284,7 @@ export default function AttendanceDetailPage() {
         <div className="p-4 flex flex-col gap-2">
           <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
             <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Present</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Present</span>
           </div>
           <span className="text-3xl font-semibold text-foreground leading-none">{attendedClasses}</span>
         </div>
@@ -293,7 +293,7 @@ export default function AttendanceDetailPage() {
         <div className="p-4 flex flex-col gap-2">
           <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
             <MinusCircle className="w-4 h-4 text-sky-400 shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">On Leave</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">On Leave</span>
           </div>
           <span className="text-3xl font-semibold text-foreground leading-none">{odSlots}</span>
         </div>
@@ -302,7 +302,7 @@ export default function AttendanceDetailPage() {
         <div className="p-4 flex flex-col gap-2">
           <div className="flex items-center gap-1.5 text-muted-foreground/60 leading-none">
             <XCircle className="w-4 h-4 text-destructive shrink-0" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider">Absent</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Absent</span>
           </div>
           <span className="text-3xl font-semibold text-foreground leading-none">{absentClasses}</span>
         </div>
@@ -348,7 +348,7 @@ export default function AttendanceDetailPage() {
                   <p className="text-sm font-semibold text-foreground leading-none">
                     {row.date}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60 font-mono leading-none">
+                  <p className="text-xs text-muted-foreground/60 font-mono leading-none">
                     {row.dayAndTime || "10:30 AM – 11:30 AM"}
                   </p>
                 </div>

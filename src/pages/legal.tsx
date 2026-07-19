@@ -27,7 +27,7 @@ const SECTIONS: Section[] = [
     icon: ShieldAlert,
     iconColor: "text-destructive",
     content: (
-      <div className="space-y-3 text-[13px] text-muted-foreground leading-[1.75]">
+      <div className="space-y-3 text-sm text-muted-foreground leading-[1.75]">
         <p className="text-foreground/85 font-medium">
           Deskly is an independent, community-built application — not affiliated
           with or endorsed by Vellore Institute of Technology (VIT).
@@ -36,7 +36,7 @@ const SECTIONS: Section[] = [
           All data originates directly from the official VTOP student portal. It
           may not reflect real-time changes, downtimes, or portal updates.
         </p>
-        <p className="text-[12px] text-destructive/70">
+        <p className="text-xs text-destructive/70">
           ⚠ Always verify attendance, grades, and schedules through official
           college channels.
         </p>
@@ -50,7 +50,7 @@ const SECTIONS: Section[] = [
     icon: Scale,
     iconColor: "text-primary",
     content: (
-      <div className="space-y-3 text-[13px] text-muted-foreground leading-[1.75]">
+      <div className="space-y-3 text-sm text-muted-foreground leading-[1.75]">
         <p>
           This software is provided{" "}
           <span className="font-semibold text-foreground">"as is"</span> without
@@ -70,7 +70,7 @@ const SECTIONS: Section[] = [
     icon: Lock,
     iconColor: "text-primary",
     content: (
-      <div className="space-y-4 text-[13px] text-muted-foreground leading-[1.75]">
+      <div className="space-y-4 text-sm text-muted-foreground leading-[1.75]">
         <p>Your data never leaves your device.</p>
         <div className="divide-y divide-border/10">
           {[
@@ -88,7 +88,7 @@ const SECTIONS: Section[] = [
             },
           ].map((item) => (
             <div key={item.q} className="py-3 space-y-0.5">
-              <p className="text-[10.5px] font-bold uppercase tracking-widest text-muted-foreground/50">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/50">
                 {item.q}
               </p>
               <p>{item.a}</p>
@@ -105,7 +105,7 @@ const SECTIONS: Section[] = [
     icon: Database,
     iconColor: "text-primary",
     content: (
-      <div className="space-y-3 text-[13px] text-muted-foreground leading-[1.75]">
+      <div className="space-y-3 text-sm text-muted-foreground leading-[1.75]">
         <p>
           All academic information is fetched from the official VTOP student
           portal using your own credentials — on your behalf, locally.
@@ -125,7 +125,7 @@ const SECTIONS: Section[] = [
     iconColor: "text-primary",
     content: (
       <div className="space-y-4">
-        <p className="text-[13px] text-muted-foreground leading-[1.75]">
+        <p className="text-sm text-muted-foreground leading-[1.75]">
           Deskly is open-source under the{" "}
           <span className="font-semibold text-foreground">MIT License</span> — one
           of the most permissive licenses available.
@@ -136,7 +136,7 @@ const SECTIONS: Section[] = [
             (p) => (
               <span
                 key={p}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/10 text-primary border border-primary/15"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/15"
               >
                 ✓ {p}
               </span>
@@ -144,13 +144,13 @@ const SECTIONS: Section[] = [
           )}
         </div>
 
-        <p className="text-[12px] text-muted-foreground/70 leading-relaxed">
+        <p className="text-xs text-muted-foreground/70 leading-relaxed">
           One condition: include the original copyright notice in all copies or
           substantial portions of the Software.
         </p>
 
         <details className="group">
-          <summary className="flex items-center gap-1.5 text-[12px] font-semibold text-primary cursor-pointer select-none list-none">
+          <summary className="flex items-center gap-1.5 text-xs font-semibold text-primary cursor-pointer select-none list-none">
             <ChevronRight className="w-3.5 h-3.5 transition-transform group-open:rotate-90" />
             View full license text
           </summary>
@@ -201,21 +201,21 @@ export default function LegalPage() {
         <div className="pt-6 pb-6 space-y-5">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer bg-transparent border-0 p-0 focus:outline-none"
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer bg-transparent border-0 p-0 focus:outline-none"
           >
             <ArrowLeft className="w-4 h-4" />
             Back
           </button>
 
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-muted-foreground/40">
               <Scale className="w-3 h-3" />
               Last updated Jun 2026
             </div>
-            <h1 className="text-[26px] font-bold tracking-tight text-foreground leading-tight">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
               Legal &amp; Privacy
             </h1>
-            <p className="text-[13px] text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Disclaimers, privacy details, and licensing for Deskly.
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function LegalPage() {
                 {/* Row */}
                 <button
                   onClick={() => toggle(sec.id)}
-                  className="w-full flex items-center gap-3.5 py-4 text-left cursor-pointer bg-transparent border-0 focus:outline-none"
+                  className="w-full flex items-center gap-3 py-4 text-left cursor-pointer bg-transparent border-0 focus:outline-none"
                 >
                   <Icon
                     className={`w-[18px] h-[18px] shrink-0 transition-colors ${
@@ -276,7 +276,7 @@ export default function LegalPage() {
         </div>
 
         {/* ── Footer ── */}
-        <p className="text-center text-[11px] text-muted-foreground/35 leading-relaxed pt-8">
+        <p className="text-center text-xs text-muted-foreground/35 leading-relaxed pt-8">
           Deskly is an independent open-source project.
           <br />
           Not affiliated with VIT or any official body.

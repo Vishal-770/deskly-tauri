@@ -67,7 +67,7 @@ function renderDetailField(icon: React.ReactNode, label: string, value: string |
         {icon}
       </div>
       <div className="flex-1 min-w-0 space-y-0.5">
-        <p className="text-[9px] sm:text-[10px] font-black text-muted-foreground/45 uppercase tracking-widest leading-none">
+        <p className="text-xs sm:text-xs font-black text-muted-foreground/45 uppercase tracking-widest leading-none">
           {label}
         </p>
         <p className="text-xs sm:text-sm font-semibold text-foreground/85 leading-normal break-words">
@@ -235,7 +235,7 @@ export default function HodDeanDetailsPage() {
                   {/* Details block */}
                   <div className="flex-1 w-full space-y-4 text-center sm:text-left min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 justify-center sm:justify-start">
-                      <span className="text-[9px] font-black text-primary uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/10 w-fit self-center sm:self-auto leading-none">
+                      <span className="text-xs font-black text-primary uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/10 w-fit self-center sm:self-auto leading-none">
                         {item.role || "Faculty"}
                       </span>
                       <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-black tracking-tight text-foreground truncate">{item.name}</h2>

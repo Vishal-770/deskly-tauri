@@ -117,7 +117,7 @@ export default function CalendarExportPopover({
               </div>
 
               {/* Recurrence End Date Selector */}
-              <div className="space-y-2 p-3.5 rounded-xl bg-muted/5 border border-border/10">
+              <div className="space-y-2 p-3 rounded-xl bg-muted/5 border border-border/10">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   Repeat Schedule Weekly Until:
                 </label>
@@ -156,7 +156,7 @@ export default function CalendarExportPopover({
                     )}
                   </AnimatePresence>
                 </div>
-                <p className="text-[10px] text-muted-foreground/60 leading-normal">
+                <p className="text-xs text-muted-foreground/60 leading-normal">
                   All weekly classes will repeat in your calendar until this chosen end date.
                 </p>
               </div>
@@ -181,7 +181,7 @@ export default function CalendarExportPopover({
                     <Info className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span>How to import the downloaded file:</span>
                   </div>
-                  <ul className="list-disc pl-4 text-[10px] text-muted-foreground/80 space-y-1.5">
+                  <ul className="list-disc pl-4 text-xs text-muted-foreground/80 space-y-1.5">
                     <li>
                       <span className="font-bold text-foreground/95">Google Calendar:</span> Go to{" "}
                       <button

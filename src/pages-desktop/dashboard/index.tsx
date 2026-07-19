@@ -314,14 +314,14 @@ export default function DashboardHomePage() {
   return shell(
     <div className="w-full space-y-10">
       {error && (
-        <div className="flex items-center justify-between p-3.5 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
+        <div className="flex items-center justify-between p-3 bg-destructive/10 border border-destructive/20 text-destructive text-xs rounded-xl gap-4 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse shrink-0" />
             <span className="truncate">Sync failed: {error} (Viewing cached data)</span>
           </div>
           <button 
             onClick={loadData}
-            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+            className="text-xs uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
           >
             Retry
           </button>
@@ -348,10 +348,10 @@ export default function DashboardHomePage() {
           {cgpaData ? (
             <div className="space-y-6">
               <div className="space-y-1">
-                <p className="text-[10px] font-black tracking-widest text-muted-foreground/60 uppercase">
+                <p className="text-xs font-black tracking-widest text-muted-foreground/60 uppercase">
                   Cumulative Grade Point Average
                 </p>
-                <div className="flex items-baseline gap-2.5 mt-1">
+                <div className="flex items-baseline gap-2 mt-1">
                   <span className="text-6xl sm:text-7xl font-black tracking-tighter text-foreground leading-none">
                     {cgpaData.currentCgpa.toFixed(2)}
                   </span>
@@ -378,31 +378,31 @@ export default function DashboardHomePage() {
               {/* 3-Column Credit Metrics */}
               <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border/10 max-w-xl">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black tracking-widest text-muted-foreground/50 uppercase">
+                  <p className="text-xs font-black tracking-widest text-muted-foreground/50 uppercase">
                     Earned
                   </p>
                   <p className="text-2xl font-extrabold text-foreground">
                     {cgpaData.earnedCredits}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60">Credits earned</p>
+                  <p className="text-xs text-muted-foreground/60">Credits earned</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black tracking-widest text-muted-foreground/50 uppercase">
+                  <p className="text-xs font-black tracking-widest text-muted-foreground/50 uppercase">
                     Required
                   </p>
                   <p className="text-2xl font-extrabold text-foreground">
                     {cgpaData.totalCreditsRequired}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60">Degree required</p>
+                  <p className="text-xs text-muted-foreground/60">Degree required</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black tracking-widest text-muted-foreground/50 uppercase">
+                  <p className="text-xs font-black tracking-widest text-muted-foreground/50 uppercase">
                     Non-Graded
                   </p>
                   <p className="text-2xl font-extrabold text-foreground">
                     {cgpaData.nonGradedCore}
                   </p>
-                  <p className="text-[10px] text-muted-foreground/60">Non-graded core</p>
+                  <p className="text-xs text-muted-foreground/60">Non-graded core</p>
                 </div>
               </div>
             </div>
@@ -411,7 +411,7 @@ export default function DashboardHomePage() {
             <div className="space-y-6">
               <div className="space-y-2">
                 <Sk className="h-3.5 w-48" />
-                <div className="flex items-baseline gap-2.5 mt-1">
+                <div className="flex items-baseline gap-2 mt-1">
                   <Sk className="h-14 w-36" />
                   <Sk className="h-4 w-12" />
                 </div>
@@ -484,13 +484,13 @@ export default function DashboardHomePage() {
                     className="space-y-3 pb-5 border-b border-border/10 last:border-b-0 last:pb-0"
                   >
                     <div className="space-y-0.5">
-                      <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground/55">
+                      <span className="text-xs font-black uppercase tracking-wider text-muted-foreground/55">
                         {item.type}
                       </span>
                       <h3 className="text-sm font-bold text-foreground mt-0.5">
                         {label}
                       </h3>
-                      <p className="text-[11px] text-muted-foreground/60">
+                      <p className="text-xs text-muted-foreground/60">
                         {desc}
                       </p>
                     </div>

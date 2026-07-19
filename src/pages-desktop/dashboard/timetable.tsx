@@ -363,7 +363,7 @@ export default function TimetablePage() {
           </div>
           <button 
             onClick={load}
-            className="text-[10px] uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
+            className="text-xs uppercase font-bold tracking-wider hover:underline focus:outline-none shrink-0"
           >
             Retry
           </button>
@@ -378,7 +378,7 @@ export default function TimetablePage() {
         </div>
         <div className="flex items-center gap-2">
           <CalendarExportPopover schedule={schedule} weekStartDate={weekStart} />
-          <div className="flex items-center gap-2 border border-border/50 bg-muted/40 rounded-lg px-3.5 py-1.5 text-sm text-muted-foreground font-medium">
+          <div className="flex items-center gap-2 border border-border/50 bg-muted/40 rounded-lg px-3 py-1.5 text-sm text-muted-foreground font-medium">
             <Calendar className="w-4 h-4 text-primary shrink-0" />
             <span>{weekLabel}</span>
             <div className="flex items-center gap-0.5 ml-1.5 pl-1.5 border-l border-border/50">

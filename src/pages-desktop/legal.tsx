@@ -67,10 +67,10 @@ export default function LegalPage() {
             </button>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-black uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-lg">
+                <span className="text-xs font-black uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-lg">
                   Legal Documents
                 </span>
-                <span className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground/60">
+                <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground/60">
                   <Clock className="w-3 h-3" />
                   Last Updated: June 2026
                 </span>
@@ -109,7 +109,7 @@ export default function LegalPage() {
           {/* Table of Contents Sidebar */}
           <aside className="hidden lg:block lg:col-span-3 sticky top-6 space-y-4">
             <div className="p-5 bg-card/25 border border-border/15 rounded-3xl space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 px-1">
+              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/50 px-1">
                 Document Sections
               </p>
               <nav className="flex flex-col gap-1.5">
@@ -121,7 +121,7 @@ export default function LegalPage() {
                     <button
                       key={sec.id}
                       onClick={() => scrollToSection(sec.id)}
-                      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
                         isActive
                           ? "bg-primary/10 text-primary border border-primary/20"
                           : "text-muted-foreground border border-transparent hover:text-foreground hover:bg-accent/40"
@@ -145,7 +145,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-destructive/10 text-destructive shrink-0">
+                <div className="p-2 rounded-2xl bg-destructive/10 text-destructive shrink-0">
                   <ShieldAlert className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -168,7 +168,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-2xl bg-primary/10 text-primary shrink-0">
                   <Scale className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -191,7 +191,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-5 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-2xl bg-primary/10 text-primary shrink-0">
                   <Lock className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -234,7 +234,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-2xl bg-primary/10 text-primary shrink-0">
                   <Database className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -252,7 +252,7 @@ export default function LegalPage() {
               className="scroll-mt-8 bg-card/25 border border-border/15 hover:border-border/30 rounded-[2rem] p-6 sm:p-8 space-y-4 transition-all duration-200"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-2xl bg-primary/10 text-primary shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
                 <h2 className="text-base sm:text-lg font-extrabold text-foreground tracking-tight">
@@ -262,7 +262,7 @@ export default function LegalPage() {
               <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Deskly is released as open-source software under the terms of the MIT License:
               </p>
-              <pre className="font-mono text-[10px] bg-muted/10 border border-border/10 rounded-2xl p-5 leading-normal whitespace-pre-wrap text-muted-foreground/85 overflow-x-auto">
+              <pre className="font-mono text-xs bg-muted/10 border border-border/10 rounded-2xl p-5 leading-normal whitespace-pre-wrap text-muted-foreground/85 overflow-x-auto">
 {`MIT License
 
 Copyright (c) 2026 Deskly Authors

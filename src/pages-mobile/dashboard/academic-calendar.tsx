@@ -260,7 +260,7 @@ export default function AcademicCalendarPage() {
 
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <header className="flex items-start justify-between gap-4">
-        <h1 className="text-[26px] font-semibold tracking-tight text-foreground flex items-center gap-2 leading-none">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground flex items-center gap-2 leading-none">
           <CalendarIcon className="w-6 h-6 text-primary shrink-0" />
           Calendar
         </h1>
@@ -292,7 +292,7 @@ export default function AcademicCalendarPage() {
             {/* Weekday Names */}
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
               <div key={day} className="py-2 text-center select-none">
-                <span className="text-[10px] font-bold tracking-wider text-muted-foreground/60 uppercase">
+                <span className="text-xs font-bold tracking-wider text-muted-foreground/60 uppercase">
                   {day}
                 </span>
               </div>
@@ -331,7 +331,7 @@ export default function AcademicCalendarPage() {
                         : "bg-transparent border-transparent text-foreground/90 hover:bg-muted/5"
                     }`}
                 >
-                  <span className={`text-[11px] font-bold leading-none w-4 h-4 rounded-full flex items-center justify-center
+                  <span className={`text-xs font-bold leading-none w-4 h-4 rounded-full flex items-center justify-center
                     ${isToday ? "bg-primary text-primary-foreground font-black" : ""}`}
                   >
                     {cell.dayNumber}
@@ -372,7 +372,7 @@ export default function AcademicCalendarPage() {
             {/* Drawer Header */}
             <div className="flex items-start justify-between gap-4 border-b border-border/10 pb-3">
               <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 leading-none">
+                <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/60 leading-none">
                   Day Schedule Details
                 </span>
                 <h3 className="text-xl font-bold text-foreground leading-none">
@@ -411,7 +411,7 @@ export default function AcademicCalendarPage() {
                         className="p-4 rounded-2xl border border-border/10 bg-muted/5 space-y-2"
                       >
                         <span
-                          className={`inline-block px-2 py-0.5 border rounded text-[9px] font-extrabold uppercase tracking-wider leading-none ${badgeStyle}`}
+                          className={`inline-block px-2 py-0.5 border rounded text-xs font-extrabold uppercase tracking-wider leading-none ${badgeStyle}`}
                         >
                           {type}
                         </span>
