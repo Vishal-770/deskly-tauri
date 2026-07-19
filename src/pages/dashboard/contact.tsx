@@ -7,6 +7,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { Copy, Check, Phone, Search, X, Mail } from "lucide-react";
+import contactImg from "@/assets/contact.png";
 
 function GmailIcon({ className }: { className?: string }) {
   return (
@@ -173,6 +174,19 @@ export default function ContactPage() {
   return shell(
     <div className="w-full flex flex-col gap-5 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
+
+      {/* Illustration image absolute header */}
+      <div className="absolute -top-4 right-0 w-[200px] h-[160px] pointer-events-none select-none z-0">
+        <img
+          src={contactImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 30% 40%, black 30%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 30% 40%, black 30%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,0.2) 80%, transparent 95%)"
+          }}
+          alt="Contact Illustration"
+        />
+      </div>
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (

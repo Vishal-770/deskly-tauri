@@ -55,6 +55,7 @@ export default function MarksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCourseCode, setSelectedCourseCode] = useState<string>("");
+  const [toggledAssessments, setToggledAssessments] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (data.length > 0) {
@@ -238,48 +239,71 @@ export default function MarksPage() {
             })}
           </div>
 
+          {/* Helper toggle hint */}
+          {activeCourse && activeCourse.assessments.length > 0 && (
+            <div className="relative z-10 flex items-center justify-between px-1 mt-1">
+              <span className="text-[10px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none">
+                Assessments
+              </span>
+              <span className="text-[10px] font-black text-primary/50 uppercase tracking-widest leading-none">
+                Tap card to swap score format
+              </span>
+            </div>
+          )}
+
           {/* ── Assessment Cards ─────────────────────────────────────────────────── */}
           {activeCourse && (
             <div className="relative z-10 flex flex-col gap-3">
               {activeCourse.assessments.length > 0 ? (
-                activeCourse.assessments.map((ass, index) => (
-                  <div
-                    key={`${ass.slNo}-${index}`}
-                    className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4"
-                  >
-                    {/* Index badge */}
-                    <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
-                      {ass.slNo ?? index + 1}
-                    </span>
+                activeCourse.assessments.map((ass, index) => {
+                  const cardKey = `${activeCourse.courseCode}-${ass.slNo}-${index}`;
+                  const isWeighted = !!toggledAssessments[cardKey];
+                  return (
+                    <div
+                      key={cardKey}
+                      onClick={() => {
+                        setToggledAssessments((prev) => ({
+                          ...prev,
+                          [cardKey]: !prev[cardKey],
+                        }));
+                      }}
+                      className="p-4.5 bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md flex items-center justify-between gap-4 active:opacity-85 hover:bg-muted/5 transition-all cursor-pointer select-none"
+                    >
+                      {/* Index badge */}
+                      <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
+                        {ass.slNo ?? index + 1}
+                      </span>
 
-                    {/* Assessment title + subtitle */}
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
-                        <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
-                          Assessment
-                        </span>
+                      {/* Assessment title + subtitle */}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium">
+                          <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
+                            Assessment
+                          </span>
+                        </div>
+                        <p className="text-sm font-bold text-foreground leading-snug truncate">{ass.markTitle}</p>
                       </div>
-                      <p className="text-sm font-bold text-foreground leading-snug truncate">{ass.markTitle}</p>
-                    </div>
 
-                    {/* Score columns */}
-                    <div className="shrink-0 flex items-center gap-3">
-                      <div className="text-right">
-                        <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block mb-1">Score</span>
-                        <span className="text-sm font-bold text-foreground tabular-nums leading-none">
-                          {ass.scoredMark} <span className="text-xs font-normal text-muted-foreground/40">/ {ass.maxMark}</span>
+                      {/* Clean Score display */}
+                      <div className="shrink-0 text-right">
+                        <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block mb-1">
+                          {isWeighted ? "Weighted" : "Score"}
                         </span>
-                      </div>
-                      <div className="w-px h-6 bg-border/20 shrink-0" />
-                      <div className="text-right">
-                        <span className="text-[9px] font-bold text-muted-foreground/45 uppercase tracking-widest leading-none block mb-1">Weighted</span>
-                        <span className="text-sm font-bold text-primary tabular-nums leading-none">
-                          {ass.weightageMark} <span className="text-xs font-normal text-muted-foreground/40">/ {ass.weightagePercent}</span>
+                        <span className="text-sm font-black text-foreground tabular-nums leading-none">
+                          {isWeighted ? (
+                            <>
+                              {ass.weightageMark.toFixed(1)} <span className="text-[10px] font-normal text-muted-foreground/40">/ {ass.weightagePercent.toFixed(1)}</span>
+                            </>
+                          ) : (
+                            <>
+                              {ass.scoredMark.toFixed(1)} <span className="text-[10px] font-normal text-muted-foreground/40">/ {ass.maxMark.toFixed(1)}</span>
+                            </>
+                          )}
                         </span>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="flex flex-col items-center justify-center py-14 gap-3 text-center bg-card/80 border border-border/40 rounded-[24px] shadow-sm backdrop-blur-md">
                   <BookOpen className="w-8 h-8 text-muted-foreground/20" />

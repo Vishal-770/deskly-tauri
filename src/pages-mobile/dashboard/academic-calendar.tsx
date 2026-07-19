@@ -12,7 +12,7 @@ import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { isNetworkError } from "@/lib/utils";
-import { Calendar as CalendarIcon, Info, RefreshCw } from "lucide-react";
+import { Calendar as CalendarIcon, Info } from "lucide-react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -277,14 +277,6 @@ export default function AcademicCalendarPage() {
               triggerClassName="h-9 w-[130px]"
               options={options.map((o) => ({ value: o.dateValue, label: o.label }))}
             />
-
-            <button
-              onClick={() => fetchView(selectedOption.dateValue)}
-              title="Refresh calendar view"
-              className="p-2 h-9 w-9 rounded-xl border border-border/10 bg-muted/10 text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors flex items-center justify-center cursor-pointer border-0 shrink-0"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
           </div>
         )}
       </header>

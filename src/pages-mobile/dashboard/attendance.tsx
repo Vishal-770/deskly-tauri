@@ -15,7 +15,6 @@ import {
   School,
   Hash,
   LayoutGrid,
-  RefreshCw,
   Trophy,
   TrendingUp,
   Clock,
@@ -45,9 +44,11 @@ function getBarBgColor(pct: number) {
 
 function formatCourseType(type: string) {
   const t = type.toLowerCase();
-  if (t.includes("embedded theory") || t.includes("theory")) return "Theory Only";
-  if (t.includes("embedded lab") || t.includes("lab")) return "Lab Only";
-  return type;
+  let formatted = type;
+  if (t.includes("embedded theory") || t.includes("theory")) formatted = "Theory Only";
+  else if (t.includes("embedded lab") || t.includes("lab")) formatted = "Lab Only";
+  
+  return formatted.trim().length > 15 ? formatted.trim().slice(0, 12) + "..." : formatted.trim();
 }
 
 // ─── Circular Progress for stats ──────────────────────────────────────────────
@@ -206,14 +207,14 @@ function AttendanceRow({
         <ListCircularProgress percentage={pct} size={48} />
 
         <div className="flex-1 min-w-0 space-y-1">
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-wrap">
-            <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none">
+          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/60 font-medium flex-nowrap overflow-hidden">
+            <span className="text-xs font-semibold text-primary uppercase tracking-wide leading-none shrink-0">
               {item.courseCode}
             </span>
-            <span>&bull;</span>
-            <span className="uppercase">{displayType}</span>
-            <span>&bull;</span>
-            <span className="font-mono">{item.slot}</span>
+            <span className="shrink-0">&bull;</span>
+            <span className="uppercase truncate max-w-[80px] leading-none block">{displayType}</span>
+            <span className="shrink-0">&bull;</span>
+            <span className="font-mono shrink-0 leading-none">{item.slot}</span>
           </div>
           <p className="text-sm font-bold text-foreground leading-snug truncate">
             {item.courseTitle}
@@ -488,12 +489,6 @@ export default function AttendancePage() {
             My Attendance
           </h1>
         </div>
-        <button
-          onClick={load}
-          className="p-1 hover:opacity-80 text-foreground shrink-0 border-0 bg-transparent cursor-pointer"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </button>
       </header>
 
       {/* Stats Card */}

@@ -25,7 +25,6 @@ import {
   CalendarDays,
   ChevronRight,
   X,
-  RefreshCw,
   Award,
   ArrowRight,
 } from "lucide-react";
@@ -174,7 +173,6 @@ function SemesterGradeDrawer({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const navigate = useNavigate();
   if (!item) return null;
 
   return (
@@ -249,17 +247,6 @@ function SemesterGradeDrawer({
               <span className="text-base font-black text-primary">{item.grade}</span>
             </div>
           </div>
-
-          <button
-            onClick={() => {
-              onOpenChange(false);
-              navigate("/dashboard/marks", { state: { courseCode: item.courseCode } });
-            }}
-            className="w-full flex items-center justify-between mt-2 px-4 py-3 rounded-[16px] bg-card/80 border border-border/40 text-xs font-bold text-foreground hover:bg-muted/10 active:opacity-85 transition-all cursor-pointer backdrop-blur-md shadow-sm"
-          >
-            <span>View Assessment Marks</span>
-            <ArrowRight className="w-4 h-4 text-primary" />
-          </button>
         </div>
       </DrawerContent>
     </Drawer>
@@ -425,7 +412,6 @@ export default function GradesPage() {
         />
       </div>
 
-      {/* Header */}
       <header className="relative z-10 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <GraduationCap className="w-6 h-6 text-primary shrink-0" />
@@ -433,15 +419,6 @@ export default function GradesPage() {
             My Grades
           </h1>
         </div>
-        <button
-          onClick={() => {
-            if (activeTab === "semester") loadSemesterGrade();
-            else loadHistory();
-          }}
-          className="p-1 hover:opacity-80 text-foreground shrink-0 border-0 bg-transparent cursor-pointer"
-        >
-          <RefreshCw className="w-5 h-5" />
-        </button>
       </header>
 
       {/* Tab Selector */}
@@ -556,7 +533,7 @@ export default function GradesPage() {
                           {item.courseCode}
                         </span>
                         <span>&bull;</span>
-                        <span className="uppercase">{item.courseType}</span>
+                        <span className="uppercase">{item.courseType.length > 15 ? item.courseType.slice(0, 12) + "..." : item.courseType}</span>
                         <span>&bull;</span>
                         <span>{item.credits.c} Credits</span>
                       </div>
@@ -597,7 +574,7 @@ export default function GradesPage() {
           )}
 
           {/* Stats Card */}
-          <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-[24px] shadow-sm flex items-center justify-between text-center backdrop-blur-md">
+          <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-none shadow-sm flex items-center justify-between text-center backdrop-blur-md">
             <div className="flex-1 min-w-0">
               <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Subjects</p>
               <p className="text-2xl font-black text-foreground leading-none">{totalSubjects}</p>
@@ -664,7 +641,7 @@ export default function GradesPage() {
                           {item.courseCode}
                         </span>
                         <span>&bull;</span>
-                        <span className="uppercase">{item.courseType.trim()}</span>
+                        <span className="uppercase">{item.courseType.trim().length > 15 ? item.courseType.trim().slice(0, 12) + "..." : item.courseType.trim()}</span>
                         <span>&bull;</span>
                         <span>{item.credits} Credits</span>
                       </div>
@@ -699,7 +676,7 @@ export default function GradesPage() {
                     const count = gradeCounts[label] ?? 0;
                     const pct = totalSubjects > 0 ? (count / totalSubjects) * 100 : 0;
                     return (
-                      <div key={label} className="bg-muted/15 border border-border/15 rounded-2xl p-3 flex flex-col justify-between gap-2.5 relative overflow-hidden">
+                      <div key={label} className="bg-muted/15 border border-border/15 rounded-none p-3 flex flex-col justify-between gap-2.5 relative overflow-hidden">
                         <div 
                           className="absolute bottom-0 left-0 h-0.5 bg-primary/30 transition-all duration-500" 
                           style={{ width: `${pct}%` }} 
@@ -730,13 +707,13 @@ export default function GradesPage() {
       <SemesterGradeDrawer
         item={selectedSemGrade}
         open={!!selectedSemGrade}
-        onOpenChange={(open) => !open && setSelectedSemGrade(null)}
+        onOpenChange={(open: boolean) => !open && setSelectedSemGrade(null)}
       />
 
       <HistoryGradeDrawer
         item={selectedHistoryGrade}
         open={!!selectedHistoryGrade}
-        onOpenChange={(open) => !open && setSelectedHistoryGrade(null)}
+        onOpenChange={(open: boolean) => !open && setSelectedHistoryGrade(null)}
       />
     </div>
   );
