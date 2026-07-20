@@ -1,0 +1,71 @@
+name: Bug Report
+description: Create a report to help us reproduce and fix an issue.
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug. Please fill out the sections below. Make sure **no personal credentials, passwords, or session tokens** are visible in screenshots or logs.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe the problem...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Open '...'
+        2. Click on '...'
+        3. See error '...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: Clear description of expected output...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating System / Platform
+      description: Select the platform where you encountered this bug.
+      options:
+        - Windows
+        - macOS
+        - Linux (Desktop)
+        - Android
+        - iOS
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Deskly Version
+      description: What version of Deskly are you running? (e.g. v4.0.0)
+      placeholder: v4.0.0
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Console Logs or Screenshots
+      description: Paste any error messages or screenshots (remove private data!).
+      placeholder: Console logs or screenshot links...
+    validations:
+      required: false

@@ -1,0 +1,57 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for Deskly.
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature. Help us understand your idea by filling out the details below.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear description of what the problem or frustration is.
+      placeholder: I am frustrated when...
+    validations:
+      required: false
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution or feature you'd like to see added.
+      placeholder: I would like Deskly to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Options Considered
+      description: Any alternative solutions or features you've considered.
+      placeholder: Alternatively, we could...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: target_ui
+    attributes:
+      label: Target UI Mode
+      description: Is this feature for Mobile UI, Desktop UI, or both?
+      options:
+        - Both Mobile & Desktop UI
+        - Mobile UI Only
+        - Desktop UI Only
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any mockups, screenshots, or context about the feature request here.
+      placeholder: Mockups or extra details...
+    validations:
+      required: false

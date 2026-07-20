@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions & Questions
+    url: https://github.com/Vishal-770/deskly-tauri/discussions
+    about: Ask questions or discuss features with the community.
+  - name: Security Vulnerability Reporting
+    url: https://github.com/Vishal-770/deskly-tauri/issues
+    about: Report security or privacy concerns via GitHub Issues.
