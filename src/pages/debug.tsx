@@ -691,7 +691,7 @@ export default function DashboardPage() {
                 <input
                   type="text"
                   placeholder="Search 37 commands..."
-                  className="h-11 w-full rounded-md border border-border/50 bg-accent/10 pl-10 pr-4 text-sm font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200"
+                  className="h-11 w-full rounded-lg border border-border/50 bg-accent/10 pl-10 pr-4 text-sm font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all duration-200"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -721,7 +721,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Commands List Card (Glassmorphic, Rounded-2xl) */}
-            <div className="rounded-md border border-border/40 bg-accent/5 overflow-hidden">
+            <div className="rounded-lg border border-border/40 bg-accent/5 overflow-hidden">
               <div className="p-4 border-b border-border/40 bg-accent/10 flex justify-between items-center">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Available Commands ({filteredCommands.length})
@@ -773,7 +773,7 @@ export default function DashboardPage() {
           <section className="lg:col-span-7 space-y-6">
             
             {/* Command Config / Input Form Card */}
-            <div className="rounded-md border border-border/40 bg-accent/5 p-6 space-y-6">
+            <div className="rounded-lg border border-border/40 bg-accent/5 p-6 space-y-6">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-xs uppercase tracking-widest font-bold text-primary">
@@ -862,7 +862,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Response Viewer Panel */}
-            <div className="rounded-md border border-border/40 bg-accent/5 p-6 space-y-4">
+            <div className="rounded-lg border border-border/40 bg-accent/5 p-6 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/40 pb-4">
                 <div className="space-y-1">
                   <h3 className="text-base font-bold">Response Inspector</h3>

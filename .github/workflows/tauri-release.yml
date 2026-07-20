@@ -164,7 +164,9 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Build signed Android package
-        run: pnpm tauri android build
+        run: |
+          pnpm tauri android build --apk
+          pnpm tauri android build --aab
 
       - name: Sign Android artifacts
         shell: bash
@@ -172,35 +174,37 @@ jobs:
           set -euo pipefail
 
           APP_DIR="src-tauri/gen/android/app/build/outputs"
-          APK_INPUT="$(find "$APP_DIR/apk" -name 'app-release.apk' -o -name '*release.apk' | sort | head -n 1)"
-          AAB_INPUT="$(find "$APP_DIR/bundle" -name 'app-release.aab' -o -name '*release.aab' | sort | head -n 1)"
           BUILD_TOOLS_DIR="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort | tail -n 1)"
-
-          if [ -z "$APK_INPUT" ] || [ ! -f "$APK_INPUT" ]; then
-            echo "Signed APK not found in $APP_DIR/apk" >&2
-            exit 1
-          fi
-
-          if [ -z "$AAB_INPUT" ] || [ ! -f "$AAB_INPUT" ]; then
-            echo "AAB not found in $APP_DIR/bundle" >&2
-            exit 1
-          fi
+          export PATH="$BUILD_TOOLS_DIR:$PATH"
 
           mkdir -p release-assets/android
 
-          export PATH="$BUILD_TOOLS_DIR:$PATH"
+          mapfile -t APK_FILES < <(find "$APP_DIR/apk" -type f \( -name '*.apk' \) ! -name '*unaligned*' ! -name '*-signed.apk')
+          if [ ${#APK_FILES[@]} -eq 0 ]; then
+            echo "No APKs found in $APP_DIR/apk" >&2
+            exit 1
+          fi
 
-          zipalign -p -f 4 "$APK_INPUT" release-assets/android/app-release-signed.apk
-          apksigner sign \
-            --ks src-tauri/gen/android/app/keystore.jks \
-            --ks-pass pass:"$ANDROID_KEYSTORE_PASSWORD" \
-            --key-pass pass:"$ANDROID_KEY_PASSWORD" \
-            release-assets/android/app-release-signed.apk
+          for apk in "${APK_FILES[@]}"; do
+            base_name="$(basename "$apk" .apk)"
+            clean_name="${base_name%-unsigned}"
+            clean_name="${clean_name%-release}"
+            out_prefix="${clean_name/#app/deskly}"
+            target_apk="release-assets/android/${out_prefix}.apk"
+            zipalign -p -f 4 "$apk" "$target_apk"
+            apksigner sign \
+              --ks src-tauri/gen/android/app/keystore.jks \
+              --ks-pass pass:"$ANDROID_KEYSTORE_PASSWORD" \
+              --key-pass pass:"$ANDROID_KEY_PASSWORD" \
+              "$target_apk"
+            apksigner verify --verbose "$target_apk"
+          done
 
-          cp "$AAB_INPUT" release-assets/android/app-release-signed.aab
-
-          apksigner verify --verbose release-assets/android/app-release-signed.apk
-          jarsigner -verify -verbose -certs release-assets/android/app-release-signed.aab | tail -n 20
+          AAB_INPUT="$(find "$APP_DIR/bundle" -type f -name '*.aab' | sort | head -n 1 || true)"
+          if [ -n "$AAB_INPUT" ] && [ -f "$AAB_INPUT" ]; then
+            cp "$AAB_INPUT" release-assets/android/deskly.aab
+            jarsigner -verify -verbose -certs release-assets/android/deskly.aab | tail -n 20 || true
+          fi
 
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -212,9 +216,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android
-          path: |
-            release-assets/android/app-release-signed.apk
-            release-assets/android/app-release-signed.aab
+          path: release-assets/android/*
           if-no-files-found: error
 
   release:

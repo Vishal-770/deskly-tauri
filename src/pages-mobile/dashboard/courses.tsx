@@ -8,7 +8,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import courseImg from "@/assets/course.png";
 import {
   Layers,
@@ -264,8 +264,17 @@ export default function CoursesPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
 
-  const [courses, setCourses] = useState<TimetableCourse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<TimetableCourse[]>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::courses");
+      if (cached) {
+        const parsed = JSON.parse(cached) as TimetableCourse[];
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [loading, setLoading] = useState(courses.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   const [selectedCourse, setSelectedCourse] = useState<TimetableCourse | null>(null);
@@ -274,36 +283,26 @@ export default function CoursesPage() {
   const [selectedTypeFilter, setSelectedTypeFilter] = useState("ALL");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("ALL");
 
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::courses");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached) as TimetableCourse[];
-        if (parsed.length > 0) {
-          setCourses(parsed);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached courses", e);
-      }
-    }
-  }, []);
-
   async function load() {
     try {
       if (!isLoggedIn && !authLoading) return;
       setError(null);
       if (authLoading) return;
-      setLoading(courses.length > 0 ? false : true);
-      const res = await getTimetableCourses();
+      const hasCache = courses.length > 0;
+      setLoading(!hasCache);
+      const res = await fetchWithTimeout(getTimetableCourses(), 15000);
       if (res.success && res.data) {
         setCourses(res.data);
         localStorage.setItem("deskly::cache::courses", JSON.stringify(res.data));
       } else {
-        setError(res.error ?? "Failed to fetch registered courses.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch registered courses.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (courses.length === 0) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }

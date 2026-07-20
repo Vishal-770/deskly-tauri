@@ -38,10 +38,24 @@ export default function SettingsPage() {
   const { isLoggedIn, loading: authLoading, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [semesters, setSemesters] = useState<Semester[]>([]);
-  const [selectedSemester, setSelectedSemester] = useState<Semester | null>(null);
+  const initialSemesters = useState<Semester[]>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::semesters");
+      return cached ? JSON.parse(cached) : [];
+    } catch { return []; }
+  })[0];
+
+  const initialActiveSem = useState<Semester | null>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::current_semester");
+      return cached ? JSON.parse(cached) : null;
+    } catch { return null; }
+  })[0];
+
+  const [semesters, setSemesters] = useState<Semester[]>(initialSemesters);
+  const [selectedSemester, setSelectedSemester] = useState<Semester | null>(initialActiveSem);
   const [hostelBlock, setHostelBlock] = useState<LaundryBlock>("A");
-  
+
   // Software Update States
   const [currentVersion, setCurrentVersion] = useState("");
   const [updateStatus, setUpdateStatus] = useState<"idle" | "checking" | "upToDate" | "available" | "downloading" | "finished" | "error">("idle");
@@ -139,10 +153,16 @@ export default function SettingsPage() {
     async function loadConfig() {
       try {
         const list = await authGetSemesters();
-        setSemesters(list || []);
+        if (list && list.length > 0) {
+          setSemesters(list);
+          localStorage.setItem("deskly::cache::semesters", JSON.stringify(list));
+        }
 
         const active = await authGetSemester();
-        setSelectedSemester(active);
+        if (active) {
+          setSelectedSemester(active);
+          localStorage.setItem("deskly::cache::current_semester", JSON.stringify(active));
+        }
 
         const savedBlock = localStorage.getItem("deskly::settings::hostelBlock");
         if (savedBlock) {

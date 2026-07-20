@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getContactInfo, ContactDetail } from "@/lib/features";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
@@ -106,39 +106,38 @@ function ContactCard({ contact }: { contact: ContactDetail }) {
 export default function ContactPage() {
   const { loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
-  const [contacts, setContacts] = useState<ContactDetail[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [contacts, setContacts] = useState<ContactDetail[] | null>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::contact");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return null;
+  });
+  const [loading, setLoading] = useState(!contacts);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::contact");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.length > 0) {
-          setContacts(parsed);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached contacts", e);
-      }
-    }
-  }, []);
-
   const fetchContacts = async () => {
-    setLoading(contacts && contacts.length > 0 ? false : true);
+    const hasCache = !!(contacts && contacts.length > 0);
+    setLoading(!hasCache);
     setError(null);
     try {
-      const res = await getContactInfo();
+      const res = await fetchWithTimeout(getContactInfo(), 15000);
       if (res.success && res.data) {
         setContacts(res.data);
         localStorage.setItem("deskly::cache::contact", JSON.stringify(res.data));
       } else {
-        setError(res.error ?? "Failed to load contact information.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to load contact information.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (!hasCache) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }

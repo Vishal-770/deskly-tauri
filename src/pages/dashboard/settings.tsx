@@ -9,46 +9,49 @@ import {
   User,
   LogOut,
   KeyRound,
-  Cookie,
   RefreshCw,
   AlertTriangle,
-  Settings,
+  Settings as SettingsIcon,
   Sun,
   Moon,
   Laptop,
-  Scale,
   ChevronRight,
+  Palette,
+  Calendar,
+  Shield,
+  ShieldCheck,
+  Info,
 } from "lucide-react";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { Drawer, DrawerContent, DrawerClose } from "@/components/ui/drawer";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { isNetworkError } from "@/lib/utils";
+import settingsImg from "@/assets/settings.png";
 
 // ─── Skeleton Helper ──────────────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function SettingsSkeleton() {
   return (
     <div className="w-full space-y-6 px-2 py-4 animate-pulse font-saira">
-      {/* Header */}
       <div className="space-y-1">
         <Sk className="h-7 w-32" />
+        <Sk className="h-3.5 w-48" />
       </div>
 
-      {/* Preferences list skeleton */}
+      <Sk className="h-20 w-full rounded-2xl" />
+
       <div className="space-y-3">
-        <Sk className="h-3 w-24" />
-        <div className="divide-y divide-border/10 border-t border-b border-border/10">
-          <div className="py-4 flex justify-between items-center">
-            <div className="space-y-1.5">
-              <Sk className="h-4 w-28" />
-              <Sk className="h-3 w-48" />
-            </div>
-            <Sk className="h-9 w-28 rounded-md shrink-0" />
-          </div>
-        </div>
+        <Sk className="h-4 w-28" />
+        <Sk className="h-36 w-full rounded-2xl" />
+      </div>
+
+      <div className="space-y-3">
+        <Sk className="h-4 w-32" />
+        <Sk className="h-56 w-full rounded-2xl" />
       </div>
     </div>
   );
@@ -63,7 +66,7 @@ export default function MobileSettings() {
   const { theme, setTheme } = useTheme();
 
   // Keyring / credential status
-  const { status: credStatus, loading: credLoading, error: credError, refresh: refreshCred } = useCredentialStatus();
+  const { status: credStatus, loading: credLoading, refresh: refreshCred, error: credError } = useCredentialStatus();
 
   const isOnline = useOnlineStatus();
 
@@ -103,27 +106,23 @@ export default function MobileSettings() {
     await setSemester(semester);
   }
 
-  // Keyring rows list
   const credItems = [
     {
-      icon: <User className="w-4 h-4 text-muted-foreground/30" />,
-      label: "Username / Reg No",
-      value: credStatus?.userId ?? null,
-      stored: credStatus ? !!credStatus.userId : null,
+      icon: <User className="w-5 h-5 text-primary shrink-0 mt-0.5" />,
+      label: "USERNAME / REG NO",
+      value: credStatus?.userId ?? authState?.userId ?? "—",
       loading: credLoading,
     },
     {
-      icon: <KeyRound className="w-4 h-4 text-muted-foreground/30" />,
-      label: "Password (Keyring)",
+      icon: <KeyRound className="w-5 h-5 text-primary shrink-0 mt-0.5" />,
+      label: "PASSWORD (Keychain)",
       value: credStatus?.hasPasswordStored ? "Stored securely in system keyring" : "Not stored",
-      stored: credStatus ? credStatus.hasPasswordStored : null,
       loading: credLoading,
     },
     {
-      icon: <Cookie className="w-4 h-4 text-muted-foreground/30" />,
-      label: "Session Cookies",
+      icon: <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />,
+      label: "SESSION COOKIES",
       value: hasCookies ? "Active session tokens present" : "No session cookies stored",
-      stored: hasCookies,
       loading: cookiesLoading,
     },
   ];
@@ -133,57 +132,81 @@ export default function MobileSettings() {
   }
 
   return (
-    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain">
+    <div className="w-full space-y-6 px-2 py-4 font-saira select-none overscroll-y-contain relative">
       <style>{`.font-saira { font-family: 'Saira', sans-serif !important; }`}</style>
 
+      {/* 3D Illustration Image absolute header */}
+      <div className="absolute -top-4 right-0 w-[180px] h-[150px] pointer-events-none select-none z-0">
+        <img
+          src={settingsImg}
+          className="w-full h-full object-contain opacity-95 dark:opacity-75"
+          style={{
+            maskImage: "radial-gradient(ellipse at 40% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)",
+            WebkitMaskImage: "radial-gradient(ellipse at 40% 40%, #fff 30%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0.2) 80%, transparent 95%)"
+          }}
+          alt="Settings Illustration"
+        />
+      </div>
+
       {/* ── Header ──────────────────────────────────────────────────────────── */}
-      <header className="flex items-start gap-2">
-        <Settings className="w-6 h-6 text-primary shrink-0 mt-0.5" />
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground leading-none">
-          Settings
-        </h1>
+      <header className="relative z-10 flex items-start gap-2.5">
+        <SettingsIcon className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+        <div className="space-y-1 min-w-0">
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground leading-none">
+            Settings
+          </h1>
+          <p className="text-xs text-muted-foreground/60 leading-none">
+            Manage your account and app preferences
+          </p>
+        </div>
       </header>
 
-      {/* ── Profile Section ─────────────────────────────────────────────────── */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-4 py-4 border-t border-b border-border/10">
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
-            <User className="w-6 h-6" />
+      {/* ── Student Profile Card ────────────────────────────────────────────── */}
+      <div
+        onClick={() => navigate("/dashboard/profile")}
+        className="relative z-10 p-4 bg-card/80 border border-border/40 rounded-2xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
+      >
+        <div className="flex items-center gap-3.5 min-w-0">
+          <div className="w-11 h-11 rounded-full bg-muted/20 flex items-center justify-center text-muted-foreground border border-border/10 shrink-0">
+            <User className="w-5 h-5" />
           </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-base font-bold text-foreground truncate">
+          <div className="min-w-0 space-y-0.5">
+            <h2 className="text-base font-bold text-foreground leading-snug truncate">
               Student
             </h2>
-            <p className="text-xs text-primary uppercase tracking-wide font-semibold mt-0.5">
+            <p className="text-xs font-mono font-medium text-muted-foreground/60 leading-none tracking-wide">
               {authState?.userId ?? "—"}
             </p>
           </div>
         </div>
+
+        <ChevronRight className="w-4.5 h-4.5 text-muted-foreground/40 shrink-0" />
       </div>
 
-      {/* ── Preferences ─────────────────────────────────────────────────────── */}
-      <section className="space-y-3.5">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
-            Preferences
-          </h2>
-        </div>
+      {/* ── Preferences Section ─────────────────────────────────────────────── */}
+      <section className="relative z-10 space-y-2.5">
+        <h2 className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none px-1">
+          Preferences
+        </h2>
 
-        <div className="divide-y divide-border/10 border-t border-b border-border/10">
-          {/* Theme Row */}
-          <div className="flex items-center justify-between gap-3 py-4">
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-semibold text-foreground">Visual Theme</h3>
-              <p className="text-xs text-muted-foreground/50 mt-1 leading-relaxed">
-                Switch between light, dark, and system themes.
-              </p>
+        <div className="bg-card/80 border border-border/40 p-4 rounded-2xl shadow-sm backdrop-blur-md space-y-4">
+          {/* Visual Theme Row */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              <Palette className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div className="min-w-0 space-y-0.5">
+                <h3 className="text-sm font-bold text-foreground leading-snug">Visual Theme</h3>
+                <p className="text-xs text-muted-foreground/60 leading-relaxed">
+                  Select a theme light, dark, and system themes.
+                </p>
+              </div>
             </div>
 
             <DrawerSelect
               value={theme}
               onValueChange={(val) => setTheme(val as any)}
               title="Visual Theme"
-              triggerClassName="w-[120px] h-9"
+              triggerClassName="w-[115px] h-8.5 rounded-lg text-xs"
               options={[
                 { value: "light", label: <span className="flex items-center gap-1.5"><Sun className="w-3.5 h-3.5" /> Light</span> },
                 { value: "dark", label: <span className="flex items-center gap-1.5"><Moon className="w-3.5 h-3.5" /> Dark</span> },
@@ -192,125 +215,122 @@ export default function MobileSettings() {
             />
           </div>
 
-          {/* Semester Row */}
-          <div className="flex items-center justify-between gap-3 py-4">
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-semibold text-foreground">Active Semester</h3>
-              <p className="text-xs text-muted-foreground/50 mt-1 leading-relaxed">
-                Select the default semester used across dashboard listings.
-              </p>
-              {semesterError && (
-                <p className="text-xs text-destructive mt-1 font-semibold">{semesterError}</p>
-              )}
-            </div>
+          <div className="border-t border-border/15 pt-4">
+            {/* Active Semester Row */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <Calendar className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                <div className="min-w-0 space-y-0.5">
+                  <h3 className="text-sm font-bold text-foreground leading-snug">Active Semester</h3>
+                  <p className="text-xs text-muted-foreground/60 leading-relaxed">
+                    Select the active semester to load relevant settings.
+                  </p>
+                  {semesterError && !isNetworkError(semesterError, isOnline) && (
+                    <p className="text-xs text-destructive mt-1 font-semibold">{semesterError}</p>
+                  )}
+                </div>
+              </div>
 
-            <DrawerSelect
-              value={currentSemester?.id || ""}
-              onValueChange={handleSemesterChange}
-              disabled={!isOnline || semesterLoading || semesters.length === 0}
-              title="Active Semester"
-              triggerClassName="w-[130px] h-9"
-              placeholder={!isOnline ? "Offline" : semesterLoading ? "Loading..." : "Select"}
-              options={semesters.map((semester) => ({ value: semester.id, label: semester.name }))}
-            />
+              <DrawerSelect
+                value={currentSemester?.id || ""}
+                onValueChange={handleSemesterChange}
+                disabled={!isOnline || semesterLoading || semesters.length === 0}
+                title="Active Semester"
+                triggerClassName="w-[145px] h-8.5 rounded-lg text-xs"
+                placeholder={
+                  currentSemester?.name
+                    ? currentSemester.name
+                    : !isOnline
+                      ? "Offline"
+                      : semesterLoading
+                        ? "Loading..."
+                        : "Select"
+                }
+                options={semesters.map((semester) => ({ value: semester.id, label: semester.name }))}
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Keyring Status ─────────────────────────────────────────────────── */}
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
-              Keyring Status
-            </h2>
-          </div>
+      {/* ── Keyring Status Section ─────────────────────────────────────────── */}
+      <section className="relative z-10 space-y-2.5">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
+            Keyring Status
+          </h2>
           <button
             onClick={handleRefreshKeyring}
             disabled={credLoading || cookiesLoading}
-            className="p-1.5 rounded-md bg-muted/20 hover:bg-muted/30 border border-border/10 cursor-pointer disabled:opacity-40 transition-colors"
+            className="w-7 h-7 rounded-full bg-muted/20 hover:bg-muted/30 border border-border/10 flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer disabled:opacity-40 transition-all"
             title="Refresh keyring status"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-muted-foreground ${(credLoading || cookiesLoading) ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${(credLoading || cookiesLoading) ? "animate-spin" : ""}`} />
           </button>
         </div>
 
-        {/* Keyring error banner */}
+        {/* Keyring Error Banner */}
         {(credError || credStatus?.keyringError) && (
-          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/15 rounded-md text-xs text-destructive font-semibold">
+          <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-xs text-destructive font-semibold">
             <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span>{credError ?? credStatus?.keyringError}</span>
           </div>
         )}
 
-        <div className="divide-y divide-border/10 border-t border-b border-border/10">
-          {credItems.map((item) => (
-            <div key={item.label} className="flex items-center justify-between gap-3 py-3">
-              <div className="flex items-center gap-3 min-w-0">
+        <div className="bg-card/80 border border-border/40 p-4 rounded-2xl shadow-sm backdrop-blur-md space-y-3.5">
+          {credItems.map((item, idx) => (
+            <div key={item.label} className={idx > 0 ? "border-t border-border/15 pt-3.5" : ""}>
+              <div className="flex items-start gap-3">
                 {item.icon}
-                <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground/50 uppercase tracking-wider leading-none">
+                <div className="min-w-0 space-y-0.5 flex-1">
+                  <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-wider leading-none">
                     {item.label}
                   </p>
                   {item.loading ? (
-                    <Sk className="h-3.5 w-36 mt-1.5" />
+                    <Sk className="h-3.5 w-32 mt-1" />
                   ) : (
-                    <p className="text-xs font-semibold text-foreground truncate mt-1 leading-none">
-                      {item.label === "Username / Reg No"
-                        ? (item.value ?? "Not stored")
-                        : item.value}
+                    <p className="text-xs font-bold text-foreground truncate leading-snug">
+                      {item.value}
                     </p>
                   )}
                 </div>
               </div>
-
-              {/* Status pill */}
-              {item.loading ? (
-                <Sk className="h-5 w-14 rounded-full shrink-0" />
-              ) : (
-                <span
-                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-black shrink-0 ${
-                    item.stored
-                      ? "bg-primary/10 text-primary border border-primary/20"
-                      : "bg-destructive/10 text-destructive border border-destructive/15"
-                  }`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${item.stored ? "bg-primary" : "bg-destructive"}`} />
-                  {item.stored ? "Stored" : "Missing"}
-                </span>
-              )}
             </div>
           ))}
-        </div>
 
-        <p className="text-xs text-muted-foreground/50 leading-relaxed px-1 font-medium">
-          Credentials are stored securely in your device's native keyring. Session cookies are held in memory and refreshed automatically.
-        </p>
-      </div>
-
-      {/* Legal Link */}
-      <Link
-        to="/legal"
-        className="flex items-center justify-between py-3 px-1 text-muted-foreground hover:text-foreground transition-colors border-t border-border/10"
-      >
-        <div className="flex items-center gap-3">
-          <Scale className="w-4 h-4 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-foreground">Legal &amp; Privacy</p>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">View disclaimers and data policies</p>
+          {/* Info Sub-Card */}
+          <div className="mt-3 p-3.5 bg-muted/15 border border-border/15 rounded-xl flex items-start gap-3">
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground/60 leading-relaxed font-medium">
+              Credentials are stored securely in your device's native keyring. Session cookies are held in memory and refreshed automatically.
+            </p>
           </div>
         </div>
-        <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground/40" />
+      </section>
+
+      {/* ── Legal & Privacy Card ────────────────────────────────────────────── */}
+      <Link
+        to="/legal"
+        className="relative z-10 p-4 bg-card/80 border border-border/40 rounded-2xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4 cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all block text-left"
+      >
+        <div className="flex items-center gap-3.5 min-w-0">
+          <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
+          <div className="min-w-0 space-y-0.5">
+            <h3 className="text-sm font-bold text-foreground leading-snug">Legal &amp; Privacy</h3>
+            <p className="text-xs text-muted-foreground/60 leading-none">View policies, terms and regulations.</p>
+          </div>
+        </div>
+        <ChevronRight className="w-4.5 h-4.5 text-muted-foreground/40 shrink-0" />
       </Link>
 
-      {/* Logout Action */}
-      <div className="pt-2">
+      {/* ── Sign Out Button ─────────────────────────────────────────────────── */}
+      <div className="relative z-10 pt-2">
         <button
           onClick={() => setIsLogoutConfirmOpen(true)}
-          className="w-full h-11 flex justify-center items-center gap-2 bg-destructive/10 hover:bg-destructive/15 text-destructive border border-destructive/20 text-sm font-semibold rounded-md transition-colors cursor-pointer"
+          className="w-full h-12 flex items-center justify-center gap-2 bg-destructive/10 hover:bg-destructive/15 text-destructive border border-destructive/20 text-sm font-bold rounded-2xl transition-all cursor-pointer shadow-sm active:opacity-80"
         >
-          <LogOut className="w-4 h-4" />
-          Sign Out
+          <LogOut className="w-4 h-4 shrink-0" />
+          <span>Sign Out</span>
         </button>
       </div>
 
@@ -343,11 +363,11 @@ export default function MobileSettings() {
                   navigate("/");
                 }
               }}
-              className="w-full h-11 flex justify-center items-center bg-destructive text-destructive-foreground text-sm font-semibold rounded-md active:opacity-90 transition-opacity cursor-pointer border-0"
+              className="w-full h-11 flex justify-center items-center bg-destructive text-destructive-foreground text-sm font-semibold rounded-lg active:opacity-90 transition-opacity cursor-pointer border-0 font-saira"
             >
               Sign Out
             </button>
-            <DrawerClose className="w-full h-11 flex justify-center items-center bg-muted text-muted-foreground text-sm font-semibold rounded-md cursor-pointer border-0 hover:bg-muted/80 focus:outline-none transition-colors">
+            <DrawerClose className="w-full h-11 flex justify-center items-center bg-muted text-muted-foreground text-sm font-semibold rounded-lg cursor-pointer border-0 hover:bg-muted/80 focus:outline-none transition-colors font-saira">
               Cancel
             </DrawerClose>
           </div>

@@ -8,6 +8,7 @@ import {
 } from "@/lib/features";
 
 import { ErrorDisplay } from "@/components/error-display";
+import { fetchWithTimeout } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import {
   AlertCircle,
   Search,
   X,
+  Loader2,
 } from "lucide-react";
 
 // ─── Course Loader Skeleton ───────────────────────────────────────────────────
@@ -73,15 +75,30 @@ export default function CategoryCoursesPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const { categoryId } = useParams("/dashboard/curriculum/:categoryId");
   const navigate = useNavigate();
+  const cacheKey = categoryId ? `deskly::cache::curriculum_courses_${categoryId}` : "";
 
-  const [courses, setCourses] = useState<CurriculumCourse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<CurriculumCourse[]>(() => {
+    if (!cacheKey) return [];
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {
+        console.error("Failed to parse cached curriculum courses", e);
+      }
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(courses.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
   // Downloading syllabus state
   const [downloading, setDownloading] = useState<Record<string, boolean>>({});
   const [downloadResult, setDownloadResult] = useState<Record<string, { success: boolean; message: string } | null>>({});
+
+  const isAnyDownloading = useMemo(() => Object.values(downloading).some(Boolean), [downloading]);
 
   async function load() {
     if (!categoryId) return;
@@ -90,22 +107,43 @@ export default function CategoryCoursesPage() {
       setError(null);
       if (authLoading) return;
 
-      setLoading(true);
+      const hasCache = courses.length > 0;
+      setLoading(!hasCache);
 
-      const res = await getCurriculumCategoryCourses(categoryId);
+      const res = await fetchWithTimeout(getCurriculumCategoryCourses(categoryId), 15000);
       if (res.success && res.data) {
         setCourses(res.data);
+        if (cacheKey) {
+          localStorage.setItem(cacheKey, JSON.stringify(res.data));
+        }
       } else {
-        setError(res.error ?? "Failed to fetch courses for this category.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch courses for this category.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (courses.length === 0) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
+    if (cacheKey) {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCourses(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse cached curriculum courses", e);
+        }
+      }
+    }
     if (isLoggedIn && categoryId) {
       load();
     }
@@ -125,7 +163,7 @@ export default function CategoryCoursesPage() {
 
   // Handle downloading syllabus file
   async function handleDownloadSyllabus(courseCode: string) {
-    if (downloading[courseCode]) return;
+    if (isAnyDownloading || downloading[courseCode]) return;
 
     setDownloading((prev) => ({ ...prev, [courseCode]: true }));
     setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
@@ -274,27 +312,6 @@ export default function CategoryCoursesPage() {
                     <h3 className="text-base font-semibold text-foreground mt-2 leading-snug">
                       {course.title}
                     </h3>
-
-                    {/* Download Inline Notice */}
-                    {result && (
-                      <div className="mt-2.5 flex items-center gap-1.5 text-xs leading-tight">
-                        {result.success ? (
-                          <>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-chart-2 shrink-0" />
-                            <span className="text-chart-2 font-medium break-all">
-                              {result.message}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
-                            <span className="text-destructive font-medium break-all">
-                              {result.message}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {/* Right section: Credits/Type and Button */}
@@ -315,16 +332,35 @@ export default function CategoryCoursesPage() {
                     </div>
 
                     {/* Action Button */}
-                    <div className="flex items-center gap-2 md:w-28 justify-end">
+                    <div className="flex items-center gap-2 md:w-32 justify-end">
                       <Button
-                        variant={result?.success ? "outline" : "default"}
+                        variant={result?.success ? "outline" : result && !result.success ? "destructive" : "default"}
                         size="sm"
-                        disabled={isDownloading}
+                        disabled={isAnyDownloading}
                         onClick={() => handleDownloadSyllabus(course.code)}
-                        className="w-full sm:w-auto rounded-md text-xs"
+                        className="w-[115px] h-8.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all duration-200"
                       >
-                        <Download className="size-3.5" />
-                        {isDownloading ? "Downloading..." : "Syllabus"}
+                        {isDownloading ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                            <span>Saving...</span>
+                          </>
+                        ) : result?.success ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Saved</span>
+                          </>
+                        ) : result && !result.success ? (
+                          <>
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>Retry</span>
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-3.5 h-3.5 shrink-0" />
+                            <span>Syllabus</span>
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>

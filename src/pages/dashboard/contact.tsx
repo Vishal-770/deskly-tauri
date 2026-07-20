@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getContactInfo, ContactDetail } from "@/lib/features";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
@@ -19,7 +19,7 @@ function GmailIcon({ className }: { className?: string }) {
 }
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function ContactSkeleton() {
@@ -31,7 +31,7 @@ function ContactSkeleton() {
       <Sk className="h-10 w-full rounded-md" />
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
-          <Sk key={i} className="h-[76px] w-full rounded-lg" />
+          <Sk key={i} className="h-[76px] w-full rounded-xl" />
         ))}
       </div>
     </div>
@@ -61,7 +61,7 @@ function ContactCard({ contact }: { contact: ContactDetail }) {
   };
 
   return (
-    <div className="p-4 bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
+    <div className="p-4 bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4">
       {/* Icon + Info */}
       <div className="flex-1 min-w-0 flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
@@ -106,39 +106,38 @@ function ContactCard({ contact }: { contact: ContactDetail }) {
 export default function ContactPage() {
   const { loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
-  const [contacts, setContacts] = useState<ContactDetail[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [contacts, setContacts] = useState<ContactDetail[] | null>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::contact");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return null;
+  });
+  const [loading, setLoading] = useState(!contacts);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::contact");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.length > 0) {
-          setContacts(parsed);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached contacts", e);
-      }
-    }
-  }, []);
-
   const fetchContacts = async () => {
-    setLoading(contacts && contacts.length > 0 ? false : true);
+    const hasCache = !!(contacts && contacts.length > 0);
+    setLoading(!hasCache);
     setError(null);
     try {
-      const res = await getContactInfo();
+      const res = await fetchWithTimeout(getContactInfo(), 15000);
       if (res.success && res.data) {
         setContacts(res.data);
         localStorage.setItem("deskly::cache::contact", JSON.stringify(res.data));
       } else {
-        setError(res.error ?? "Failed to load contact information.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to load contact information.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (!hasCache) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }
@@ -190,7 +189,7 @@ export default function ContactPage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={fetchContacts} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
@@ -224,7 +223,7 @@ export default function ContactPage() {
 
       {/* Contact Cards */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-lg shadow-sm backdrop-blur-md">
+        <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md">
           <Phone className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No contacts found</p>
           <p className="text-xs text-muted-foreground">Try a different search term.</p>

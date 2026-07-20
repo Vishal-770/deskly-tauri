@@ -1,6 +1,6 @@
 [package]
 name = "deskly-tauri"
-version = "3.0.13"
+version = "4.0.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -39,3 +39,11 @@ rand = "0.8"
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"
 rfd = "0.15"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+

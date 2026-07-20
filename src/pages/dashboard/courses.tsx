@@ -8,7 +8,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import courseImg from "@/assets/course.png";
 import {
   Layers,
@@ -141,7 +141,7 @@ function CourseDetailDrawer({
             <h3 className="text-xs font-bold tracking-widest text-muted-foreground/50 uppercase leading-none pl-1">
               Credit Breakdown
             </h3>
-            <div className="grid grid-cols-4 divide-x divide-border/10 text-center py-2 bg-muted/10 rounded-md border border-border/5">
+            <div className="grid grid-cols-4 divide-x divide-border/10 text-center py-2 bg-muted/10 rounded-lg border border-border/5">
               {[
                 { label: "Lecture (L)", val: item.credits?.lecture ?? 0 },
                 { label: "Tutorial (T)", val: item.credits?.tutorial ?? 0 },
@@ -189,7 +189,7 @@ function CourseDetailDrawer({
                 </h3>
                 
                 <div className="flex items-center gap-4 py-1">
-                  <div className="w-11 h-11 rounded-md bg-primary/10 flex items-center justify-center shrink-0 text-primary border border-primary/10">
+                  <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary border border-primary/10">
                     <User className="w-5.5 h-5.5" />
                   </div>
                   
@@ -226,7 +226,7 @@ function CoursesSkeleton() {
         <Sk className="h-7 w-44" />
         <Sk className="h-3 w-56" />
       </div>
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-md overflow-hidden">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-lg overflow-hidden">
         <div className="grid grid-cols-3 divide-x divide-border/10">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="p-4 space-y-2">
@@ -243,7 +243,7 @@ function CoursesSkeleton() {
           <Sk className="h-10 rounded-md" />
         </div>
       </div>
-      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-md overflow-hidden divide-y divide-border/10">
+      <div className="bg-muted/30 dark:bg-muted/30 dark:bg-[#0e0e0f]/40 border border-border/40 dark:border-border/10 rounded-lg overflow-hidden divide-y divide-border/10">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="flex items-center gap-4 p-4">
             <div className="flex-1 space-y-2">
@@ -264,8 +264,17 @@ export default function CoursesPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
 
-  const [courses, setCourses] = useState<TimetableCourse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<TimetableCourse[]>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::courses");
+      if (cached) {
+        const parsed = JSON.parse(cached) as TimetableCourse[];
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [loading, setLoading] = useState(courses.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   const [selectedCourse, setSelectedCourse] = useState<TimetableCourse | null>(null);
@@ -274,36 +283,26 @@ export default function CoursesPage() {
   const [selectedTypeFilter, setSelectedTypeFilter] = useState("ALL");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("ALL");
 
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::courses");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached) as TimetableCourse[];
-        if (parsed.length > 0) {
-          setCourses(parsed);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached courses", e);
-      }
-    }
-  }, []);
-
   async function load() {
     try {
       if (!isLoggedIn && !authLoading) return;
       setError(null);
       if (authLoading) return;
-      setLoading(courses.length > 0 ? false : true);
-      const res = await getTimetableCourses();
+      const hasCache = courses.length > 0;
+      setLoading(!hasCache);
+      const res = await fetchWithTimeout(getTimetableCourses(), 15000);
       if (res.success && res.data) {
         setCourses(res.data);
         localStorage.setItem("deskly::cache::courses", JSON.stringify(res.data));
       } else {
-        setError(res.error ?? "Failed to fetch registered courses.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch registered courses.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (courses.length === 0) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }
@@ -390,7 +389,7 @@ export default function CoursesPage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">Retry</button>
         </div>
@@ -407,7 +406,7 @@ export default function CoursesPage() {
       </header>
 
       {/* ── Stats block ──────────────────────────────────────────────────────── */}
-      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-lg shadow-md flex items-center justify-between text-center backdrop-blur-md">
+      <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-xl shadow-md flex items-center justify-between text-center backdrop-blur-md">
         <div className="flex-1 min-w-0">
           <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Total</p>
           <p className="text-2xl font-black text-foreground leading-none">{courseStats.total}</p>
@@ -457,7 +456,7 @@ export default function CoursesPage() {
 
       {/* ── Course List ──────────────────────────────────────────────────────── */}
       {filteredCourses.length === 0 ? (
-        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-md">
+        <div className="relative z-10 flex flex-col items-center justify-center py-16 gap-3 text-center bg-muted/15 dark:bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-lg">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <p className="text-sm font-semibold text-foreground leading-none">No courses found</p>
           <p className="text-xs text-muted-foreground">Try modifying the type or category filters.</p>
@@ -472,7 +471,7 @@ export default function CoursesPage() {
                   setSelectedCourse(item);
                   setDrawerOpen(true);
                 }}
-                className="p-4 bg-card/80 border border-border/40 rounded-lg shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
+                className="p-4 bg-card/80 border border-border/40 rounded-xl shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all cursor-pointer backdrop-blur-md"
               >
                 <div className="flex-1 min-w-0 space-y-3">
                   {/* Top row: index, code, type, slot, credits as plain text items */}
@@ -531,7 +530,7 @@ export default function CoursesPage() {
           <h3 className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
             Credit Distribution
           </h3>
-          <div className="bg-card/80 border border-border/40 p-5 rounded-lg shadow-md backdrop-blur-md space-y-5">
+          <div className="bg-card/80 border border-border/40 p-5 rounded-xl shadow-md backdrop-blur-md space-y-5">
             {/* Segmented Progress Track */}
             <div className="h-3 w-full bg-muted/20 rounded-full overflow-hidden flex border border-border/5">
               {courseStats.theory.credits > 0 && (

@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useParams, useNavigate } from "@/router";
 import { getAttendanceDetail, AttendanceDetailRecord, AttendanceRecord } from "@/lib/attendance";
+import { fetchWithTimeout, isNetworkError } from "@/lib/utils";
+import { OfflineDisplay } from "@/components/offline-display";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { ErrorDisplay } from "@/components/error-display";
 import {
   ArrowLeft,
@@ -11,6 +14,7 @@ import {
   Clock,
   Calendar,
   BarChart3,
+  WifiOff,
 } from "lucide-react";
 
 // ─── Circular Arc Progress ────────────────────────────────────────────────────
@@ -158,12 +162,21 @@ export default function AttendanceDetailPage() {
   const { classId } = useParams("/dashboard/attendance/:classId");
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Record passed from the list page via router state, with cached fallback
+  const isOnline = useOnlineStatus();
   const [record, setRecord] = useState<AttendanceRecord | undefined>(location.state?.record);
-
-  const [details, setDetails] = useState<AttendanceDetailRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [details, setDetails] = useState<AttendanceDetailRecord[]>(() => {
+    if (!classId) return [];
+    try {
+      const cacheKey = `deskly::cache::attendance_detail_${classId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [loading, setLoading] = useState(details.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -183,24 +196,27 @@ export default function AttendanceDetailPage() {
     }
   }, [classId, record]);
 
-  useEffect(() => {
+  async function load() {
     if (!classId || !record) return;
-
-    async function load() {
-      try {
-        const res = await getAttendanceDetail(classId!, record!.slot);
-        if (res.success && res.data) {
-          setDetails(res.data);
-        } else {
-          setError(res.error ?? "Failed to load attendance details.");
-        }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      } finally {
-        setLoading(false);
+    const hasCache = details.length > 0;
+    setLoading(!hasCache);
+    try {
+      const cacheKey = `deskly::cache::attendance_detail_${classId}`;
+      const res = await fetchWithTimeout(getAttendanceDetail(classId!, record!.slot), 15000);
+      if (res.success && res.data) {
+        setDetails(res.data);
+        localStorage.setItem(cacheKey, JSON.stringify(res.data));
+      } else {
+        if (!hasCache) setError(res.error ?? "Failed to load attendance details.");
       }
+    } catch (e) {
+      if (!hasCache) setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     load();
   }, [classId, record]);
 
@@ -227,6 +243,9 @@ export default function AttendanceDetailPage() {
   );
 
   if (!record) {
+    if (!isOnline || isNetworkError(error, isOnline)) {
+      return shell(<OfflineDisplay onRetry={load} />);
+    }
     return shell(
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <p className="text-muted-foreground text-sm">No course data found.</p>
@@ -240,14 +259,17 @@ export default function AttendanceDetailPage() {
     );
   }
 
-  if (loading) {
+  if (loading && details.length === 0) {
     return shell(<DetailSkeleton />);
   }
 
-  if (error) {
+  if (error && details.length === 0) {
+    if (!isOnline || isNetworkError(error, isOnline)) {
+      return shell(<OfflineDisplay onRetry={load} />);
+    }
     return shell(
       <div className="flex h-full items-center justify-center">
-        <ErrorDisplay message={error} onRetry={() => window.location.reload()} />
+        <ErrorDisplay message={error} onRetry={load} />
       </div>
     );
   }
@@ -395,11 +417,25 @@ export default function AttendanceDetailPage() {
         </div>
 
         {details.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-            <Calendar className="w-8 h-8 text-muted-foreground/20" />
-            <p className="text-sm font-bold text-foreground">No session data available</p>
-            <p className="text-xs text-muted-foreground">Detailed log hasn't been recorded yet.</p>
-          </div>
+          !isOnline || isNetworkError(error, isOnline) ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+              <WifiOff className="w-8 h-8 text-muted-foreground/30" />
+              <p className="text-sm font-bold text-foreground">Session logs unavailable offline</p>
+              <p className="text-xs text-muted-foreground">Connect to the internet to load detailed session logs for this class.</p>
+              <button
+                onClick={load}
+                className="mt-1 px-4 py-2 rounded-md bg-primary/10 hover:bg-primary/15 text-primary text-xs font-bold transition-all border border-primary/20 cursor-pointer"
+              >
+                Retry Connection
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+              <Calendar className="w-8 h-8 text-muted-foreground/20" />
+              <p className="text-sm font-bold text-foreground">No session data available</p>
+              <p className="text-xs text-muted-foreground">Detailed log hasn't been recorded yet.</p>
+            </div>
+          )
         ) : (
           <div className="space-y-1.5 pt-2">
             {details.map((row, i) => (

@@ -20,4 +20,10 @@ export function isNetworkError(error: string | null | undefined, isOnline: boole
     msg.includes("connection") ||
     msg.includes("offline")
   );
+}export function fetchWithTimeout<T>(promise: Promise<T>, ms = 15000): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("Request timed out after 15 seconds")), ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
 }

@@ -7,7 +7,7 @@ import { Target, BookOpen } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { ErrorDisplay } from "@/components/error-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 
 function Sk({ className = "" }: { className?: string }) {
   return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
@@ -51,60 +51,53 @@ export default function MarksPage() {
   const isOnline = useOnlineStatus();
   const location = useLocation();
 
-  const [data, setData] = useState<StudentMarkEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<StudentMarkEntry[]>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::marks");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [loading, setLoading] = useState(data.length === 0);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCourseCode, setSelectedCourseCode] = useState<string>("");
+  const [selectedCourseCode, setSelectedCourseCode] = useState<string>(() => data[0]?.courseCode ?? "");
   const [toggledAssessments, setToggledAssessments] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (data.length > 0) {
-      if (location.state?.courseCode) {
-        const match = data.find(
-          (c) => c.courseCode.toLowerCase() === location.state.courseCode.toLowerCase()
-        );
-        if (match) {
-          setSelectedCourseCode(match.courseCode);
-          return;
-        }
-      }
-      if (!selectedCourseCode) {
-        setSelectedCourseCode(data[0].courseCode);
+    if (data.length > 0 && location.state?.courseCode) {
+      const match = data.find(
+        (c) => c.courseCode.toLowerCase() === location.state.courseCode.toLowerCase()
+      );
+      if (match) {
+        setSelectedCourseCode(match.courseCode);
       }
     }
   }, [data, location.state]);
-
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::marks");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.length > 0) {
-          setData(parsed);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached marks", e);
-      }
-    }
-  }, []);
 
   async function load() {
     try {
       if (!isLoggedIn && !authLoading) return;
       setError(null);
       if (authLoading) return;
-      setLoading(data.length > 0 ? false : true);
-      const res = await getMarks();
+      const hasCache = data.length > 0;
+      setLoading(!hasCache);
+      const res = await fetchWithTimeout(getMarks(), 15000);
       if (res.success && res.data) {
         setData(res.data);
         localStorage.setItem("deskly::cache::marks", JSON.stringify(res.data));
         if (res.data.length > 0) setSelectedCourseCode(res.data[0].courseCode);
       } else {
-        setError(res.error ?? "Failed to fetch marks view.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch marks view.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (data.length === 0) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }

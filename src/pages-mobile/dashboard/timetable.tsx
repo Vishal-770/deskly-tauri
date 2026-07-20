@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
 import { ErrorDisplay } from "@/components/error-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import SingleCourseExportModal from "@/components/single-course-export-modal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -388,43 +388,37 @@ export default function TimetablePage() {
     mon.setHours(0, 0, 0, 0);
     return mon;
   });
-  const [schedule, setSchedule] = useState<WeeklySchedule>(EMPTY);
-  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialTt = useMemo(() => {
+    try {
+      const cachedTt = localStorage.getItem("deskly::cache::timetable");
+      if (cachedTt) {
+        const parsedTt = JSON.parse(cachedTt);
+        if (parsedTt && Object.values(parsedTt).some((arr: any) => arr.length > 0)) return parsedTt;
+      }
+    } catch {}
+    return EMPTY;
+  }, []);
+
+  const initialAtt = useMemo(() => {
+    try {
+      const cachedAtt = localStorage.getItem("deskly::cache::timetable_attendance");
+      if (cachedAtt) {
+        const parsedAtt = JSON.parse(cachedAtt);
+        if (Array.isArray(parsedAtt) && parsedAtt.length > 0) return parsedAtt;
+      }
+    } catch {}
+    return [];
+  }, []);
+
+  const [schedule, setSchedule] = useState<WeeklySchedule>(initialTt);
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAtt);
+  const [loading, setLoading] = useState(Object.values(initialTt).every((arr) => (arr as ScheduleEntry[]).length === 0));
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<ScheduleEntry | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isLoggedIn) navigate("/");
   }, [isLoggedIn, authLoading]);
-
-  // Load from Cache (SWR) first
-  useEffect(() => {
-    try {
-      const cachedTt = localStorage.getItem("deskly::cache::timetable");
-      const cachedAtt = localStorage.getItem("deskly::cache::timetable_attendance");
-      let hasData = false;
-      if (cachedTt) {
-        const parsedTt = JSON.parse(cachedTt);
-        if (parsedTt && Object.values(parsedTt).some((arr: any) => arr.length > 0)) {
-          setSchedule(parsedTt);
-          hasData = true;
-        }
-      }
-      if (cachedAtt) {
-        const parsedAtt = JSON.parse(cachedAtt);
-        if (parsedAtt && parsedAtt.length > 0) {
-          setAttendance(parsedAtt);
-          hasData = true;
-        }
-      }
-      if (hasData) {
-        setLoading(false);
-      }
-    } catch (e) {
-      console.error("Failed to parse cached timetable/attendance", e);
-    }
-  }, []);
 
   async function load() {
     try {
@@ -433,8 +427,8 @@ export default function TimetablePage() {
       setLoading(isScheduleEmpty);
 
       const [tt, att] = await Promise.all([
-        invoke<ApiResult<WeeklySchedule>>("timetable_get_weekly", { semesterSubId: null }),
-        invoke<AttendanceResponse>("attendance_get_current").catch(() => ({ success: false } as AttendanceResponse)),
+        fetchWithTimeout(invoke<ApiResult<WeeklySchedule>>("timetable_get_weekly", { semesterSubId: null }), 15000),
+        fetchWithTimeout(invoke<AttendanceResponse>("attendance_get_current").catch(() => ({ success: false } as AttendanceResponse)), 15000),
       ]);
 
       let updatedTt = schedule;
@@ -443,7 +437,7 @@ export default function TimetablePage() {
       if (tt.success && tt.data) {
         setSchedule(tt.data);
         updatedTt = tt.data;
-      } else if (tt.error) {
+      } else if (tt.error && isScheduleEmpty) {
         setError(tt.error);
       }
 
@@ -455,7 +449,10 @@ export default function TimetablePage() {
       localStorage.setItem("deskly::cache::timetable", JSON.stringify(updatedTt));
       localStorage.setItem("deskly::cache::timetable_attendance", JSON.stringify(updatedAtt));
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const isScheduleEmpty = Object.values(schedule).every((arr) => arr.length === 0);
+      if (isScheduleEmpty) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }

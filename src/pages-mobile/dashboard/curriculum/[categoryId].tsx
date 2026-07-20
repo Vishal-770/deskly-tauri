@@ -14,7 +14,7 @@ import { ErrorDisplay } from "@/components/error-display";
 import { Button } from "@/components/ui/button";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import {
   BookOpen,
   Download,
@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Search,
   X,
+  Loader2,
 } from "lucide-react";
 import curriculumImg from "@/assets/curriculum.png";
 
@@ -63,14 +64,29 @@ function CoursesDetailSkeleton() {
 export default function CategoryCoursesPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const { categoryId } = useParams("/dashboard/curriculum/:categoryId");
+  const cacheKey = categoryId ? `deskly::cache::curriculum_courses_${categoryId}` : "";
 
-  const [courses, setCourses] = useState<CurriculumCourse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<CurriculumCourse[]>(() => {
+    if (!cacheKey) return [];
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {
+        console.error("Failed to parse cached curriculum courses", e);
+      }
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(courses.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
   const [downloading, setDownloading] = useState<Record<string, boolean>>({});
   const [downloadResult, setDownloadResult] = useState<Record<string, { success: boolean; message: string } | null>>({});
+
+  const isAnyDownloading = useMemo(() => Object.values(downloading).some(Boolean), [downloading]);
 
   async function load() {
     if (!categoryId) return;
@@ -78,21 +94,42 @@ export default function CategoryCoursesPage() {
       if (!isLoggedIn && !authLoading) return;
       setError(null);
       if (authLoading) return;
-      setLoading(true);
-      const res = await getCurriculumCategoryCourses(categoryId);
+      const hasCache = courses.length > 0;
+      setLoading(!hasCache);
+      const res = await fetchWithTimeout(getCurriculumCategoryCourses(categoryId), 15000);
       if (res.success && res.data) {
         setCourses(res.data);
+        if (cacheKey) {
+          localStorage.setItem(cacheKey, JSON.stringify(res.data));
+        }
       } else {
-        setError(res.error ?? "Failed to fetch courses for this category.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch courses for this category.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (courses.length === 0) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
+    if (cacheKey) {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setCourses(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse cached curriculum courses", e);
+        }
+      }
+    }
     if (isLoggedIn && categoryId) load();
   }, [isLoggedIn, authLoading, categoryId]);
 
@@ -108,7 +145,7 @@ export default function CategoryCoursesPage() {
   }, [courses, query]);
 
   async function handleDownloadSyllabus(courseCode: string) {
-    if (downloading[courseCode]) return;
+    if (isAnyDownloading || downloading[courseCode]) return;
     setDownloading((prev) => ({ ...prev, [courseCode]: true }));
     setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
     try {
@@ -246,49 +283,49 @@ export default function CategoryCoursesPage() {
             return (
               <div
                 key={course.code}
-                className="p-4 bg-card/80 border border-border/40 rounded-xl shadow-sm flex items-start justify-between gap-4 backdrop-blur-md"
+                className="p-4 bg-card/80 border border-border/40 rounded-xl shadow-sm flex items-center justify-between gap-4 backdrop-blur-md"
               >
-                {/* Left: Code + Title + result */}
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="space-y-1">
-                    <p className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
-                      {course.code}
-                    </p>
-                    <p className="text-sm font-bold text-foreground leading-snug">{course.title}</p>
-                    <p className="text-xs text-muted-foreground/50 leading-none">
-                      {course.courseType} &bull; {course.credits} credits
-                    </p>
-                  </div>
-
-                  {/* Download result inline */}
-                  {result && (
-                    <div className="flex items-start gap-1.5 pt-1">
-                      {result.success ? (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                          <span className="text-xs text-emerald-500 font-medium break-all leading-snug">{result.message}</span>
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0 mt-0.5" />
-                          <span className="text-xs text-destructive font-medium break-all leading-snug">{result.message}</span>
-                        </>
-                      )}
-                    </div>
-                  )}
+                {/* Left: Code + Title + Credits */}
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-xs font-bold text-primary uppercase tracking-widest leading-none">
+                    {course.code}
+                  </p>
+                  <p className="text-sm font-bold text-foreground leading-snug">{course.title}</p>
+                  <p className="text-xs text-muted-foreground/50 leading-none pt-0.5">
+                    {course.courseType} &bull; {course.credits} credits
+                  </p>
                 </div>
 
-                {/* Right: Download button */}
-                <div className="shrink-0 pt-0.5">
+                {/* Right: Fixed-size Download button with in-button state */}
+                <div className="shrink-0">
                   <Button
-                    variant={result?.success ? "outline" : "default"}
+                    variant={result?.success ? "outline" : result && !result.success ? "destructive" : "default"}
                     size="sm"
-                    disabled={isDownloading}
+                    disabled={isAnyDownloading}
                     onClick={() => handleDownloadSyllabus(course.code)}
-                    className="rounded-md text-xs h-8"
+                    className="w-[115px] h-8.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all duration-200"
                   >
-                    <Download className="size-3.5" />
-                    {isDownloading ? "…" : "Syllabus"}
+                    {isDownloading ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                        <span>Saving...</span>
+                      </>
+                    ) : result?.success ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Saved</span>
+                      </>
+                    ) : result && !result.success ? (
+                      <>
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>Retry</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-3.5 h-3.5 shrink-0" />
+                        <span>Syllabus</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>

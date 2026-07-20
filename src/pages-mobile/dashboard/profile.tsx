@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getStudentProfile, ProfileData } from "@/lib/features";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import { ErrorDisplay } from "@/components/error-display";
 import profileImg from "@/assets/profile.png";
 import {
@@ -93,18 +93,22 @@ export default function StudentProfilePage() {
   const [error, setError] = useState<string | null>(null);
 
   async function fetchProfile() {
-    setLoading(profile ? false : true);
+    const hasCache = !!profile;
+    setLoading(!hasCache);
     try {
-      const res = await getStudentProfile();
+      const res = await fetchWithTimeout(getStudentProfile(), 15000);
       if (res.success && res.data) {
         setProfile(res.data);
         localStorage.setItem("deskly::cache::profile", JSON.stringify(res.data));
-        setError(null);
       } else {
-        setError(res.error ?? "Failed to fetch student profile details.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch student profile.");
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      if (!hasCache) {
+        setError(err instanceof Error ? err.message : String(err));
+      }
     } finally {
       setLoading(false);
     }

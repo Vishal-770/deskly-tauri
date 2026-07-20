@@ -4,7 +4,7 @@ import { getPaymentReceipts, Receipt } from "@/lib/features";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import paymentImg from "@/assets/payment.png";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
@@ -168,31 +168,25 @@ function ReceiptDrawer({
 export default function PaymentReceiptsPage() {
   const { loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [receipts, setReceipts] = useState<Receipt[]>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::payment_receipts");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [loading, setLoading] = useState(receipts.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
 
-  // Load receipts data
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::payment_receipts");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.length > 0) {
-          setReceipts(parsed);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached receipts", e);
-      }
-    }
-  }, []);
-
   async function load() {
     try {
-      setLoading(receipts && receipts.length > 0 ? false : true);
-      const res = await getPaymentReceipts();
+      const hasCache = receipts.length > 0;
+      setLoading(!hasCache);
+      const res = await fetchWithTimeout(getPaymentReceipts(), 15000);
       if (res.success && res.data) {
         const cleanList = res.data.filter(
           (r) => r.receiptNumber.trim().toUpperCase() !== "RECEIPT NUMBER"
@@ -200,10 +194,14 @@ export default function PaymentReceiptsPage() {
         setReceipts(cleanList);
         localStorage.setItem("deskly::cache::payment_receipts", JSON.stringify(cleanList));
       } else {
-        setError(res.error ?? "Failed to fetch payment receipts.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch payment receipts.");
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      if (receipts.length === 0) {
+        setError(err instanceof Error ? err.message : String(err));
+      }
     } finally {
       setLoading(false);
     }

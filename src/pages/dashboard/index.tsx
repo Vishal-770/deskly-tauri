@@ -13,7 +13,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import dashboardImg from "@/assets/dashboard.png";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -118,9 +118,9 @@ function DashboardSkeleton() {
           <Skeleton className="h-1.5 w-full" />
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <Skeleton className="h-24 rounded-md" />
-          <Skeleton className="h-24 rounded-md" />
-          <Skeleton className="h-24 rounded-md" />
+          <Skeleton className="h-24 rounded-lg" />
+          <Skeleton className="h-24 rounded-lg" />
+          <Skeleton className="h-24 rounded-lg" />
         </div>
       </div>
 
@@ -190,7 +190,7 @@ function GpaTrendGraph({ points }: { points: GpaTrendPoint[] }) {
       </div>
 
       {/* Hero Metrics Row */}
-      <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 border border-border/30 rounded-md">
+      <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 border border-border/30 rounded-lg">
         <div className="text-center space-y-0.5">
           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">Latest</span>
           <span className="text-sm font-black text-foreground">{latestGpa.toFixed(2)}</span>
@@ -317,48 +317,33 @@ export default function MobileDashboardHome() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
 
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [cgpaData, setCgpaData] = useState<CgpaData | null>(null);
-  const [feedbackData, setFeedbackData] = useState<FeedbackStatus[] | null>(null);
-  const [gpaTrend, setGpaTrend] = useState<GpaTrendPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const formattedDate = useMemo(
-    () =>
-      new Date().toLocaleDateString("default", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }),
-    []
-  );
-
-  // Cache read (SWR pattern)
-  useEffect(() => {
+  const cachedDashboard = useMemo(() => {
     try {
       const cached = localStorage.getItem("deskly::cache::dashboard");
-      if (cached) {
-        const p = JSON.parse(cached);
-        if (p?.cgpaData) setCgpaData(p.cgpaData);
-        if (p?.feedbackData) setFeedbackData(p.feedbackData);
-        if (p?.profile) setProfile(p.profile);
-        if (p?.gpaTrend) setGpaTrend(p.gpaTrend);
-        if (p?.cgpaData || p?.feedbackData || p?.profile) setLoading(false);
-      }
-    } catch {}
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
   }, []);
+
+  const [profile, setProfile] = useState<ProfileData | null>(cachedDashboard?.profile ?? null);
+  const [cgpaData, setCgpaData] = useState<CgpaData | null>(cachedDashboard?.cgpaData ?? null);
+  const [feedbackData, setFeedbackData] = useState<FeedbackStatus[] | null>(cachedDashboard?.feedbackData ?? null);
+  const [gpaTrend, setGpaTrend] = useState<GpaTrendPoint[]>(cachedDashboard?.gpaTrend ?? []);
+  const [loading, setLoading] = useState(!cachedDashboard?.cgpaData && !cachedDashboard?.feedbackData);
+  const [error, setError] = useState<string | null>(null);
 
   async function loadData() {
     if (authLoading || !isLoggedIn) return;
     setError(null);
 
+    const hasCache = !!(cgpaData || feedbackData || profile);
+
     try {
       const [cgpaRes, feedbackRes, profileRes] = await Promise.all([
-        getCgpaPage(),
-        getFeedbackStatus(),
-        getStudentProfile().catch(() => null),
+        fetchWithTimeout(getCgpaPage(), 15000),
+        fetchWithTimeout(getFeedbackStatus(), 15000),
+        fetchWithTimeout(getStudentProfile().catch(() => null), 15000),
       ]);
 
       let updatedCgpa = cgpaData;
@@ -369,14 +354,14 @@ export default function MobileDashboardHome() {
       if (cgpaRes.success && cgpaRes.cgpaData) {
         setCgpaData(cgpaRes.cgpaData);
         updatedCgpa = cgpaRes.cgpaData;
-      } else if (cgpaRes.error) {
+      } else if (cgpaRes.error && !hasCache) {
         setError(cgpaRes.error);
       }
 
       if (feedbackRes.success && feedbackRes.data) {
         setFeedbackData(feedbackRes.data);
         updatedFeedback = feedbackRes.data;
-      } else if (feedbackRes.error) {
+      } else if (feedbackRes.error && !hasCache) {
         setError(feedbackRes.error);
       }
 
@@ -387,7 +372,7 @@ export default function MobileDashboardHome() {
 
       // Fetch GPA trend in parallel for all semesters
       try {
-        const initialGradeRes = await getStudentGradeView().catch(() => null);
+        const initialGradeRes = await fetchWithTimeout(getStudentGradeView().catch(() => null), 15000);
         if (initialGradeRes?.success && initialGradeRes.data) {
           const semesters = initialGradeRes.data.semesters || [];
           if (semesters.length > 0) {
@@ -396,7 +381,7 @@ export default function MobileDashboardHome() {
                 if (sem.id === initialGradeRes.data?.semesterSubId) {
                   return { id: sem.id, name: sem.name, gpa: initialGradeRes.data.gpa ?? null };
                 }
-                const res = await getStudentGradeView(sem.id).catch(() => null);
+                const res = await fetchWithTimeout(getStudentGradeView(sem.id).catch(() => null), 15000);
                 return {
                   id: sem.id,
                   name: sem.name,
@@ -429,7 +414,9 @@ export default function MobileDashboardHome() {
         })
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (!hasCache) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }
@@ -441,7 +428,20 @@ export default function MobileDashboardHome() {
 
   const studentName = formatStudentName(profile?.student?.name);
 
-  if (!isOnline && !cgpaData && !feedbackData && !loading) {
+  const formattedDate = useMemo(
+    () =>
+      new Date().toLocaleDateString("default", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+    []
+  );
+
+  const showOffline = !cgpaData && !feedbackData && !profile && (isOnline === false || isNetworkError(error, isOnline));
+
+  if (showOffline && !loading) {
     return <OfflineDisplay onRetry={loadData} />;
   }
 
@@ -477,7 +477,7 @@ export default function MobileDashboardHome() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button
             onClick={loadData}
@@ -603,10 +603,10 @@ export default function MobileDashboardHome() {
               return (
                 <div
                   key={idx}
-                  className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4 rounded-lg flex items-center justify-between shadow-sm"
+                  className="bg-gradient-to-br from-card/90 to-card/45 border border-border/15 p-4 rounded-xl flex items-center justify-between shadow-sm"
                 >
                   <div className="flex items-center min-w-0">
-                    <div className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 mr-4 ${iconColor}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 mr-4 ${iconColor}`}>
                       <Icon className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 space-y-1">

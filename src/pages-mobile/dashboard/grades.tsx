@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import gradeHistoryImg from "@/assets/grade-history.png";
@@ -267,14 +267,28 @@ export default function GradesPage() {
   const [selectedSemId, setSelectedSemId] = useState<string>("");
 
   // Semester Grade View State
-  const [semGradeData, setSemGradeData] = useState<SemesterGradeViewData | null>(null);
-  const [semLoading, setSemLoading] = useState(true);
+  const initialSemGrade = useMemo(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::sem_grades");
+      return cached ? JSON.parse(cached) : null;
+    } catch { return null; }
+  }, []);
+
+  const [semGradeData, setSemGradeData] = useState<SemesterGradeViewData | null>(initialSemGrade);
+  const [semLoading, setSemLoading] = useState(!initialSemGrade);
   const [semError, setSemError] = useState<string | null>(null);
   const [selectedSemGrade, setSelectedSemGrade] = useState<SemesterGradeEntry | null>(null);
 
   // Grade History State
-  const [historyData, setHistoryData] = useState<StudentHistoryData | null>(null);
-  const [historyLoading, setHistoryLoading] = useState(true);
+  const initialHistory = useMemo(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::grade_history");
+      return cached ? JSON.parse(cached) : null;
+    } catch { return null; }
+  }, []);
+
+  const [historyData, setHistoryData] = useState<StudentHistoryData | null>(initialHistory);
+  const [historyLoading, setHistoryLoading] = useState(!initialHistory);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [selectedHistoryGrade, setSelectedHistoryGrade] = useState<StudentHistoryData["grades"][number] | null>(null);
 
@@ -283,13 +297,15 @@ export default function GradesPage() {
 
   // Load Semester Grade View
   async function loadSemesterGrade(semId?: string) {
-    setSemLoading(semGradeData && semGradeData.grades.length > 0 ? false : true);
+    const hasCache = !!(semGradeData && semGradeData.grades && semGradeData.grades.length > 0);
+    setSemLoading(!hasCache);
     setSemError(null);
     try {
       const targetSem = semId !== undefined ? semId : selectedSemId;
-      const res = await getStudentGradeView(targetSem || undefined);
+      const res = await fetchWithTimeout(getStudentGradeView(targetSem || undefined), 15000);
       if (res.success && res.data) {
         setSemGradeData(res.data);
+        localStorage.setItem("deskly::cache::sem_grades", JSON.stringify(res.data));
         if (res.data.semesters && res.data.semesters.length > 0) {
           setSemesters(res.data.semesters);
         }
@@ -297,10 +313,14 @@ export default function GradesPage() {
           setSelectedSemId(res.data.semesterSubId);
         }
       } else {
-        setSemError(res.error ?? "Failed to fetch semester grades.");
+        if (!hasCache) {
+          setSemError(res.error ?? "Failed to fetch semester grades.");
+        }
       }
     } catch (e) {
-      setSemError(e instanceof Error ? e.message : String(e));
+      if (!hasCache) {
+        setSemError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setSemLoading(false);
     }
@@ -308,17 +328,23 @@ export default function GradesPage() {
 
   // Load Grade History
   async function loadHistory() {
-    setHistoryLoading(historyData && historyData.grades && historyData.grades.length > 0 ? false : true);
+    const hasCache = !!(historyData && historyData.grades && historyData.grades.length > 0);
+    setHistoryLoading(!hasCache);
     setHistoryError(null);
     try {
-      const res = await getGradesHistory();
+      const res = await fetchWithTimeout(getGradesHistory(), 15000);
       if (res.success && res.data) {
         setHistoryData(res.data);
+        localStorage.setItem("deskly::cache::grade_history", JSON.stringify(res.data));
       } else {
-        setHistoryError(res.error ?? "Failed to fetch grade history.");
+        if (!hasCache) {
+          setHistoryError(res.error ?? "Failed to fetch grade history.");
+        }
       }
     } catch (e) {
-      setHistoryError(e instanceof Error ? e.message : String(e));
+      if (!hasCache) {
+        setHistoryError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setHistoryLoading(false);
     }
@@ -574,7 +600,7 @@ export default function GradesPage() {
           )}
 
           {/* Stats Card */}
-          <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-none shadow-sm flex items-center justify-between text-center backdrop-blur-md">
+          <div className="relative z-10 bg-card/80 border border-border/40 p-5 rounded-xl shadow-sm flex items-center justify-between text-center backdrop-blur-md">
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none mb-2">Subjects</p>
               <p className="text-2xl font-black text-foreground leading-none">{totalSubjects}</p>
@@ -676,7 +702,7 @@ export default function GradesPage() {
                     const count = gradeCounts[label] ?? 0;
                     const pct = totalSubjects > 0 ? (count / totalSubjects) * 100 : 0;
                     return (
-                      <div key={label} className="bg-muted/15 border border-border/15 rounded-none p-3 flex flex-col justify-between gap-2 relative overflow-hidden">
+                      <div key={label} className="bg-muted/15 border border-border/15 rounded-xl p-3 flex flex-col justify-between gap-2 relative overflow-hidden">
                         <div 
                           className="absolute bottom-0 left-0 h-0.5 bg-primary/30 transition-all duration-500" 
                           style={{ width: `${pct}%` }} 

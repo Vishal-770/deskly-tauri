@@ -8,7 +8,7 @@ import { ScrollText, ChevronRight } from "lucide-react";
 import curriculumImg from "@/assets/curriculum.png";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
@@ -45,40 +45,39 @@ export default function CurriculumIndexPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  const [categories, setCategories] = useState<CurriculumCategory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::curriculum::categories");
-    if (cached) {
-      try {
+  const [categories, setCategories] = useState<CurriculumCategory[]>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::curriculum::categories");
+      if (cached) {
         const parsed = JSON.parse(cached) as CurriculumCategory[];
-        if (parsed.length > 0) {
-          setCategories(parsed);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached curriculum categories", e);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    }
-  }, []);
+    } catch {}
+    return [];
+  });
+  const [loading, setLoading] = useState(categories.length === 0);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
     try {
       if (!isLoggedIn && !authLoading) return;
       setError(null);
       if (authLoading) return;
-      setLoading(categories.length > 0 ? false : true);
-      const res = await getCurriculumCategories();
+      const hasCache = categories.length > 0;
+      setLoading(!hasCache);
+      const res = await fetchWithTimeout(getCurriculumCategories(), 15000);
       if (res.success && res.data) {
         setCategories(res.data);
         localStorage.setItem("deskly::cache::curriculum::categories", JSON.stringify(res.data));
       } else {
-        setError(res.error ?? "Failed to fetch curriculum categories.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch curriculum categories.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (categories.length === 0) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }

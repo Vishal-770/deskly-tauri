@@ -176,7 +176,7 @@ export default function MobileDashboardLayout() {
                     key={item.path}
                     to={item.path as any}
                     onClick={() => setIsMoreOpen(false)}
-                    className={`group flex flex-col items-center justify-center p-3 rounded-md bg-muted/20 border border-transparent transition-all duration-200 active:bg-muted/40 cursor-pointer ${
+                    className={`group flex flex-col items-center justify-center p-3 rounded-lg bg-muted/20 border border-transparent transition-all duration-200 active:bg-muted/40 cursor-pointer ${
                       isActive 
                         ? "bg-primary/5 dark:bg-primary/10 border-primary/10 text-primary" 
                         : "text-foreground"

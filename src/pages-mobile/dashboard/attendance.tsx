@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getCurrentAttendance, AttendanceRecord } from "@/lib/attendance";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
@@ -370,41 +370,42 @@ export default function AttendancePage() {
   const isDetailRoute = useMatch("/dashboard/attendance/:classId");
   const isOnline = useOnlineStatus();
 
-  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selected, setSelected] = useState<AttendanceRecord | null>(null);
-  const [filterType, setFilterType] = useState("all");
-
-  useEffect(() => {
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>(() => {
     try {
       const cached = localStorage.getItem("deskly::cache::attendance");
       if (cached) {
         const parsed = JSON.parse(cached) as AttendanceRecord[];
-        if (parsed.length > 0) {
-          setAttendance(parsed);
-          setLoading(false);
-        }
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch {}
-  }, []);
+    return [];
+  });
+  const [loading, setLoading] = useState(attendance.length === 0);
+  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<AttendanceRecord | null>(null);
+  const [filterType, setFilterType] = useState("all");
 
   async function load() {
     if (authLoading || !isLoggedIn) return;
     setError(null);
-    setLoading(attendance.length === 0);
+    const hasCache = attendance.length > 0;
+    setLoading(!hasCache);
     try {
-      const res = await getCurrentAttendance();
+      const res = await fetchWithTimeout(getCurrentAttendance(), 15000);
       if (res.success && res.data) {
         setAttendance(res.data);
         const sem = res.semesterId ?? "";
         localStorage.setItem("deskly::cache::attendance", JSON.stringify(res.data));
         localStorage.setItem("deskly::cache::attendance_semester", sem);
       } else {
-        setError(res.error ?? "Failed to fetch attendance.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch attendance.");
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (!hasCache) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setLoading(false);
     }

@@ -18,8 +18,22 @@ type UseSemesterReturn = {
 };
 
 export function useSemester(): UseSemesterReturn {
-  const [currentSemester, setCurrentSemester] = useState<Semester | null>(null);
-  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [currentSemester, setCurrentSemester] = useState<Semester | null>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::current_semester");
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [semesters, setSemesters] = useState<Semester[]>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::semesters");
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,12 +45,16 @@ export function useSemester(): UseSemesterReturn {
         authGetSemester(),
         authGetSemesters(),
       ]);
-      setCurrentSemester(selected);
-      setSemesters(available);
+      if (selected) {
+        setCurrentSemester(selected);
+        localStorage.setItem("deskly::cache::current_semester", JSON.stringify(selected));
+      }
+      if (available && available.length > 0) {
+        setSemesters(available);
+        localStorage.setItem("deskly::cache::semesters", JSON.stringify(available));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
-      setSemesters([]);
-      setCurrentSemester(null);
     } finally {
       setLoading(false);
     }
@@ -49,6 +67,7 @@ export function useSemester(): UseSemesterReturn {
       const success = await authSetSemester(semester);
       if (success) {
         setCurrentSemester(semester);
+        localStorage.setItem("deskly::cache::current_semester", JSON.stringify(semester));
       }
       return success;
     } catch (err) {

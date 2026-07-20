@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import {
   Clock,
@@ -107,13 +107,13 @@ function ExamSkeleton() {
         <Sk className="h-8 w-20 rounded-md" />
       </div>
       <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-        <Sk className="h-14 w-28 rounded-md shrink-0" />
-        <Sk className="h-14 w-28 rounded-md shrink-0" />
-        <Sk className="h-14 w-28 rounded-md shrink-0" />
+        <Sk className="h-14 w-28 rounded-lg shrink-0" />
+        <Sk className="h-14 w-28 rounded-lg shrink-0" />
+        <Sk className="h-14 w-28 rounded-lg shrink-0" />
       </div>
       <div className="space-y-3">
         <Sk className="h-5 w-40" />
-        <div className="bg-muted/10 border border-border/10 rounded-md divide-y divide-border/10">
+        <div className="bg-muted/10 border border-border/10 rounded-lg divide-y divide-border/10">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="p-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
@@ -138,31 +138,22 @@ export default function ExamSchedulePage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
 
-  const [groups, setGroups] = useState<ExamScheduleGroup[]>([]);
-  const [selectedTab, setSelectedTab] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Selected exam details for the bottom drawer
-  const [selectedExam, setSelectedExam] = useState<ExamScheduleEntry | null>(null);
-
-
-  // Load from Cache (SWR) first
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::exams");
-    if (cached) {
-      try {
+  const initialExams = useMemo(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::exams");
+      if (cached) {
         const parsed = JSON.parse(cached) as ExamScheduleGroup[];
-        if (parsed.length > 0) {
-          setGroups(parsed);
-          setSelectedTab(parsed[0].examType);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached exams", e);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    }
+    } catch {}
+    return [];
   }, []);
+
+  const [groups, setGroups] = useState<ExamScheduleGroup[]>(initialExams);
+  const [selectedTab, setSelectedTab] = useState<string>(initialExams[0]?.examType ?? "");
+  const [loading, setLoading] = useState(initialExams.length === 0);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedExam, setSelectedExam] = useState<ExamScheduleEntry | null>(null);
 
   // Load fresh from backend
   async function load() {
@@ -171,9 +162,10 @@ export default function ExamSchedulePage() {
       setError(null);
       if (authLoading) return;
 
-      setLoading(groups.length > 0 ? false : true);
+      const hasCache = groups.length > 0;
+      setLoading(!hasCache);
 
-      const res = await invoke<ExamScheduleResponse>("exam_schedule_get", { semesterSubId: null });
+      const res = await fetchWithTimeout(invoke<ExamScheduleResponse>("exam_schedule_get", { semesterSubId: null }), 15000);
       if (res.success && res.data) {
         setGroups(res.data);
         localStorage.setItem("deskly::cache::exams", JSON.stringify(res.data));
@@ -193,7 +185,7 @@ export default function ExamSchedulePage() {
           localStorage.removeItem("deskly::cache::exams");
           setError("Could not find exam schedule table");
         } else {
-          setError(errMsg);
+          if (!hasCache) setError(errMsg);
         }
       }
     } catch (e) {
@@ -203,7 +195,7 @@ export default function ExamSchedulePage() {
         localStorage.removeItem("deskly::cache::exams");
         setError("Could not find exam schedule table");
       } else {
-        setError(errMsg);
+        if (groups.length === 0) setError(errMsg);
       }
     } finally {
       setLoading(false);
@@ -306,7 +298,7 @@ export default function ExamSchedulePage() {
 
       {/* Error banner */}
       {error && !isNotReleased && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
             Retry
@@ -364,7 +356,7 @@ export default function ExamSchedulePage() {
 
       {/* ── Content View ────────────────────────────────────────────────────── */}
       {isNotReleased ? (
-        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-md">
+        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-lg">
           <CalendarRange className="w-8 h-8 text-muted-foreground/20" />
           <div>
             <h2 className="text-sm font-semibold text-foreground">Exams Not Uploaded</h2>
@@ -374,7 +366,7 @@ export default function ExamSchedulePage() {
           </div>
         </div>
       ) : activeSchedules.length === 0 ? (
-        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-md">
+        <div className="relative z-10 flex flex-col items-center justify-center py-20 gap-3 text-center bg-muted/15 dark:bg-[#0e0e0f]/20 border border-border/40 dark:border-border/10 rounded-lg">
           <FileText className="w-8 h-8 text-muted-foreground/20" />
           <div>
             <p className="text-sm font-bold text-foreground">No exam schedules loaded</p>
@@ -418,7 +410,7 @@ export default function ExamSchedulePage() {
                 <div
                   key={`${exam.courseCode}-${idx}`}
                   onClick={() => setSelectedExam(exam)}
-                  className="p-4 bg-card/80 border border-border/40 rounded-lg shadow-sm flex items-center justify-between gap-4 backdrop-blur-md cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
+                  className="p-4 bg-card/80 border border-border/40 rounded-xl shadow-sm flex items-center justify-between gap-4 backdrop-blur-md cursor-pointer hover:bg-muted/5 active:opacity-75 transition-all"
                 >
                   {/* Date bubble */}
                   <div className="flex items-center gap-3 min-w-0">
@@ -545,7 +537,7 @@ export default function ExamSchedulePage() {
                         console.error("Failed to save calendar file", e);
                       }
                     }}
-                    className="w-full py-3 bg-primary hover:opacity-90 active:opacity-75 transition-all text-primary-foreground font-black text-sm rounded-md flex items-center justify-center gap-2 border-0 cursor-pointer"
+                    className="w-full py-3 bg-primary hover:opacity-90 active:opacity-75 transition-all text-primary-foreground font-black text-sm rounded-lg flex items-center justify-center gap-2 border-0 cursor-pointer"
                   >
                     <CalendarRange className="w-4 h-4 shrink-0" />
                     <span>Add to Calendar</span>

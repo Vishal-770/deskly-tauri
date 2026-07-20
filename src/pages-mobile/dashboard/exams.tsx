@@ -5,7 +5,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import {
   Clock,
@@ -138,31 +138,22 @@ export default function ExamSchedulePage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
 
-  const [groups, setGroups] = useState<ExamScheduleGroup[]>([]);
-  const [selectedTab, setSelectedTab] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Selected exam details for the bottom drawer
-  const [selectedExam, setSelectedExam] = useState<ExamScheduleEntry | null>(null);
-
-
-  // Load from Cache (SWR) first
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::exams");
-    if (cached) {
-      try {
+  const initialExams = useMemo(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::exams");
+      if (cached) {
         const parsed = JSON.parse(cached) as ExamScheduleGroup[];
-        if (parsed.length > 0) {
-          setGroups(parsed);
-          setSelectedTab(parsed[0].examType);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached exams", e);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
-    }
+    } catch {}
+    return [];
   }, []);
+
+  const [groups, setGroups] = useState<ExamScheduleGroup[]>(initialExams);
+  const [selectedTab, setSelectedTab] = useState<string>(initialExams[0]?.examType ?? "");
+  const [loading, setLoading] = useState(initialExams.length === 0);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedExam, setSelectedExam] = useState<ExamScheduleEntry | null>(null);
 
   // Load fresh from backend
   async function load() {
@@ -171,9 +162,10 @@ export default function ExamSchedulePage() {
       setError(null);
       if (authLoading) return;
 
-      setLoading(groups.length > 0 ? false : true);
+      const hasCache = groups.length > 0;
+      setLoading(!hasCache);
 
-      const res = await invoke<ExamScheduleResponse>("exam_schedule_get", { semesterSubId: null });
+      const res = await fetchWithTimeout(invoke<ExamScheduleResponse>("exam_schedule_get", { semesterSubId: null }), 15000);
       if (res.success && res.data) {
         setGroups(res.data);
         localStorage.setItem("deskly::cache::exams", JSON.stringify(res.data));
@@ -193,7 +185,7 @@ export default function ExamSchedulePage() {
           localStorage.removeItem("deskly::cache::exams");
           setError("Could not find exam schedule table");
         } else {
-          setError(errMsg);
+          if (!hasCache) setError(errMsg);
         }
       }
     } catch (e) {
@@ -203,7 +195,7 @@ export default function ExamSchedulePage() {
         localStorage.removeItem("deskly::cache::exams");
         setError("Could not find exam schedule table");
       } else {
-        setError(errMsg);
+        if (groups.length === 0) setError(errMsg);
       }
     } finally {
       setLoading(false);

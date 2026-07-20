@@ -4,7 +4,7 @@ import { getPaymentReceipts, Receipt } from "@/lib/features";
 import { ErrorDisplay } from "@/components/error-display";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { OfflineDisplay } from "@/components/offline-display";
-import { isNetworkError } from "@/lib/utils";
+import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import paymentImg from "@/assets/payment.png";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
@@ -53,7 +53,7 @@ function parseReceiptDate(dateStr: string): Date {
 // ─── Loader Skeleton Layout ───────────────────────────────────────────────────
 
 function Sk({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-md bg-muted/65 ${className}`} />;
+  return <div className={`animate-pulse rounded-lg bg-muted/65 ${className}`} />;
 }
 
 function PaymentReceiptsSkeleton() {
@@ -62,12 +62,12 @@ function PaymentReceiptsSkeleton() {
       <div className="space-y-1">
         <Sk className="h-7 w-44" />
       </div>
-      <Sk className="h-20 w-full rounded-lg" />
-      <Sk className="h-24 w-full rounded-lg" />
+      <Sk className="h-20 w-full rounded-xl" />
+      <Sk className="h-24 w-full rounded-xl" />
       <div className="space-y-3 pt-2">
         <Sk className="h-5 w-36" />
         {[...Array(4)].map((_, i) => (
-          <Sk key={i} className="h-20 w-full rounded-lg" />
+          <Sk key={i} className="h-20 w-full rounded-xl" />
         ))}
       </div>
     </div>
@@ -104,7 +104,7 @@ function ReceiptDrawer({
           {/* Header Row */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-4 flex-1 min-w-0">
-              <div className="w-12 h-12 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                 <FileText className="w-6 h-6" />
               </div>
               <div className="flex-1 min-w-0 space-y-1">
@@ -168,31 +168,25 @@ function ReceiptDrawer({
 export default function PaymentReceiptsPage() {
   const { loading: authLoading } = useAuth();
   const isOnline = useOnlineStatus();
-  const [receipts, setReceipts] = useState<Receipt[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [receipts, setReceipts] = useState<Receipt[]>(() => {
+    try {
+      const cached = localStorage.getItem("deskly::cache::payment_receipts");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [loading, setLoading] = useState(receipts.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
 
-  // Load receipts data
-  useEffect(() => {
-    const cached = localStorage.getItem("deskly::cache::payment_receipts");
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed && parsed.length > 0) {
-          setReceipts(parsed);
-          setLoading(false);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached receipts", e);
-      }
-    }
-  }, []);
-
   async function load() {
     try {
-      setLoading(receipts && receipts.length > 0 ? false : true);
-      const res = await getPaymentReceipts();
+      const hasCache = receipts.length > 0;
+      setLoading(!hasCache);
+      const res = await fetchWithTimeout(getPaymentReceipts(), 15000);
       if (res.success && res.data) {
         const cleanList = res.data.filter(
           (r) => r.receiptNumber.trim().toUpperCase() !== "RECEIPT NUMBER"
@@ -200,10 +194,14 @@ export default function PaymentReceiptsPage() {
         setReceipts(cleanList);
         localStorage.setItem("deskly::cache::payment_receipts", JSON.stringify(cleanList));
       } else {
-        setError(res.error ?? "Failed to fetch payment receipts.");
+        if (!hasCache) {
+          setError(res.error ?? "Failed to fetch payment receipts.");
+        }
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      if (receipts.length === 0) {
+        setError(err instanceof Error ? err.message : String(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -283,7 +281,7 @@ export default function PaymentReceiptsPage() {
 
       {/* Error banner */}
       {error && !isNetworkError(error, isOnline) && (
-        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-md">
+        <div className="relative z-10 flex items-center justify-between gap-4 px-4 py-3 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
           <p className="text-xs font-semibold truncate">Sync failed — {error}</p>
           <button onClick={load} className="text-xs font-bold uppercase tracking-wider shrink-0 border-0 bg-transparent text-destructive cursor-pointer">
             Retry
@@ -299,7 +297,7 @@ export default function PaymentReceiptsPage() {
 
       {/* ── Registration Details Card ────────────────────────────────────────── */}
       {studentMeta && (
-        <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 p-5 rounded-lg shadow-sm space-y-3">
+        <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 p-5 rounded-xl shadow-sm space-y-3">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-primary shrink-0" />
             <h2 className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">Registration Info</h2>
@@ -323,7 +321,7 @@ export default function PaymentReceiptsPage() {
       )}
 
       {/* ── Overview Stats Card ──────────────────────────────────────────────── */}
-      <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 p-5 rounded-lg shadow-sm space-y-4">
+      <div className="relative z-10 bg-card/70 backdrop-blur-md border border-border/30 p-5 rounded-xl shadow-sm space-y-4">
         {/* Row 1: Receipts and Latest Date */}
         <div className="flex items-center justify-between text-center">
           <div className="flex-1 min-w-0">
@@ -356,7 +354,7 @@ export default function PaymentReceiptsPage() {
         </div>
 
         {filteredReceipts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/70 backdrop-blur-md border border-border/30 rounded-lg shadow-sm">
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-center bg-card/70 backdrop-blur-md border border-border/30 rounded-xl shadow-sm">
             <FileText className="w-8 h-8 text-muted-foreground/20" />
             <p className="text-sm font-semibold text-foreground leading-none">No receipts found</p>
             <p className="text-xs text-muted-foreground">No payment records are available.</p>
@@ -368,10 +366,10 @@ export default function PaymentReceiptsPage() {
                 <div
                   key={receipt.receiptNumber}
                   onClick={() => setSelectedReceipt(receipt)}
-                  className="bg-card/70 backdrop-blur-md border border-border/30 p-4 rounded-lg shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all duration-150 cursor-pointer"
+                  className="bg-card/70 backdrop-blur-md border border-border/30 p-4 rounded-xl shadow-sm flex items-center justify-between gap-4 active:opacity-75 hover:bg-muted/5 transition-all duration-150 cursor-pointer"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-10 h-10 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
                       <FileText className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">

@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useParams, useNavigate } from "@/router";
 import { getAttendanceDetail, AttendanceDetailRecord, AttendanceRecord } from "@/lib/attendance";
+import { fetchWithTimeout, isNetworkError } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { Calendar } from "lucide-react";
+import { Calendar, WifiOff, CheckCircle2, XCircle, Award, Clock } from "lucide-react";
+import { OfflineDisplay } from "@/components/offline-display";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 
 // ─── Circular Progress ────────────────────────────────────────────────────────
 
@@ -35,9 +38,9 @@ function BigCircularProgress({ percentage }: { percentage: number }) {
   );
 }
 
-// ─── Status Badge ─────────────────────────────────────────────────────────────
+// ─── Status Indicator (Clean Non-Pill) ────────────────────────────────────────
 
-function StatusBadge({ status }: { status: string }) {
+function StatusIndicator({ status }: { status: string }) {
   const s = status.trim().toLowerCase();
   const isPresent = s === "present" || s === "p" || s === "1";
   const isAbsent = s === "absent" || s === "a" || s === "0";
@@ -45,33 +48,33 @@ function StatusBadge({ status }: { status: string }) {
 
   if (isPresent) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 leading-none">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-        Present
-      </span>
+      <div className="flex items-center gap-1.5 text-emerald-500 font-extrabold text-xs tracking-wide">
+        <CheckCircle2 className="w-4 h-4 shrink-0" />
+        <span>Present</span>
+      </div>
     );
   }
   if (isAbsent) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-destructive bg-destructive/10 border border-destructive/20 leading-none">
-        <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
-        Absent
-      </span>
+      <div className="flex items-center gap-1.5 text-destructive font-extrabold text-xs tracking-wide">
+        <XCircle className="w-4 h-4 shrink-0" />
+        <span>Absent</span>
+      </div>
     );
   }
   if (isOd) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-primary bg-primary/10 border border-primary/20 leading-none">
-        <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-        {status}
-      </span>
+      <div className="flex items-center gap-1.5 text-primary font-extrabold text-xs tracking-wide">
+        <Award className="w-4 h-4 shrink-0" />
+        <span>{status}</span>
+      </div>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold text-muted-foreground bg-muted/20 border border-border/20 leading-none">
-      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 shrink-0" />
-      {status}
-    </span>
+    <div className="flex items-center gap-1.5 text-muted-foreground font-semibold text-xs tracking-wide">
+      <Clock className="w-4 h-4 shrink-0" />
+      <span>{status}</span>
+    </div>
   );
 }
 
@@ -110,10 +113,22 @@ export default function AttendanceDetailPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const isOnline = useOnlineStatus();
   const [record, setRecord] = useState<AttendanceRecord | undefined>(location.state?.record);
-  const [details, setDetails] = useState<AttendanceDetailRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [, setError] = useState<string | null>(null);
+  const [details, setDetails] = useState<AttendanceDetailRecord[]>(() => {
+    if (!classId) return [];
+    try {
+      const cacheKey = `deskly::cache::attendance_detail_${classId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
+  });
+  const [loading, setLoading] = useState(details.length === 0);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!record && classId) {
@@ -132,24 +147,27 @@ export default function AttendanceDetailPage() {
     }
   }, [classId, record]);
 
-  useEffect(() => {
+  async function load() {
     if (!classId || !record) return;
-
-    async function load() {
-      try {
-        const res = await getAttendanceDetail(classId!, record!.slot);
-        if (res.success && res.data) {
-          setDetails(res.data);
-        } else {
-          setError(res.error ?? "Failed to load attendance details.");
-        }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : String(e));
-      } finally {
-        setLoading(false);
+    const hasCache = details.length > 0;
+    setLoading(!hasCache);
+    try {
+      const cacheKey = `deskly::cache::attendance_detail_${classId}`;
+      const res = await fetchWithTimeout(getAttendanceDetail(classId!, record!.slot), 15000);
+      if (res.success && res.data) {
+        setDetails(res.data);
+        localStorage.setItem(cacheKey, JSON.stringify(res.data));
+      } else {
+        if (!hasCache) setError(res.error ?? "Failed to load attendance details.");
       }
+    } catch (e) {
+      if (!hasCache) setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     load();
   }, [classId, record]);
 
@@ -158,6 +176,9 @@ export default function AttendanceDetailPage() {
   }
 
   if (!record) {
+    if (!isOnline || isNetworkError(error, isOnline)) {
+      return <OfflineDisplay onRetry={load} />;
+    }
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 font-saira py-16">
         <p className="text-muted-foreground text-sm">No course data found.</p>
@@ -263,11 +284,25 @@ export default function AttendanceDetailPage() {
             ))}
           </div>
         ) : details.length === 0 ? (
-          <div className="p-8 flex flex-col items-center justify-center gap-3 text-center bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md">
-            <Calendar className="w-8 h-8 text-muted-foreground/20" />
-            <p className="text-sm font-semibold text-foreground leading-none">No session logs available</p>
-            <p className="text-xs text-muted-foreground">Detailed logs haven't been synchronized.</p>
-          </div>
+          !isOnline || isNetworkError(error, isOnline) ? (
+            <div className="p-8 flex flex-col items-center justify-center gap-3 text-center bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md">
+              <WifiOff className="w-8 h-8 text-muted-foreground/30" />
+              <p className="text-sm font-bold text-foreground leading-none">Session logs unavailable offline</p>
+              <p className="text-xs text-muted-foreground">Connect to the internet to load detailed session logs for this class.</p>
+              <button
+                onClick={load}
+                className="mt-1 px-4 py-2 rounded-lg bg-primary/10 hover:bg-primary/15 text-primary text-xs font-bold transition-all border border-primary/20 cursor-pointer font-saira"
+              >
+                Retry Connection
+              </button>
+            </div>
+          ) : (
+            <div className="p-8 flex flex-col items-center justify-center gap-3 text-center bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md">
+              <Calendar className="w-8 h-8 text-muted-foreground/20" />
+              <p className="text-sm font-semibold text-foreground leading-none">No session logs available</p>
+              <p className="text-xs text-muted-foreground">Detailed logs haven't been synchronized.</p>
+            </div>
+          )
         ) : (
           <div className="flex flex-col gap-3">
             {details.map((row, i) => (
@@ -275,30 +310,30 @@ export default function AttendanceDetailPage() {
                 key={`${row.serialNo}-${i}`}
                 className="p-4 bg-card/80 border border-border/40 rounded-xl shadow-sm backdrop-blur-md flex items-center justify-between gap-4"
               >
-                {/* Left: Serial Number */}
-                <span className="text-xs font-semibold text-muted-foreground/30 tabular-nums w-5 shrink-0">
-                  {row.serialNo ?? i + 1}
-                </span>
+                  {/* Left: Serial Number */}
+                  <span className="text-xs font-bold text-muted-foreground/40 tabular-nums w-5 shrink-0">
+                    {row.serialNo ?? i + 1}
+                  </span>
 
-                {/* Middle: Date, Time & Slot */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium">
-                    <span className="text-xs font-semibold text-primary font-mono leading-none">
-                      {row.slot || record.slot}
-                    </span>
-                    <span>&bull;</span>
-                    <span className="font-mono">{row.dayAndTime || "10:30 AM – 11:30 AM"}</span>
+                  {/* Middle: Date, Time & Slot */}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60 font-medium">
+                      <span className="text-xs font-bold text-primary font-mono leading-none">
+                        {row.slot || record.slot}
+                      </span>
+                      <span>&bull;</span>
+                      <span className="font-mono">{row.dayAndTime || "10:30 AM – 11:30 AM"}</span>
+                    </div>
+                    <p className="text-sm font-bold text-foreground leading-snug truncate">
+                      {row.date}
+                    </p>
                   </div>
-                  <p className="text-sm font-bold text-foreground leading-snug truncate">
-                    {row.date}
-                  </p>
-                </div>
 
-                {/* Right: Status badge */}
-                <div className="shrink-0">
-                  <StatusBadge status={row.status} />
+                  {/* Right: Clean Status Indicator */}
+                  <div className="shrink-0">
+                    <StatusIndicator status={row.status} />
+                  </div>
                 </div>
-              </div>
             ))}
           </div>
         )}
