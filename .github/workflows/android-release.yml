@@ -106,12 +106,21 @@ jobs:
             exit 1
           fi
 
+          VERSION="${GITHUB_REF_NAME#android-v}"
+          VERSION="${VERSION#v}"
+
           for apk in "${APK_FILES[@]}"; do
             base_name="$(basename "$apk" .apk)"
             clean_name="${base_name%-unsigned}"
             clean_name="${clean_name%-release}"
-            out_prefix="${clean_name/#app/deskly}"
-            target_apk="release-assets/android/${out_prefix}.apk"
+            if [ "$clean_name" = "app-universal" ] || [ "$clean_name" = "app" ]; then
+              out_name="Deskly_${VERSION}_universal"
+            else
+              abi="${clean_name#app-universal-}"
+              abi="${abi#app-}"
+              out_name="Deskly_${VERSION}_${abi}"
+            fi
+            target_apk="release-assets/android/${out_name}.apk"
             zipalign -p -f 4 "$apk" "$target_apk"
             apksigner sign \
               --ks src-tauri/gen/android/app/keystore.jks \
@@ -123,8 +132,9 @@ jobs:
 
           AAB_INPUT="$(find "$APP_DIR/bundle" -type f -name '*.aab' | sort | head -n 1 || true)"
           if [ -n "$AAB_INPUT" ] && [ -f "$AAB_INPUT" ]; then
-            cp "$AAB_INPUT" release-assets/android/deskly.aab
-            jarsigner -verify -verbose -certs release-assets/android/deskly.aab | tail -n 20 || true
+            target_aab="release-assets/android/Deskly_${VERSION}.aab"
+            cp "$AAB_INPUT" "$target_aab"
+            jarsigner -verify -verbose -certs "$target_aab" | tail -n 20 || true
           fi
 
         env:
