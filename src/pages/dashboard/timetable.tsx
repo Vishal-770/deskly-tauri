@@ -19,6 +19,7 @@ import {
   Hash,
   LayoutGrid,
   ChevronRight,
+  X,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -286,15 +287,15 @@ function TimetableDrawer({
           {/* Header Row */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-1">
-              <div className="flex items-center gap-2 leading-none">
-                <span className="text-sm font-medium tracking-wide text-primary uppercase">
+              <div className="flex items-center gap-2 leading-none flex-wrap">
+                <span className="text-xs font-bold tracking-wider text-primary uppercase">
                   {item.courseCode}
                 </span>
                 <span className="text-xs font-medium text-muted-foreground/60">
                   ({displayType})
                 </span>
               </div>
-              <h2 className="text-xl font-medium text-foreground leading-snug tracking-tight">
+              <h2 className="text-xl font-bold text-foreground leading-snug tracking-tight break-words">
                 {item.courseTitle}
               </h2>
             </div>
@@ -302,21 +303,21 @@ function TimetableDrawer({
             {/* Close Button */}
             <button
               onClick={() => onOpenChange(false)}
-              className="w-8 h-8 rounded-full bg-muted/65 flex items-center justify-center text-foreground hover:bg-muted active:opacity-75 transition-colors border-none cursor-pointer shrink-0"
+              className="p-2 rounded-full bg-muted/40 hover:bg-muted/60 text-muted-foreground hover:text-foreground active:opacity-75 transition-all border-none cursor-pointer shrink-0"
             >
-              <span className="text-lg leading-none font-sans">×</span>
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Attendance Status block */}
           {hasAtt && (
             <div className="space-y-3 pt-2">
-              <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+              <p className="text-xs font-bold tracking-widest text-muted-foreground/50 uppercase leading-none">
                 Attendance Status
               </p>
               
               <div className="flex items-center gap-4">
-                <span className={`text-[32px] font-medium leading-none ${getPercentageColor(pct)}`}>
+                <span className={`text-3xl font-extrabold leading-none ${getPercentageColor(pct)}`}>
                   {pct}%
                 </span>
                 <div className="h-2.5 flex-1 bg-muted/30 rounded-full overflow-hidden">
@@ -327,9 +328,11 @@ function TimetableDrawer({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-muted-foreground leading-none pt-0.5">
-                <AttendanceHint attended={attendanceRecord.attendedClasses} total={attendanceRecord.totalClasses} courseType={item.courseType} />
-                <span className="font-mono">
+              <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground leading-snug pt-0.5 flex-wrap">
+                <div className="flex-1 min-w-0">
+                  <AttendanceHint attended={attendanceRecord.attendedClasses} total={attendanceRecord.totalClasses} courseType={item.courseType} />
+                </div>
+                <span className="font-mono tabular-nums whitespace-nowrap shrink-0 text-right text-muted-foreground/75">
                   {item.courseType.toLowerCase().includes("lab") ? attendanceRecord.attendedClasses / 2 : attendanceRecord.attendedClasses} /{" "}
                   {item.courseType.toLowerCase().includes("lab") ? attendanceRecord.totalClasses / 2 : attendanceRecord.totalClasses}{" "}
                   {item.courseType.toLowerCase().includes("lab") ? "labs" : "classes"} attended
@@ -340,23 +343,18 @@ function TimetableDrawer({
 
           {/* Course Details List */}
           <div className="space-y-3 pt-1">
-            <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground/60 uppercase leading-none">
+            <p className="text-xs font-bold tracking-widest text-muted-foreground/50 uppercase leading-none">
               Class Schedule Details
             </p>
 
-            <div className="divide-y divide-border/10">
+            <div className="divide-y divide-border/15 border-t border-b border-border/15">
               {details.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-center gap-4 py-3">
-                  {/* Left Column: Icon Box */}
-                  <div className="w-8 h-8 rounded-md bg-muted/20 flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4 text-muted-foreground/75 shrink-0" />
+                <div key={label} className="flex items-start justify-between gap-4 py-3">
+                  <div className="flex items-center gap-2.5 shrink-0 pt-0.5">
+                    <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                    <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide leading-none">{label}</span>
                   </div>
-                  
-                  {/* Right Column: Text contents */}
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-muted-foreground/50 uppercase tracking-wider font-semibold leading-none mb-1">{label}</p>
-                    <p className="text-sm font-medium text-foreground truncate">{value}</p>
-                  </div>
+                  <span className="text-sm font-semibold text-foreground text-right break-words min-w-0 max-w-[65%]">{value || "—"}</span>
                 </div>
               ))}
             </div>

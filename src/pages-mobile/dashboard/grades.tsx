@@ -16,7 +16,6 @@ import { isNetworkError, fetchWithTimeout } from "@/lib/utils";
 import { DrawerSelect } from "@/components/ui/drawer-select";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import gradeHistoryImg from "@/assets/grade-history.png";
-import { useNavigate } from "react-router-dom";
 import {
   GraduationCap,
   Search,
@@ -26,7 +25,6 @@ import {
   ChevronRight,
   X,
   Award,
-  ArrowRight,
 } from "lucide-react";
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
@@ -63,7 +61,6 @@ function HistoryGradeDrawer({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const navigate = useNavigate();
   if (!item) return null;
 
   return (
@@ -146,6 +143,7 @@ function HistoryGradeDrawer({
                 <span className="text-sm font-semibold text-foreground truncate">{item.courseDistribution || "—"}</span>
               </div>
             </div>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

@@ -277,15 +277,15 @@ function AttendanceDrawer({
             <div className="flex items-center gap-4 flex-1 min-w-0">
               <ListCircularProgress percentage={pct} size={54} />
               <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-2 leading-none">
-                  <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                <div className="flex items-center gap-2 leading-none flex-wrap">
+                  <span className="text-xs font-bold text-primary uppercase tracking-wider">
                     {item.courseCode}
                   </span>
                   <span className="text-xs font-medium text-muted-foreground/60">
                     ({displayType})
                   </span>
                 </div>
-                <h2 className="text-xl font-bold text-foreground leading-snug tracking-tight">
+                <h2 className="text-xl font-bold text-foreground leading-snug tracking-tight break-words">
                   {item.courseTitle}
                 </h2>
               </div>
@@ -318,9 +318,11 @@ function AttendanceDrawer({
               </div>
             </div>
  
-            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground leading-none pt-0.5">
-              <AttendanceHint attended={item.attendedClasses} total={item.totalClasses} courseType={item.courseType} />
-              <span className="font-mono tabular-nums whitespace-nowrap shrink-0 text-right">
+            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground leading-snug pt-0.5 flex-wrap">
+              <div className="flex-1 min-w-0">
+                <AttendanceHint attended={item.attendedClasses} total={item.totalClasses} courseType={item.courseType} />
+              </div>
+              <span className="font-mono tabular-nums whitespace-nowrap shrink-0 text-right text-muted-foreground/75">
                 {item.courseType.toLowerCase().includes("lab") ? item.attendedClasses / 2 : item.attendedClasses} /{" "}
                 {item.courseType.toLowerCase().includes("lab") ? item.totalClasses / 2 : item.totalClasses}{" "}
                 {item.courseType.toLowerCase().includes("lab") ? "labs" : "classes"} attended
@@ -345,12 +347,12 @@ function AttendanceDrawer({
 
             <div className="divide-y divide-border/15 border-t border-b border-border/15">
               {details.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-center justify-between gap-4 py-3">
-                  <div className="flex items-center gap-3 shrink-0">
+                <div key={label} className="flex items-start justify-between gap-4 py-3">
+                  <div className="flex items-center gap-2.5 shrink-0 pt-0.5">
                     <Icon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
                     <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wide leading-none">{label}</span>
                   </div>
-                  <span className="text-sm font-semibold text-foreground text-right truncate max-w-[60%]">{value || "—"}</span>
+                  <span className="text-sm font-semibold text-foreground text-right break-words min-w-0 max-w-[65%]">{value || "—"}</span>
                 </div>
               ))}
             </div>

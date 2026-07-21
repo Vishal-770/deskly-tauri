@@ -8,7 +8,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { authState, loading, error, login } = useAuth();
+  const { authState, loading, error, login, initialized } = useAuth();
   const [regNo, setRegNo] = useState("");
   const [password, setPassword] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -84,7 +84,7 @@ export default function Home() {
     ease: [0.16, 1, 0.3, 1] as [number, number, number, number]
   };
 
-  if (authState === null && loading) {
+  if (!initialized || loading || authState?.loggedIn) {
     return (
       <main className="h-full min-h-0 flex items-center justify-center bg-background text-foreground antialiased p-6">
         <div className="w-full max-w-[400px] flex flex-col gap-16 py-10 items-center sm:items-start">
