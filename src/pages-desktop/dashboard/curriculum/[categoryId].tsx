@@ -169,7 +169,7 @@ export default function CategoryCoursesPage() {
     setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
 
     try {
-      const res = await downloadCurriculumSyllabus(courseCode);
+      const res = await fetchWithTimeout(downloadCurriculumSyllabus(courseCode), 15000);
       if (res.success && res.data) {
         const savePath = res.data.savePath;
         setDownloadResult((prev) => ({
@@ -189,13 +189,18 @@ export default function CategoryCoursesPage() {
         }));
       }
     } catch (e) {
-      setDownloadResult((prev) => ({
-        ...prev,
-        [courseCode]: {
-          success: false,
-          message: e instanceof Error ? e.message : String(e),
-        },
-      }));
+      const errMsg = e instanceof Error ? e.message : String(e);
+      if (errMsg.toLowerCase().includes("cancel") || errMsg.toLowerCase().includes("dismiss")) {
+        setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
+      } else {
+        setDownloadResult((prev) => ({
+          ...prev,
+          [courseCode]: {
+            success: false,
+            message: errMsg,
+          },
+        }));
+      }
     } finally {
       setDownloading((prev) => ({ ...prev, [courseCode]: false }));
     }

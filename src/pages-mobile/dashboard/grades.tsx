@@ -146,18 +146,6 @@ function HistoryGradeDrawer({
                 <span className="text-sm font-semibold text-foreground truncate">{item.courseDistribution || "—"}</span>
               </div>
             </div>
-          </div>
-
-          <button
-            onClick={() => {
-              onOpenChange(false);
-              navigate("/dashboard/marks", { state: { courseCode: item.courseCode } });
-            }}
-            className="w-full flex items-center justify-between mt-2 px-4 py-3 rounded-lg bg-card/80 border border-border/40 text-xs font-bold text-foreground hover:bg-muted/10 active:opacity-85 transition-all cursor-pointer backdrop-blur-md shadow-sm"
-          >
-            <span>View Assessment Marks</span>
-            <ArrowRight className="w-4 h-4 text-primary" />
-          </button>
         </div>
       </DrawerContent>
     </Drawer>

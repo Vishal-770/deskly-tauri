@@ -146,54 +146,74 @@ export default function CategoryCoursesPage() {
 
   async function handleDownloadSyllabus(courseCode: string) {
     if (isAnyDownloading || downloading[courseCode]) return;
-    setDownloading((prev) => ({ ...prev, [courseCode]: true }));
-    setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
-    try {
-      // 1. Download syllabus to memory (base64) from VTOP
-      const res = await downloadCurriculumSyllabus(courseCode);
-      
-      if (!res.success || !res.data) {
-        setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: false, message: res.error ?? "Failed to download syllabus." } }));
-        return;
-      }
 
-      // 2. Prompt user where to save it with the correct filename returned by the server
-      const defaultFilename = res.data.filename;
-      const fileExt = defaultFilename.split(".").pop() || "zip";
-      const savePath = await save({
+    const defaultFilename = `${courseCode}_Syllabus.pdf`;
+
+    // 1. Prompt user for save path FIRST before starting download
+    let savePath: string | null = null;
+    try {
+      savePath = await save({
         filters: [{
-          name: "Syllabus File",
-          extensions: [fileExt]
+          name: "PDF File",
+          extensions: ["pdf"]
         }],
         defaultPath: defaultFilename
       });
+    } catch (dialogErr) {
+      console.warn("Save dialog cancelled or closed:", dialogErr);
+      savePath = null;
+    }
 
-      if (!savePath) {
-        setDownloading((prev) => ({ ...prev, [courseCode]: false }));
+    // If user cancelled save dialog, exit immediately. Do NOT enter loading state!
+    if (!savePath) {
+      setDownloading((prev) => ({ ...prev, [courseCode]: false }));
+      setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
+      return;
+    }
+
+    // 2. User confirmed save path -> start loading state & fetch from VTOP
+    setDownloading((prev) => ({ ...prev, [courseCode]: true }));
+    setDownloadResult((prev) => ({ ...prev, [courseCode]: null }));
+
+    try {
+      const res = await fetchWithTimeout(downloadCurriculumSyllabus(courseCode), 15000);
+      
+      if (!res.success || !res.data) {
+        setDownloadResult((prev) => ({
+          ...prev,
+          [courseCode]: { success: false, message: res.error ?? "Failed to download syllabus." }
+        }));
         return;
       }
 
-      // 3. Write file content to chosen path using native plugin-fs ContentResolver
+      // 3. Write file content to the chosen savePath
       const base64Data = res.data.contentBase64;
       if (base64Data) {
-        const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+        const binaryData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
         await writeFile(savePath, binaryData);
       }
 
-      setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: true, message: "Saved!" } }));
+      setDownloadResult((prev) => ({
+        ...prev,
+        [courseCode]: { success: true, message: "Saved!" }
+      }));
       
       // Native notification feedback
       try {
         sendNotification({
           title: "Syllabus Saved",
-          body: `Syllabus successfully saved to: ${defaultFilename}`
+          body: `Syllabus successfully saved!`
         });
       } catch (err) {
         console.error("Failed to trigger native notification", err);
       }
 
     } catch (e) {
-      setDownloadResult((prev) => ({ ...prev, [courseCode]: { success: false, message: e instanceof Error ? e.message : String(e) } }));
+      const errMsg = e instanceof Error ? e.message : String(e);
+      setDownloadResult((prev) => ({
+        ...prev,
+        [courseCode]: { success: false, message: errMsg }
+      }));
     } finally {
       setDownloading((prev) => ({ ...prev, [courseCode]: false }));
     }
